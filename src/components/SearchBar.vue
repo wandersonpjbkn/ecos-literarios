@@ -1,5 +1,5 @@
 <template>
-  <div ref="wrapRef" class="search-wrap">
+  <div class="search-wrap">
     <div class="search-box" :class="{ 'is-focused': focused }">
       <svg
         class="search-icon"
@@ -68,7 +68,6 @@ const props = defineProps<{
 }>()
 const emit = defineEmits(['update:modelValue', 'select'])
 
-const wrapRef = ref<HTMLDivElement | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
 const focused = ref(false)
 const activeIdx = ref(-1)

@@ -1,4 +1,6 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+
+import { useBooksStore } from '@/stores'
 
 import type { Book } from '@/types'
 
@@ -12,23 +14,21 @@ const cache: { data: Book[] | null; ts: number } = { data: null, ts: 0 }
 const CACHE_TTL = 5 * 60 * 1000
 
 export function useSheets() {
-  const books = ref<Book[]>([])
-  const loading = ref(false)
-  const error = ref<string | null>(null)
-
   const fetchBooks = async (forceRefresh = false) => {
     const now = Date.now()
 
     if (!forceRefresh && cache.data && now - cache.ts < CACHE_TTL) {
-      books.value = cache.data
+      useBooksStore().books = cache.data
       return
     }
 
-    loading.value = true
-    error.value = null
+    useBooksStore().loading = true
+    useBooksStore().error = null
 
     try {
-      const url = `https://docs.google.com/spreadsheets/d/e/${SHEET_CONFIG.SHEET_ID}/pub?gid=${SHEET_CONFIG.GID}}&single=true&output=csv`
+      const url = `https://docs.google.com/spreadsheets/d/e/${SHEET_CONFIG.SHEET_ID}/pub?gid=${SHEET_CONFIG.GID}&single=true&output=csv`
+
+      console.log('Fetching books...', url)
 
       const res = await fetch(url)
 
@@ -38,22 +38,22 @@ export function useSheets() {
 
       const parsed = parseCSV(csv)
 
-      books.value = parsed
+      useBooksStore().books = parsed
       cache.data = parsed
       cache.ts = now
 
       console.log('Books loaded:', parsed.length)
     } catch (e: unknown) {
-      error.value = (e instanceof Error ? e.message : String(e)) || 'Erro ao carregar dados'
+      useBooksStore().error = (e instanceof Error ? e.message : String(e)) || 'Erro ao carregar dados'
       console.error('[useSheets]', e)
     } finally {
-      loading.value = false
+      useBooksStore().loading = false
     }
   }
 
-  const size = () => books.value.length
-
-  return { books, size, loading, error, fetchBooks }
+  return {
+    fetchBooks,
+  }
 }
 
 const parseCSV = (csv: string): Book[] => {

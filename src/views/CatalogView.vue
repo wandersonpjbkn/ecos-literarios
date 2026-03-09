@@ -4,23 +4,23 @@
     <section class="catalog-hero">
       <div class="hero-inner">
         <h1 class="hero-title"><em>Catálogo</em> de Indicações</h1>
-        <p class="hero-sub">{{ useSheets().size }} títulos indicados pelos membros do clube</p>
+        <p class="hero-sub">{{ useBooksStore().size }} títulos indicados pelos membros do clube</p>
       </div>
     </section>
 
     <!-- Loading / Error -->
-    <div v-if="useSheets().loading" class="state-screen">
+    <div v-if="useBooksStore().loading" class="state-screen">
       <div class="spinner"></div>
       <p>Carregando catálogo…</p>
     </div>
 
-    <div v-else-if="useSheets().error" class="state-screen state-error">
+    <div v-else-if="useBooksStore().error" class="state-screen state-error">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="12" cy="12" r="10" />
         <line x1="12" y1="8" x2="12" y2="12" />
         <line x1="12" y1="16" x2="12.01" y2="16" />
       </svg>
-      <p>{{ useSheets().error }}</p>
+      <p>{{ useBooksStore().error }}</p>
       <button class="retry-btn" @click="useSheets().fetchBooks(true)">Tentar novamente</button>
       <p class="error-hint">
         Verifique se o <code>SHEET_ID</code> está configurado em <code>useSheets.js</code> e se a planilha está
@@ -34,9 +34,9 @@
         <SearchBar v-model="search" :suggestions="searchSuggestions" @select="onSelectSuggestion" />
         <div class="result-count">
           <template v-if="activeFilterCount > 0">
-            <strong>{{ filtered.length }}</strong> de {{ useSheets().size }} títulos
+            <strong>{{ filtered.length }}</strong> de {{ useBooksStore().size }} títulos
           </template>
-          <template v-else> {{ useSheets().size }} títulos </template>
+          <template v-else> {{ useBooksStore().size }} títulos </template>
         </div>
       </div>
 
@@ -84,6 +84,7 @@
 <script lang="ts" setup>
 import { onMounted } from 'vue'
 
+import { useBooksStore } from '@/stores'
 import { useSheets, useFilters } from '@/composables'
 
 import SearchBar from '@/components/SearchBar.vue'
@@ -106,7 +107,7 @@ const {
   activeFilterCount,
   clearAll,
   searchSuggestions,
-} = useFilters(useSheets().books)
+} = useFilters()
 
 onMounted(() => useSheets().fetchBooks())
 

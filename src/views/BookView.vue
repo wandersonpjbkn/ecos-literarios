@@ -1,7 +1,7 @@
 <template>
   <div class="book-page">
     <!-- Loading -->
-    <div v-if="useSheets().loading" class="state-screen">
+    <div v-if="useBooksStore().loading" class="state-screen">
       <div class="spinner"></div>
     </div>
 
@@ -122,6 +122,7 @@
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
+import { useBooksStore } from '@/stores'
 import { useCategoryColors, useSheets } from '@/composables'
 
 import type { Book } from '@/types'
@@ -130,13 +131,13 @@ const route = useRoute()
 
 onMounted(() => useSheets().fetchBooks())
 
-const book = computed((): Book => useSheets().books.value.find((b) => String(b.id) === String(route.params.id)) as Book)
+const book = computed((): Book => useBooksStore().books.find((b) => String(b.id) === String(route.params.id)) as Book)
 
 const related = computed(() => {
   if (!book.value) return []
 
-  return useSheets()
-    .books.value.filter((b) => b.id !== book.value.id && b.categoria === book.value.categoria)
+  return useBooksStore()
+    .books.filter((b) => b.id !== book.value.id && b.categoria === book.value.categoria)
     .slice(0, 4)
 })
 </script>
