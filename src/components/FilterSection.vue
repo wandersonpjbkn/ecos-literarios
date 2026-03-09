@@ -43,28 +43,35 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 
-const props = defineProps<{
-  title: string
-  options: string[]
-  selected: string[]
-  collapsible?: boolean
-  initialOpen?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    title: string
+    options: string[]
+    selected: string[]
+    collapsible?: boolean
+  }>(),
+  {
+    collapsible: false,
+  },
+)
 const emit = defineEmits(['toggle'])
 
-const open = ref(props.initialOpen !== undefined ? props.initialOpen : true)
+const open = ref(props.collapsible !== undefined ? props.collapsible : true)
 
 const toggle = () => {
   open.value = !open.value
 }
 </script>
 
-<style scoped>
-.filter-section {
-  border-bottom: 1px solid var(--border);
-}
-.filter-section:last-child {
-  border-bottom: none;
+<style lang="scss" scoped>
+.filter {
+  &-section {
+    border-bottom: 1px solid var(--border);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
 }
 
 .section-header {
@@ -84,9 +91,10 @@ const toggle = () => {
   cursor: pointer;
   text-align: left;
   transition: color var(--transition);
-}
-.section-header:hover {
-  color: var(--ink);
+
+  &:hover {
+    color: var(--ink);
+  }
 }
 
 .count {
@@ -120,16 +128,17 @@ const toggle = () => {
   cursor: pointer;
   transition: background var(--transition);
   user-select: none;
-}
-.option:hover {
-  background: var(--paper-warm);
-}
-.option.is-checked {
-  background: rgba(181, 69, 27, 0.05);
-}
 
-.option input {
-  display: none;
+  &:hover {
+    background: var(--paper-warm);
+  }
+  &.is-checked {
+    background: rgba(181, 69, 27, 0.05);
+  }
+
+  input {
+    display: none;
+  }
 }
 
 .checkmark {

@@ -45,6 +45,7 @@
           title="Mídia"
           :options="options.midia"
           :selected="selected.midia"
+          collapsible
           @toggle="(val) => emit('toggle', 'midia', val)"
         />
 
@@ -61,8 +62,6 @@
           title="Sub-gêneros"
           :options="options.subgeneros"
           :selected="selected.subgeneros"
-          collapsible
-          :initial-open="false"
           @toggle="(val) => emit('toggle', 'subgeneros', val)"
         />
 
@@ -71,7 +70,6 @@
           title="Quem indicou"
           :options="options.quem"
           :selected="selected.quem"
-          collapsible
           @toggle="(val) => emit('toggle', 'quem', val)"
         />
       </div>
@@ -105,7 +103,6 @@ const activeTags = computed(() => {
   ]
 
   for (const [key, arr] of map) {
-    if (arr || arr?.length === 0) continue
     for (const value of arr!) tags.push({ key, value })
   }
 
@@ -117,7 +114,7 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .filter-panel {
   width: 260px;
   flex-shrink: 0;
@@ -138,9 +135,10 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
   color: var(--ink);
   cursor: pointer;
   transition: background var(--transition);
-}
-.filter-toggle:hover {
-  background: var(--paper-warm);
+
+  &:hover {
+    background: var(--paper-warm);
+  }
 }
 
 .badge {
@@ -164,26 +162,30 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
   transform: rotate(180deg);
 }
 
-.panel-body {
-  background: var(--paper);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
+.panel {
+  &-body {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
 
-.panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 16px 12px;
-  border-bottom: 1px solid var(--border);
-}
+  &-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid var(--border);
+  }
 
-.panel-title {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--ink);
+  &-title {
+    font: {
+      family: var(--font-display);
+      size: 1rem;
+      weight: 600;
+    }
+    color: var(--ink);
+  }
 }
 
 .clear-btn {
