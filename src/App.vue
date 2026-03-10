@@ -1,6 +1,6 @@
 <template>
   <div class="app">
-    <header class="site-header">
+    <header :class="['site-header', { 'header-active': isScrolled }]">
       <div class="header-inner">
         <RouterLink to="/" class="brand">
           <span class="brand-icon">📚</span>
@@ -15,66 +15,127 @@
       </div>
     </header>
 
-    <main class="site-main">
+    <main
+      ref="content"
+      :class="[
+        'site-main',
+        {
+          'scroll-active': isScrolled && toHideFrom.includes(route.name as string),
+        },
+      ]"
+      @scroll="handleHeaderVisibility"
+    >
       <RouterView v-slot="{ Component }">
         <Transition name="fade" mode="out-in">
-          <component :is="Component" />
+          <component :is="Component" @top="toTop" />
         </Transition>
       </RouterView>
     </main>
 
-    <footer class="site-footer">
-      <p>Ecos Literários · Clube do livro · Feito com 💛</p>
-    </footer>
+    <BackTop :target="content" />
   </div>
 </template>
 
+<script lang="ts" setup>
+import { ref, provide, watch, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
+
+import BackTop from '@/components/BackTop.vue'
+
+const route = useRoute()
+
+const content = ref<HTMLElement | null>(null)
+const isScrolled = ref(false)
+
+const toHideFrom = ['catalog']
+const threshold = 16 * 13 // rem
+
+const handleHeaderVisibility = (e: Event | HTMLElement | null) => {
+  if (!e) return
+
+  const target = e instanceof HTMLElement ? e : (e.target as HTMLElement)
+  const child = target.children[0] as HTMLElement
+
+  if (toHideFrom.includes(child?.dataset?.page as string)) {
+    isScrolled.value = target.scrollTop > threshold
+  } else {
+    isScrolled.value = true
+  }
+}
+
+const toTop = () => {
+  if (content.value) {
+    content.value.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
+
+provide('isScrolled', isScrolled)
+
+watch(route, async () => {
+  await nextTick()
+
+  setTimeout(() => {
+    toTop()
+    handleHeaderVisibility(content.value)
+  }, 350) // transition delay
+})
+</script>
+
 <style lang="scss" scoped>
 .app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  position: relative;
+
+  height: 100dvh;
+  overflow: hidden;
 }
 
 .site {
-  /* ── Header ──────────────────────────────────── */
   &-header {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 100;
 
+    height: 4rem;
     background: var(--ink);
     border-bottom: 1px solid rgba(var(--surface-rgb), 0.078);
+    opacity: 0;
+
     backdrop-filter: blur(8px);
+    transform: translateY(-100%);
+    pointer-events: none;
+    transition: all var(--transition);
+
+    &.header-active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
   }
 
   /* ── Main ────────────────────────────────────── */
   &-main {
-    flex: 1;
-  }
+    position: relative;
 
-  /* ── Footer ──────────────────────────────────── */
-  &-footer {
-    margin-top: auto;
+    height: 100dvh;
+    overflow-y: auto;
 
-    background: var(--ink);
-    padding: 20px 24px;
+    transition: padding var(--transition);
 
-    color: var(--muted);
-    text-align: center;
-    font-size: 0.8rem;
+    &.scroll-active {
+      padding-top: 12rem;
+    }
   }
 }
 
 .header {
   &-inner {
     margin: 0 auto;
-
     display: flex;
     max-width: 1200px;
     height: 64px;
     padding: 0 24px;
-
     align-items: center;
     justify-content: space-between;
     gap: 24px;
@@ -95,6 +156,9 @@
   gap: 12px;
   transition: opacity var(--transition);
 
+  align-items: center;
+  gap: 12px;
+  transition: opacity var(--transition);
   &:hover {
     opacity: 0.85;
   }

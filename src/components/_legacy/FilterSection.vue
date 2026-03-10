@@ -148,7 +148,7 @@ const toggle = () => {
 /* Transition */
 .section-enter-active,
 .section-leave-active {
-  transition: all 200ms ease;
+  transition: all var(--transition);
   overflow: hidden;
 }
 .section-enter-from,

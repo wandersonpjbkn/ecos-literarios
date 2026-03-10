@@ -1,6 +1,6 @@
 <template>
   <Transition name="af-bar">
-    <div v-if="hasActive" class="active-filters">
+    <div v-if="hasActive" :class="['active-filters', { 'dark-mode': isDark }]">
       <span class="af-title">Filtros:</span>
 
       <TransitionGroup name="af-tag" tag="div" class="af-tags">
@@ -28,9 +28,15 @@ import { computed } from 'vue'
 
 import type { Options } from '@/types'
 
-const props = defineProps<{
-  selected: Options
-}>()
+const props = withDefaults(
+  defineProps<{
+    selected: Options
+    isDark?: boolean
+  }>(),
+  {
+    isDark: false,
+  },
+)
 
 const emit = defineEmits<{
   remove: [key: string, value: string]
@@ -41,7 +47,7 @@ const labelMap = {
   midia: 'Mídia',
   categoria: 'Categoria',
   subgeneros: 'Sub-gênero',
-  quem: 'Quem indicou',
+  quem: 'Quem mencionou',
 }
 
 const hasActive = computed(() => Object.values(props.selected).some((arr) => arr.length > 0))
@@ -50,7 +56,7 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
 <style lang="scss" scoped>
 .active-filters {
   position: sticky;
-  top: 5rem;
+  top: calc(-12rem + 5rem);
   z-index: 5;
   margin-top: 2rem;
 
@@ -64,15 +70,23 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+
+  &.dark-mode {
+    background: var(--ink);
+    border: none;
+  }
 }
 
 .af-title {
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   flex-shrink: 0;
+}
+.dark-mode .af-title {
+  color: var(--surface);
 }
 
 .af-tags {
@@ -83,6 +97,8 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
 }
 
 .af-tag {
+  $padding: 0.5rem 0.75rem;
+
   display: inline-flex;
   align-items: center;
   gap: 0;
@@ -91,7 +107,7 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
   overflow: hidden;
   cursor: pointer;
   font-family: var(--font-body);
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   padding: 0;
   background: none;
   transition: opacity var(--transition);
@@ -99,59 +115,68 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
   &:hover {
     opacity: 0.8;
   }
-}
 
-.af-tag-group {
-  padding: 3px 8px;
-  background: var(--accent);
-  color: white;
-  font-weight: 600;
-  white-space: nowrap;
-}
+  &-group {
+    padding: #{$padding};
+    background: var(--accent);
+    color: white;
+    font-weight: 600;
+    white-space: nowrap;
+  }
 
-.af-tag-value {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
-  background: var(--accent-light);
-  color: var(--accent);
-  font-weight: 500;
-  white-space: nowrap;
-}
+  &-value {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: #{$padding};
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 500;
+    white-space: nowrap;
+  }
 
-.af-tag svg {
-  display: block;
-  padding: 0 6px 0 0;
-  background: var(--accent-light);
-  color: var(--accent-muted);
-  height: 100%;
-  box-sizing: content-box;
-  align-self: stretch;
+  svg {
+    display: block;
+    padding: 0 6px 0 0;
+    background: var(--accent-light);
+    color: var(--accent-muted);
+    height: 100%;
+    box-sizing: content-box;
+    align-self: stretch;
+  }
 }
 
 .af-clear-all {
-  padding: 3px 10px;
+  padding: 0.5rem 1rem;
   border: 1px solid var(--border-strong);
-  border-radius: 20px;
+  border-radius: 1rem;
   background: none;
-  font-family: var(--font-body);
-  font-size: 0.78rem;
+
+  font: {
+    family: var(--font-body);
+    size: 1rem;
+  }
   color: var(--muted);
-  cursor: pointer;
+
   transition: all var(--transition);
   flex-shrink: 0;
+  cursor: pointer;
 
   &:hover {
     border-color: var(--accent);
     color: var(--accent);
   }
 }
+.dark-mode .af-clear-all {
+  border: none;
+  background: var(--accent);
+  color: var(--surface);
+}
 
 /* Transitions */
 .af-bar-enter-active,
 .af-bar-leave-active {
-  transition: all 200ms ease;
+  transition: all var(--transition);
 }
 .af-bar-enter-from,
 .af-bar-leave-to {
@@ -161,7 +186,7 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
 
 .af-tag-enter-active,
 .af-tag-leave-active {
-  transition: all 150ms ease;
+  transition: all var(--transition);
 }
 .af-tag-enter-from,
 .af-tag-leave-to {

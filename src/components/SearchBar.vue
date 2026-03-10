@@ -142,7 +142,7 @@ const cleanAll = () => {
 
     font: {
       family: var(--font-body);
-      size: 0.95rem;
+      size: 1rem;
     }
     color: var(--ink);
 
@@ -205,7 +205,7 @@ const cleanAll = () => {
 
 .sug {
   &-titulo {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--ink);
     font-weight: 500;
 
@@ -217,7 +217,7 @@ const cleanAll = () => {
   }
 
   &-autor {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     color: var(--muted);
     flex-shrink: 0;
   }
@@ -226,7 +226,7 @@ const cleanAll = () => {
 /* Dropdown transition */
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: all 150ms ease;
+  transition: all var(--transition);
 }
 .dropdown-enter-from,
 .dropdown-leave-to {

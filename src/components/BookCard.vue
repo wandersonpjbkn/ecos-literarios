@@ -1,5 +1,5 @@
 <template>
-  <RouterLink :to="`/livro/${book.id}`" class="book-card">
+  <component :is="isComponent" :to="`/livro/${book.id}`" class="book-card">
     <!-- Color swatch based on category -->
     <div class="card-spine" :style="{ '--background': useCategoryColors().categoryClass(book.categoria) }" />
 
@@ -21,20 +21,34 @@
           <BaseIcon name="user" />
           {{ book.quem }}
         </span>
-        <BaseIcon name="arrow-right" class="arrow" />
+        <BaseIcon v-if="!isMobile" name="arrow-right" class="arrow" />
+
+        <!-- mobile -->
+        <RouterLink v-if="isMobile" :to="`/livro/${book.id}`" class="card-link">
+          <span>Ver detalhe</span>
+          <BaseIcon name="arrow-right" class="arrow" />
+        </RouterLink>
       </div>
     </div>
-  </RouterLink>
+  </component>
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
+
 import type { Book } from '@/types'
+
+import { useCategoryColors } from '@/composables'
 
 defineProps<{
   book: Book
 }>()
 
-import { useCategoryColors } from '@/composables'
+const isMobile = computed(() => window.innerWidth < 768)
+const isComponent = computed(() => {
+  if (isMobile.value) return 'div'
+  return 'RouterLink'
+})
 </script>
 
 <style lang="scss" scoped>
@@ -48,18 +62,21 @@ import { useCategoryColors } from '@/composables'
     border-radius: var(--radius);
 
     overflow: hidden;
-    transition: all 220ms ease;
-    cursor: pointer;
+    transition: all var(--transition);
 
-    &:hover {
-      box-shadow: var(--shadow-lg);
-      border-color: rgba(var(--accent-rgb), 0.3);
+    @media (min-width: 768px) {
+      cursor: pointer;
 
-      transform: translateY(-3px);
+      &:hover {
+        box-shadow: var(--shadow-lg);
+        border-color: rgba(var(--accent-rgb), 0.3);
 
-      .arrow {
-        color: var(--accent);
-        transform: translateX(3px);
+        transform: translateY(-3px);
+
+        .arrow {
+          color: var(--accent);
+          transform: translateX(3px);
+        }
       }
     }
   }
@@ -77,7 +94,7 @@ import { useCategoryColors } from '@/composables'
     padding: 16px;
     min-width: 0;
 
-    gap: 8px;
+    gap: 0.45rem;
     flex-direction: column;
     flex: 1;
   }
@@ -95,7 +112,7 @@ import { useCategoryColors } from '@/composables'
 
     font: {
       family: var(--font-display);
-      size: 1rem;
+      size: 1.25rem;
       weight: 600;
     }
     line-height: 1.3;
@@ -109,7 +126,7 @@ import { useCategoryColors } from '@/composables'
 
   &-autor {
     font: {
-      size: 0.82rem;
+      size: 0.875rem;
       style: italic;
     }
     color: var(--muted);
@@ -124,18 +141,55 @@ import { useCategoryColors } from '@/composables'
   }
 
   &-footer {
-    margin-top: auto;
+    margin-top: 2rem;
 
     display: flex;
     padding-top: 4px;
 
     align-items: center;
     justify-content: space-between;
+
+    @media (max-width: 768px) {
+      .arrow {
+        color: var(--accent);
+      }
+    }
+  }
+
+  &-link {
+    display: flex;
+    background: var(--bg-subtle);
+    color: var(--accent);
+    border: none;
+    padding: 9px 20px;
+    border-radius: var(--radius-sm);
+
+    font: {
+      family: var(--font-body);
+      size: 0.8rem;
+    }
+
+    align-items: center;
+    cursor: pointer;
+    transition: all var(--transition);
+
+    .arrow {
+      margin-left: 5px;
+    }
+
+    &:active {
+      color: var(--surface);
+      background: var(--accent);
+
+      .arrow {
+        color: var(--surface);
+      }
+    }
   }
 }
 
 .midia-badge {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -159,15 +213,15 @@ import { useCategoryColors } from '@/composables'
 }
 
 .categoria-tag {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: var(--muted);
 }
 
 .sub-tag {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   background: var(--bg-subtle);
   color: var(--muted);
-  padding: 2px 7px;
+  padding: 0.25rem 0.75rem;
   border-radius: 100px;
 }
 
@@ -175,7 +229,7 @@ import { useCategoryColors } from '@/composables'
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--muted);
 }
 

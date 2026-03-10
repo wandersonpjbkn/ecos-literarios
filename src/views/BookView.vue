@@ -1,5 +1,5 @@
 <template>
-  <div class="book-page">
+  <div class="page book-page" data-page="book">
     <!-- Loading -->
     <div v-if="useBooksStore().loading" class="state-screen">
       <div class="spinner"></div>
@@ -59,12 +59,12 @@
       <!-- Content -->
       <section class="book-content">
         <div class="content-inner">
-          <!-- Quem indicou + Por que -->
+          <!-- Quem mencionou + Por que -->
           <div v-if="book.quem || book.porque" class="indicacao-card">
             <div class="indicacao-header">
               <BaseIcon name="user" class="icon-user" />
               <span v-if="book.quem"
-                >Indicado por <strong>{{ book.quem }}</strong></span
+                >Mencionado por <strong>{{ book.quem }}</strong></span
               >
             </div>
             <blockquote v-if="book.porque" class="porque-quote">"{{ book.porque }}"</blockquote>
@@ -85,7 +85,7 @@
               <span class="meta-value">{{ book.autor }}</span>
             </div>
             <div v-if="book.quem" class="meta-item">
-              <span class="meta-label">Indicado por</span>
+              <span class="meta-label">Mencionado por</span>
               <span class="meta-value">{{ book.quem }}</span>
             </div>
           </div>
@@ -107,8 +107,6 @@
           </div>
         </div>
       </section>
-
-      <BackTop />
     </template>
   </div>
 </template>
@@ -119,8 +117,6 @@ import { useRoute } from 'vue-router'
 
 import { useBooksStore } from '@/stores'
 import { useCategoryColors, useSheets } from '@/composables'
-
-import BackTop from '@/components/BackTop.vue'
 
 import type { Book } from '@/types'
 
@@ -165,6 +161,10 @@ const related = computed(() => {
 
 /* ── Top bar ─────────────────────────────────── */
 .top-bar {
+  position: sticky;
+  top: 4rem;
+  z-index: 2;
+
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   padding: 0 24px;
@@ -212,6 +212,10 @@ const related = computed(() => {
 }
 
 .book {
+  &-page {
+    padding-top: 4rem;
+  }
+
   /* ── Hero ────────────────────────────────────── */
   &-hero {
     background: var(--ink);
@@ -297,7 +301,7 @@ const related = computed(() => {
   }
 
   &-midia {
-    font-size: 0.6rem;
+    font-size: 1rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: rgba(var(--surface-rgb), 0.6);
@@ -306,14 +310,14 @@ const related = computed(() => {
 
   &-titulo {
     font-family: var(--font-display);
-    font-size: 0.85rem;
+    font-size: 1.25rem;
     color: rgba(var(--surface-rgb), 0.95);
     font-weight: 700;
     line-height: 1.3;
   }
 
   &-autor {
-    font-size: 0.65rem;
+    font-size: 0.8rem;
     color: rgba(var(--surface-rgb), 0.55);
     font-style: italic;
   }

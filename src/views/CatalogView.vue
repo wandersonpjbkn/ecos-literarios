@@ -1,9 +1,9 @@
 <template>
-  <div class="catalog-page">
+  <div class="page catalog-page" data-page="catalog">
     <!-- Hero -->
-    <section class="catalog-hero">
+    <section class="catalog-hero" :class="{ 'hero-hidden': isScrolled }">
       <div class="hero-inner">
-        <h1 class="hero-title"><em>Catálogo</em> de Indicações</h1>
+        <h1 class="hero-title"><span class="hero-icon">📚</span><em>Catálogo</em> de Indicações</h1>
         <p class="hero-sub">{{ useBooksStore().size }} títulos indicados pelos membros do clube</p>
       </div>
     </section>
@@ -24,6 +24,7 @@
       </p>
     </div>
 
+    <!-- Catalog -->
     <div v-else class="catalog-body">
       <!-- Row 1: Search + count -->
       <div class="search-row">
@@ -39,6 +40,15 @@
       <!-- Row 2: Filter bar -->
       <div class="filter-bar">
         <MultiSelect
+          class="multi-select"
+          label="Mencionado por"
+          :options="optionsQuem"
+          :selected="selectedQuem"
+          @toggle="(v) => handleToggle('quem', v)"
+          @clear="clearKey('quem')"
+        />
+        <MultiSelect
+          v-if="showFilters"
           class="multi-select"
           label="Mídia"
           :options="optionsMidia"
@@ -64,16 +74,7 @@
           @toggle="(v) => handleToggle('subgeneros', v)"
           @clear="clearKey('subgeneros')"
         />
-        <MultiSelect
-          v-if="showFilters"
-          class="multi-select"
-          label="Quem indicou"
-          :options="optionsQuem"
-          :selected="selectedQuem"
-          @toggle="(v) => handleToggle('quem', v)"
-          @clear="clearKey('quem')"
-        />
-        <button class="show-all-btn" @click="showFilters = !showFilters">
+        <button class="show-all-btn" @click="handleClickShowAll">
           {{ showFilters ? 'Ocultar' : 'Mostrar' }} filtros
         </button>
       </div>
@@ -89,12 +90,12 @@
         @remove="handleRemove"
         @clear-all="clearAll"
       />
+      <hr class="grid-divider" />
 
       <!-- Grid -->
       <div class="grid-area">
         <TransitionGroup v-if="filtered.length > 0" name="grid" tag="div" class="books-grid">
           <BookCard v-for="book in filtered" :key="book.id" :book="book" />
-          <BackTop />
         </TransitionGroup>
 
         <!-- Empty state -->
@@ -109,7 +110,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, inject, type Ref } from 'vue'
 
 import { useBooksStore } from '@/stores'
 import { useSheets, useFilters } from '@/composables'
@@ -118,9 +119,12 @@ import SearchBar from '@/components/SearchBar.vue'
 import MultiSelect from '@/components/MultiSelect.vue'
 import ActiveFilters from '@/components/ActiveFilters.vue'
 import BookCard from '@/components/BookCard.vue'
-import BackTop from '@/components/BackTop.vue'
 
 import type { Book } from '@/types'
+
+const emit = defineEmits(['top'])
+
+const isScrolled = inject<Ref<boolean>>('isScrolled', ref(false))
 
 const {
   search,
@@ -172,11 +176,16 @@ const onSelectSuggestion = (book: Book) => {
   search.value = book.titulo
 }
 
-/** Mobile */
+/** show all */
 
 const showFilters = ref(false)
 
 const isMobile = computed(() => window.innerWidth < 768)
+
+const handleClickShowAll = () => {
+  showFilters.value = !showFilters.value
+  emit('top')
+}
 
 onMounted(() => {
   if (!isMobile.value) showFilters.value = true
@@ -191,7 +200,10 @@ onMounted(() => {
 
     background: var(--ink);
     padding: 48px 24px 40px;
+    max-height: 500px;
+
     overflow: hidden;
+    transition: all var(--transition);
 
     &::before {
       content: '';
@@ -201,6 +213,13 @@ onMounted(() => {
 
       background: radial-gradient(ellipse 60% 80% at 10% 50%, rgba(var(--accent-rgb), 0.18) 0%, transparent 70%);
 
+      pointer-events: none;
+    }
+
+    &.hero-hidden {
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
       pointer-events: none;
     }
   }
@@ -220,6 +239,13 @@ onMounted(() => {
     margin: 0 auto;
 
     max-width: 1200px;
+  }
+
+  &-icon {
+    font: {
+      size: clamp(2rem, 5vw, 3rem);
+    }
+    line-height: 1;
   }
 
   &-title {
@@ -347,8 +373,7 @@ onMounted(() => {
 /* ── Filter bar ──────────────────────────────── */
 .filter-bar {
   display: flex;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 1rem;
 }
 
 .multi-select {
@@ -358,20 +383,19 @@ onMounted(() => {
 }
 
 .show-all-btn {
-  margin-top: 1rem;
-
   display: none;
   width: 100%;
+  height: 48px;
   background: var(--accent);
-  color: var(--surface);
   border: none;
   padding: 9px 20px;
   border-radius: var(--radius-sm);
 
   font: {
     family: var(--font-body);
-    size: 0.875rem;
+    size: 1rem;
   }
+  color: var(--surface);
 
   cursor: pointer;
   transition: opacity var(--transition);
@@ -380,6 +404,12 @@ onMounted(() => {
     opacity: 0.85;
     background: var(--accent-hover);
   }
+}
+
+.grid-divider {
+  margin: 2rem 0;
+  border: none;
+  border-top: 1px solid var(--border);
 }
 
 /* ── Grid ────────────────────────────────────── */
@@ -409,22 +439,22 @@ onMounted(() => {
 /* Grid transition */
 .grid-enter-active {
   transition:
-    opacity 200ms ease,
-    transform 200ms ease;
+    opacity var(--transition),
+    transform var(--transition);
 }
 .grid-enter-from {
   opacity: 0;
   transform: scale(0.96);
 }
 .grid-leave-active {
-  transition: opacity 150ms ease;
+  transition: opacity var(--transition);
   position: absolute;
 }
 .grid-leave-to {
   opacity: 0;
 }
 .grid-move {
-  transition: transform 200ms ease;
+  transition: transform var(--transition);
 }
 
 /* ── Responsive ──────────────────────────────── */
@@ -439,7 +469,6 @@ onMounted(() => {
   .show-all-btn {
     display: block;
   }
-
   .search-row {
     flex-wrap: wrap;
   }

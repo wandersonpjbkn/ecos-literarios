@@ -50,9 +50,9 @@
           @toggle="(val) => emit('toggle', 'subgeneros', val)"
         />
 
-        <!-- Quem indicou -->
+        <!-- Quem mencionou -->
         <FilterSection
-          title="Quem indicou"
+          title="Quem mencionou"
           :options="options.quem"
           :selected="selected.quem"
           @toggle="(val) => emit('toggle', 'quem', val)"
@@ -220,7 +220,7 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
 /* Tag transition */
 .tag-enter-active,
 .tag-leave-active {
-  transition: all 150ms ease;
+  transition: all var(--transition);
 }
 .tag-enter-from,
 .tag-leave-to {

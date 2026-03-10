@@ -56,7 +56,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps<{
   label: string
@@ -87,7 +87,6 @@ const toggleOpen = () => {
   } else {
     isOpen.value = true
     activeIdx.value = -1
-    nextTick(() => inputRef.value?.focus())
   }
 }
 
@@ -121,16 +120,17 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
 <style lang="scss" scoped>
 .ms-control {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 40px;
+  height: 48px;
   padding: 0 12px;
   background: var(--surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
+
   cursor: pointer;
   transition: all var(--transition);
   user-select: none;
+  gap: 6px;
+  align-items: center;
 
   .is-open & {
     border-color: var(--accent);
@@ -145,7 +145,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
 
 .ms-label {
   flex: 1;
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-family: var(--font-body);
   color: var(--muted);
   white-space: nowrap;
@@ -167,7 +167,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   border-radius: 50%;
   background: var(--accent);
   color: white;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -188,34 +188,43 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  min-width: 220px;
   z-index: 300;
-  overflow: hidden;
+
   display: flex;
-  flex-direction: column;
+  min-width: 220px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
+
+  overflow: hidden;
+  flex-direction: column;
 }
 
 .ms-search-wrap {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  height: 48px;
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
+
   color: var(--muted);
+
+  align-items: center;
+  gap: 8px;
   flex-shrink: 0;
 }
 
 .ms-search {
   flex: 1;
+
   border: none;
   outline: none;
   background: none;
-  font-family: var(--font-body);
-  font-size: 0.875rem;
+
+  font: {
+    family: var(--font-body);
+    size: 1rem;
+  }
   color: var(--ink);
 
   &::placeholder {
@@ -232,11 +241,13 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
 
 .ms-clear-query {
   display: flex;
-  align-items: center;
+
   padding: 2px;
   border: none;
   background: none;
   border-radius: 3px;
+
+  align-items: center;
   cursor: pointer;
   color: var(--muted);
 
@@ -256,7 +267,8 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
+  padding: 12px;
+
   cursor: pointer;
   transition: background var(--transition);
 
@@ -289,14 +301,14 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
 }
 
 .ms-opt-label {
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: var(--ink);
   line-height: 1.3;
 }
 
 .ms-empty {
   padding: 16px 12px;
-  font-size: 0.82rem;
+  font-size: 1rem;
   color: var(--muted);
   text-align: center;
 }
@@ -317,7 +329,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   border-radius: 3px;
   background: none;
   font-family: var(--font-body);
-  font-size: 0.78rem;
+  font-size: 1rem;
   color: var(--accent);
   cursor: pointer;
   transition: background var(--transition);
@@ -328,13 +340,13 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
 }
 
 .ms-footer-count {
-  font-size: 0.75rem;
+  font-size: 1rem;
   color: var(--muted);
 }
 
 .ms-dropdown-enter-active,
 .ms-dropdown-leave-active {
-  transition: all 150ms ease;
+  transition: all var(--transition);
 }
 .ms-dropdown-enter-from,
 .ms-dropdown-leave-to {
