@@ -17,19 +17,18 @@
       <div class="top-bar">
         <div class="top-bar-inner">
           <RouterLink to="/" class="back-link">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="19" y1="12" x2="5" y2="12" />
-              <polyline points="12 19 5 12 12 5" />
-            </svg>
+            <BaseIcon name="arrow-left" />
             Catálogo
           </RouterLink>
-          <div class="breadcrumb-divider">›</div>
+          <div class="breadcrumb-divider">
+            <span>/</span>
+          </div>
           <span class="breadcrumb-current">{{ book.titulo }}</span>
         </div>
       </div>
 
       <!-- Hero -->
-      <section class="book-hero" :style="{ '--spine-color': useCategoryColors().categoryColor(book.categoria) }">
+      <section class="book-hero" :style="{ '--spine-color': useCategoryColors().categoryClass(book.categoria) }">
         <div class="hero-inner">
           <!-- Book visual -->
           <div class="book-cover">
@@ -63,10 +62,7 @@
           <!-- Quem indicou + Por que -->
           <div v-if="book.quem || book.porque" class="indicacao-card">
             <div class="indicacao-header">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
+              <BaseIcon name="user" class="icon-user" />
               <span v-if="book.quem"
                 >Indicado por <strong>{{ book.quem }}</strong></span
               >
@@ -101,10 +97,7 @@
             </h3>
             <div class="related-grid">
               <RouterLink v-for="r in related" :key="r.id" :to="`/livro/${r.id}`" class="related-card">
-                <div
-                  class="related-spine"
-                  :style="{ background: useCategoryColors().categoryColor(r.categoria) }"
-                ></div>
+                <div class="related-spine" :style="{ background: useCategoryColors().categoryClass(book.categoria) }" />
                 <div class="related-body">
                   <strong>{{ r.titulo }}</strong>
                   <span>{{ r.autor }}</span>
@@ -168,18 +161,21 @@ const related = computed(() => {
 
 /* ── Top bar ─────────────────────────────────── */
 .top-bar {
-  background: var(--paper);
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
   padding: 0 24px;
 
   &-inner {
-    max-width: 900px;
     margin: 0 auto;
-    height: 44px;
+
     display: flex;
+    max-width: 900px;
+    height: 44px;
+
     align-items: center;
     gap: 8px;
-    font-size: 0.82rem;
+
+    font-size: 0.85rem;
   }
 }
 .back-link {
@@ -195,7 +191,11 @@ const related = computed(() => {
 }
 .breadcrumb {
   &-divider {
-    color: var(--border);
+    display: inline-flex;
+
+    color: var(--muted);
+
+    align-items: center;
   }
 
   &-current {
@@ -219,7 +219,7 @@ const related = computed(() => {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse 50% 100% at 0% 50%, rgba(181, 69, 27, 0.15) 0%, transparent 60%);
+      background: radial-gradient(ellipse 50% 100% at 0% 50%, rgba(var(--accent-rgb), 0.2) 0%, transparent 60%);
       pointer-events: none;
     }
   }
@@ -244,13 +244,13 @@ const related = computed(() => {
     font-family: var(--font-display);
     font-size: clamp(1.6rem, 4vw, 2.4rem);
     font-weight: 700;
-    color: var(--paper);
+    color: var(--surface);
     line-height: 1.15;
   }
 
   &-autor {
     font-size: 1rem;
-    color: rgba(245, 240, 232, 0.6);
+    color: rgba(var(--surface-rgb), 0.65);
     font-style: italic;
   }
 }
@@ -288,7 +288,7 @@ const related = computed(() => {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+      background: linear-gradient(135deg, rgba(var(--surface-rgb), 0.08) 0%, transparent 60%);
     }
   }
 
@@ -296,21 +296,21 @@ const related = computed(() => {
     font-size: 0.6rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(var(--surface-rgb), 0.6);
     font-weight: 600;
   }
 
   &-titulo {
     font-family: var(--font-display);
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(var(--surface-rgb), 0.95);
     font-weight: 700;
     line-height: 1.3;
   }
 
   &-autor {
     font-size: 0.65rem;
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(var(--surface-rgb), 0.55);
     font-style: italic;
   }
 }
@@ -347,8 +347,8 @@ const related = computed(() => {
 
 .categoria-badge {
   font-size: 0.8rem;
-  color: rgba(245, 240, 232, 0.6);
-  background: rgba(255, 255, 255, 0.07);
+  color: rgba(var(--surface-rgb), 0.65);
+  background: rgba(var(--surface-rgb), 0.07);
   padding: 3px 9px;
   border-radius: 3px;
 }
@@ -361,17 +361,17 @@ const related = computed(() => {
 
 .sg-tag {
   font-size: 0.75rem;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(245, 240, 232, 0.75);
+  background: rgba(var(--surface-rgb), 0.1);
+  color: rgba(var(--surface-rgb), 0.8);
   padding: 4px 10px;
   border-radius: 100px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--surface-rgb), 0.1);
 }
 
 /* ── Content ─────────────────────────────────── */
 .book-content {
   padding: 40px 24px 64px;
-  background: var(--cream);
+  background: var(--bg);
 }
 .content-inner {
   max-width: 900px;
@@ -383,7 +383,7 @@ const related = computed(() => {
 
 /* Indicação card */
 .indicacao-card {
-  background: var(--paper);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-left: 4px solid var(--accent);
   border-radius: var(--radius);
@@ -404,6 +404,13 @@ const related = computed(() => {
 .indicacao-header svg {
   color: var(--accent);
   flex-shrink: 0;
+}
+
+.icon-user {
+  $size: 1.125rem;
+
+  width: $size;
+  height: $size;
 }
 
 .porque-quote {
@@ -428,7 +435,7 @@ const related = computed(() => {
 }
 
 .meta-item {
-  background: var(--paper);
+  background: var(--surface);
   padding: 16px 20px;
   display: flex;
   flex-direction: column;
@@ -469,7 +476,7 @@ const related = computed(() => {
 
 .related-card {
   display: flex;
-  background: var(--paper);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   overflow: hidden;

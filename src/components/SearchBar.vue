@@ -1,18 +1,7 @@
 <template>
   <div class="search-wrap">
     <div class="search-box" :class="{ 'is-focused': focused }">
-      <svg
-        class="search-icon"
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
-        <circle cx="11" cy="11" r="8" />
-        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-      </svg>
+      <BaseIcon name="search" class="search-icon" />
       <input
         ref="inputRef"
         type="text"
@@ -30,10 +19,7 @@
         @keydown.escape="close"
       />
       <button v-if="model" class="clear-search" aria-label="Limpar" @click="cleanAll">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
+        <BaseIcon name="times" />
       </button>
     </div>
 
@@ -116,60 +102,74 @@ const cleanAll = () => {
 }
 </script>
 
-<style scoped>
-.search-wrap {
-  position: relative;
-  width: 100%;
-}
+<style lang="scss" scoped>
+.search {
+  &-wrap {
+    position: relative;
 
-.search-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--paper);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0 14px;
-  transition: all var(--transition);
-}
-.search-box.is-focused {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(181, 69, 27, 0.12);
-  background: white;
-}
+    width: 100%;
+  }
 
-.search-icon {
-  color: var(--muted);
-  flex-shrink: 0;
-}
+  &-box {
+    display: flex;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0 14px;
 
-.search-input {
-  flex: 1;
-  height: 48px;
-  background: none;
-  border: none;
-  outline: none;
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  color: var(--ink);
-}
-.search-input::placeholder {
-  color: var(--muted);
+    align-items: center;
+    gap: 10px;
+    transition: all var(--transition);
+
+    &.is-focused {
+      background: var(--surface);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+  }
+
+  &-icon {
+    color: var(--muted);
+
+    flex-shrink: 0;
+  }
+
+  &-input {
+    height: 48px;
+    background: none;
+    border: none;
+    outline: none;
+
+    font: {
+      family: var(--font-body);
+      size: 0.95rem;
+    }
+    color: var(--ink);
+
+    flex: 1;
+
+    &::placeholder {
+      color: var(--muted);
+    }
+  }
 }
 
 .clear-search {
+  display: flex;
   background: none;
   border: none;
-  color: var(--muted);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
   padding: 4px;
   border-radius: 3px;
+
+  color: var(--muted);
+
   transition: color var(--transition);
-}
-.clear-search:hover {
-  color: var(--ink);
+  cursor: pointer;
+  align-items: center;
+
+  &:hover {
+    color: var(--ink);
+  }
 }
 
 /* Dropdown */
@@ -189,33 +189,38 @@ const cleanAll = () => {
 
 .suggestion {
   display: flex;
+  padding: 10px 16px;
+
+  cursor: pointer;
+  transition: background var(--transition);
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 16px;
-  cursor: pointer;
-  transition: background var(--transition);
-}
-.suggestion:hover,
-.suggestion.is-active {
-  background: var(--paper-warm);
+
+  &:hover,
+  &.is-active {
+    background: var(--bg-subtle);
+  }
 }
 
-.sug-titulo {
-  font-size: 0.9rem;
-  color: var(--ink);
-  font-weight: 500;
-}
-.sug-titulo :deep(mark) {
-  background: rgba(181, 69, 27, 0.15);
-  color: var(--accent);
-  border-radius: 2px;
-}
+.sug {
+  &-titulo {
+    font-size: 0.9rem;
+    color: var(--ink);
+    font-weight: 500;
 
-.sug-autor {
-  font-size: 0.78rem;
-  color: var(--muted);
-  flex-shrink: 0;
+    :deep(mark) {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 2px;
+    }
+  }
+
+  &-autor {
+    font-size: 0.78rem;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
 }
 
 /* Dropdown transition */

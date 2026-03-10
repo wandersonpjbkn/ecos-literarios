@@ -1,0 +1,84 @@
+@use 'sass:color';
+
+/** categories */
+$category-colors: (
+  'suspense': #475569,
+  'terror': #1e293b,
+  'fantasia': #1d4ed8,
+  'romance': #6d28d9,
+  'drama': #0f766e,
+  'ficcao': #1e40af,
+  'nao-ficcao': #374151,
+  'poesia': #7c3aed,
+  'realismo': #374151,
+  'ficcao-cientifica': #0284c7,
+  'ficcao-historica': #075985,
+);
+
+/** others */
+$lilac: #9d174d;
+$lilac-light: #fce7f3;
+
+$green: #065f46;
+$green-light: #d1fae5;
+
+/** surface */
+$bg: #f8fafc; /* fundo geral da página */
+$bg-subtle: #f1f5f9; /* seções alternadas, hover leve */
+$surface: #ffffff; /* cards, painéis, dropdowns */
+$surface-raised: #ffffff; /* modais, overlays */
+
+/** text */
+$ink: #0f172a; /* texto principal */
+$ink-secondary: #334155; /* texto secundário */
+$muted: #64748b; /* subtextos, placeholders, labels */
+$muted-light: #94a3b8; /* disabled, decorativo */
+
+/** details */
+$accent: #2563eb; /* primário: botões, links, foco */
+$accent-hover: #1d4ed8; /* hover do acento */
+$accent-light: #dbeafe; /* fundo de badges de mídia */
+$accent-soft: #eff6ff; /* hover suavíssimo, destaques */
+$accent-muted: #93c5fd; /* bordas de foco, ícones secundários */
+
+/** RGB channels — para uso com rgba(var(--X-rgb), alpha) */
+// 255, 255, 255
+$surface-rgb:
+  #{color.channel($surface, 'red', $space: rgb)},
+  #{color.channel($surface, 'green', $space: rgb)},
+  #{color.channel($surface, 'blue', $space: rgb)};
+
+// 37, 99, 235
+$accent-rgb:
+  #{color.channel($accent, 'red', $space: rgb)},
+  #{color.channel($accent, 'green', $space: rgb)},
+  #{color.channel($accent, 'blue', $space: rgb)};
+
+// 15, 23, 42
+$ink-rgb:
+  #{color.channel($ink, 'red', $space: rgb)},
+  #{color.channel($ink, 'green', $space: rgb)},
+  #{color.channel($ink, 'blue', $space: rgb)};
+
+/** borders */
+$border: #e2e8f0; /* bordas de cards e painéis */
+$border-strong: #cbd5e1; /* bordas de inputs */
+$border-focus: #93c5fd; /* ring de foco */
+
+/** shadow */
+$shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+$shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+$shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
+$shadow-xl: 0 20px 48px rgba(15, 23, 42, 0.16);
+
+/** fonts */
+$font-display: 'Montserrat', serif;
+$font-body: 'Montserrat', system-ui, sans-serif;
+
+/** radius */
+$radius-sm: 4px;
+$radius: 8px;
+$radius-lg: 16px;
+
+/** transition */
+$transition: 180ms ease;

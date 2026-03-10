@@ -3,17 +3,7 @@
     <button class="section-header" :aria-expanded="open" @click="toggle">
       <span>{{ title }}</span>
       <span v-if="selected.length > 0" class="count">{{ selected.length }}</span>
-      <svg
-        class="chevron"
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
-        <polyline points="6 9 12 15 18 9" />
-      </svg>
+      <BaseIcon name="chevron" class="chevron" />
     </button>
 
     <Transition name="section">
@@ -21,17 +11,7 @@
         <label v-for="opt in options" :key="opt" class="option" :class="{ 'is-checked': selected.includes(opt) }">
           <input type="checkbox" :checked="selected.includes(opt)" @change="emit('toggle', opt)" />
           <span class="checkmark">
-            <svg
-              v-if="selected.includes(opt)"
-              width="10"
-              height="10"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="3"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
+            <BaseIcon v-if="selected.includes(opt)" name="checkbox" />
           </span>
           <span class="opt-label">{{ opt }}</span>
         </label>
@@ -100,7 +80,7 @@ const toggle = () => {
 .count {
   font-size: 0.7rem;
   background: var(--accent);
-  color: white;
+  color: var(--surface);
   font-weight: 600;
   padding: 1px 6px;
   border-radius: 100px;
@@ -130,10 +110,10 @@ const toggle = () => {
   user-select: none;
 
   &:hover {
-    background: var(--paper-warm);
+    background: var(--bg-subtle);
   }
   &.is-checked {
-    background: rgba(181, 69, 27, 0.05);
+    background: var(--accent-soft);
   }
 
   input {
@@ -151,12 +131,12 @@ const toggle = () => {
   align-items: center;
   justify-content: center;
   transition: all var(--transition);
-  background: white;
+  background: var(--surface);
 }
 .is-checked .checkmark {
   background: var(--accent);
   border-color: var(--accent);
-  color: white;
+  color: var(--surface);
 }
 
 .opt-label {

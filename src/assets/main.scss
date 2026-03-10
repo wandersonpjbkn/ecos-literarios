@@ -1,29 +1,63 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@use './modules/fonts' as *;
+@use './modules/colors' as *;
+
+@use './modules/categories' as *;
 
 /* ── Tokens ─────────────────────────────────── */
 :root {
-  --ink: #1a1612;
-  --paper: #f5f0e8;
-  --paper-warm: #ede6d6;
-  --cream: #faf7f2;
-  --accent: #b5451b;
-  --accent-2: #d4874e;
-  --muted: #7a6e61;
-  --border: #d9d0c0;
-  --tag-bg: #e8e0d0;
+  /** others */
+  --lilac: #{$lilac};
+  --lilac-light: #{$lilac-light};
 
-  --font-display: 'Montserrat', serif;
-  --font-body: 'Montserrat', system-ui, sans-serif;
+  --green: #{$green};
+  --green-light: #{$green-light};
 
-  --radius-sm: 4px;
-  --radius: 8px;
-  --radius-lg: 16px;
+  /** surface */
+  --bg: #{$bg};
+  --bg-subtle: #{$bg-subtle};
+  --surface: #{$surface};
+  --surface-raised: #{$surface-raised};
 
-  --shadow-sm: 0 1px 3px rgba(26, 22, 18, 0.08);
-  --shadow: 0 4px 16px rgba(26, 22, 18, 0.12);
-  --shadow-lg: 0 12px 40px rgba(26, 22, 18, 0.18);
+  /** text */
+  --ink: #{$ink};
+  --ink-secondary: #{$ink-secondary};
+  --muted: #{$muted};
+  --muted-light: #{$muted-light};
 
-  --transition: 200ms ease;
+  /** details */
+  --accent: #{$accent};
+  --accent-hover: #{$accent-hover};
+  --accent-light: #{$accent-light};
+  --accent-soft: #{$accent-soft};
+  --accent-muted: #{$accent-muted};
+
+  /** RGB channels — rgba(var(--X-rgb), alpha) */
+  --surface-rgb: #{$surface-rgb};
+  --accent-rgb: #{$accent-rgb};
+  --ink-rgb: #{$ink-rgb};
+
+  /** borders */
+  --border: #{$border};
+  --border-strong: #{$border-strong};
+  --border-focus: #{$border-focus};
+
+  /** shadow */
+  --shadow-sm: #{$shadow-sm};
+  --shadow: #{$shadow};
+  --shadow-lg: #{$shadow-lg};
+  --shadow-xl: #{$shadow-xl};
+
+  /** fonts */
+  --font-display: #{$font-display};
+  --font-body: #{$font-body};
+
+  /** radius */
+  --radius-sm: #{$radius-sm};
+  --radius: #{$radius};
+  --radius-lg: #{$radius-lg};
+
+  /** transition */
+  --transition: #{$transition};
 }
 
 /* ── Reset ───────────────────────────────────── */
@@ -41,12 +75,15 @@ html {
 }
 
 body {
-  background: var(--cream);
-  color: var(--ink);
-  font-family: var(--font-body);
-  font-weight: 400;
-  line-height: 1.6;
+  background: var(--bg);
   min-height: 100vh;
+
+  font: {
+    family: var(--font-body);
+    weight: 400;
+  }
+  color: var(--ink);
+  line-height: 1.6;
 }
 
 a {
@@ -87,7 +124,7 @@ h4 {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--paper);
+  background: var(--bg-subtle);
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border);

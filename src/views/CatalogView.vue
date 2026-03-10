@@ -15,11 +15,7 @@
     </div>
 
     <div v-else-if="useBooksStore().error" class="state-screen state-error">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="8" x2="12" y2="12" />
-        <line x1="12" y1="16" x2="12.01" y2="16" />
-      </svg>
+      <BaseIcon name="error" />
       <p>{{ useBooksStore().error }}</p>
       <button class="retry-btn" @click="useSheets().fetchBooks(true)">Tentar novamente</button>
       <p class="error-hint">
@@ -68,10 +64,7 @@
 
           <!-- Empty state -->
           <div v-else class="empty-state">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-            </svg>
+            <BaseIcon name="book" />
             <p>Nenhum título encontrado com estes filtros.</p>
             <button class="retry-btn" @click="clearAll">Limpar filtros</button>
           </div>
@@ -130,71 +123,115 @@ const onSelectSuggestion = (book: Book) => {
 }
 </script>
 
-<style scoped>
-/* ── Hero ────────────────────────────────────── */
-.catalog-hero {
-  background: var(--ink);
-  padding: 48px 24px 40px;
-  position: relative;
-  overflow: hidden;
-}
-.catalog-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 60% 80% at 10% 50%, rgba(181, 69, 27, 0.18) 0%, transparent 70%);
-  pointer-events: none;
+<style lang="scss" scoped>
+.catalog {
+  /* ── Hero ────────────────────────────────────── */
+  &-hero {
+    position: relative;
+
+    background: var(--ink);
+    padding: 48px 24px 40px;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+
+      position: absolute;
+      inset: 0;
+
+      background: radial-gradient(ellipse 60% 80% at 10% 50%, rgba(var(--accent-rgb), 0.18) 0%, transparent 70%);
+
+      pointer-events: none;
+    }
+  }
+
+  /* ── Catalog body ────────────────────────────── */
+  &-body {
+    margin: 0 auto;
+
+    max-width: 1200px;
+    padding: 24px 24px 48px;
+  }
+
+  &-layout {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+  }
 }
 
-.hero-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  position: relative;
-}
+.hero {
+  &-inner {
+    position: relative;
+    margin: 0 auto;
 
-.hero-title {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 700;
-  color: var(--paper);
-  line-height: 1.1;
-  margin-bottom: 8px;
-}
-.hero-title em {
-  font-style: italic;
-  color: var(--accent-2);
-}
+    max-width: 1200px;
+  }
 
-.hero-sub {
-  color: rgba(245, 240, 232, 0.55);
-  font-size: 0.95rem;
+  &-title {
+    margin-bottom: 8px;
+
+    font: {
+      family: var(--font-display);
+      size: clamp(2rem, 5vw, 3rem);
+      weight: 700;
+    }
+    color: var(--surface);
+    line-height: 1.1;
+
+    em {
+      font: {
+        style: italic;
+      }
+      color: var(--accent-muted);
+    }
+  }
+
+  &-sub {
+    font: {
+      size: 0.95rem;
+    }
+    color: rgba(var(--surface-rgb), 0.55);
+  }
 }
 
 /* ── States ──────────────────────────────────── */
-.state-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 80px 24px;
-  color: var(--muted);
-  text-align: center;
+.state {
+  &-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 80px 24px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  &-error {
+    color: var(--accent);
+  }
 }
 
-.state-error {
-  color: var(--accent);
-}
-.error-hint {
-  font-size: 0.82rem;
-  color: var(--muted);
-  max-width: 440px;
-}
-.error-hint code {
-  background: var(--tag-bg);
-  padding: 1px 5px;
-  border-radius: 3px;
-  font-size: 0.8rem;
+.error {
+  &-hint {
+    max-width: 440px;
+
+    font: {
+      size: 0.82rem;
+    }
+    color: var(--muted);
+
+    code {
+      background: var(--bg-subtle);
+      padding: 1px 5px;
+      border-radius: 3px;
+
+      font: {
+        size: 0.8rem;
+      }
+    }
+  }
 }
 
 .spinner {
@@ -203,6 +240,7 @@ const onSelectSuggestion = (book: Book) => {
   border: 3px solid var(--border);
   border-top-color: var(--accent);
   border-radius: 50%;
+
   animation: spin 0.7s linear infinite;
 }
 @keyframes spin {
@@ -213,7 +251,7 @@ const onSelectSuggestion = (book: Book) => {
 
 .retry-btn {
   background: var(--accent);
-  color: white;
+  color: var(--surface);
   border: none;
   padding: 9px 20px;
   border-radius: var(--radius-sm);
@@ -221,16 +259,11 @@ const onSelectSuggestion = (book: Book) => {
   font-size: 0.875rem;
   cursor: pointer;
   transition: opacity var(--transition);
-}
-.retry-btn:hover {
-  opacity: 0.85;
-}
 
-/* ── Catalog body ────────────────────────────── */
-.catalog-body {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 24px 48px;
+  &:hover {
+    opacity: 0.85;
+    background: var(--accent-hover);
+  }
 }
 
 .search-row {
@@ -241,19 +274,17 @@ const onSelectSuggestion = (book: Book) => {
 }
 
 .result-count {
-  font-size: 0.82rem;
+  flex-shrink: 0;
+
+  font: {
+    size: 0.82rem;
+  }
   color: var(--muted);
   white-space: nowrap;
-  flex-shrink: 0;
-}
-.result-count strong {
-  color: var(--accent);
-}
 
-.catalog-layout {
-  display: flex;
-  gap: 28px;
-  align-items: flex-start;
+  strong {
+    color: var(--accent);
+  }
 }
 
 /* ── Grid ────────────────────────────────────── */

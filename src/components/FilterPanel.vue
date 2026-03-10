@@ -2,22 +2,10 @@
   <aside class="filter-panel" :class="{ 'is-open': isOpen }">
     <!-- Mobile toggle -->
     <button class="filter-toggle" aria-label="Filtros" @click="isOpen = !isOpen">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-      </svg>
+      <BaseIcon name="filter" />
       <span>Filtros</span>
       <span v-if="activeCount > 0" class="badge">{{ activeCount }}</span>
-      <svg
-        class="chevron"
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
-        <polyline points="6 9 12 15 18 9" />
-      </svg>
+      <BaseIcon name="chevron" class="chevron" />
     </button>
 
     <!-- Panel body -->
@@ -32,10 +20,7 @@
       <TransitionGroup v-if="activeCount > 0" name="tag" tag="div" class="active-tags">
         <span v-for="tag in activeTags" :key="tag.key + tag.value" class="active-tag" @click="removeTag(tag)">
           {{ tag.value }}
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
+          <BaseIcon name="times" />
         </span>
       </TransitionGroup>
 
@@ -126,7 +111,7 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: var(--paper);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   font-family: var(--font-body);
@@ -137,7 +122,7 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
   transition: background var(--transition);
 
   &:hover {
-    background: var(--paper-warm);
+    background: var(--bg-subtle);
   }
 }
 
@@ -164,7 +149,7 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
 
 .panel {
   &-body {
-    background: var(--paper);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
@@ -200,7 +185,7 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
   transition: background var(--transition);
 }
 .clear-btn:hover {
-  background: rgba(181, 69, 27, 0.08);
+  background: var(--accent-soft);
 }
 
 .active-tags {
@@ -215,8 +200,8 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--accent);
+  color: var(--surface);
   font-size: 0.75rem;
   padding: 3px 8px;
   border-radius: 100px;

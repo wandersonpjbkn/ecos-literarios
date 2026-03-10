@@ -1,13 +1,13 @@
 {
-  "Suspense": "#8b5e3c",
-  "Terror": "#3d2b1f",
-  "Fantasia": "#2d4a6e",
-  "Romance": "#8b3a52",
-  "Drama": "#4a6741",
-  "Ficção": "#5c4a7a",
-  "Não Ficção": "#5a5a4a",
-  "Poesia": "#7a4a6e",
-  "Realismo": "#6a5a40",
-  "Ficção Científica": "#2a4a5e",
-  "Ficção Histórica": "#6e4a30"
+  "Suspense": "suspense",
+  "Terror": "terror",
+  "Fantasia": "fantasia",
+  "Romance": "romance",
+  "Drama": "drama",
+  "Ficção": "ficcao",
+  "Não Ficção": "nao-ficcao",
+  "Poesia": "poesia",
+  "Realismo": "realismo",
+  "Ficção Científica": "ficcao-cientifica",
+  "Ficção Histórica": "ficcao-historica"
 }

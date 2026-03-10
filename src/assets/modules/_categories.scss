@@ -1,0 +1,7 @@
+@use './colors';
+
+:root {
+  @each $category, $color in colors.$category-colors {
+    --category-color-#{$category}: #{$color};
+  }
+}
