@@ -25,49 +25,83 @@
     </div>
 
     <div v-else class="catalog-body">
-      <!-- Search bar (full width) -->
+      <!-- Row 1: Search + count -->
       <div class="search-row">
         <SearchBar v-model="search" :suggestions="searchSuggestions" @select="onSelectSuggestion" />
         <div class="result-count">
           <template v-if="activeFilterCount > 0">
             <strong>{{ filtered.length }}</strong> de {{ useBooksStore().size }} títulos
           </template>
-          <template v-else> {{ useBooksStore().size }} títulos </template>
+          <template v-else>{{ useBooksStore().size }} títulos</template>
         </div>
       </div>
 
-      <div class="catalog-layout">
-        <!-- Filters sidebar -->
-        <FilterPanel
-          :options="{
-            midia: optionsMidia,
-            categoria: optionsCategoria,
-            subgeneros: optionsSubgeneros,
-            quem: optionsQuem,
-          }"
-          :selected="{
-            midia: selectedMidia,
-            categoria: selectedCategoria,
-            subgeneros: selectedSubgeneros,
-            quem: selectedQuem,
-          }"
-          :active-count="activeFilterCount"
-          @toggle="handleToggle"
-          @clear="clearAll"
+      <!-- Row 2: Filter bar -->
+      <div class="filter-bar">
+        <MultiSelect
+          class="multi-select"
+          label="Mídia"
+          :options="optionsMidia"
+          :selected="selectedMidia"
+          @toggle="(v) => handleToggle('midia', v)"
+          @clear="clearKey('midia')"
         />
+        <MultiSelect
+          v-if="showFilters"
+          class="multi-select"
+          label="Categoria"
+          :options="optionsCategoria"
+          :selected="selectedCategoria"
+          @toggle="(v) => handleToggle('categoria', v)"
+          @clear="clearKey('categoria')"
+        />
+        <MultiSelect
+          v-if="showFilters"
+          class="multi-select"
+          label="Sub-gêneros"
+          :options="optionsSubgeneros"
+          :selected="selectedSubgeneros"
+          @toggle="(v) => handleToggle('subgeneros', v)"
+          @clear="clearKey('subgeneros')"
+        />
+        <MultiSelect
+          v-if="showFilters"
+          class="multi-select"
+          label="Quem indicou"
+          :options="optionsQuem"
+          :selected="selectedQuem"
+          @toggle="(v) => handleToggle('quem', v)"
+          @clear="clearKey('quem')"
+        />
+        <button class="show-all-btn" @click="showFilters = !showFilters">
+          {{ showFilters ? 'Ocultar' : 'Mostrar' }} filtros
+        </button>
+      </div>
 
-        <!-- Grid -->
-        <div class="grid-area">
-          <TransitionGroup v-if="filtered.length > 0" name="grid" tag="div" class="books-grid">
-            <BookCard v-for="book in filtered" :key="book.id" :book="book" />
-          </TransitionGroup>
+      <!-- Row 3: Active filter tags -->
+      <ActiveFilters
+        :selected="{
+          midia: selectedMidia,
+          categoria: selectedCategoria,
+          subgeneros: selectedSubgeneros,
+          quem: selectedQuem,
+        }"
+        @remove="handleRemove"
+        @clear-all="clearAll"
+      />
 
-          <!-- Empty state -->
-          <div v-else class="empty-state">
-            <BaseIcon name="book" />
-            <p>Nenhum título encontrado com estes filtros.</p>
-            <button class="retry-btn" @click="clearAll">Limpar filtros</button>
-          </div>
+      <!-- Grid -->
+      <div class="grid-area">
+        <TransitionGroup v-if="filtered.length > 0" name="grid" tag="div" class="books-grid">
+          <BookCard v-for="book in filtered" :key="book.id" :book="book" />
+          <BackTop />
+        </TransitionGroup>
+
+        <!-- Empty state -->
+        <div v-else class="empty-state">
+          <BaseIcon name="book" />
+          <p>Nenhum título encontrado com estes filtros.</p>
+          <button class="retry-btn" @click="clearAll">Limpar filtros</button>
         </div>
       </div>
     </div>
@@ -75,14 +109,16 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 import { useBooksStore } from '@/stores'
 import { useSheets, useFilters } from '@/composables'
 
 import SearchBar from '@/components/SearchBar.vue'
-import FilterPanel from '@/components/FilterPanel.vue'
+import MultiSelect from '@/components/MultiSelect.vue'
+import ActiveFilters from '@/components/ActiveFilters.vue'
 import BookCard from '@/components/BookCard.vue'
+import BackTop from '@/components/BackTop.vue'
 
 import type { Book } from '@/types'
 
@@ -118,9 +154,33 @@ const handleToggle = (key: string, value: string) => {
   else arr.value.splice(idx, 1)
 }
 
+const clearKey = (key: string) => {
+  const map = {
+    midia: selectedMidia,
+    categoria: selectedCategoria,
+    subgeneros: selectedSubgeneros,
+    quem: selectedQuem,
+  }
+  map[key as keyof typeof map].value = []
+}
+
+const handleRemove = (key: string, value: string) => {
+  handleToggle(key, value)
+}
+
 const onSelectSuggestion = (book: Book) => {
   search.value = book.titulo
 }
+
+/** Mobile */
+
+const showFilters = ref(false)
+
+const isMobile = computed(() => window.innerWidth < 768)
+
+onMounted(() => {
+  if (!isMobile.value) showFilters.value = true
+})
 </script>
 
 <style lang="scss" scoped>
@@ -151,12 +211,6 @@ const onSelectSuggestion = (book: Book) => {
 
     max-width: 1200px;
     padding: 24px 24px 48px;
-  }
-
-  &-layout {
-    display: flex;
-    gap: 28px;
-    align-items: flex-start;
   }
 }
 
@@ -266,11 +320,14 @@ const onSelectSuggestion = (book: Book) => {
   }
 }
 
+/* ── Search row ──────────────────────────────── */
 .search-row {
+  margin-bottom: 1rem;
+
   display: flex;
+
   align-items: center;
   gap: 16px;
-  margin-bottom: 24px;
 }
 
 .result-count {
@@ -287,10 +344,49 @@ const onSelectSuggestion = (book: Book) => {
   }
 }
 
+/* ── Filter bar ──────────────────────────────── */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.multi-select {
+  position: relative;
+  flex: 1;
+  min-width: 140px;
+}
+
+.show-all-btn {
+  margin-top: 1rem;
+
+  display: none;
+  width: 100%;
+  background: var(--accent);
+  color: var(--surface);
+  border: none;
+  padding: 9px 20px;
+  border-radius: var(--radius-sm);
+
+  font: {
+    family: var(--font-body);
+    size: 0.875rem;
+  }
+
+  cursor: pointer;
+  transition: opacity var(--transition);
+
+  &:hover {
+    opacity: 0.85;
+    background: var(--accent-hover);
+  }
+}
+
 /* ── Grid ────────────────────────────────────── */
 .grid-area {
-  flex: 1;
-  min-width: 0;
+  position: relative;
+
+  margin-top: 2rem;
 }
 
 .books-grid {
@@ -331,10 +427,19 @@ const onSelectSuggestion = (book: Book) => {
   transition: transform 200ms ease;
 }
 
+/* ── Responsive ──────────────────────────────── */
 @media (max-width: 768px) {
-  .catalog-layout {
-    flex-direction: column;
+  .filter-bar {
+    flex-wrap: wrap;
   }
+  .multi-select {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+  .show-all-btn {
+    display: block;
+  }
+
   .search-row {
     flex-wrap: wrap;
   }

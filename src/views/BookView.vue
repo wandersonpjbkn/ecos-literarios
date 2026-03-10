@@ -107,6 +107,8 @@
           </div>
         </div>
       </section>
+
+      <BackTop />
     </template>
   </div>
 </template>
@@ -117,6 +119,8 @@ import { useRoute } from 'vue-router'
 
 import { useBooksStore } from '@/stores'
 import { useCategoryColors, useSheets } from '@/composables'
+
+import BackTop from '@/components/BackTop.vue'
 
 import type { Book } from '@/types'
 

@@ -1,6 +1,4 @@
-import { computed, ref } from 'vue'
-
-import { useBooksStore } from '@/stores'
+import { useBooksStore, useCacheStore } from '@/stores'
 
 import type { Book } from '@/types'
 
@@ -10,16 +8,11 @@ export const SHEET_CONFIG = {
   HEADER_ROW: import.meta.env.VITE_SHEET_HEADER_ROW,
 }
 
-const cache: { data: Book[] | null; ts: number } = { data: null, ts: 0 }
-const CACHE_TTL = 5 * 60 * 1000
-
 export function useSheets() {
   const fetchBooks = async (forceRefresh = false) => {
-    const now = Date.now()
-
-    if (!forceRefresh && cache.data && now - cache.ts < CACHE_TTL) {
-      useBooksStore().books = cache.data
-      return
+    if (!forceRefresh && useCacheStore().isCacheValid) {
+      useBooksStore().books = useCacheStore().cache!
+      return console.log('📦 Usando dados do cache')
     }
 
     useBooksStore().loading = true
@@ -28,7 +21,7 @@ export function useSheets() {
     try {
       const url = `https://docs.google.com/spreadsheets/d/e/${SHEET_CONFIG.SHEET_ID}/pub?gid=${SHEET_CONFIG.GID}&single=true&output=csv`
 
-      console.log('Fetching books...', url)
+      console.log('Fetching books...')
 
       const res = await fetch(url)
 
@@ -39,8 +32,8 @@ export function useSheets() {
       const parsed = parseCSV(csv)
 
       useBooksStore().books = parsed
-      cache.data = parsed
-      cache.ts = now
+      useCacheStore().cache = parsed
+      useCacheStore().ts = Date.now()
 
       console.log('Books loaded:', parsed.length)
     } catch (e: unknown) {
@@ -74,7 +67,7 @@ const parseCSV = (csv: string): Book[] => {
 
     const [, titulo, autor, midia, categoria, subgeneros, quem, porque] = cols
 
-    if (!titulo) continue
+    if (!titulo && !autor) continue
 
     const tags = subgeneros
       ? subgeneros

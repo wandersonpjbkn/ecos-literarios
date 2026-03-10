@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import persisteStorage from 'pinia-plugin-persistedstate'
 
 import router from '@/router'
 
@@ -9,8 +10,11 @@ import BaseIcon from '@/components/BaseIcon.vue'
 import '@/assets/main.scss'
 
 const app = createApp(App)
+const pinia = createPinia()
 
-app.use(createPinia())
+pinia.use(persisteStorage)
+
+app.use(pinia)
 app.use(router)
 
 app.component('BaseIcon', BaseIcon)
