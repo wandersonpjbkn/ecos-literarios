@@ -248,8 +248,8 @@ const onSelectSuggestion = (book: Book) => {
 <style lang="scss" scoped>
 /* ── Intro ───────────────────────────────────── */
 .filter-intro {
-  background: var(--ink);
-  border-bottom: 1px solid rgba(var(--surface-rgb), 0.08);
+  background: var(--color-text-default);
+  border-bottom: 1px solid rgba(var(--color-surface-default-rgb), 0.08);
   padding: 20px 24px;
 }
 
@@ -265,15 +265,15 @@ const onSelectSuggestion = (book: Book) => {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: rgba(var(--surface-rgb), 0.5);
+  color: rgba(var(--color-surface-default-rgb), 0.5);
   font-size: 0.875rem;
   white-space: nowrap;
   padding-top: 6px;
-  transition: color var(--transition);
+  transition: color var(--motion-transition-default);
   text-decoration: none;
   flex-shrink: 0;
 
-  &:hover { color: var(--surface); }
+  &:hover { color: var(--color-surface-default); }
 }
 
 .intro-meta {
@@ -287,20 +287,20 @@ const onSelectSuggestion = (book: Book) => {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent-muted);
+  color: var(--color-action-text-subtle);
 }
 
 .intro-title {
-  font-family: var(--font-display);
+  font-family: var(--font-family-display);
   font-size: clamp(1.1rem, 3vw, 1.5rem);
   font-weight: 700;
-  color: var(--surface);
+  color: var(--color-surface-default);
   line-height: 1.2;
 }
 
 .intro-desc {
   font-size: 0.875rem;
-  color: rgba(var(--surface-rgb), 0.5);
+  color: rgba(var(--color-surface-default-rgb), 0.5);
   margin-top: 2px;
 }
 
@@ -319,35 +319,35 @@ const onSelectSuggestion = (book: Book) => {
   justify-content: center;
   gap: 16px;
   padding: 80px 24px;
-  color: var(--muted);
+  color: var(--color-text-subtle);
   text-align: center;
 }
 
-.state-error { color: var(--accent); }
+.state-error { color: var(--color-action-default); }
 
 .spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
+  border: 3px solid var(--color-border-default);
+  border-top-color: var(--color-action-default);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .retry-btn {
-  background: var(--accent);
-  color: var(--surface);
+  background: var(--color-action-default);
+  color: var(--color-surface-default);
   border: none;
   padding: 10px 20px;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-body);
+  border-radius: var(--border-radius-sm);
+  font-family: var(--font-family-body);
   font-size: 1rem;
   cursor: pointer;
   min-height: 44px;
-  transition: opacity var(--transition);
+  transition: opacity var(--motion-transition-default);
 
-  &:hover { opacity: 0.85; background: var(--accent-hover); }
+  &:hover { opacity: 0.85; background: var(--color-action-default-hover); }
 }
 
 /* ── Search row ──────────────────────────────── */
@@ -361,10 +361,10 @@ const onSelectSuggestion = (book: Book) => {
 .result-count {
   flex-shrink: 0;
   font-size: 0.9rem;
-  color: var(--muted);
+  color: var(--color-text-subtle);
   white-space: nowrap;
 
-  strong { color: var(--accent); }
+  strong { color: var(--color-action-default); }
 }
 
 /* ── Layout sidebar + grid ───────────────────── */
@@ -392,17 +392,17 @@ const onSelectSuggestion = (book: Book) => {
   align-items: center;
   gap: 16px;
   padding: 60px 24px;
-  color: var(--muted);
+  color: var(--color-text-subtle);
   text-align: center;
   font-size: 1rem;
 }
 
 /* Grid transitions */
-.grid-enter-active { transition: opacity var(--transition), transform var(--transition); }
+.grid-enter-active { transition: opacity var(--motion-transition-default), transform var(--motion-transition-default); }
 .grid-enter-from { opacity: 0; transform: scale(0.96); }
-.grid-leave-active { transition: opacity var(--transition); position: absolute; }
+.grid-leave-active { transition: opacity var(--motion-transition-default); position: absolute; }
 .grid-leave-to { opacity: 0; }
-.grid-move { transition: transform var(--transition); }
+.grid-move { transition: transform var(--motion-transition-default); }
 
 /* ── Responsive ──────────────────────────────── */
 @media (max-width: 768px) {

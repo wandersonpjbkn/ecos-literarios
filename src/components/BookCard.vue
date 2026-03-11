@@ -57,24 +57,24 @@ const isComponent = computed(() => {
     position: relative;
 
     display: flex;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    background: var(--color-surface-default);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--border-radius-default);
 
     overflow: hidden;
-    transition: all var(--transition);
+    transition: all var(--motion-transition-default);
 
     @media (min-width: 768px) {
       cursor: pointer;
 
       &:hover {
         box-shadow: var(--shadow-lg);
-        border-color: rgba(var(--accent-rgb), 0.3);
+        border-color: rgba(var(--color-action-default-rgb), 0.3);
 
         transform: translateY(-3px);
 
         .arrow {
-          color: var(--accent);
+          color: var(--color-action-default);
           transform: translateX(3px);
         }
       }
@@ -112,12 +112,12 @@ const isComponent = computed(() => {
     display: -webkit-box;
 
     font: {
-      family: var(--font-display);
+      family: var(--font-family-display);
       size: clamp(1rem, 2.5vw, 1.2rem);
       weight: 600;
     }
     line-height: 1.35;
-    color: var(--ink);
+    color: var(--color-text-default);
 
     overflow: hidden;
 
@@ -130,7 +130,7 @@ const isComponent = computed(() => {
       size: 0.9rem;
       style: italic;
     }
-    color: var(--muted);
+    color: var(--color-text-subtle);
   }
 
   &-tags {
@@ -155,35 +155,35 @@ const isComponent = computed(() => {
 
     @media (max-width: 768px) {
       .arrow {
-        color: var(--accent);
+        color: var(--color-action-default);
       }
     }
   }
 
   &-link {
     display: inline-flex;
-    background: var(--bg-subtle);
+    background: var(--color-background-subtle);
     border: none;
     padding: 10px 16px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--border-radius-sm);
 
     font: {
-      family: var(--font-body);
+      family: var(--font-family-body);
       size: 0.95rem;
     }
-    color: var(--accent);
+    color: var(--color-action-default);
 
     align-items: center;
     gap: 6px;
     cursor: pointer;
-    transition: all var(--transition);
+    transition: all var(--motion-transition-default);
 
     &:active {
-      color: var(--surface);
-      background: var(--accent);
+      color: var(--color-surface-default);
+      background: var(--color-action-default);
 
       .arrow {
-        color: var(--surface);
+        color: var(--color-surface-default);
       }
     }
   }
@@ -200,28 +200,28 @@ const isComponent = computed(() => {
 
 .badge {
   &-livro {
-    background: var(--accent-light);
-    color: var(--accent);
+    background: var(--badge-livro-background-color);
+    color: var(--badge-livro-text-color);
   }
   &-manga {
-    background: var(--lilac-light);
-    color: var(--lilac);
+    background: var(--badge-manga-background-color);
+    color: var(--badge-manga-text-color);
   }
   &-hq {
-    background: var(--green-light);
-    color: var(--green);
+    background: var(--badge-hq-background-color);
+    color: var(--badge-hq-text-color);
   }
 }
 
 .categoria-tag {
   font-size: 0.875rem;
-  color: var(--muted);
+  color: var(--color-text-subtle);
 }
 
 .sub-tag {
   font-size: 0.8rem;
-  background: var(--bg-subtle);
-  color: var(--muted);
+  background: var(--badge-tag-background-color);
+  color: var(--color-text-subtle);
   padding: 3px 10px;
   border-radius: 100px;
 }
@@ -231,12 +231,12 @@ const isComponent = computed(() => {
   align-items: center;
   gap: 5px;
   font-size: 0.875rem;
-  color: var(--muted);
+  color: var(--color-text-subtle);
 }
 
 .arrow {
-  color: var(--border);
-  transition: all var(--transition);
+  color: var(--color-border-default);
+  transition: all var(--motion-transition-default);
   flex-shrink: 0;
 }
 </style>

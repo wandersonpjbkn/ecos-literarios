@@ -123,24 +123,24 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   display: flex;
   min-height: 44px;
   padding: 0 12px;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--color-surface-default);
+  border: 1.5px solid var(--color-border-default);
+  border-radius: var(--border-radius-default);
 
   cursor: pointer;
-  transition: all var(--transition);
+  transition: all var(--motion-transition-default);
   user-select: none;
   gap: 6px;
   align-items: center;
 
   .is-open & {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-soft);
+    border-color: var(--color-action-default);
+    box-shadow: 0 0 0 3px var(--color-action-background-subtle);
   }
 
   .has-value & {
-    border-color: var(--accent-muted);
-    background: var(--accent-soft);
+    border-color: var(--color-action-text-subtle);
+    background: var(--color-action-background-subtle);
   }
 }
 
@@ -148,14 +148,14 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   flex: 1;
 
   font-size: 1rem;
-  font-family: var(--font-body);
-  color: var(--muted);
+  font-family: var(--font-family-body);
+  color: var(--color-text-subtle);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 
   .has-value & {
-    color: var(--accent);
+    color: var(--color-action-default);
     font-weight: 500;
   }
 }
@@ -165,7 +165,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--color-action-default);
 
   color: white;
   font-size: 0.75rem;
@@ -177,14 +177,14 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
 }
 
 .ms-chevron {
-  color: var(--muted);
+  color: var(--color-text-subtle);
 
   flex-shrink: 0;
-  transition: transform var(--transition);
+  transition: transform var(--motion-transition-default);
 
   .is-open & {
     transform: rotate(180deg);
-    color: var(--accent);
+    color: var(--color-action-default);
   }
 }
 
@@ -198,9 +198,9 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
 
   display: flex;
   min-width: 240px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-default);
   box-shadow: var(--shadow-lg);
 
   overflow: hidden;
@@ -211,9 +211,9 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   display: flex;
   min-height: 44px;
   padding: 0 12px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border-default);
 
-  color: var(--muted);
+  color: var(--color-text-subtle);
 
   align-items: center;
   gap: 8px;
@@ -228,13 +228,13 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   background: none;
 
   font: {
-    family: var(--font-body);
+    family: var(--font-family-body);
     size: 1rem;
   }
-  color: var(--ink);
+  color: var(--color-text-default);
 
   &::placeholder {
-    color: var(--muted);
+    color: var(--color-text-subtle);
   }
 
   &-icon {
@@ -254,17 +254,17 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   min-height: 36px;
   border: none;
   background: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--border-radius-sm);
 
   align-items: center;
   cursor: pointer;
   justify-content: center;
 
-  color: var(--muted);
+  color: var(--color-text-subtle);
 
   &:hover {
-    color: var(--ink);
-    background: var(--bg-subtle);
+    color: var(--color-text-default);
+    background: var(--color-background-subtle);
   }
 }
 
@@ -284,15 +284,15 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  transition: background var(--transition);
+  transition: background var(--motion-transition-default);
 
   &:hover,
   &.is-active {
-    background: var(--bg-subtle);
+    background: var(--color-background-subtle);
   }
 
   &.is-selected {
-    background: var(--accent-soft);
+    background: var(--color-action-background-subtle);
   }
 }
 
@@ -302,29 +302,29 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   justify-content: center;
   width: 18px;
   height: 18px;
-  border: 1.5px solid var(--border-strong);
+  border: 1.5px solid var(--color-border-strong);
   border-radius: 3px;
-  background: var(--surface);
+  background: var(--color-surface-default);
   flex-shrink: 0;
-  transition: all var(--transition);
+  transition: all var(--motion-transition-default);
 
   &.is-checked {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--color-action-default);
+    border-color: var(--color-action-default);
     color: white;
   }
 }
 
 .ms-opt-label {
   font-size: 1rem;
-  color: var(--ink);
+  color: var(--color-text-default);
   line-height: 1.3;
 }
 
 .ms-empty {
   padding: 20px 12px;
   font-size: 0.95rem;
-  color: var(--muted);
+  color: var(--color-text-subtle);
   text-align: center;
 }
 
@@ -335,8 +335,8 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   justify-content: space-between;
   min-height: 44px;
   padding: 8px 12px;
-  border-top: 1px solid var(--border);
-  background: var(--bg-subtle);
+  border-top: 1px solid var(--color-border-default);
+  background: var(--color-background-subtle);
   flex-shrink: 0;
 }
 
@@ -348,28 +348,28 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   background: none;
 
   font: {
-    family: var(--font-body);
+    family: var(--font-family-body);
     size: 1rem;
   }
-  color: var(--accent);
+  color: var(--color-action-default);
 
   cursor: pointer;
-  transition: background var(--transition);
+  transition: background var(--motion-transition-default);
 
   &:hover {
-    background: var(--accent-soft);
+    background: var(--color-action-background-subtle);
   }
 }
 
 .ms-footer-count {
   font-size: 0.875rem;
-  color: var(--muted);
+  color: var(--color-text-subtle);
 }
 
 /* ── Transition ──────────────────────────────── */
 .ms-dropdown-enter-active,
 .ms-dropdown-leave-active {
-  transition: all var(--transition);
+  transition: all var(--motion-transition-default);
 }
 .ms-dropdown-enter-from,
 .ms-dropdown-leave-to {

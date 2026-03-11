@@ -61,15 +61,15 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
   flex-wrap: wrap;
   gap: 8px;
 
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-default);
 }
 
 .af-title {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--muted);
+  color: var(--color-text-subtle);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   flex-shrink: 0;
@@ -92,12 +92,12 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
   border-radius: 20px;
   overflow: hidden;
   cursor: pointer;
-  font-family: var(--font-body);
+  font-family: var(--font-family-body);
   font-size: 0.9rem;
   padding: 0;
   background: none;
   min-height: 36px;
-  transition: opacity var(--transition);
+  transition: opacity var(--motion-transition-default);
 
   &:hover {
     opacity: 0.8;
@@ -107,7 +107,7 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
     display: flex;
     align-items: center;
     padding: #{$pad};
-    background: var(--accent);
+    background: var(--color-action-default);
     color: white;
     font-weight: 600;
     white-space: nowrap;
@@ -118,8 +118,8 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
     align-items: center;
     gap: 5px;
     padding: #{$pad};
-    background: var(--accent-light);
-    color: var(--accent);
+    background: var(--color-action-background-subtle);
+    color: var(--color-action-default);
     font-weight: 500;
     white-space: nowrap;
   }
@@ -127,8 +127,8 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
   svg {
     display: block;
     padding: 0 8px 0 0;
-    background: var(--accent-light);
-    color: var(--accent-muted);
+    background: var(--color-action-background-subtle);
+    color: var(--color-action-text-subtle);
     height: 100%;
     box-sizing: content-box;
     align-self: stretch;
@@ -137,31 +137,31 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
 
 .af-clear-all {
   padding: 0.45rem 1rem;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--color-border-strong);
   border-radius: 20px;
   background: none;
   min-height: 36px;
 
   font: {
-    family: var(--font-body);
+    family: var(--font-family-body);
     size: 0.9rem;
   }
-  color: var(--muted);
+  color: var(--color-text-subtle);
 
-  transition: all var(--transition);
+  transition: all var(--motion-transition-default);
   flex-shrink: 0;
   cursor: pointer;
 
   &:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+    border-color: var(--color-action-default);
+    color: var(--color-action-default);
   }
 }
 
 /* Transitions */
 .af-bar-enter-active,
 .af-bar-leave-active {
-  transition: all var(--transition);
+  transition: all var(--motion-transition-default);
 }
 .af-bar-enter-from,
 .af-bar-leave-to {
@@ -171,7 +171,7 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
 
 .af-tag-enter-active,
 .af-tag-leave-active {
-  transition: all var(--transition);
+  transition: all var(--motion-transition-default);
 }
 .af-tag-enter-from,
 .af-tag-leave-to {

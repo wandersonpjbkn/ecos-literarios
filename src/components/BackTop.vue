@@ -58,16 +58,16 @@ onUnmounted(() => {
   bottom: 1rem;
   z-index: 100;
 
-  background-color: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background-color: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-default);
   width: $size;
   height: $size;
 
   &-icon {
     width: inherit;
     height: inherit;
-    color: var(--accent);
+    color: var(--color-action-default);
     cursor: pointer;
     transform: rotate(90deg);
   }
@@ -76,7 +76,7 @@ onUnmounted(() => {
 // Estilo para a transição de fade
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity var(--transition);
+  transition: opacity var(--motion-transition-default);
 }
 
 .fade-enter-from,

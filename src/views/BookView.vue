@@ -211,13 +211,13 @@ const related = computed(() => {
   justify-content: center;
   gap: 16px;
   padding: 80px 24px;
-  color: var(--muted);
+  color: var(--color-text-subtle);
 }
 .spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
+  border: 3px solid var(--color-border-default);
+  border-top-color: var(--color-action-default);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -233,8 +233,8 @@ const related = computed(() => {
   top: 0;
   z-index: 2;
 
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: var(--color-surface-default);
+  border-bottom: 1px solid var(--color-border-default);
   padding: 0 24px;
 
   &-inner {
@@ -255,12 +255,12 @@ const related = computed(() => {
   display: flex;
   align-items: center;
   gap: 5px;
-  color: var(--muted);
-  transition: color var(--transition);
+  color: var(--color-text-subtle);
+  transition: color var(--motion-transition-default);
   white-space: nowrap;
 
   &:hover {
-    color: var(--accent);
+    color: var(--color-action-default);
   }
 }
 
@@ -268,13 +268,13 @@ const related = computed(() => {
   &-divider {
     display: inline-flex;
 
-    color: var(--muted);
+    color: var(--color-text-subtle);
 
     align-items: center;
   }
 
   &-current {
-    color: var(--ink);
+    color: var(--color-text-default);
     font-weight: 500;
     overflow: hidden;
     white-space: nowrap;
@@ -285,7 +285,7 @@ const related = computed(() => {
 .book {
   /* ── Hero ────────────────────────────────────── */
   &-hero {
-    background: var(--ink);
+    background: var(--color-text-default);
     padding: 48px 24px;
     position: relative;
     overflow: hidden;
@@ -294,7 +294,11 @@ const related = computed(() => {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse 50% 100% at 0% 50%, rgba(var(--accent-rgb), 0.2) 0%, transparent 60%);
+      background: radial-gradient(
+        ellipse 50% 100% at 0% 50%,
+        rgba(var(--color-action-default-rgb), 0.2) 0%,
+        transparent 60%
+      );
       pointer-events: none;
     }
   }
@@ -316,16 +320,16 @@ const related = computed(() => {
   }
 
   &-titulo {
-    font-family: var(--font-display);
+    font-family: var(--font-family-display);
     font-size: clamp(1.6rem, 4vw, 2.4rem);
     font-weight: 700;
-    color: var(--surface);
+    color: var(--color-surface-default);
     line-height: 1.15;
   }
 
   &-autor {
     font-size: 1rem;
-    color: rgba(var(--surface-rgb), 0.65);
+    color: rgba(var(--color-surface-default-rgb), 0.65);
     font-style: italic;
   }
 }
@@ -363,7 +367,7 @@ const related = computed(() => {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(var(--surface-rgb), 0.08) 0%, transparent 60%);
+      background: linear-gradient(135deg, rgba(var(--color-surface-default-rgb), 0.08) 0%, transparent 60%);
     }
   }
 
@@ -371,21 +375,21 @@ const related = computed(() => {
     font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(var(--surface-rgb), 0.6);
+    color: rgba(var(--color-surface-default-rgb), 0.6);
     font-weight: 600;
   }
 
   &-titulo {
-    font-family: var(--font-display);
+    font-family: var(--font-family-display);
     font-size: 1rem;
-    color: rgba(var(--surface-rgb), 0.95);
+    color: rgba(var(--color-surface-default-rgb), 0.95);
     font-weight: 700;
     line-height: 1.3;
   }
 
   &-autor {
     font-size: 0.8rem;
-    color: rgba(var(--surface-rgb), 0.55);
+    color: rgba(var(--color-surface-default-rgb), 0.55);
     font-style: italic;
   }
 }
@@ -422,8 +426,8 @@ const related = computed(() => {
 
 .categoria-badge {
   font-size: 0.875rem;
-  color: rgba(var(--surface-rgb), 0.65);
-  background: rgba(var(--surface-rgb), 0.07);
+  color: rgba(var(--color-surface-default-rgb), 0.65);
+  background: rgba(var(--color-surface-default-rgb), 0.07);
   padding: 3px 9px;
   border-radius: 3px;
 }
@@ -436,17 +440,17 @@ const related = computed(() => {
 
 .sg-tag {
   font-size: 0.8rem;
-  background: rgba(var(--surface-rgb), 0.1);
-  color: rgba(var(--surface-rgb), 0.8);
+  background: rgba(var(--color-surface-default-rgb), 0.1);
+  color: rgba(var(--color-surface-default-rgb), 0.8);
   padding: 4px 10px;
   border-radius: 100px;
-  border: 1px solid rgba(var(--surface-rgb), 0.1);
+  border: 1px solid rgba(var(--color-surface-default-rgb), 0.1);
 }
 
 /* ── Content ─────────────────────────────────── */
 .book-content {
   padding: 40px 24px 64px;
-  background: var(--bg);
+  background: var(--color-background-default);
 }
 
 .content-inner {
@@ -459,10 +463,10 @@ const related = computed(() => {
 
 /* ── Indicação card ──────────────────────────── */
 .indicacao-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--accent);
-  border-radius: var(--radius);
+  background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
+  border-left: 4px solid var(--color-action-default);
+  border-radius: var(--border-radius-default);
   padding: 24px 28px;
 }
 
@@ -470,15 +474,15 @@ const related = computed(() => {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--muted);
+  color: var(--color-text-subtle);
   font-size: 0.95rem;
   margin-bottom: 14px;
 
   strong {
-    color: var(--ink);
+    color: var(--color-text-default);
   }
   svg {
-    color: var(--accent);
+    color: var(--color-action-default);
     flex-shrink: 0;
   }
 }
@@ -489,10 +493,10 @@ const related = computed(() => {
 }
 
 .porque-quote {
-  font-family: var(--font-display);
+  font-family: var(--font-family-display);
   font-style: italic;
   font-size: 1.05rem;
-  color: var(--ink);
+  color: var(--color-text-default);
   line-height: 1.6;
 }
 
@@ -508,7 +512,7 @@ const related = computed(() => {
 
 .external-search-label {
   font-size: 0.875rem;
-  color: var(--muted);
+  color: var(--color-text-subtle);
   flex-shrink: 0;
 }
 
@@ -524,10 +528,10 @@ const related = computed(() => {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--muted);
-  transition: all var(--transition);
+  border: 1px solid var(--color-border-default);
+  background: var(--color-surface-default);
+  color: var(--color-text-subtle);
+  transition: all var(--motion-transition-default);
   flex-shrink: 0;
 
   svg {
@@ -538,7 +542,7 @@ const related = computed(() => {
   &:hover {
     border-color: transparent;
     transform: translateY(-2px);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-default);
   }
 
   /* Cores de marca no hover */
@@ -554,6 +558,23 @@ const related = computed(() => {
     background: #4285f4;
     color: #fff;
   }
+
+  @media (max-width: 768px) {
+    border-color: transparent;
+
+    &--amazon {
+      background: #ff9900;
+      color: #fff;
+    }
+    &--youtube {
+      background: #ff0000;
+      color: #fff;
+    }
+    &--google {
+      background: #4285f4;
+      color: #fff;
+    }
+  }
 }
 
 /* ── Meta grid — clicável ────────────────────── */
@@ -561,21 +582,21 @@ const related = computed(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--color-border-default);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-default);
   overflow: hidden;
 }
 
 .meta-item {
-  background: var(--surface);
+  background: var(--color-surface-default);
   padding: 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 4px;
   /* min touch target */
   min-height: 72px;
-  transition: background var(--transition);
+  transition: background var(--motion-transition-default);
 
   &--link {
     position: relative;
@@ -586,21 +607,21 @@ const related = computed(() => {
       position: absolute;
       bottom: 14px;
       right: 14px;
-      color: var(--border-strong);
-      transition: all var(--transition);
+      color: var(--color-border-strong);
+      transition: all var(--motion-transition-default);
     }
 
     &:hover {
-      background: var(--accent-soft);
+      background: var(--color-action-background-subtle);
 
       .meta-label {
-        color: var(--accent);
+        color: var(--color-action-default);
       }
       .meta-value {
-        color: var(--accent);
+        color: var(--color-action-default);
       }
       .meta-arrow {
-        color: var(--accent);
+        color: var(--color-action-default);
         transform: translateX(3px);
       }
     }
@@ -611,29 +632,29 @@ const related = computed(() => {
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--color-text-subtle);
   font-weight: 500;
-  transition: color var(--transition);
+  transition: color var(--motion-transition-default);
 }
 
 .meta-value {
   font-size: 1rem;
-  color: var(--ink);
+  color: var(--color-text-default);
   font-weight: 500;
-  transition: color var(--transition);
+  transition: color var(--motion-transition-default);
 }
 
 /* ── Related ─────────────────────────────────── */
 .related {
   &-title {
-    font-family: var(--font-display);
+    font-family: var(--font-family-display);
     font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 16px;
 
     em {
       font-style: italic;
-      color: var(--accent);
+      color: var(--color-action-default);
     }
   }
 
@@ -646,11 +667,11 @@ const related = computed(() => {
   &-card {
     display: flex;
     align-items: center;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
+    background: var(--color-surface-default);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--border-radius-sm);
     overflow: hidden;
-    transition: all var(--transition);
+    transition: all var(--motion-transition-default);
     min-height: 56px;
     text-decoration: none;
 
@@ -658,11 +679,11 @@ const related = computed(() => {
       cursor: pointer;
 
       &:hover {
-        box-shadow: var(--shadow);
+        box-shadow: var(--shadow-default);
         transform: translateY(-2px);
 
         .arrow {
-          color: var(--accent);
+          color: var(--color-action-default);
           transform: translateX(3px);
         }
       }
@@ -689,12 +710,12 @@ const related = computed(() => {
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
-      color: var(--ink);
+      color: var(--color-text-default);
     }
 
     span {
       font-size: 0.8rem;
-      color: var(--muted);
+      color: var(--color-text-subtle);
       font-style: italic;
     }
   }
@@ -702,12 +723,12 @@ const related = computed(() => {
 
 .arrow {
   margin-right: 12px;
-  color: var(--border);
+  color: var(--color-border-default);
   flex-shrink: 0;
-  transition: all var(--transition);
+  transition: all var(--motion-transition-default);
 
   @media (max-width: 768px) {
-    color: var(--accent);
+    color: var(--color-action-default);
   }
 }
 
@@ -715,16 +736,16 @@ const related = computed(() => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--accent);
+  color: var(--color-action-default);
   font-size: 1rem;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--color-action-default);
   padding: 10px 18px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--border-radius-sm);
   min-height: 44px;
-  transition: all var(--transition);
+  transition: all var(--motion-transition-default);
 
   &:hover {
-    background: var(--accent);
+    background: var(--color-action-default);
     color: white;
   }
 }

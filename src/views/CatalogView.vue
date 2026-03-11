@@ -191,8 +191,8 @@ onMounted(() => {
   &-intro {
     margin: 0 auto 2rem;
 
-    background: var(--bg);
-    border-bottom: 1px solid rgba(var(--surface-rgb), 0.08);
+    background: var(--color-background-default);
+    border-bottom: 1px solid rgba(var(--color-surface-default-rgb), 0.08);
   }
 
   /* ── Catalog body ────────────────────────────── */
@@ -214,17 +214,17 @@ onMounted(() => {
     margin-bottom: 0.25rem;
 
     font: {
-      family: var(--font-display);
+      family: var(--font-family-display);
       size: 1.25rem;
       weight: 600;
     }
-    color: var(--ink);
+    color: var(--color-text-default);
     white-space: nowrap;
   }
 
   &-desc {
     font-size: 0.9rem;
-    color: var(--ink-secondary);
+    color: var(--color-text-secondary);
     line-height: 1.5;
   }
 }
@@ -240,12 +240,12 @@ onMounted(() => {
     justify-content: center;
     gap: 16px;
 
-    color: var(--muted);
+    color: var(--color-text-subtle);
     text-align: center;
   }
 
   &-error {
-    color: var(--accent);
+    color: var(--color-action-default);
   }
 }
 
@@ -256,10 +256,10 @@ onMounted(() => {
     font: {
       size: 0.82rem;
     }
-    color: var(--muted);
+    color: var(--color-text-subtle);
 
     code {
-      background: var(--bg-subtle);
+      background: var(--color-background-subtle);
       padding: 1px 5px;
       border-radius: 3px;
 
@@ -273,8 +273,8 @@ onMounted(() => {
 .spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
+  border: 3px solid var(--color-border-default);
+  border-top-color: var(--color-action-default);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -285,24 +285,24 @@ onMounted(() => {
 }
 
 .retry-btn {
-  background: var(--accent);
+  background: var(--color-action-default);
   border: none;
   padding: 10px 20px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--border-radius-sm);
   min-height: 44px;
 
   font: {
-    family: var(--font-body);
+    family: var(--font-family-body);
     size: 1rem;
   }
-  color: var(--surface);
+  color: var(--color-surface-default);
 
   cursor: pointer;
-  transition: opacity var(--transition);
+  transition: opacity var(--motion-transition-default);
 
   &:hover {
     opacity: 0.85;
-    background: var(--accent-hover);
+    background: var(--color-action-default-hover);
   }
 }
 
@@ -319,11 +319,11 @@ onMounted(() => {
 .result-count {
   flex-shrink: 0;
   font-size: 0.9rem;
-  color: var(--muted);
+  color: var(--color-text-subtle);
   white-space: nowrap;
 
   strong {
-    color: var(--accent);
+    color: var(--color-action-default);
   }
 }
 
@@ -344,25 +344,25 @@ onMounted(() => {
 .show-all-btn {
   display: none;
   height: 48px;
-  background: var(--accent);
+  background: var(--color-action-default);
   border: none;
   padding: 0 20px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--border-radius-sm);
   min-height: 44px;
 
   font: {
-    family: var(--font-body);
+    family: var(--font-family-body);
     size: 1rem;
   }
-  color: var(--surface);
+  color: var(--color-surface-default);
 
   cursor: pointer;
-  transition: opacity var(--transition);
+  transition: opacity var(--motion-transition-default);
   white-space: nowrap;
 
   &:hover {
     opacity: 0.85;
-    background: var(--accent-hover);
+    background: var(--color-action-default-hover);
   }
 }
 
@@ -384,7 +384,7 @@ onMounted(() => {
   align-items: center;
   gap: 16px;
   padding: 60px 24px;
-  color: var(--muted);
+  color: var(--color-text-subtle);
   text-align: center;
   font-size: 1rem;
 }
@@ -392,22 +392,22 @@ onMounted(() => {
 /* Grid transitions */
 .grid-enter-active {
   transition:
-    opacity var(--transition),
-    transform var(--transition);
+    opacity var(--motion-transition-default),
+    transform var(--motion-transition-default);
 }
 .grid-enter-from {
   opacity: 0;
   transform: scale(0.96);
 }
 .grid-leave-active {
-  transition: opacity var(--transition);
+  transition: opacity var(--motion-transition-default);
   position: absolute;
 }
 .grid-leave-to {
   opacity: 0;
 }
 .grid-move {
-  transition: transform var(--transition);
+  transition: transform var(--motion-transition-default);
 }
 
 /* ── Responsive ──────────────────────────────── */

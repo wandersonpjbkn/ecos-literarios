@@ -4,61 +4,74 @@
 
 @use './modules/categories' as *;
 
-/* ── Tokens ─────────────────────────────────── */
+/* ── Tokens CSS ─────────────────────────────── */
 :root {
-  /** others */
-  --lilac: #{$lilac};
-  --lilac-light: #{$lilac-light};
+  // ── context: badge · component · variant ─────────────────────
+  // object: background / text  ·  modifier: color
+  --badge-livro-background-color: #{$badge-livro-bg};
+  --badge-livro-text-color:       #{$badge-livro-ink};
+  --badge-manga-background-color: #{$badge-manga-bg};
+  --badge-manga-text-color:       #{$badge-manga-ink};
+  --badge-hq-background-color:    #{$badge-hq-bg};
+  --badge-hq-text-color:          #{$badge-hq-ink};
+  --badge-tag-background-color:   #{$badge-tag-bg};
+  --badge-tag-text-color:         #{$badge-tag-ink};
 
-  --green: #{$green};
-  --green-light: #{$green-light};
+  // ── context: — (global)  ──────────────────────────────────────
+  // object: background  ·  modifier: default | subtle
+  --color-background-default:             #{$bg};
+  --color-background-subtle:              #{$bg-subtle};
 
-  /** surface */
-  --bg: #{$bg};
-  --bg-subtle: #{$bg-subtle};
-  --surface: #{$surface};
-  --surface-raised: #{$surface-raised};
+  // object: surface  ·  modifier: default | raised
+  --color-surface-default:                #{$surface};
+  --color-surface-raised:                 #{$surface-raised};
+  --color-surface-default-rgb:            #{$surface-rgb};
 
-  /** text */
-  --ink: #{$ink};
-  --ink-secondary: #{$ink-secondary};
-  --muted: #{$muted};
-  --muted-light: #{$muted-light};
+  // object: text  ·  modifier: default | secondary | subtle | disabled
+  --color-text-default:                   #{$ink};
+  --color-text-secondary:                 #{$ink-secondary};
+  --color-text-subtle:                    #{$muted};
+  --color-text-disabled:                  #{$muted-light};
+  --color-text-default-rgb:               #{$ink-rgb};
 
-  /** details */
-  --accent: #{$accent};
-  --accent-hover: #{$accent-hover};
-  --accent-light: #{$accent-light};
-  --accent-soft: #{$accent-soft};
-  --accent-muted: #{$accent-muted};
+  // object: action (accent primário — cerulean)
+  // modifier: default | hover (state) | background-subtle | text-subtle
+  --color-action-default:                 #{$accent};
+  --color-action-default-hover:           #{$accent-hover};
+  --color-action-background-subtle:       #{$accent-light};
+  --color-action-text-subtle:             #{$accent-muted};
+  --color-action-default-rgb:             #{$accent-rgb};
 
-  /** RGB channels — rgba(var(--X-rgb), alpha) */
-  --surface-rgb: #{$surface-rgb};
-  --accent-rgb: #{$accent-rgb};
-  --ink-rgb: #{$ink-rgb};
+  // object: secondary (accent secundário — seagreen)
+  // modifier: default | hover | background-subtle | text-default
+  --color-secondary-default:              #{$accent2};
+  --color-secondary-default-hover:        #{$accent2-hover};
+  --color-secondary-background-subtle:    #{$accent2-light};
+  --color-secondary-text-default:         #{$accent2-text};
 
-  /** borders */
-  --border: #{$border};
-  --border-strong: #{$border-strong};
-  --border-focus: #{$border-focus};
+  // object: border  ·  modifier: default | strong | focus (state)
+  --color-border-default:                 #{$border};
+  --color-border-strong:                  #{$border-strong};
+  --color-border-focus:                   #{$border-focus};
 
-  /** shadow */
-  --shadow-sm: #{$shadow-sm};
-  --shadow: #{$shadow};
-  --shadow-lg: #{$shadow-lg};
-  --shadow-xl: #{$shadow-xl};
+  // ── context: — (global)  ──────────────────────────────────────
+  // object: shadow  ·  modifier: sm | default | lg | xl (scale)
+  --shadow-sm:                            #{$shadow-sm};
+  --shadow-default:                       #{$shadow};
+  --shadow-lg:                            #{$shadow-lg};
+  --shadow-xl:                            #{$shadow-xl};
 
-  /** fonts */
-  --font-display: #{$font-display};
-  --font-body: #{$font-body};
+  // object: font  ·  type: family  ·  scale: display | body
+  --font-family-display:                  #{$font-display};
+  --font-family-body:                     #{$font-body};
 
-  /** radius */
-  --radius-sm: #{$radius-sm};
-  --radius: #{$radius};
-  --radius-lg: #{$radius-lg};
+  // object: border  ·  type: radius  ·  scale: sm | default | lg
+  --border-radius-sm:                     #{$radius-sm};
+  --border-radius-default:                #{$radius};
+  --border-radius-lg:                     #{$radius-lg};
 
-  /** transition */
-  --transition: #{$transition};
+  // object: motion  ·  type: transition  ·  scale: default
+  --motion-transition-default:            #{$transition};
 }
 
 /* ── Reset ───────────────────────────────────── */
@@ -76,14 +89,11 @@ html {
 }
 
 body {
-  background: var(--bg);
+  background: var(--color-background-default);
   min-height: 100vh;
-
-  font: {
-    family: var(--font-body);
-    weight: 400;
-  }
-  color: var(--ink);
+  font-family: var(--font-family-body);
+  font-weight: 400;
+  color: var(--color-text-default);
   line-height: 1.6;
 }
 
@@ -97,12 +107,12 @@ img {
   display: block;
 }
 
-/* ── Typography ──────────────────────────────── */
+/* ── Tipografia ──────────────────────────────── */
 h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-display);
+  font-family: var(--font-family-display);
   line-height: 1.2;
 }
 
@@ -125,17 +135,17 @@ h4 {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-subtle);
+  background: var(--color-background-subtle);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: var(--color-border-default);
   border-radius: 3px;
 }
 
 /* ── Transitions de rota ─────────────────────── */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity var(--transition);
+  transition: opacity var(--motion-transition-default);
 }
 .fade-enter-from,
 .fade-leave-to {
@@ -144,8 +154,8 @@ h4 {
 
 .slide-up-enter-active {
   transition:
-    opacity var(--transition),
-    transform var(--transition);
+    opacity var(--motion-transition-default),
+    transform var(--motion-transition-default);
 }
 .slide-up-enter-from {
   opacity: 0;

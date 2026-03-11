@@ -62,8 +62,8 @@ watch(route, async () => {
     z-index: 100;
     flex-shrink: 0;
     height: 4rem;
-    background: var(--ink);
-    border-bottom: 1px solid rgba(var(--surface-rgb), 0.08);
+    background: var(--color-text-default);
+    border-bottom: 1px solid rgba(var(--color-surface-default-rgb), 0.08);
   }
 
   &-main {
@@ -93,11 +93,11 @@ watch(route, async () => {
 .brand {
   display: flex;
 
-  color: var(--accent-muted);
+  color: var(--color-action-text-subtle);
 
   align-items: center;
   gap: 12px;
-  transition: opacity var(--transition);
+  transition: opacity var(--motion-transition-default);
 
   &:hover {
     opacity: 0.85;
@@ -116,11 +116,11 @@ watch(route, async () => {
 
   &-name {
     font: {
-      family: var(--font-display);
+      family: var(--font-family-display);
       size: 1.1rem;
       weight: 600;
     }
-    color: var(--surface);
+    color: var(--color-surface-default);
   }
 
   &-sub {
@@ -128,7 +128,7 @@ watch(route, async () => {
       size: 0.7rem;
       weight: 500;
     }
-    color: var(--accent-muted);
+    color: var(--color-action-text-subtle);
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
@@ -137,20 +137,20 @@ watch(route, async () => {
 .nav {
   &-link {
     padding: 6px 14px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--border-radius-sm);
 
     font: {
       weight: 400;
       size: 0.9rem;
     }
-    color: var(--muted);
+    color: var(--color-text-subtle);
 
-    transition: all var(--transition);
+    transition: all var(--motion-transition-default);
 
     &:hover,
     &.router-link-active {
-      color: var(--surface);
-      background: rgba(var(--surface-rgb), 0.08);
+      color: var(--color-surface-default);
+      background: rgba(var(--color-surface-default-rgb), 0.08);
     }
   }
 }
@@ -158,7 +158,7 @@ watch(route, async () => {
 /* Route transitions */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity var(--transition);
+  transition: opacity var(--motion-transition-default);
 }
 .fade-enter-from,
 .fade-leave-to {

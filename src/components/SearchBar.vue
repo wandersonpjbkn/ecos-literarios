@@ -112,24 +112,24 @@ const cleanAll = () => {
 
   &-box {
     display: flex;
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius);
+    background: var(--color-surface-default);
+    border: 1.5px solid var(--color-border-default);
+    border-radius: var(--border-radius-default);
     padding: 0 14px;
     min-height: 44px;
 
     align-items: center;
     gap: 10px;
-    transition: all var(--transition);
+    transition: all var(--motion-transition-default);
 
     &.is-focused {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-soft);
+      border-color: var(--color-action-default);
+      box-shadow: 0 0 0 3px var(--color-action-background-subtle);
     }
   }
 
   &-icon {
-    color: var(--muted);
+    color: var(--color-text-subtle);
     flex-shrink: 0;
   }
 
@@ -140,15 +140,15 @@ const cleanAll = () => {
     outline: none;
 
     font: {
-      family: var(--font-body);
+      family: var(--font-family-body);
       size: 1rem;
     }
-    color: var(--ink);
+    color: var(--color-text-default);
 
     flex: 1;
 
     &::placeholder {
-      color: var(--muted);
+      color: var(--color-text-subtle);
     }
   }
 }
@@ -161,15 +161,15 @@ const cleanAll = () => {
   border-radius: 3px;
   min-width: 36px;
   min-height: 36px;
-  color: var(--muted);
+  color: var(--color-text-subtle);
 
-  transition: color var(--transition);
+  transition: color var(--motion-transition-default);
   cursor: pointer;
   align-items: center;
   justify-content: center;
 
   &:hover {
-    color: var(--ink);
+    color: var(--color-text-default);
   }
 }
 
@@ -181,9 +181,9 @@ const cleanAll = () => {
   right: 0;
   z-index: 200;
 
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-default);
   box-shadow: var(--shadow-lg);
   list-style: none;
 
@@ -196,33 +196,33 @@ const cleanAll = () => {
   padding: 10px 16px;
 
   cursor: pointer;
-  transition: background var(--transition);
+  transition: background var(--motion-transition-default);
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
 
   &:hover,
   &.is-active {
-    background: var(--bg-subtle);
+    background: var(--color-background-subtle);
   }
 }
 
 .sug {
   &-titulo {
     font-size: 1rem;
-    color: var(--ink);
+    color: var(--color-text-default);
     font-weight: 500;
 
     :deep(mark) {
-      background: var(--accent-soft);
-      color: var(--accent);
+      background: var(--color-action-background-subtle);
+      color: var(--color-action-default);
       border-radius: 2px;
     }
   }
 
   &-autor {
     font-size: 0.875rem;
-    color: var(--muted);
+    color: var(--color-text-subtle);
     flex-shrink: 0;
   }
 }
@@ -230,7 +230,7 @@ const cleanAll = () => {
 /* Dropdown transition */
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: all var(--transition);
+  transition: all var(--motion-transition-default);
 }
 .dropdown-enter-from,
 .dropdown-leave-to {

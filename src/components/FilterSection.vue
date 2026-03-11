@@ -46,7 +46,7 @@ const toggle = () => {
 <style lang="scss" scoped>
 .filter {
   &-section {
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--color-border-default);
 
     &:last-child {
       border-bottom: none;
@@ -62,25 +62,25 @@ const toggle = () => {
   padding: 12px 16px;
   background: none;
   border: none;
-  font-family: var(--font-body);
+  font-family: var(--font-family-body);
   font-size: 0.82rem;
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--color-text-subtle);
   cursor: pointer;
   text-align: left;
-  transition: color var(--transition);
+  transition: color var(--motion-transition-default);
 
   &:hover {
-    color: var(--ink);
+    color: var(--color-text-default);
   }
 }
 
 .count {
   font-size: 0.7rem;
-  background: var(--accent);
-  color: var(--surface);
+  background: var(--color-action-default);
+  color: var(--color-surface-default);
   font-weight: 600;
   padding: 1px 6px;
   border-radius: 100px;
@@ -90,7 +90,7 @@ const toggle = () => {
 
 .chevron {
   margin-left: auto;
-  transition: transform var(--transition);
+  transition: transform var(--motion-transition-default);
 }
 .is-collapsed .chevron {
   transform: rotate(-90deg);
@@ -106,14 +106,14 @@ const toggle = () => {
   gap: 10px;
   padding: 6px 16px;
   cursor: pointer;
-  transition: background var(--transition);
+  transition: background var(--motion-transition-default);
   user-select: none;
 
   &:hover {
-    background: var(--bg-subtle);
+    background: var(--color-background-subtle);
   }
   &.is-checked {
-    background: var(--accent-soft);
+    background: var(--color-action-background-subtle);
   }
 
   input {
@@ -124,31 +124,31 @@ const toggle = () => {
 .checkmark {
   width: 16px;
   height: 16px;
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--color-border-default);
   border-radius: 3px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition);
-  background: var(--surface);
+  transition: all var(--motion-transition-default);
+  background: var(--color-surface-default);
 }
 .is-checked .checkmark {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--surface);
+  background: var(--color-action-default);
+  border-color: var(--color-action-default);
+  color: var(--color-surface-default);
 }
 
 .opt-label {
   font-size: 0.875rem;
-  color: var(--ink);
+  color: var(--color-text-default);
   line-height: 1.3;
 }
 
 /* Transition */
 .section-enter-active,
 .section-leave-active {
-  transition: all var(--transition);
+  transition: all var(--motion-transition-default);
   overflow: hidden;
 }
 .section-enter-from,

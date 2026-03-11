@@ -115,23 +115,23 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-family: var(--font-body);
+  background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-default);
+  font-family: var(--font-family-body);
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--ink);
+  color: var(--color-text-default);
   cursor: pointer;
-  transition: background var(--transition);
+  transition: background var(--motion-transition-default);
 
   &:hover {
-    background: var(--bg-subtle);
+    background: var(--color-background-subtle);
   }
 }
 
 .badge {
-  background: var(--accent);
+  background: var(--color-action-default);
   color: white;
   font-size: 0.7rem;
   font-weight: 600;
@@ -145,7 +145,7 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
 
 .chevron {
   margin-left: auto;
-  transition: transform var(--transition);
+  transition: transform var(--motion-transition-default);
 }
 .is-open .chevron {
   transform: rotate(180deg);
@@ -153,9 +153,9 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
 
 .panel {
   &-body {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    background: var(--color-surface-default);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--border-radius-default);
     overflow: hidden;
   }
 
@@ -164,32 +164,32 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
     align-items: center;
     justify-content: space-between;
     padding: 16px 16px 12px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--color-border-default);
   }
 
   &-title {
     font: {
-      family: var(--font-display);
+      family: var(--font-family-display);
       size: 1rem;
       weight: 600;
     }
-    color: var(--ink);
+    color: var(--color-text-default);
   }
 }
 
 .clear-btn {
   background: none;
   border: none;
-  font-family: var(--font-body);
+  font-family: var(--font-family-body);
   font-size: 0.78rem;
-  color: var(--accent);
+  color: var(--color-action-default);
   cursor: pointer;
   padding: 2px 4px;
   border-radius: 3px;
-  transition: background var(--transition);
+  transition: background var(--motion-transition-default);
 }
 .clear-btn:hover {
-  background: var(--accent-soft);
+  background: var(--color-action-background-subtle);
 }
 
 .active-tags {
@@ -197,20 +197,20 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
   flex-wrap: wrap;
   gap: 6px;
   padding: 10px 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border-default);
 }
 
 .active-tag {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: var(--accent);
-  color: var(--surface);
+  background: var(--color-action-default);
+  color: var(--color-surface-default);
   font-size: 0.75rem;
   padding: 3px 8px;
   border-radius: 100px;
   cursor: pointer;
-  transition: opacity var(--transition);
+  transition: opacity var(--motion-transition-default);
 }
 .active-tag:hover {
   opacity: 0.75;
@@ -224,7 +224,7 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
 /* Tag transition */
 .tag-enter-active,
 .tag-leave-active {
-  transition: all var(--transition);
+  transition: all var(--motion-transition-default);
 }
 .tag-enter-from,
 .tag-leave-to {
