@@ -118,9 +118,10 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
 </script>
 
 <style lang="scss" scoped>
+/* ── Control ─────────────────────────────────── */
 .ms-control {
   display: flex;
-  height: 48px;
+  min-height: 44px;
   padding: 0 12px;
   background: var(--surface);
   border: 1.5px solid var(--border);
@@ -145,6 +146,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
 
 .ms-label {
   flex: 1;
+
   font-size: 1rem;
   font-family: var(--font-body);
   color: var(--muted);
@@ -160,20 +162,23 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
 
 .ms-count {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: var(--accent);
+
   color: white;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
+
   flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
 }
 
 .ms-chevron {
   color: var(--muted);
+
   flex-shrink: 0;
   transition: transform var(--transition);
 
@@ -183,6 +188,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   }
 }
 
+/* ── Dropdown ────────────────────────────────── */
 .ms-dropdown {
   position: absolute;
   top: calc(100% + 4px);
@@ -191,7 +197,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   z-index: 300;
 
   display: flex;
-  min-width: 220px;
+  min-width: 240px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -203,8 +209,8 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
 
 .ms-search-wrap {
   display: flex;
-  height: 48px;
-  padding: 10px 12px;
+  min-height: 44px;
+  padding: 0 12px;
   border-bottom: 1px solid var(--border);
 
   color: var(--muted);
@@ -232,43 +238,51 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   }
 
   &-icon {
-    $size: 13px;
+    $size: 1rem;
 
     width: $size;
     height: $size;
+
+    flex-shrink: 0;
   }
 }
 
 .ms-clear-query {
   display: flex;
-
-  padding: 2px;
+  padding: 4px;
+  min-width: 36px;
+  min-height: 36px;
   border: none;
   background: none;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
 
   align-items: center;
   cursor: pointer;
+  justify-content: center;
+
   color: var(--muted);
 
   &:hover {
     color: var(--ink);
+    background: var(--bg-subtle);
   }
 }
 
+/* ── Options list ────────────────────────────── */
 .ms-list {
   list-style: none;
   overflow-y: auto;
-  max-height: 220px;
+  max-height: 260px;
   padding: 4px 0;
 }
 
 .ms-option {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
+  min-height: 44px;
+  padding: 10px 12px;
 
+  align-items: center;
+  gap: 12px;
   cursor: pointer;
   transition: background var(--transition);
 
@@ -276,6 +290,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   &.is-active {
     background: var(--bg-subtle);
   }
+
   &.is-selected {
     background: var(--accent-soft);
   }
@@ -285,8 +300,8 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border: 1.5px solid var(--border-strong);
   border-radius: 3px;
   background: var(--surface);
@@ -307,16 +322,18 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
 }
 
 .ms-empty {
-  padding: 16px 12px;
-  font-size: 1rem;
+  padding: 20px 12px;
+  font-size: 0.95rem;
   color: var(--muted);
   text-align: center;
 }
 
+/* ── Footer ──────────────────────────────────── */
 .ms-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 44px;
   padding: 8px 12px;
   border-top: 1px solid var(--border);
   background: var(--bg-subtle);
@@ -324,13 +341,18 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
 }
 
 .ms-clear-all {
-  padding: 2px 4px;
+  padding: 6px 10px;
+  min-height: 36px;
   border: none;
   border-radius: 3px;
   background: none;
-  font-family: var(--font-body);
-  font-size: 1rem;
+
+  font: {
+    family: var(--font-body);
+    size: 1rem;
+  }
   color: var(--accent);
+
   cursor: pointer;
   transition: background var(--transition);
 
@@ -340,10 +362,11 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
 }
 
 .ms-footer-count {
-  font-size: 1rem;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 
+/* ── Transition ──────────────────────────────── */
 .ms-dropdown-enter-active,
 .ms-dropdown-leave-active {
   transition: all var(--transition);

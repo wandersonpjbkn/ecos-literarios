@@ -1,6 +1,6 @@
 <template>
   <Transition name="af-bar">
-    <div v-if="hasActive" :class="['active-filters', { 'dark-mode': isDark }]">
+    <div v-if="hasActive" class="active-filters">
       <span class="af-title">Filtros:</span>
 
       <TransitionGroup name="af-tag" tag="div" class="af-tags">
@@ -28,15 +28,9 @@ import { computed } from 'vue'
 
 import type { Options } from '@/types'
 
-const props = withDefaults(
-  defineProps<{
-    selected: Options
-    isDark?: boolean
-  }>(),
-  {
-    isDark: false,
-  },
-)
+const props = defineProps<{
+  selected: Options
+}>()
 
 const emit = defineEmits<{
   remove: [key: string, value: string]
@@ -56,12 +50,12 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
 <style lang="scss" scoped>
 .active-filters {
   position: sticky;
-  top: calc(-12rem + 5rem);
+  top: 1rem;
   z-index: 5;
   margin-top: 2rem;
 
   display: flex;
-  padding: 1rem;
+  padding: 12px;
 
   align-items: center;
   flex-wrap: wrap;
@@ -70,23 +64,15 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-
-  &.dark-mode {
-    background: var(--ink);
-    border: none;
-  }
 }
 
 .af-title {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   flex-shrink: 0;
-}
-.dark-mode .af-title {
-  color: var(--surface);
 }
 
 .af-tags {
@@ -97,19 +83,20 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
 }
 
 .af-tag {
-  $padding: 0.5rem 0.75rem;
+  $pad: 0.45rem 0.75rem;
 
   display: inline-flex;
-  align-items: center;
+  align-items: stretch;
   gap: 0;
   border: none;
   border-radius: 20px;
   overflow: hidden;
   cursor: pointer;
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   padding: 0;
   background: none;
+  min-height: 36px;
   transition: opacity var(--transition);
 
   &:hover {
@@ -117,7 +104,9 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
   }
 
   &-group {
-    padding: #{$padding};
+    display: flex;
+    align-items: center;
+    padding: #{$pad};
     background: var(--accent);
     color: white;
     font-weight: 600;
@@ -128,7 +117,7 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
     display: flex;
     align-items: center;
     gap: 5px;
-    padding: #{$padding};
+    padding: #{$pad};
     background: var(--accent-light);
     color: var(--accent);
     font-weight: 500;
@@ -137,7 +126,7 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
 
   svg {
     display: block;
-    padding: 0 6px 0 0;
+    padding: 0 8px 0 0;
     background: var(--accent-light);
     color: var(--accent-muted);
     height: 100%;
@@ -147,14 +136,15 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
 }
 
 .af-clear-all {
-  padding: 0.5rem 1rem;
+  padding: 0.45rem 1rem;
   border: 1px solid var(--border-strong);
-  border-radius: 1rem;
+  border-radius: 20px;
   background: none;
+  min-height: 36px;
 
   font: {
     family: var(--font-body);
-    size: 1rem;
+    size: 0.9rem;
   }
   color: var(--muted);
 
@@ -166,11 +156,6 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
     border-color: var(--accent);
     color: var(--accent);
   }
-}
-.dark-mode .af-clear-all {
-  border: none;
-  background: var(--accent);
-  color: var(--surface);
 }
 
 /* Transitions */

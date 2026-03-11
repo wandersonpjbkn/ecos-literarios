@@ -102,6 +102,7 @@
                   <strong>{{ r.titulo }}</strong>
                   <span>{{ r.autor }}</span>
                 </div>
+                <BaseIcon name="arrow-right" class="arrow" />
               </RouterLink>
             </div>
           </div>
@@ -162,7 +163,7 @@ const related = computed(() => {
 /* ── Top bar ─────────────────────────────────── */
 .top-bar {
   position: sticky;
-  top: 4rem;
+  top: 0;
   z-index: 2;
 
   background: var(--surface);
@@ -212,10 +213,6 @@ const related = computed(() => {
 }
 
 .book {
-  &-page {
-    padding-top: 4rem;
-  }
-
   /* ── Hero ────────────────────────────────────── */
   &-hero {
     background: var(--ink);
@@ -465,61 +462,93 @@ const related = computed(() => {
 }
 
 /* Related */
-.related-title {
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-.related-title em {
-  font-style: italic;
-  color: var(--accent);
+.related {
+  &-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+
+    em {
+      font-style: italic;
+      color: var(--accent);
+    }
+  }
+
+  &-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  &-card {
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    transition: all var(--transition);
+
+    @media (min-width: 768px) {
+      cursor: pointer;
+
+      &:hover {
+        box-shadow: var(--shadow);
+        transform: translateY(-2px);
+
+        .arrow {
+          color: var(--accent);
+          transform: translateX(3px);
+        }
+      }
+    }
+  }
+
+  &-spine {
+    width: 4px;
+    flex-shrink: 0;
+  }
+
+  &-body {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+
+    strong {
+      font-size: 0.85rem;
+      font-weight: 600;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    span {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+  }
 }
 
-.related-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
-}
+.arrow {
+  margin-left: auto;
+  margin-right: 1rem;
 
-.related-card {
-  display: flex;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  transition: all var(--transition);
-}
-.related-card:hover {
-  box-shadow: var(--shadow);
-  transform: translateY(-2px);
-}
+  color: var(--border);
 
-.related-spine {
-  width: 4px;
   flex-shrink: 0;
+  align-self: center;
+
+  transition: all var(--transition);
+
+  @media (max-width: 768px) {
+    color: var(--accent);
+  }
 }
 
-.related-body {
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-.related-body strong {
-  font-size: 0.85rem;
-  font-weight: 600;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.related-body span {
-  font-size: 0.75rem;
-  color: var(--muted);
-  font-style: italic;
-}
-
+/** return */
 .back-btn {
   display: inline-flex;
   align-items: center;
@@ -530,10 +559,11 @@ const related = computed(() => {
   padding: 8px 16px;
   border-radius: var(--radius-sm);
   transition: all var(--transition);
-}
-.back-btn:hover {
-  background: var(--accent);
-  color: white;
+
+  &:hover {
+    background: var(--accent);
+    color: white;
+  }
 }
 
 @media (max-width: 640px) {

@@ -86,6 +86,7 @@ const isComponent = computed(() => {
   &-spine {
     width: 5px;
     flex-shrink: 0;
+    background: var(--background);
     opacity: 0.85;
   }
 
@@ -94,7 +95,7 @@ const isComponent = computed(() => {
     padding: 16px;
     min-width: 0;
 
-    gap: 0.45rem;
+    gap: 6px;
     flex-direction: column;
     flex: 1;
   }
@@ -112,10 +113,10 @@ const isComponent = computed(() => {
 
     font: {
       family: var(--font-display);
-      size: 1.25rem;
+      size: clamp(1rem, 2.5vw, 1.2rem);
       weight: 600;
     }
-    line-height: 1.3;
+    line-height: 1.35;
     color: var(--ink);
 
     overflow: hidden;
@@ -126,7 +127,7 @@ const isComponent = computed(() => {
 
   &-autor {
     font: {
-      size: 0.875rem;
+      size: 0.9rem;
       style: italic;
     }
     color: var(--muted);
@@ -144,7 +145,7 @@ const isComponent = computed(() => {
   }
 
   &-footer {
-    margin-top: 1rem;
+    margin-top: 12px;
 
     display: flex;
     padding-top: 4px;
@@ -160,25 +161,22 @@ const isComponent = computed(() => {
   }
 
   &-link {
-    display: flex;
+    display: inline-flex;
     background: var(--bg-subtle);
-    color: var(--accent);
     border: none;
-    padding: 9px 20px;
+    padding: 10px 16px;
     border-radius: var(--radius-sm);
 
     font: {
       family: var(--font-body);
-      size: 0.8rem;
+      size: 0.95rem;
     }
+    color: var(--accent);
 
     align-items: center;
+    gap: 6px;
     cursor: pointer;
     transition: all var(--transition);
-
-    .arrow {
-      margin-left: 5px;
-    }
 
     &:active {
       color: var(--surface);
@@ -192,11 +190,11 @@ const isComponent = computed(() => {
 }
 
 .midia-badge {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: 3px;
 }
 
@@ -216,7 +214,7 @@ const isComponent = computed(() => {
 }
 
 .categoria-tag {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 
@@ -224,15 +222,15 @@ const isComponent = computed(() => {
   font-size: 0.8rem;
   background: var(--bg-subtle);
   color: var(--muted);
-  padding: 0.25rem 0.75rem;
+  padding: 3px 10px;
   border-radius: 100px;
 }
 
 .quem-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.8rem;
+  gap: 5px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 

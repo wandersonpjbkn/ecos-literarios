@@ -1,13 +1,5 @@
 <template>
   <div class="page catalog-page" data-page="catalog">
-    <!-- Hero -->
-    <section class="catalog-hero" :class="{ 'hero-hidden': isScrolled }">
-      <div class="hero-inner">
-        <h1 class="hero-title"><span class="hero-icon">📚</span><em>Catálogo</em> de Indicações</h1>
-        <p class="hero-sub">{{ useBooksStore().size }} títulos indicados pelos membros do clube</p>
-      </div>
-    </section>
-
     <!-- Loading / Error -->
     <div v-if="useBooksStore().loading" class="state-screen">
       <div class="spinner"></div>
@@ -26,6 +18,16 @@
 
     <!-- Catalog -->
     <div v-else class="catalog-body">
+      <!-- enum-->
+      <section class="catalog-intro">
+        <div class="intro-inner">
+          <h1 class="intro-title">Catálogo de Indicações</h1>
+          <p class="intro-desc">
+            Use os filtros abaixo para navegar entre os livros já citados no Clube Ecos Literários.
+          </p>
+        </div>
+      </section>
+
       <!-- Row 1: Search + count -->
       <div class="search-row">
         <SearchBar v-model="search" :suggestions="searchSuggestions" @select="onSelectSuggestion" />
@@ -90,7 +92,6 @@
         @remove="handleRemove"
         @clear-all="clearAll"
       />
-      <hr class="grid-divider" />
 
       <!-- Grid -->
       <div class="grid-area">
@@ -110,7 +111,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, inject, type Ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 import { useBooksStore } from '@/stores'
 import { useSheets, useFilters } from '@/composables'
@@ -123,8 +124,6 @@ import BookCard from '@/components/BookCard.vue'
 import type { Book } from '@/types'
 
 const emit = defineEmits(['top'])
-
-const isScrolled = inject<Ref<boolean>>('isScrolled', ref(false))
 
 const {
   search,
@@ -151,7 +150,6 @@ const handleToggle = (key: string, value: string) => {
     subgeneros: selectedSubgeneros,
     quem: selectedQuem,
   }
-
   const arr = map[key as keyof typeof map]
   const idx = arr.value.indexOf(value)
   if (idx === -1) arr.value.push(value)
@@ -168,18 +166,13 @@ const clearKey = (key: string) => {
   map[key as keyof typeof map].value = []
 }
 
-const handleRemove = (key: string, value: string) => {
-  handleToggle(key, value)
-}
+const handleRemove = (key: string, value: string) => handleToggle(key, value)
 
 const onSelectSuggestion = (book: Book) => {
   search.value = book.titulo
 }
 
-/** show all */
-
 const showFilters = ref(false)
-
 const isMobile = computed(() => window.innerWidth < 768)
 
 const handleClickShowAll = () => {
@@ -194,34 +187,12 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .catalog {
-  /* ── Hero ────────────────────────────────────── */
-  &-hero {
-    position: relative;
+  /* ── Intro ────────────────────────────── */
+  &-intro {
+    margin: 0 auto 2rem;
 
-    background: var(--ink);
-    padding: 48px 24px 40px;
-    max-height: 500px;
-
-    overflow: hidden;
-    transition: all var(--transition);
-
-    &::before {
-      content: '';
-
-      position: absolute;
-      inset: 0;
-
-      background: radial-gradient(ellipse 60% 80% at 10% 50%, rgba(var(--accent-rgb), 0.18) 0%, transparent 70%);
-
-      pointer-events: none;
-    }
-
-    &.hero-hidden {
-      max-height: 0;
-      padding-top: 0;
-      padding-bottom: 0;
-      pointer-events: none;
-    }
+    background: var(--bg);
+    border-bottom: 1px solid rgba(var(--surface-rgb), 0.08);
   }
 
   /* ── Catalog body ────────────────────────────── */
@@ -229,49 +200,32 @@ onMounted(() => {
     margin: 0 auto;
 
     max-width: 1200px;
-    padding: 24px 24px 48px;
+    padding: 20px 16px 48px;
   }
 }
 
-.hero {
+.intro {
   &-inner {
-    position: relative;
     margin: 0 auto;
-
     max-width: 1200px;
   }
 
-  &-icon {
-    font: {
-      size: clamp(2rem, 5vw, 3rem);
-    }
-    line-height: 1;
-  }
-
   &-title {
-    margin-bottom: 8px;
+    margin-bottom: 0.25rem;
 
     font: {
       family: var(--font-display);
-      size: clamp(2rem, 5vw, 3rem);
-      weight: 700;
+      size: 1.25rem;
+      weight: 600;
     }
-    color: var(--surface);
-    line-height: 1.1;
-
-    em {
-      font: {
-        style: italic;
-      }
-      color: var(--accent-muted);
-    }
+    color: var(--ink);
+    white-space: nowrap;
   }
 
-  &-sub {
-    font: {
-      size: 0.95rem;
-    }
-    color: rgba(var(--surface-rgb), 0.55);
+  &-desc {
+    font-size: 0.9rem;
+    color: var(--ink-secondary);
+    line-height: 1.5;
   }
 }
 
@@ -279,11 +233,13 @@ onMounted(() => {
 .state {
   &-screen {
     display: flex;
+    padding: 80px 24px;
+
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 16px;
-    padding: 80px 24px;
+
     color: var(--muted);
     text-align: center;
   }
@@ -320,7 +276,6 @@ onMounted(() => {
   border: 3px solid var(--border);
   border-top-color: var(--accent);
   border-radius: 50%;
-
   animation: spin 0.7s linear infinite;
 }
 @keyframes spin {
@@ -331,65 +286,10 @@ onMounted(() => {
 
 .retry-btn {
   background: var(--accent);
-  color: var(--surface);
   border: none;
-  padding: 9px 20px;
+  padding: 10px 20px;
   border-radius: var(--radius-sm);
-  font-family: var(--font-body);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: opacity var(--transition);
-
-  &:hover {
-    opacity: 0.85;
-    background: var(--accent-hover);
-  }
-}
-
-/* ── Search row ──────────────────────────────── */
-.search-row {
-  margin-bottom: 1rem;
-
-  display: flex;
-
-  align-items: center;
-  gap: 16px;
-}
-
-.result-count {
-  flex-shrink: 0;
-
-  font: {
-    size: 0.82rem;
-  }
-  color: var(--muted);
-  white-space: nowrap;
-
-  strong {
-    color: var(--accent);
-  }
-}
-
-/* ── Filter bar ──────────────────────────────── */
-.filter-bar {
-  display: flex;
-  gap: 1rem;
-}
-
-.multi-select {
-  position: relative;
-  flex: 1;
-  min-width: 140px;
-}
-
-.show-all-btn {
-  display: none;
-  width: 100%;
-  height: 48px;
-  background: var(--accent);
-  border: none;
-  padding: 9px 20px;
-  border-radius: var(--radius-sm);
+  min-height: 44px;
 
   font: {
     family: var(--font-body);
@@ -406,26 +306,78 @@ onMounted(() => {
   }
 }
 
-.grid-divider {
-  margin: 2rem 0;
+/* ── Search row ──────────────────────────────── */
+.search-row {
+  margin-bottom: 12px;
+
+  display: flex;
+
+  align-items: center;
+  gap: 12px;
+}
+
+.result-count {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+  white-space: nowrap;
+
+  strong {
+    color: var(--accent);
+  }
+}
+
+/* ── Filter bar ──────────────────────────────── */
+.filter-bar {
+  margin-bottom: 2rem;
+
+  display: flex;
+  gap: 10px;
+}
+
+.multi-select {
+  position: relative;
+  flex: 1;
+  min-width: 140px;
+}
+
+.show-all-btn {
+  display: none;
+  height: 48px;
+  background: var(--accent);
   border: none;
-  border-top: 1px solid var(--border);
+  padding: 0 20px;
+  border-radius: var(--radius-sm);
+  min-height: 44px;
+
+  font: {
+    family: var(--font-body);
+    size: 1rem;
+  }
+  color: var(--surface);
+
+  cursor: pointer;
+  transition: opacity var(--transition);
+  white-space: nowrap;
+
+  &:hover {
+    opacity: 0.85;
+    background: var(--accent-hover);
+  }
 }
 
 /* ── Grid ────────────────────────────────────── */
 .grid-area {
   position: relative;
-
   margin-top: 2rem;
 }
 
 .books-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem 1rem;
 }
 
-/* Empty state */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -434,9 +386,10 @@ onMounted(() => {
   padding: 60px 24px;
   color: var(--muted);
   text-align: center;
+  font-size: 1rem;
 }
 
-/* Grid transition */
+/* Grid transitions */
 .grid-enter-active {
   transition:
     opacity var(--transition),
@@ -459,21 +412,45 @@ onMounted(() => {
 
 /* ── Responsive ──────────────────────────────── */
 @media (max-width: 768px) {
+  .catalog-intro {
+    margin-bottom: 1rem;
+  }
+
+  .intro-inner {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .intro-desc {
+    font-size: 0.875rem;
+  }
+
   .filter-bar {
     flex-wrap: wrap;
+    gap: 8px;
   }
+
   .multi-select {
     min-width: 0;
     flex: 1 1 100%;
   }
+
   .show-all-btn {
     display: block;
+    width: 100%;
   }
+
   .search-row {
     flex-wrap: wrap;
   }
+
   .result-count {
     order: -1;
+    width: 100%;
+  }
+
+  .books-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

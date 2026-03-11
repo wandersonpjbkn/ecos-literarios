@@ -1,6 +1,6 @@
 <template>
   <div class="app">
-    <header :class="['site-header', { 'header-active': isScrolled }]">
+    <header class="site-header">
       <div class="header-inner">
         <RouterLink to="/" class="brand">
           <span class="brand-icon">📚</span>
@@ -15,16 +15,7 @@
       </div>
     </header>
 
-    <main
-      ref="content"
-      :class="[
-        'site-main',
-        {
-          'scroll-active': isScrolled && toHideFrom.includes(route.name as string),
-        },
-      ]"
-      @scroll="handleHeaderVisibility"
-    >
+    <main ref="content" class="site-main">
       <RouterView v-slot="{ Component }">
         <Transition name="fade" mode="out-in">
           <component :is="Component" @top="toTop" />
@@ -37,31 +28,13 @@
 </template>
 
 <script lang="ts" setup>
-import { defineAsyncComponent, ref, provide, watch, nextTick } from 'vue'
+import { defineAsyncComponent, ref, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 
 const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
 
 const route = useRoute()
-
 const content = ref<HTMLElement | null>(null)
-const isScrolled = ref(false)
-
-const toHideFrom = ['catalog']
-const threshold = 16 * 13 // rem
-
-const handleHeaderVisibility = (e: Event | HTMLElement | null) => {
-  if (!e) return
-
-  const target = e instanceof HTMLElement ? e : (e.target as HTMLElement)
-  const child = target.children[0] as HTMLElement
-
-  if (toHideFrom.includes(child?.dataset?.page as string)) {
-    isScrolled.value = target.scrollTop > threshold
-  } else {
-    isScrolled.value = true
-  }
-}
 
 const toTop = () => {
   if (content.value) {
@@ -69,63 +42,33 @@ const toTop = () => {
   }
 }
 
-provide('isScrolled', isScrolled)
-
 watch(route, async () => {
   await nextTick()
-
-  setTimeout(() => {
-    toTop()
-    handleHeaderVisibility(content.value)
-  }, 350) // transition delay
+  setTimeout(() => toTop(), 350)
 })
 </script>
 
 <style lang="scss" scoped>
 .app {
-  position: relative;
-
+  display: flex;
+  flex-direction: column;
   height: 100dvh;
   overflow: hidden;
 }
 
 .site {
   &-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    position: relative;
     z-index: 100;
-
+    flex-shrink: 0;
     height: 4rem;
     background: var(--ink);
-    border-bottom: 1px solid rgba(var(--surface-rgb), 0.078);
-    opacity: 0;
-
-    backdrop-filter: blur(8px);
-    transform: translateY(-100%);
-    pointer-events: none;
-    transition: all var(--transition);
-
-    &.header-active {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
+    border-bottom: 1px solid rgba(var(--surface-rgb), 0.08);
   }
 
-  /* ── Main ────────────────────────────────────── */
   &-main {
-    position: relative;
-
-    height: 100dvh;
+    flex: 1;
     overflow-y: auto;
-
-    transition: padding var(--transition);
-
-    &.scroll-active {
-      padding-top: 12rem;
-    }
   }
 }
 
@@ -156,9 +99,6 @@ watch(route, async () => {
   gap: 12px;
   transition: opacity var(--transition);
 
-  align-items: center;
-  gap: 12px;
-  transition: opacity var(--transition);
   &:hover {
     opacity: 0.85;
   }
@@ -210,8 +150,18 @@ watch(route, async () => {
     &:hover,
     &.router-link-active {
       color: var(--surface);
-      background: rgba(var(--surface-rgb), 0.078);
+      background: rgba(var(--surface-rgb), 0.08);
     }
   }
+}
+
+/* Route transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity var(--transition);
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

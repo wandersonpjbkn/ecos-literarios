@@ -116,13 +116,13 @@ const cleanAll = () => {
     border: 1.5px solid var(--border);
     border-radius: var(--radius);
     padding: 0 14px;
+    min-height: 44px;
 
     align-items: center;
     gap: 10px;
     transition: all var(--transition);
 
     &.is-focused {
-      background: var(--surface);
       border-color: var(--accent);
       box-shadow: 0 0 0 3px var(--accent-soft);
     }
@@ -130,12 +130,11 @@ const cleanAll = () => {
 
   &-icon {
     color: var(--muted);
-
     flex-shrink: 0;
   }
 
   &-input {
-    height: 48px;
+    height: 44px;
     background: none;
     border: none;
     outline: none;
@@ -160,12 +159,14 @@ const cleanAll = () => {
   border: none;
   padding: 4px;
   border-radius: 3px;
-
+  min-width: 36px;
+  min-height: 36px;
   color: var(--muted);
 
   transition: color var(--transition);
   cursor: pointer;
   align-items: center;
+  justify-content: center;
 
   &:hover {
     color: var(--ink);
@@ -178,17 +179,20 @@ const cleanAll = () => {
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  background: white;
+  z-index: 200;
+
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
   list-style: none;
-  z-index: 200;
+
   overflow: hidden;
 }
 
 .suggestion {
   display: flex;
+  min-height: 44px;
   padding: 10px 16px;
 
   cursor: pointer;
@@ -217,7 +221,7 @@ const cleanAll = () => {
   }
 
   &-autor {
-    font-size: 0.8rem;
+    font-size: 0.875rem;
     color: var(--muted);
     flex-shrink: 0;
   }
