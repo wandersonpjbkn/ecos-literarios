@@ -10,7 +10,7 @@
           </div>
         </RouterLink>
         <nav class="header-nav">
-          <RouterLink to="/" class="nav-link">Catálogo</RouterLink>
+          <ThemeSwitcher />
         </nav>
       </div>
     </header>
@@ -30,6 +30,7 @@
 <script lang="ts" setup>
 import { defineAsyncComponent, ref, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
+import ThemeSwitcher from '@/components/ThemeSwitcher.vue'
 
 const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
 
@@ -62,7 +63,7 @@ watch(route, async () => {
     z-index: 100;
     flex-shrink: 0;
     height: 4rem;
-    background: var(--color-text-default);
+    background: var(--color-header-bg, var(--color-text-default));
     border-bottom: 1px solid rgba(var(--color-surface-default-rgb), 0.08);
   }
 

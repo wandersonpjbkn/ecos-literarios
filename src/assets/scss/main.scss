@@ -3,75 +3,80 @@
 @use './modules/miscellaneous' as *;
 
 @use './modules/categories' as *;
+@use './modules/themes' as *;
 
 /* ── Tokens CSS ─────────────────────────────── */
 :root {
   // ── context: badge · component · variant ─────────────────────
   // object: background / text  ·  modifier: color
   --badge-livro-background-color: #{$badge-livro-bg};
-  --badge-livro-text-color:       #{$badge-livro-ink};
+  --badge-livro-text-color: #{$badge-livro-ink};
   --badge-manga-background-color: #{$badge-manga-bg};
-  --badge-manga-text-color:       #{$badge-manga-ink};
-  --badge-hq-background-color:    #{$badge-hq-bg};
-  --badge-hq-text-color:          #{$badge-hq-ink};
-  --badge-tag-background-color:   #{$badge-tag-bg};
-  --badge-tag-text-color:         #{$badge-tag-ink};
+  --badge-manga-text-color: #{$badge-manga-ink};
+  --badge-hq-background-color: #{$badge-hq-bg};
+  --badge-hq-text-color: #{$badge-hq-ink};
+  --badge-tag-background-color: #{$badge-tag-bg};
+  --badge-tag-text-color: #{$badge-tag-ink};
 
   // ── context: — (global)  ──────────────────────────────────────
   // object: background  ·  modifier: default | subtle
-  --color-background-default:             #{$bg};
-  --color-background-subtle:              #{$bg-subtle};
+  --color-background-default: #{$bg};
+  --color-background-subtle: #{$bg-subtle};
 
   // object: surface  ·  modifier: default | raised
-  --color-surface-default:                #{$surface};
-  --color-surface-raised:                 #{$surface-raised};
-  --color-surface-default-rgb:            #{$surface-rgb};
+  --color-surface-default: #{$surface};
+  --color-surface-raised: #{$surface-raised};
+  --color-surface-default-rgb: #{$surface-rgb};
 
   // object: text  ·  modifier: default | secondary | subtle | disabled
-  --color-text-default:                   #{$ink};
-  --color-text-secondary:                 #{$ink-secondary};
-  --color-text-subtle:                    #{$muted};
-  --color-text-disabled:                  #{$muted-light};
-  --color-text-default-rgb:               #{$ink-rgb};
+  --color-text-default: #{$ink};
+  --color-text-secondary: #{$ink-secondary};
+  --color-text-subtle: #{$muted};
+  --color-text-disabled: #{$muted-light};
+  --color-text-default-rgb: #{$ink-rgb};
 
   // object: action (accent primário — cerulean)
   // modifier: default | hover (state) | background-subtle | text-subtle
-  --color-action-default:                 #{$accent};
-  --color-action-default-hover:           #{$accent-hover};
-  --color-action-background-subtle:       #{$accent-light};
-  --color-action-text-subtle:             #{$accent-muted};
-  --color-action-default-rgb:             #{$accent-rgb};
+  --color-action-default: #{$accent};
+  --color-action-default-hover: #{$accent-hover};
+  --color-action-background-subtle: #{$accent-light};
+  --color-action-text-subtle: #{$accent-muted};
+  --color-action-default-rgb: #{$accent-rgb};
 
   // object: secondary (accent secundário — seagreen)
   // modifier: default | hover | background-subtle | text-default
-  --color-secondary-default:              #{$accent2};
-  --color-secondary-default-hover:        #{$accent2-hover};
-  --color-secondary-background-subtle:    #{$accent2-light};
-  --color-secondary-text-default:         #{$accent2-text};
+  --color-secondary-default: #{$accent2};
+  --color-secondary-default-hover: #{$accent2-hover};
+  --color-secondary-background-subtle: #{$accent2-light};
+  --color-secondary-text-default: #{$accent2-text};
 
   // object: border  ·  modifier: default | strong | focus (state)
-  --color-border-default:                 #{$border};
-  --color-border-strong:                  #{$border-strong};
-  --color-border-focus:                   #{$border-focus};
+  --color-border-default: #{$border};
+  --color-border-strong: #{$border-strong};
+  --color-border-focus: #{$border-focus};
 
   // ── context: — (global)  ──────────────────────────────────────
   // object: shadow  ·  modifier: sm | default | lg | xl (scale)
-  --shadow-sm:                            #{$shadow-sm};
-  --shadow-default:                       #{$shadow};
-  --shadow-lg:                            #{$shadow-lg};
-  --shadow-xl:                            #{$shadow-xl};
+  --shadow-sm: #{$shadow-sm};
+  --shadow-default: #{$shadow};
+  --shadow-lg: #{$shadow-lg};
+  --shadow-xl: #{$shadow-xl};
 
   // object: font  ·  type: family  ·  scale: display | body
-  --font-family-display:                  #{$font-display};
-  --font-family-body:                     #{$font-body};
+  --font-family-display: #{$font-display};
+  --font-family-body: #{$font-body};
 
   // object: border  ·  type: radius  ·  scale: sm | default | lg
-  --border-radius-sm:                     #{$radius-sm};
-  --border-radius-default:                #{$radius};
-  --border-radius-lg:                     #{$radius-lg};
+  --border-radius-sm: #{$radius-sm};
+  --border-radius-default: #{$radius};
+  --border-radius-lg: #{$radius-lg};
+
+  // object: header-bg — override por tema, fallback = ink
+  // Tema padrão: header usa o mesmo $ink (cerulean-shade-90)
+  --color-header-bg: #{$ink};
 
   // object: motion  ·  type: transition  ·  scale: default
-  --motion-transition-default:            #{$transition};
+  --motion-transition-default: #{$transition};
 }
 
 /* ── Reset ───────────────────────────────────── */
