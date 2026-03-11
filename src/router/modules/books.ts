@@ -1,10 +1,8 @@
-import BookView from '@/views/BookView.vue'
-
 export const routes = [
   {
     path: '/livro/:id',
     name: 'book',
-    component: BookView,
+    component: () => import('@/views/BookView.vue'),
     meta: { title: 'Livro — Ecos Literários' },
   },
 ]

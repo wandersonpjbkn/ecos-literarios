@@ -37,10 +37,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, provide, watch, nextTick } from 'vue'
+import { defineAsyncComponent, ref, provide, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 
-import BackTop from '@/components/BackTop.vue'
+const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
 
 const route = useRoute()
 

@@ -1,11 +1,10 @@
-import { createApp } from 'vue'
+import { createApp, defineAsyncComponent } from 'vue'
 import { createPinia } from 'pinia'
 import persisteStorage from 'pinia-plugin-persistedstate'
 
 import router from '@/router'
 
 import App from '@/App.vue'
-import BaseIcon from '@/components/BaseIcon.vue'
 
 import '@/assets/main.scss'
 
@@ -17,6 +16,9 @@ pinia.use(persisteStorage)
 app.use(pinia)
 app.use(router)
 
-app.component('BaseIcon', BaseIcon)
+app.component(
+  'BaseIcon',
+  defineAsyncComponent(() => import('@/components/BaseIcon.vue')),
+)
 
 app.mount('#app')

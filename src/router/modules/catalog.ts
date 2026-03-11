@@ -1,10 +1,8 @@
-import CatalogView from '@/views/CatalogView.vue'
-
 export const routes = [
   {
     path: '/',
     name: 'catalog',
-    component: CatalogView,
+    component: () => import('@/views/CatalogView.vue'),
     meta: { title: 'Catálogo — Ecos Literários' },
   },
 ]
