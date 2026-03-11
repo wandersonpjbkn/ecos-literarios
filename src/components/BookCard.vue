@@ -133,7 +133,10 @@ const isComponent = computed(() => {
   }
 
   &-tags {
-    margin-top: 2px;
+    margin: {
+      top: 2px;
+      bottom: auto;
+    }
 
     display: flex;
     flex-wrap: wrap;
@@ -141,7 +144,7 @@ const isComponent = computed(() => {
   }
 
   &-footer {
-    margin-top: 2rem;
+    margin-top: 1rem;
 
     display: flex;
     padding-top: 4px;
