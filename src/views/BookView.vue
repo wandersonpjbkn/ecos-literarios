@@ -70,30 +70,97 @@
             <blockquote v-if="book.porque" class="porque-quote">"{{ book.porque }}"</blockquote>
           </div>
 
-          <!-- Metadata grid -->
+          <!-- Pesquisar em outras mídias -->
+          <div class="external-search">
+            <p class="external-search-label">
+              Buscar sobre <strong>{{ book.titulo }}</strong> em:
+            </p>
+            <div class="external-search-btns">
+              <a
+                :href="`https://www.amazon.com.br/s?k=${encodeURIComponent(book.titulo + ' ' + book.autor)}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="ext-btn ext-btn--amazon"
+                aria-label="Buscar na Amazon"
+                title="Amazon"
+              >
+                <!-- Amazon icon -->
+                <BaseIcon name="amazon" />
+              </a>
+
+              <a
+                :href="`https://www.youtube.com/results?search_query=${encodeURIComponent(book.titulo + ' ' + book.autor)}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="ext-btn ext-btn--youtube"
+                aria-label="Buscar no YouTube"
+                title="YouTube"
+              >
+                <!-- YouTube icon -->
+                <BaseIcon name="youtube" />
+              </a>
+
+              <a
+                :href="`https://www.google.com/search?q=${encodeURIComponent(book.titulo + ' ' + book.autor)}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="ext-btn ext-btn--google"
+                aria-label="Buscar no Google"
+                title="Google"
+              >
+                <!-- Google icon -->
+                <BaseIcon name="chrome" />
+              </a>
+            </div>
+          </div>
+
+          <!-- Metadata grid — itens clicáveis -->
           <div class="meta-grid">
-            <div v-if="book.midia" class="meta-item">
+            <RouterLink
+              v-if="book.midia"
+              :to="`/midia/${encodeURIComponent(book.midia)}`"
+              class="meta-item meta-item--link"
+            >
               <span class="meta-label">Mídia</span>
               <span class="meta-value">{{ book.midia }}</span>
-            </div>
-            <div v-if="book.categoria" class="meta-item">
+              <BaseIcon name="arrow-right" class="meta-arrow" />
+            </RouterLink>
+
+            <RouterLink
+              v-if="book.categoria"
+              :to="`/categoria/${encodeURIComponent(book.categoria)}`"
+              class="meta-item meta-item--link"
+            >
               <span class="meta-label">Categoria</span>
               <span class="meta-value">{{ book.categoria }}</span>
-            </div>
-            <div v-if="book.autor" class="meta-item">
+              <BaseIcon name="arrow-right" class="meta-arrow" />
+            </RouterLink>
+
+            <RouterLink
+              v-if="book.autor"
+              :to="`/autor/${encodeURIComponent(book.autor)}`"
+              class="meta-item meta-item--link"
+            >
               <span class="meta-label">Autor/a</span>
               <span class="meta-value">{{ book.autor }}</span>
-            </div>
-            <div v-if="book.quem" class="meta-item">
+              <BaseIcon name="arrow-right" class="meta-arrow" />
+            </RouterLink>
+
+            <RouterLink
+              v-if="book.quem"
+              :to="`/mencao/${encodeURIComponent(book.quem)}`"
+              class="meta-item meta-item--link"
+            >
               <span class="meta-label">Mencionado por</span>
               <span class="meta-value">{{ book.quem }}</span>
-            </div>
+              <BaseIcon name="arrow-right" class="meta-arrow" />
+            </RouterLink>
           </div>
 
           <!-- Related: same category -->
           <div v-if="related.length" class="related-section">
             <h3 class="related-title">
-              Mais em <em>{{ book.categoria }}</em>
+              Ver mais em <em>{{ book.categoria }}</em>
             </h3>
             <div class="related-grid">
               <RouterLink v-for="r in related" :key="r.id" :to="`/livro/${r.id}`" class="related-card">
@@ -180,20 +247,23 @@ const related = computed(() => {
     align-items: center;
     gap: 8px;
 
-    font-size: 0.85rem;
+    font-size: 0.875rem;
   }
 }
+
 .back-link {
   display: flex;
   align-items: center;
   gap: 5px;
   color: var(--muted);
   transition: color var(--transition);
+  white-space: nowrap;
 
   &:hover {
     color: var(--accent);
   }
 }
+
 .breadcrumb {
   &-divider {
     display: inline-flex;
@@ -298,7 +368,7 @@ const related = computed(() => {
   }
 
   &-midia {
-    font-size: 1rem;
+    font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: rgba(var(--surface-rgb), 0.6);
@@ -307,7 +377,7 @@ const related = computed(() => {
 
   &-titulo {
     font-family: var(--font-display);
-    font-size: 1.25rem;
+    font-size: 1rem;
     color: rgba(var(--surface-rgb), 0.95);
     font-weight: 700;
     line-height: 1.3;
@@ -327,7 +397,7 @@ const related = computed(() => {
 }
 
 .midia-badge {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -351,7 +421,7 @@ const related = computed(() => {
 }
 
 .categoria-badge {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   color: rgba(var(--surface-rgb), 0.65);
   background: rgba(var(--surface-rgb), 0.07);
   padding: 3px 9px;
@@ -365,7 +435,7 @@ const related = computed(() => {
 }
 
 .sg-tag {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   background: rgba(var(--surface-rgb), 0.1);
   color: rgba(var(--surface-rgb), 0.8);
   padding: 4px 10px;
@@ -378,15 +448,16 @@ const related = computed(() => {
   padding: 40px 24px 64px;
   background: var(--bg);
 }
+
 .content-inner {
   max-width: 900px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 28px;
 }
 
-/* Indicação card */
+/* ── Indicação card ──────────────────────────── */
 .indicacao-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -400,22 +471,21 @@ const related = computed(() => {
   align-items: center;
   gap: 10px;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   margin-bottom: 14px;
-}
-.indicacao-header strong {
-  color: var(--ink);
-}
-.indicacao-header svg {
-  color: var(--accent);
-  flex-shrink: 0;
+
+  strong {
+    color: var(--ink);
+  }
+  svg {
+    color: var(--accent);
+    flex-shrink: 0;
+  }
 }
 
 .icon-user {
-  $size: 1.125rem;
-
-  width: $size;
-  height: $size;
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 .porque-quote {
@@ -424,11 +494,69 @@ const related = computed(() => {
   font-size: 1.05rem;
   color: var(--ink);
   line-height: 1.6;
-  position: relative;
-  padding-left: 0;
 }
 
-/* Meta grid */
+/* ── External search ─────────────────────────── */
+.external-search {
+  margin-left: auto;
+
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.external-search-label {
+  font-size: 0.875rem;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.external-search-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.ext-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  transition: all var(--transition);
+  flex-shrink: 0;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  /* Cores de marca no hover */
+  &--amazon:hover {
+    background: #ff9900;
+    color: #fff;
+  }
+  &--youtube:hover {
+    background: #ff0000;
+    color: #fff;
+  }
+  &--google:hover {
+    background: #4285f4;
+    color: #fff;
+  }
+}
+
+/* ── Meta grid — clicável ────────────────────── */
 .meta-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -445,23 +573,57 @@ const related = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  /* min touch target */
+  min-height: 72px;
+  transition: background var(--transition);
+
+  &--link {
+    position: relative;
+    cursor: pointer;
+    text-decoration: none;
+
+    .meta-arrow {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      color: var(--border-strong);
+      transition: all var(--transition);
+    }
+
+    &:hover {
+      background: var(--accent-soft);
+
+      .meta-label {
+        color: var(--accent);
+      }
+      .meta-value {
+        color: var(--accent);
+      }
+      .meta-arrow {
+        color: var(--accent);
+        transform: translateX(3px);
+      }
+    }
+  }
 }
 
 .meta-label {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
   font-weight: 500;
+  transition: color var(--transition);
 }
 
 .meta-value {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--ink);
   font-weight: 500;
+  transition: color var(--transition);
 }
 
-/* Related */
+/* ── Related ─────────────────────────────────── */
 .related {
   &-title {
     font-family: var(--font-display);
@@ -483,11 +645,14 @@ const related = computed(() => {
 
   &-card {
     display: flex;
+    align-items: center;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     overflow: hidden;
     transition: all var(--transition);
+    min-height: 56px;
+    text-decoration: none;
 
     @media (min-width: 768px) {
       cursor: pointer;
@@ -506,6 +671,7 @@ const related = computed(() => {
 
   &-spine {
     width: 4px;
+    align-self: stretch;
     flex-shrink: 0;
   }
 
@@ -515,17 +681,19 @@ const related = computed(() => {
     flex-direction: column;
     gap: 3px;
     min-width: 0;
+    flex: 1;
 
     strong {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 600;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
+      color: var(--ink);
     }
 
     span {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       color: var(--muted);
       font-style: italic;
     }
@@ -533,14 +701,9 @@ const related = computed(() => {
 }
 
 .arrow {
-  margin-left: auto;
-  margin-right: 1rem;
-
+  margin-right: 12px;
   color: var(--border);
-
   flex-shrink: 0;
-  align-self: center;
-
   transition: all var(--transition);
 
   @media (max-width: 768px) {
@@ -548,16 +711,16 @@ const related = computed(() => {
   }
 }
 
-/** return */
 .back-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   color: var(--accent);
-  font-size: 0.9rem;
+  font-size: 1rem;
   border: 1px solid var(--accent);
-  padding: 8px 16px;
+  padding: 10px 18px;
   border-radius: var(--radius-sm);
+  min-height: 44px;
   transition: all var(--transition);
 
   &:hover {
@@ -573,6 +736,9 @@ const related = computed(() => {
   }
   .book-cover {
     display: none;
+  }
+  .meta-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
 </style>

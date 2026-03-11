@@ -1,10 +1,10 @@
-// src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 
 import Catalog from './modules/catalog'
 import Book from './modules/books'
+import Filter from './modules/filter'
 
-const routes = [...Catalog.routes, ...Book.routes]
+const routes = [...Catalog.routes, ...Book.routes, ...Filter.routes]
 
 const router = createRouter({
   history: createWebHistory(),
