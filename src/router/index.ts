@@ -22,8 +22,8 @@ router.afterEach((to) => {
 
   sendGtmEvent({
     event: 'content_view',
-    'content-name': to.fullPath,
-    'content-view-name': to.name || to.meta.title || 'unknown',
+    content_name: to.fullPath,
+    content_view_name: to.name || to.meta.title || 'unknown',
     gtm_meta: to.meta.gtm || null,
   })
 })
