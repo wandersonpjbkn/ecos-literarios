@@ -1,0 +1,80 @@
+@use 'sass:color';
+@use 'sass:map';
+
+@use '@/assets/scss/abstracts/functions' as *;
+
+@use '@/assets/scss/base/typography' as *;
+@use '@/assets/scss/base/miscellaneous' as *;
+
+@mixin create-theme($theme-name, $config) {
+  :root[data-theme='#{$theme-name}'] {
+    $semantics: map.get($config, 'semantics');
+    $actions: map.get($config, 'actions');
+    $badges: map.get($config, 'badges');
+    $borders: map.get($config, 'borders');
+
+    // Badges
+    @each $key, $val in $badges {
+      --badge-#{$key}-background-color: #{map.get($val, 'bg')};
+      --badge-#{$key}-text-color: #{map.get($val, 'ink')};
+    }
+
+    // Superfícies e Texto
+    --color-background-default: #{map.get($semantics, 'bg')};
+    --color-background-subtle: #{map.get($semantics, 'bg-subtle')};
+    --color-surface-default: #{map.get($semantics, 'surface')};
+    --color-surface-raised: #{map.get($semantics, 'surface-raised')};
+    --color-surface-default-rgb: #{get-rgb(map.get($semantics, 'surface'))};
+
+    --color-text-default: #{map.get($semantics, 'ink')};
+    --color-text-secondary: #{map.get($semantics, 'ink-secondary')};
+    --color-text-subtle: #{map.get($semantics, 'muted')};
+    --color-text-disabled: #{map.get($semantics, 'muted-light')};
+    --color-text-default-rgb: #{get-rgb(map.get($semantics, 'ink'))};
+
+    // Ações Primárias
+    --color-action-default: #{map.get($actions, 'primary')};
+    --color-action-default-hover: #{map.get($actions, 'primary-hover')};
+    --color-action-background-subtle: #{map.get($actions, 'primary-light')};
+    --color-action-text-subtle: #{map.get($actions, 'primary-muted')};
+    --color-action-default-rgb: #{get-rgb(map.get($actions, 'primary'))};
+
+    // Ações Secundárias
+    --color-secondary-default: #{map.get($actions, 'secondary')};
+    --color-secondary-default-hover: #{map.get($actions, 'secondary-hover')};
+    --color-secondary-background-subtle: #{map.get($actions, 'secondary-light')};
+    --color-secondary-text-default: #{map.get($actions, 'secondary-text')};
+
+    // Bordas
+    --color-border-default: #{map.get($borders, 'default')};
+    --color-border-strong: #{map.get($borders, 'strong')};
+    --color-border-focus: #{map.get($borders, 'focus')};
+
+    // Header e Globais
+    --color-header-bg: #{map.get($config, 'header-bg')};
+
+    // Categorias
+    @each $category, $color in map.get($config, 'categories') {
+      --category-color-#{$category}: #{$color};
+    }
+
+    // ── context: — (global)  ──────────────────────────────────────
+    // object: shadow  ·  modifier: sm | default | lg | xl (scale)
+    --shadow-sm: #{$shadow-sm};
+    --shadow-default: #{$shadow};
+    --shadow-lg: #{$shadow-lg};
+    --shadow-xl: #{$shadow-xl};
+
+    // object: font  ·  type: family  ·  scale: display | body
+    --font-family-display: #{$font-display};
+    --font-family-body: #{$font-body};
+
+    // object: border  ·  type: radius  ·  scale: sm | default | lg
+    --border-radius-sm: #{$radius-sm};
+    --border-radius-default: #{$radius};
+    --border-radius-lg: #{$radius-lg};
+
+    // object: motion  ·  type: transition  ·  scale: default
+    --motion-transition-default: #{$transition};
+  }
+}

@@ -1,0 +1,62 @@
+@use 'sass:color';
+@use 'sass:map';
+
+@function generate-palette($base-color) {
+  $palette: (
+    'base': $base-color,
+    'tint': (),
+    'shade': (),
+    'tone': (),
+  );
+
+  @for $i from 1 through 10 {
+    $name: $i * 10;
+    $percent: $i * 10%;
+
+    $tints: map.get($palette, 'tint');
+    $shades: map.get($palette, 'shade');
+    $tones: map.get($palette, 'tone');
+
+    $tints: map.merge(
+      $tints,
+      (
+        '#{$name}': color.mix(#fff, $base-color, $percent),
+      )
+    );
+    $shades: map.merge(
+      $shades,
+      (
+        '#{$name}': color.mix(#000, $base-color, $percent),
+      )
+    );
+    $tones: map.merge(
+      $tones,
+      (
+        '#{$name}': color.mix(#888, $base-color, $percent),
+      )
+    );
+
+    $palette: map.merge(
+      $palette,
+      (
+        'tint': $tints,
+        'shade': $shades,
+        'tone': $tones,
+      )
+    );
+  }
+
+  @return $palette;
+}
+
+@function get-rgb($color) {
+  @return "#{color.channel($color, 'red', $space: rgb)}, #{color.channel($color, 'green', $space: rgb)}, #{color.channel($color, 'blue', $space: rgb)}";
+}
+
+@function palette($palette, $color, $variant, $step: 'base') {
+  @if $variant == 'base' {
+    @return map.get($palette, $color, $variant);
+  }
+
+  @return map.get($palette, $color, $variant, $step);
+}

@@ -49,7 +49,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
 const themes = [
-  { id: 'ecos', label: 'Summer', emoji: '📚' },
+  { id: 'ecos', label: 'Ecos', emoji: '📚' },
   { id: 'olive-garden', label: 'Olive', emoji: '🫒' },
   { id: 'sunny-beach', label: 'Sunny', emoji: '🏖️' },
   { id: 'gothic-glam', label: 'Gothic', emoji: '🖤' },
@@ -66,14 +66,9 @@ const activeTheme = ref<string>(DEFAULT_THEME)
 const current = computed(() => themes.find((t) => t.id === activeTheme.value) || themes[0])
 
 const applyTheme = (id: string) => {
-  console.log('applyTheme', id)
-
   const el = document.documentElement
-  if (id === DEFAULT_THEME) {
-    el.removeAttribute('data-theme')
-  } else {
-    el.setAttribute('data-theme', id)
-  }
+
+  el.setAttribute('data-theme', id)
   activeTheme.value = id
 }
 

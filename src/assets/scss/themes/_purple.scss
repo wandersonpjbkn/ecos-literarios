@@ -1,0 +1,87 @@
+@use 'sass:map';
+
+@use '@/assets/scss/abstracts/functions' as *;
+@use '@/assets/scss/abstracts/mixins' as *;
+
+$palette: (
+  'space-cadet': generate-palette(#242038),
+  'lavender-purple': generate-palette(#9067c6),
+  'soft-periwinkle': generate-palette(#8d86c9),
+  'pale-slate': generate-palette(#cac4ce),
+  'linen': generate-palette(#f7ece1),
+  'soft-lavender': generate-palette(#f4f0f8),
+);
+
+$config: (
+  // Camada de Badges (Mídia)
+  'badges': (
+    'livro': (
+      'bg': palette($palette, 'lavender-purple', 'tint', '90'), // #f4f0f9
+      'ink': palette($palette, 'lavender-purple', 'shade', '30'), // #65488b
+    ),
+    'manga': (
+      'bg': palette($palette, 'linen', 'tint', '30'), // #f9f2ea
+      'ink': palette($palette, 'lavender-purple', 'shade', '20'), // #73529e
+    ),
+    'hq': (
+      'bg': palette($palette, 'soft-periwinkle', 'tint', '70'), // #dddbef
+      'ink': palette($palette, 'soft-periwinkle', 'shade', '40'), // #555079
+    ),
+    'tag': (
+      'bg': palette($palette, 'soft-lavender', 'tone', '20'), // #dddae0
+      'ink': palette($palette, 'soft-lavender', 'shade', '60'), // #626063
+    ),
+  ),
+
+  // Camada Semântica (Superfícies e Texto)
+  'semantics': (
+    'bg': palette($palette, 'soft-lavender', 'base'), // #f4f0f8
+    'bg-subtle': palette($palette, 'soft-lavender', 'tint', '30'), // #f7f5fa
+    'surface': #ffffff,
+    'surface-raised': #ffffff,
+    'ink': palette($palette, 'space-cadet', 'shade', '90'), // #040306
+    'ink-secondary': palette($palette, 'space-cadet', 'shade', '70'), // #0b0a11
+    'muted': palette($palette, 'soft-lavender', 'shade', '60'), // #626063
+    'muted-light': palette($palette, 'soft-lavender', 'shade', '50') // #7a787c
+  ),
+
+  // Camada de Ações (Accents)
+  'actions': (
+    'primary': palette($palette, 'lavender-purple', 'shade', '20'), // #73529e (corresponde ao $accent original)
+    'primary-hover': palette($palette, 'lavender-purple', 'shade', '30'), // #65488b
+    'primary-light': palette($palette, 'lavender-purple', 'tint', '90'), // #f4f0f9
+    'primary-muted': palette($palette, 'lavender-purple', 'tint', '70'), // #ded1ee
+    'secondary': palette($palette, 'soft-periwinkle', 'base'), // #8d86c9
+    'secondary-hover': palette($palette, 'soft-periwinkle', 'shade', '10'), // #7f79b5
+    'secondary-light': palette($palette, 'soft-periwinkle', 'tint', '70'), // #dddbef
+    'secondary-text': palette($palette, 'soft-periwinkle', 'shade', '40') // #555079
+  ),
+
+  // Camada de Bordas
+  'borders': (
+    'default': palette($palette, 'soft-lavender', 'tone', '20'), // #dddae0
+    'strong': palette($palette, 'soft-lavender', 'shade', '20'), // #c3c0c6
+    'focus': palette($palette, 'lavender-purple', 'shade', '20') // #73529e
+  ),
+
+  // Categorias (Cores de lombada)
+  'categories': (
+    'suspense': palette($palette, 'lavender-purple', 'shade', '20'), // #73529e
+    'terror': palette($palette, 'space-cadet', 'shade', '70'), // #0b0a11
+    'fantasia': palette($palette, 'lavender-purple', 'base'), // #9067c6
+    'ficcao': palette($palette, 'lavender-purple', 'shade', '30'), // #65488b
+    'ficcao-historica': palette($palette, 'lavender-purple', 'tone', '40'), // #8a71aa
+    'drama': palette($palette, 'soft-periwinkle', 'shade', '30'), // #635e8d
+    'ficcao-cientifica': palette($palette, 'soft-periwinkle', 'base'), // #8d86c9
+    'romance': palette($palette, 'linen', 'shade', '20'), // #c6bdb4
+    'poesia': palette($palette, 'linen', 'shade', '10'), // #ded4cb
+    'nao-ficcao': palette($palette, 'pale-slate', 'shade', '50'), // #656267
+    'realismo': palette($palette, 'soft-lavender', 'shade', '50') // #7a787c
+  ),
+
+  // Extras específicos
+  'header-bg': palette($palette, 'space-cadet', 'shade', '90') // #040306
+);
+
+@include create-theme('purple-haze', $config);
+

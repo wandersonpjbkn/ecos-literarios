@@ -1,0 +1,367 @@
+// ════════════════════════════════════════════════════════════════════
+//  _colors-sunny-beach.scss — 🏖️  Sunny Beach Day
+//  Paleta completa: 6 cores × 3 séries × 10 steps = 180 primitivos
+//  + tokens semânticos derivados — mesma arquitetura do tema Summer
+//
+//  Cores base:
+//    $charcoal-blue      #264653   Charcoal Blue — base ink, header
+//    $verdigris          #2a9d8f   Verdigris — accent primário
+//    $jasmine            #e9c46a   Jasmine — badge mangá
+//    $sandy-brown        #f4a261   Sandy Brown — secondary
+//    $burnt-peach        #e76f51   Burnt Peach — badge hq
+//    $sea-foam           #eef2f3   Sea Foam — neutro (tint-90 de charcoal-blue)
+//
+//  Cor neutra do sistema: neutro — fundo geral, surfaces
+//  Contraste WCAG 2.1 verificado em todos os pares texto/fundo.
+// ════════════════════════════════════════════════════════════════════
+
+// ──────────────────────────────────────────────────────────────────
+//  LAYER 0 — REFERÊNCIAS BRUTAS
+//  Não usar diretamente em componentes. Usar sempre via semânticos.
+// ──────────────────────────────────────────────────────────────────
+
+// ── Charcoal Blue  #264653 ───────────────────────
+$charcoal-blue: #264653;
+// tint
+$charcoal-blue-tint-10: #3c5964;
+$charcoal-blue-tint-20: #516b75;
+$charcoal-blue-tint-30: #677e87;
+$charcoal-blue-tint-40: #7d9098;
+$charcoal-blue-tint-50: #93a3a9;
+$charcoal-blue-tint-60: #a8b5ba;
+$charcoal-blue-tint-70: #bec8cb;
+$charcoal-blue-tint-80: #d4dadd;
+$charcoal-blue-tint-90: #e9edee;
+$charcoal-blue-tint-100: #ffffff;
+// shade
+$charcoal-blue-shade-10: #223f4b;
+$charcoal-blue-shade-20: #1e3842;
+$charcoal-blue-shade-30: #1b313a;
+$charcoal-blue-shade-40: #172a32;
+$charcoal-blue-shade-50: #13232a;
+$charcoal-blue-shade-60: #0f1c21;
+$charcoal-blue-shade-70: #0b1519;
+$charcoal-blue-shade-80: #080e11;
+$charcoal-blue-shade-90: #040708;
+$charcoal-blue-shade-100: #000000;
+// tone
+$charcoal-blue-tone-10: #2f4c58;
+$charcoal-blue-tone-20: #38525c;
+$charcoal-blue-tone-30: #415761;
+$charcoal-blue-tone-40: #4a5d65;
+$charcoal-blue-tone-50: #53636a;
+$charcoal-blue-tone-60: #5c696e;
+$charcoal-blue-tone-70: #656f73;
+$charcoal-blue-tone-80: #6e7477;
+$charcoal-blue-tone-90: #777a7c;
+$charcoal-blue-tone-100: #808080;
+
+// ── Verdigris  #2a9d8f ────────────────────────────
+$verdigris: #2a9d8f;
+// tint
+$verdigris-tint-10: #3fa79a;
+$verdigris-tint-20: #55b1a5;
+$verdigris-tint-30: #6abab1;
+$verdigris-tint-40: #7fc4bc;
+$verdigris-tint-50: #95cec7;
+$verdigris-tint-60: #aad8d2;
+$verdigris-tint-70: #bfe2dd;
+$verdigris-tint-80: #d4ebe9;
+$verdigris-tint-90: #eaf5f4;
+$verdigris-tint-100: #ffffff;
+// shade
+$verdigris-shade-10: #268d81;
+$verdigris-shade-20: #227e72;
+$verdigris-shade-30: #1d6e64;
+$verdigris-shade-40: #195e56;
+$verdigris-shade-50: #154f48;
+$verdigris-shade-60: #113f39;
+$verdigris-shade-70: #0d2f2b;
+$verdigris-shade-80: #081f1d;
+$verdigris-shade-90: #04100e;
+$verdigris-shade-100: #000000;
+// tone
+$verdigris-tone-10: #339a8e;
+$verdigris-tone-20: #3b978c;
+$verdigris-tone-30: #44948b;
+$verdigris-tone-40: #4c9189;
+$verdigris-tone-50: #558f88;
+$verdigris-tone-60: #5e8c86;
+$verdigris-tone-70: #668985;
+$verdigris-tone-80: #6f8683;
+$verdigris-tone-90: #778382;
+$verdigris-tone-100: #808080;
+
+// ── Jasmine  #e9c46a ──────────────────────────────────
+$jasmine: #e9c46a;
+// tint
+$jasmine-tint-10: #ebca79;
+$jasmine-tint-20: #edd088;
+$jasmine-tint-30: #f0d697;
+$jasmine-tint-40: #f2dca6;
+$jasmine-tint-50: #f4e2b5;
+$jasmine-tint-60: #f6e7c3;
+$jasmine-tint-70: #f8edd2;
+$jasmine-tint-80: #fbf3e1;
+$jasmine-tint-90: #fdf9f0;
+$jasmine-tint-100: #ffffff;
+// shade
+$jasmine-shade-10: #d2b05f;
+$jasmine-shade-20: #ba9d55;
+$jasmine-shade-30: #a3894a;
+$jasmine-shade-40: #8c7640;
+$jasmine-shade-50: #756235;
+$jasmine-shade-60: #5d4e2a;
+$jasmine-shade-70: #463b20;
+$jasmine-shade-80: #2f2715;
+$jasmine-shade-90: #17140b;
+$jasmine-shade-100: #000000;
+// tone
+$jasmine-tone-10: #dfbd6c;
+$jasmine-tone-20: #d4b66e;
+$jasmine-tone-30: #cab071;
+$jasmine-tone-40: #bfa973;
+$jasmine-tone-50: #b5a275;
+$jasmine-tone-60: #aa9b77;
+$jasmine-tone-70: #a09479;
+$jasmine-tone-80: #958e7c;
+$jasmine-tone-90: #8b877e;
+$jasmine-tone-100: #808080;
+
+// ── Sandy Brown  #f4a261 ────────────────────────────────
+$sandy-brown: #f4a261;
+// tint
+$sandy-brown-tint-10: #f5ab71;
+$sandy-brown-tint-20: #f6b581;
+$sandy-brown-tint-30: #f7be90;
+$sandy-brown-tint-40: #f8c7a0;
+$sandy-brown-tint-50: #fad1b0;
+$sandy-brown-tint-60: #fbdac0;
+$sandy-brown-tint-70: #fce3d0;
+$sandy-brown-tint-80: #fdecdf;
+$sandy-brown-tint-90: #fef6ef;
+$sandy-brown-tint-100: #ffffff;
+// shade
+$sandy-brown-shade-10: #dc9257;
+$sandy-brown-shade-20: #c3824e;
+$sandy-brown-shade-30: #ab7144;
+$sandy-brown-shade-40: #92613a;
+$sandy-brown-shade-50: #7a5131;
+$sandy-brown-shade-60: #624127;
+$sandy-brown-shade-70: #49311d;
+$sandy-brown-shade-80: #312013;
+$sandy-brown-shade-90: #18100a;
+$sandy-brown-shade-100: #000000;
+// tone
+$sandy-brown-tone-10: #e89f64;
+$sandy-brown-tone-20: #dd9b67;
+$sandy-brown-tone-30: #d1986a;
+$sandy-brown-tone-40: #c6946d;
+$sandy-brown-tone-50: #ba9171;
+$sandy-brown-tone-60: #ae8e74;
+$sandy-brown-tone-70: #a38a77;
+$sandy-brown-tone-80: #97877a;
+$sandy-brown-tone-90: #8c837d;
+$sandy-brown-tone-100: #808080;
+
+// ── Burnt Peach  #e76f51 ─────────────────────────────────
+$burnt-peach: #e76f51;
+// tint
+$burnt-peach-tint-10: #e97d62;
+$burnt-peach-tint-20: #ec8c74;
+$burnt-peach-tint-30: #ee9a85;
+$burnt-peach-tint-40: #f1a997;
+$burnt-peach-tint-50: #f3b7a8;
+$burnt-peach-tint-60: #f5c5b9;
+$burnt-peach-tint-70: #f8d4cb;
+$burnt-peach-tint-80: #fae2dc;
+$burnt-peach-tint-90: #fdf1ee;
+$burnt-peach-tint-100: #ffffff;
+// shade
+$burnt-peach-shade-10: #d06449;
+$burnt-peach-shade-20: #b95941;
+$burnt-peach-shade-30: #a24e39;
+$burnt-peach-shade-40: #8b4331;
+$burnt-peach-shade-50: #743829;
+$burnt-peach-shade-60: #5c2c20;
+$burnt-peach-shade-70: #452118;
+$burnt-peach-shade-80: #2e1610;
+$burnt-peach-shade-90: #170b08;
+$burnt-peach-shade-100: #000000;
+// tone
+$burnt-peach-tone-10: #dd7156;
+$burnt-peach-tone-20: #d2725a;
+$burnt-peach-tone-30: #c8745f;
+$burnt-peach-tone-40: #be7664;
+$burnt-peach-tone-50: #b47869;
+$burnt-peach-tone-60: #a9796d;
+$burnt-peach-tone-70: #9f7b72;
+$burnt-peach-tone-80: #957d77;
+$burnt-peach-tone-90: #8a7e7b;
+$burnt-peach-tone-100: #808080;
+
+// ── Sea Foam  #eef2f3 ───────────
+$sea-foam: #eef2f3;
+// tint
+$sea-foam-tint-10: #f0f3f4;
+$sea-foam-tint-20: #f1f5f5;
+$sea-foam-tint-30: #f3f6f7;
+$sea-foam-tint-40: #f5f7f8;
+$sea-foam-tint-50: #f7f9f9;
+$sea-foam-tint-60: #f8fafa;
+$sea-foam-tint-70: #fafbfb;
+$sea-foam-tint-80: #fcfcfd;
+$sea-foam-tint-90: #fdfefe;
+$sea-foam-tint-100: #ffffff;
+// shade
+$sea-foam-shade-10: #d6dadb;
+$sea-foam-shade-20: #bec2c2;
+$sea-foam-shade-30: #a7a9aa;
+$sea-foam-shade-40: #8f9192;
+$sea-foam-shade-50: #77797a;
+$sea-foam-shade-60: #5f6161;
+$sea-foam-shade-70: #474949;
+$sea-foam-shade-80: #303031;
+$sea-foam-shade-90: #181818;
+$sea-foam-shade-100: #000000;
+// tone
+$sea-foam-tone-10: #e3e7e8;
+$sea-foam-tone-20: #d8dbdc;
+$sea-foam-tone-30: #cdd0d1;
+$sea-foam-tone-40: #c2c4c5;
+$sea-foam-tone-50: #b7b9ba;
+$sea-foam-tone-60: #acaeae;
+$sea-foam-tone-70: #a1a2a3;
+$sea-foam-tone-80: #969797;
+$sea-foam-tone-90: #8b8b8c;
+$sea-foam-tone-100: #808080;
+// ──────────────────────────────────────────────────────────────────
+//  LAYER 1 — TOKENS DE COMPONENTE
+// ──────────────────────────────────────────────────────────────────
+
+// ── Categorias (spine colors) ─────────────────────────────────────
+$category-colors: (
+  'suspense': #227e72,
+  'terror': #0b1519,
+  'fantasia': #2a9d8f,
+  'ficcao': #1d6e64,
+  'ficcao-historica': #4c9189,
+  'drama': #a24e39,
+  'ficcao-cientifica': #e76f51,
+  'romance': #c3824e,
+  'poesia': #f4a261,
+  'nao-ficcao': #5d4e2a,
+  'realismo': #77797a,
+);
+
+// ── Badges de mídia ───────────────────────────────────────────────
+$badge-livro-bg: #eaf5f4;
+$badge-livro-ink: #1d6e64;
+
+$badge-manga-bg: #fbf3e1;
+$badge-manga-ink: #756235;
+
+$badge-hq-bg: #fae2dc;
+$badge-hq-ink: #8b4331;
+
+// ── Badge de sub-gênero (chip/tag neutro) ────────────────────────
+$badge-tag-bg: #d8dbdc;
+$badge-tag-ink: #565757;
+
+// ──────────────────────────────────────────────────────────────────
+//  LAYER 2 — TOKENS SEMÂNTICOS
+//  Mapeiam intenção de design → primitivo.
+//  Nenhum valor aqui usa color.mix — tudo referência a primitivos.
+// ──────────────────────────────────────────────────────────────────
+
+// ── Superfícies ───────────────────────────────────────────────────
+$bg: #eef2f3;
+$bg-subtle: #f3f6f7;
+$surface: #ffffff;
+$surface-raised: #ffffff;
+
+// ── Hierarquia de texto ───────────────────────────────────────────
+$ink: #040708;
+$ink-secondary: #0b1519;
+$muted: #565757;
+$muted-light: #6b6d6d;
+
+// ── Accent primário ───────────────────────────────────────────────
+$accent: #20776d;
+$accent-hover: #1c685e;
+$accent-light: #eaf5f4;
+$accent-soft: #eaf5f4;
+$accent-muted: #bfe2dd;
+
+// ── Accent secundário ─────────────────────────────────────────────
+$accent2: #e76f51;
+$accent2-hover: #b95941;
+$accent2-light: #fae2dc;
+$accent2-soft: #fdf1ee;
+$accent2-text: #a24e39;
+
+// ── Bordas ────────────────────────────────────────────────────────
+$border: #d8dbdc;
+$border-strong: #bec2c2;
+$border-focus: #20776d;
+
+// ──────────────────────────────────────────────────────────────────
+//  LAYER 3 — CANAIS RGB
+// ──────────────────────────────────────────────────────────────────
+$surface-rgb: 255, 255, 255;
+$accent-rgb: 32, 119, 109;
+$ink-rgb: 4, 7, 8;
+
+:root[data-theme='sunny-beach'] {
+  // ── context: badge · component · variant ─────────────────────
+  // object: background / text  ·  modifier: color
+  --badge-livro-background-color: #{$badge-livro-bg};
+  --badge-livro-text-color: #{$badge-livro-ink};
+  --badge-manga-background-color: #{$badge-manga-bg};
+  --badge-manga-text-color: #{$badge-manga-ink};
+  --badge-hq-background-color: #{$badge-hq-bg};
+  --badge-hq-text-color: #{$badge-hq-ink};
+  --badge-tag-background-color: #{$badge-tag-bg};
+  --badge-tag-text-color: #{$badge-tag-ink};
+
+  // ── context: — (global)  ──────────────────────────────────────
+  // object: background  ·  modifier: default | subtle
+  --color-background-default: #{$bg};
+  --color-background-subtle: #{$bg-subtle};
+
+  // object: surface  ·  modifier: default | raised
+  --color-surface-default: #{$surface};
+  --color-surface-raised: #{$surface-raised};
+  --color-surface-default-rgb: #{$surface-rgb};
+
+  // object: text  ·  modifier: default | secondary | subtle | disabled
+  --color-text-default: #{$ink};
+  --color-text-secondary: #{$ink-secondary};
+  --color-text-subtle: #{$muted};
+  --color-text-disabled: #{$muted-light};
+  --color-text-default-rgb: #{$ink-rgb};
+
+  // object: action (accent primário — cerulean)
+  // modifier: default | hover (state) | background-subtle | text-subtle
+  --color-action-default: #{$accent};
+  --color-action-default-hover: #{$accent-hover};
+  --color-action-background-subtle: #{$accent-light};
+  --color-action-text-subtle: #{$accent-muted};
+  --color-action-default-rgb: #{$accent-rgb};
+
+  // object: secondary (accent secundário — seagreen)
+  // modifier: default | hover | background-subtle | text-default
+  --color-secondary-default: #{$accent2};
+  --color-secondary-default-hover: #{$accent2-hover};
+  --color-secondary-background-subtle: #{$accent2-light};
+  --color-secondary-text-default: #{$accent2-text};
+
+  // object: border  ·  modifier: default | strong | focus (state)
+  --color-border-default: #{$border};
+  --color-border-strong: #{$border-strong};
+  --color-border-focus: #{$border-focus};
+
+  // object: header-bg — fallback summer = ink (cerulean-shade-90)
+  // Cada tema sobrescreve via [data-theme] em _themes.scss
+  --color-header-bg: #{$ink};
+}

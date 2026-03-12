@@ -1,0 +1,367 @@
+// ════════════════════════════════════════════════════════════════════
+//  _colors-purple-haze.scss — 🔮  Purple Haze
+//  Paleta completa: 6 cores × 3 séries × 10 steps = 180 primitivos
+//  + tokens semânticos derivados — mesma arquitetura do tema Summer
+//
+//  Cores base:
+//    $space-cadet        #242038   Space Cadet — ink / header
+//    $lavender-purple    #9067c6   Lavender Purple — accent primário (shade-20)
+//    $soft-periwinkle    #8d86c9   Soft Periwinkle — secondary
+//    $pale-slate         #cac4ce   Pale Slate — decorativo
+//    $linen              #f7ece1   Linen — tom quente pálido
+//    $soft-lavender      #f4f0f8   Soft Lavender — neutro do sistema
+//
+//  Cor neutra do sistema: neutro — fundo geral, surfaces
+//  Contraste WCAG 2.1 verificado em todos os pares texto/fundo.
+// ════════════════════════════════════════════════════════════════════
+
+// ──────────────────────────────────────────────────────────────────
+//  LAYER 0 — REFERÊNCIAS BRUTAS
+//  Não usar diretamente em componentes. Usar sempre via semânticos.
+// ──────────────────────────────────────────────────────────────────
+
+// ── Space Cadet  #242038 ─────────────────────────────
+$space-cadet: #242038;
+// tint
+$space-cadet-tint-10: #3a364c;
+$space-cadet-tint-20: #504d60;
+$space-cadet-tint-30: #666374;
+$space-cadet-tint-40: #7c7988;
+$space-cadet-tint-50: #92909c;
+$space-cadet-tint-60: #a7a6af;
+$space-cadet-tint-70: #bdbcc3;
+$space-cadet-tint-80: #d3d2d7;
+$space-cadet-tint-90: #e9e9eb;
+$space-cadet-tint-100: #ffffff;
+// shade
+$space-cadet-shade-10: #201d32;
+$space-cadet-shade-20: #1d1a2d;
+$space-cadet-shade-30: #191627;
+$space-cadet-shade-40: #161322;
+$space-cadet-shade-50: #12101c;
+$space-cadet-shade-60: #0e0d16;
+$space-cadet-shade-70: #0b0a11;
+$space-cadet-shade-80: #07060b;
+$space-cadet-shade-90: #040306;
+$space-cadet-shade-100: #000000;
+// tone
+$space-cadet-tone-10: #2d2a3f;
+$space-cadet-tone-20: #363346;
+$space-cadet-tone-30: #403d4e;
+$space-cadet-tone-40: #494655;
+$space-cadet-tone-50: #52505c;
+$space-cadet-tone-60: #5b5a63;
+$space-cadet-tone-70: #64636a;
+$space-cadet-tone-80: #6e6d72;
+$space-cadet-tone-90: #777679;
+$space-cadet-tone-100: #808080;
+
+// ── Lavender Purple  #9067c6 ───────────
+$lavender-purple: #9067c6;
+// tint
+$lavender-purple-tint-10: #9b76cc;
+$lavender-purple-tint-20: #a685d1;
+$lavender-purple-tint-30: #b195d7;
+$lavender-purple-tint-40: #bca4dd;
+$lavender-purple-tint-50: #c8b3e3;
+$lavender-purple-tint-60: #d3c2e8;
+$lavender-purple-tint-70: #ded1ee;
+$lavender-purple-tint-80: #e9e1f4;
+$lavender-purple-tint-90: #f4f0f9;
+$lavender-purple-tint-100: #ffffff;
+// shade
+$lavender-purple-shade-10: #825db2;
+$lavender-purple-shade-20: #73529e;
+$lavender-purple-shade-30: #65488b;
+$lavender-purple-shade-40: #563e77;
+$lavender-purple-shade-50: #483463;
+$lavender-purple-shade-60: #3a294f;
+$lavender-purple-shade-70: #2b1f3b;
+$lavender-purple-shade-80: #1d1528;
+$lavender-purple-shade-90: #0e0a14;
+$lavender-purple-shade-100: #000000;
+// tone
+$lavender-purple-tone-10: #8e6abf;
+$lavender-purple-tone-20: #8d6cb8;
+$lavender-purple-tone-30: #8b6fb1;
+$lavender-purple-tone-40: #8a71aa;
+$lavender-purple-tone-50: #8874a3;
+$lavender-purple-tone-60: #86769c;
+$lavender-purple-tone-70: #857995;
+$lavender-purple-tone-80: #837b8e;
+$lavender-purple-tone-90: #827e87;
+$lavender-purple-tone-100: #808080;
+
+// ── Soft Periwinkle  #8d86c9 ────────────────────────────
+$soft-periwinkle: #8d86c9;
+// tint
+$soft-periwinkle-tint-10: #9892ce;
+$soft-periwinkle-tint-20: #a49ed4;
+$soft-periwinkle-tint-30: #afaad9;
+$soft-periwinkle-tint-40: #bbb6df;
+$soft-periwinkle-tint-50: #c6c3e4;
+$soft-periwinkle-tint-60: #d1cfe9;
+$soft-periwinkle-tint-70: #dddbef;
+$soft-periwinkle-tint-80: #e8e7f4;
+$soft-periwinkle-tint-90: #f4f3fa;
+$soft-periwinkle-tint-100: #ffffff;
+// shade
+$soft-periwinkle-shade-10: #7f79b5;
+$soft-periwinkle-shade-20: #716ba1;
+$soft-periwinkle-shade-30: #635e8d;
+$soft-periwinkle-shade-40: #555079;
+$soft-periwinkle-shade-50: #474365;
+$soft-periwinkle-shade-60: #383650;
+$soft-periwinkle-shade-70: #2a283c;
+$soft-periwinkle-shade-80: #1c1b28;
+$soft-periwinkle-shade-90: #0e0d14;
+$soft-periwinkle-shade-100: #000000;
+// tone
+$soft-periwinkle-tone-10: #8c85c2;
+$soft-periwinkle-tone-20: #8a85ba;
+$soft-periwinkle-tone-30: #8984b3;
+$soft-periwinkle-tone-40: #8884ac;
+$soft-periwinkle-tone-50: #8783a5;
+$soft-periwinkle-tone-60: #85829d;
+$soft-periwinkle-tone-70: #848296;
+$soft-periwinkle-tone-80: #83818f;
+$soft-periwinkle-tone-90: #818187;
+$soft-periwinkle-tone-100: #808080;
+
+// ── Pale Slate  #cac4ce ────────────────────────────────
+$pale-slate: #cac4ce;
+// tint
+$pale-slate-tint-10: #cfcad3;
+$pale-slate-tint-20: #d5d0d8;
+$pale-slate-tint-30: #dad6dd;
+$pale-slate-tint-40: #dfdce2;
+$pale-slate-tint-50: #e5e2e7;
+$pale-slate-tint-60: #eae7eb;
+$pale-slate-tint-70: #efedf0;
+$pale-slate-tint-80: #f4f3f5;
+$pale-slate-tint-90: #faf9fa;
+$pale-slate-tint-100: #ffffff;
+// shade
+$pale-slate-shade-10: #b6b0b9;
+$pale-slate-shade-20: #a29da5;
+$pale-slate-shade-30: #8d8990;
+$pale-slate-shade-40: #79767c;
+$pale-slate-shade-50: #656267;
+$pale-slate-shade-60: #514e52;
+$pale-slate-shade-70: #3d3b3e;
+$pale-slate-shade-80: #282729;
+$pale-slate-shade-90: #141415;
+$pale-slate-shade-100: #000000;
+// tone
+$pale-slate-tone-10: #c3bdc6;
+$pale-slate-tone-20: #bbb6be;
+$pale-slate-tone-30: #b4b0b7;
+$pale-slate-tone-40: #aca9af;
+$pale-slate-tone-50: #a5a2a7;
+$pale-slate-tone-60: #9e9b9f;
+$pale-slate-tone-70: #969497;
+$pale-slate-tone-80: #8f8e90;
+$pale-slate-tone-90: #878788;
+$pale-slate-tone-100: #808080;
+
+// ── Linen  #f7ece1 ──────────────────────────────
+$linen: #f7ece1;
+// tint
+$linen-tint-10: #f8eee4;
+$linen-tint-20: #f9f0e7;
+$linen-tint-30: #f9f2ea;
+$linen-tint-40: #faf4ed;
+$linen-tint-50: #fbf6f0;
+$linen-tint-60: #fcf7f3;
+$linen-tint-70: #fdf9f6;
+$linen-tint-80: #fdfbf9;
+$linen-tint-90: #fefdfc;
+$linen-tint-100: #ffffff;
+// shade
+$linen-shade-10: #ded4cb;
+$linen-shade-20: #c6bdb4;
+$linen-shade-30: #ada59e;
+$linen-shade-40: #948e87;
+$linen-shade-50: #7c7671;
+$linen-shade-60: #635e5a;
+$linen-shade-70: #4a4744;
+$linen-shade-80: #312f2d;
+$linen-shade-90: #191817;
+$linen-shade-100: #000000;
+// tone
+$linen-tone-10: #ebe1d7;
+$linen-tone-20: #dfd6ce;
+$linen-tone-30: #d3ccc4;
+$linen-tone-40: #c7c1ba;
+$linen-tone-50: #bcb6b1;
+$linen-tone-60: #b0aba7;
+$linen-tone-70: #a4a09d;
+$linen-tone-80: #989693;
+$linen-tone-90: #8c8b8a;
+$linen-tone-100: #808080;
+
+// ── Soft Lavender  #f4f0f8 ──────────────────────
+$soft-lavender: #f4f0f8;
+// tint
+$soft-lavender-tint-10: #f5f2f9;
+$soft-lavender-tint-20: #f6f3f9;
+$soft-lavender-tint-30: #f7f5fa;
+$soft-lavender-tint-40: #f8f6fb;
+$soft-lavender-tint-50: #faf8fc;
+$soft-lavender-tint-60: #fbf9fc;
+$soft-lavender-tint-70: #fcfbfd;
+$soft-lavender-tint-80: #fdfcfe;
+$soft-lavender-tint-90: #fefefe;
+$soft-lavender-tint-100: #ffffff;
+// shade
+$soft-lavender-shade-10: #dcd8df;
+$soft-lavender-shade-20: #c3c0c6;
+$soft-lavender-shade-30: #aba8ae;
+$soft-lavender-shade-40: #929095;
+$soft-lavender-shade-50: #7a787c;
+$soft-lavender-shade-60: #626063;
+$soft-lavender-shade-70: #49484a;
+$soft-lavender-shade-80: #313032;
+$soft-lavender-shade-90: #181819;
+$soft-lavender-shade-100: #000000;
+// tone
+$soft-lavender-tone-10: #e8e5ec;
+$soft-lavender-tone-20: #dddae0;
+$soft-lavender-tone-30: #d1ced4;
+$soft-lavender-tone-40: #c6c3c8;
+$soft-lavender-tone-50: #bab8bc;
+$soft-lavender-tone-60: #aeadb0;
+$soft-lavender-tone-70: #a3a2a4;
+$soft-lavender-tone-80: #979698;
+$soft-lavender-tone-90: #8c8b8c;
+$soft-lavender-tone-100: #808080;
+// ──────────────────────────────────────────────────────────────────
+//  LAYER 1 — TOKENS DE COMPONENTE
+// ──────────────────────────────────────────────────────────────────
+
+// ── Categorias (spine colors) ─────────────────────────────────────
+$category-colors: (
+  'suspense': #73529e,
+  'terror': #0b0a11,
+  'fantasia': #9067c6,
+  'ficcao': #65488b,
+  'ficcao-historica': #8a71aa,
+  'drama': #635e8d,
+  'ficcao-cientifica': #8d86c9,
+  'romance': #c6bdb4,
+  'poesia': #ded4cb,
+  'nao-ficcao': #656267,
+  'realismo': #7a787c,
+);
+
+// ── Badges de mídia ───────────────────────────────────────────────
+$badge-livro-bg: #f4f0f9;
+$badge-livro-ink: #65488b;
+
+$badge-manga-bg: #f9f2ea;
+$badge-manga-ink: #73529e;
+
+$badge-hq-bg: #dddbef;
+$badge-hq-ink: #555079;
+
+// ── Badge de sub-gênero (chip/tag neutro) ────────────────────────
+$badge-tag-bg: #dddae0;
+$badge-tag-ink: #626063;
+
+// ──────────────────────────────────────────────────────────────────
+//  LAYER 2 — TOKENS SEMÂNTICOS
+//  Mapeiam intenção de design → primitivo.
+//  Nenhum valor aqui usa color.mix — tudo referência a primitivos.
+// ──────────────────────────────────────────────────────────────────
+
+// ── Superfícies ───────────────────────────────────────────────────
+$bg: #f4f0f8;
+$bg-subtle: #f7f5fa;
+$surface: #ffffff;
+$surface-raised: #ffffff;
+
+// ── Hierarquia de texto ───────────────────────────────────────────
+$ink: #040306;
+$ink-secondary: #0b0a11;
+$muted: #626063;
+$muted-light: #7a787c;
+
+// ── Accent primário ───────────────────────────────────────────────
+$accent: #73529e;
+$accent-hover: #65488b;
+$accent-light: #f4f0f9;
+$accent-soft: #f4f0f9;
+$accent-muted: #ded1ee;
+
+// ── Accent secundário ─────────────────────────────────────────────
+$accent2: #8d86c9;
+$accent2-hover: #7f79b5;
+$accent2-light: #dddbef;
+$accent2-soft: #e8e7f4;
+$accent2-text: #555079;
+
+// ── Bordas ────────────────────────────────────────────────────────
+$border: #dddae0;
+$border-strong: #c3c0c6;
+$border-focus: #73529e;
+
+// ──────────────────────────────────────────────────────────────────
+//  LAYER 3 — CANAIS RGB
+// ──────────────────────────────────────────────────────────────────
+$surface-rgb: 255, 255, 255;
+$accent-rgb: 115, 82, 158;
+$ink-rgb: 4, 3, 6;
+
+:root[data-theme='purple-haze'] {
+  // ── context: badge · component · variant ─────────────────────
+  // object: background / text  ·  modifier: color
+  --badge-livro-background-color: #{$badge-livro-bg};
+  --badge-livro-text-color: #{$badge-livro-ink};
+  --badge-manga-background-color: #{$badge-manga-bg};
+  --badge-manga-text-color: #{$badge-manga-ink};
+  --badge-hq-background-color: #{$badge-hq-bg};
+  --badge-hq-text-color: #{$badge-hq-ink};
+  --badge-tag-background-color: #{$badge-tag-bg};
+  --badge-tag-text-color: #{$badge-tag-ink};
+
+  // ── context: — (global)  ──────────────────────────────────────
+  // object: background  ·  modifier: default | subtle
+  --color-background-default: #{$bg};
+  --color-background-subtle: #{$bg-subtle};
+
+  // object: surface  ·  modifier: default | raised
+  --color-surface-default: #{$surface};
+  --color-surface-raised: #{$surface-raised};
+  --color-surface-default-rgb: #{$surface-rgb};
+
+  // object: text  ·  modifier: default | secondary | subtle | disabled
+  --color-text-default: #{$ink};
+  --color-text-secondary: #{$ink-secondary};
+  --color-text-subtle: #{$muted};
+  --color-text-disabled: #{$muted-light};
+  --color-text-default-rgb: #{$ink-rgb};
+
+  // object: action (accent primário — cerulean)
+  // modifier: default | hover (state) | background-subtle | text-subtle
+  --color-action-default: #{$accent};
+  --color-action-default-hover: #{$accent-hover};
+  --color-action-background-subtle: #{$accent-light};
+  --color-action-text-subtle: #{$accent-muted};
+  --color-action-default-rgb: #{$accent-rgb};
+
+  // object: secondary (accent secundário — seagreen)
+  // modifier: default | hover | background-subtle | text-default
+  --color-secondary-default: #{$accent2};
+  --color-secondary-default-hover: #{$accent2-hover};
+  --color-secondary-background-subtle: #{$accent2-light};
+  --color-secondary-text-default: #{$accent2-text};
+
+  // object: border  ·  modifier: default | strong | focus (state)
+  --color-border-default: #{$border};
+  --color-border-strong: #{$border-strong};
+  --color-border-focus: #{$border-focus};
+
+  // object: header-bg — fallback summer = ink (cerulean-shade-90)
+  // Cada tema sobrescreve via [data-theme] em _themes.scss
+  --color-header-bg: #{$ink};
+}
