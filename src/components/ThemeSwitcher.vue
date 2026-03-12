@@ -70,6 +70,12 @@ const current = computed(() => themes.find((t) => t.id === activeTheme.value) ||
 const applyTheme = (id: string) => {
   const el = document.documentElement
 
+  sendGtmEvent({
+    event: 'theme_change',
+    theme: id,
+    theme_label: themes.find((t) => t.id === id)?.label ?? id,
+  })
+
   el.setAttribute('data-theme', id)
   activeTheme.value = id
 }
@@ -77,13 +83,6 @@ const applyTheme = (id: string) => {
 const select = (id: string) => {
   applyTheme(id)
   localStorage.setItem(STORAGE_KEY, id)
-
-  sendGtmEvent({
-    event: 'theme_change',
-    theme: id,
-    theme_label: themes.find((t) => t.id === id)?.label ?? id,
-  })
-
   close()
 }
 
