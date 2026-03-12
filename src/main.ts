@@ -1,6 +1,7 @@
 import { createApp, defineAsyncComponent } from 'vue'
 import { createPinia } from 'pinia'
 import persisteStorage from 'pinia-plugin-persistedstate'
+import gtm from '@gtm-support/vue-gtm'
 
 import router from '@/router'
 
@@ -15,6 +16,15 @@ pinia.use(persisteStorage)
 
 app.use(pinia)
 app.use(router)
+app.use(gtm, {
+  id: import.meta.env.VITE_GTM_ID,
+  defer: false,
+  compatibility: false,
+  enabled: import.meta.env.VITE_ENV === 'production',
+  loadScript: true,
+  vueRouter: router,
+  trackOnNextTick: false,
+})
 
 app.component(
   'BaseIcon',
