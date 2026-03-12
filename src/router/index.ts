@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import { sendGtmEvent } from '@/utils/gtm'
+
 import Catalog from './modules/catalog'
 import Book from './modules/books'
 import Filter from './modules/filter'
@@ -17,6 +19,13 @@ const router = createRouter({
 
 router.afterEach((to) => {
   window.document.title = (to.meta.title as string) || 'Ecos Literários'
+
+  sendGtmEvent({
+    event: 'content_view',
+    'content-name': to.fullPath,
+    'content-view-name': to.name || to.meta.title || 'unknown',
+    gtm_meta: to.meta.gtm || null,
+  })
 })
 
 export default router

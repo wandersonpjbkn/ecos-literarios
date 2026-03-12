@@ -83,6 +83,7 @@
                 class="ext-btn ext-btn--amazon"
                 aria-label="Buscar na Amazon"
                 title="Amazon"
+                @click="emitGTMEvent('amazon')"
               >
                 <!-- Amazon icon -->
                 <BaseIcon name="amazon" />
@@ -95,6 +96,7 @@
                 class="ext-btn ext-btn--youtube"
                 aria-label="Buscar no YouTube"
                 title="YouTube"
+                @click="emitGTMEvent('youtube')"
               >
                 <!-- YouTube icon -->
                 <BaseIcon name="youtube" />
@@ -107,6 +109,7 @@
                 class="ext-btn ext-btn--google"
                 aria-label="Buscar no Google"
                 title="Google"
+                @click="emitGTMEvent('google')"
               >
                 <!-- Google icon -->
                 <BaseIcon name="chrome" />
@@ -186,6 +189,8 @@ import { useRoute } from 'vue-router'
 import { useBooksStore } from '@/stores'
 import { useCategoryColors, useSheets } from '@/composables'
 
+import { sendGtmEvent } from '@/utils/gtm'
+
 import type { Book } from '@/types'
 
 const route = useRoute()
@@ -201,6 +206,16 @@ const related = computed(() => {
     .books.filter((b) => b.id !== book.value.id && b.categoria === book.value.categoria)
     .slice(0, 4)
 })
+
+/** GTM :: external links */
+const emitGTMEvent = (origin: string) => {
+  sendGtmEvent({
+    event: 'external_link',
+    external_link_origin: origin,
+    external_link_name: book.value.titulo,
+    external_link_author: book.value.autor,
+  })
+}
 </script>
 
 <style lang="scss" scoped>

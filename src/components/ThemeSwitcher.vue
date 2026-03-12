@@ -48,6 +48,8 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
+import { sendGtmEvent } from '@/utils/gtm'
+
 const themes = [
   { id: 'ecos', label: 'Ecos', emoji: '📚' },
   { id: 'olive-garden', label: 'Olive', emoji: '🫒' },
@@ -75,6 +77,13 @@ const applyTheme = (id: string) => {
 const select = (id: string) => {
   applyTheme(id)
   localStorage.setItem(STORAGE_KEY, id)
+
+  sendGtmEvent({
+    event: 'theme_change',
+    theme: id,
+    theme_label: themes.find((t) => t.id === id)?.label ?? id,
+  })
+
   close()
 }
 
