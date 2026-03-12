@@ -20,7 +20,7 @@ app.use(gtm, {
   id: import.meta.env.VITE_GTM_ID,
   defer: false,
   compatibility: false,
-  enabled: import.meta.env.VITE_ENV === 'production',
+  enabled: import.meta.env.PROD,
   loadScript: true,
   vueRouter: router,
   trackOnNextTick: false,
