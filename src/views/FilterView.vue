@@ -32,14 +32,7 @@
       <!-- Search + count -->
       <div class="search-row">
         <SearchBar v-model="search" :suggestions="searchSuggestions" @select="onSelectSuggestion" />
-        <div class="result-count" aria-live="polite" aria-atomic="true">
-          <template v-if="activeFilterCount > 0">
-            <strong>{{ filtered.length }}</strong> de {{ baseFiltered.length }} títulos
-          </template>
-          <template v-else>
-            <strong>{{ baseFiltered.length }}</strong> títulos
-          </template>
-        </div>
+        <ResultCount :total="useBooksStore().size" :filtered="filtered.length" :active-filters="activeFilterCount" />
       </div>
 
       <!-- Layout: sidebar + grid -->
@@ -49,6 +42,7 @@
           :options="panelOptions"
           :selected="panelSelected"
           :active-count="activeFilterCount"
+          :opened="false"
           @toggle="handleToggle"
           @clear="clearSecondary"
         />
@@ -78,6 +72,7 @@ import { useBooksStore } from '@/stores'
 import { useSheets } from '@/composables'
 
 import SearchBar from '@/components/SearchBar.vue'
+import ResultCount from '@/components/ResultCount.vue'
 import FilterPanel from '@/components/FilterPanel.vue'
 import BookCard from '@/components/BookCard.vue'
 
@@ -363,17 +358,6 @@ const onSelectSuggestion = (book: Book) => {
   margin-bottom: 20px;
 }
 
-.result-count {
-  flex-shrink: 0;
-  font-size: 0.9rem;
-  color: var(--color-text-subtle);
-  white-space: nowrap;
-
-  strong {
-    color: var(--color-action-default);
-  }
-}
-
 /* ── Layout sidebar + grid ───────────────────── */
 .filter-layout {
   display: flex;
@@ -438,10 +422,6 @@ const onSelectSuggestion = (book: Book) => {
   }
   .search-row {
     flex-wrap: wrap;
-  }
-  .result-count {
-    order: -1;
-    width: 100%;
   }
   .books-grid {
     grid-template-columns: 1fr;

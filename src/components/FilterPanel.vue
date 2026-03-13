@@ -2,7 +2,7 @@
   <aside class="filter-panel" :class="{ 'is-open': isOpen }">
     <!-- Mobile toggle -->
     <button class="filter-toggle" :aria-expanded="isOpen" aria-controls="filter-panel-body" @click="isOpen = !isOpen">
-      <BaseIcon name="filter" aria-hidden="true" />
+      <BaseIcon name="funil" aria-hidden="true" />
       <span>Filtros</span>
       <span v-if="activeCount > 0" class="badge" aria-label="`${activeCount} filtros ativos`">{{ activeCount }}</span>
       <BaseIcon name="chevron" class="chevron" aria-hidden="true" />
@@ -49,6 +49,7 @@
           title="Categoria"
           :options="options.categoria"
           :selected="selected.categoria"
+          :default-open="false"
           @toggle="(val) => emit('toggle', 'categoria', val)"
         />
 
@@ -58,6 +59,7 @@
           title="Sub-gêneros"
           :options="options.subgeneros"
           :selected="selected.subgeneros"
+          :default-open="false"
           @toggle="(val) => emit('toggle', 'subgeneros', val)"
         />
 
@@ -67,6 +69,7 @@
           title="Quem mencionou"
           :options="options.quem"
           :selected="selected.quem"
+          :default-open="false"
           @toggle="(val) => emit('toggle', 'quem', val)"
         />
       </div>
@@ -75,17 +78,23 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 import type { Options } from '@/types'
 
 import FilterSection from '@/components/FilterSection.vue'
 
-const props = defineProps<{
-  options: Options
-  selected: Options
-  activeCount: number
-}>()
+const props = withDefaults(
+  defineProps<{
+    options: Options
+    selected: Options
+    activeCount: number
+    opened?: boolean
+  }>(),
+  {
+    opened: true,
+  },
+)
 const emit = defineEmits(['toggle', 'clear'])
 
 const isOpen = ref(true)
@@ -109,6 +118,10 @@ const activeTags = computed(() => {
 const removeTag = ({ key, value }: { key: string; value: string }) => {
   emit('toggle', key, value)
 }
+
+onMounted(() => {
+  isOpen.value = props.opened
+})
 </script>
 
 <style lang="scss" scoped>

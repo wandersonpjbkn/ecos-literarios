@@ -18,7 +18,7 @@
     <main ref="content" class="site-main">
       <RouterView v-slot="{ Component }">
         <Transition name="fade" mode="out-in">
-          <component :is="Component" @top="toTop" />
+          <component :is="Component" />
         </Transition>
       </RouterView>
     </main>
@@ -37,15 +37,13 @@ const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
 const route = useRoute()
 const content = ref<HTMLElement | null>(null)
 
-const toTop = () => {
-  if (content.value) {
-    content.value.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-}
-
 watch(route, async () => {
   await nextTick()
-  setTimeout(() => toTop(), 350)
+  setTimeout(() => {
+    if (content.value) {
+      content.value.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, 350)
 })
 </script>
 

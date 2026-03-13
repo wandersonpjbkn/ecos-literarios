@@ -40,7 +40,7 @@ const backTop = () => {
   $size: 3rem;
 
   position: fixed;
-  right: 2rem;
+  right: 3rem;
   bottom: 1rem;
   z-index: 100;
 
@@ -48,8 +48,8 @@ const backTop = () => {
   align-items: center;
   justify-content: center;
 
-  background-color: var(--color-surface-default);
-  border: 1px solid var(--color-border-default);
+  background-color: var(--color-action-default);
+  border: none;
   border-radius: var(--border-radius-default);
   width: $size;
   height: $size;
@@ -57,9 +57,12 @@ const backTop = () => {
 
   @media (max-width: 767px) {
     $size-mobile: 44px;
+
+    right: 2rem;
+    bottom: 2rem;
+
     width: $size-mobile;
     height: $size-mobile;
-    right: 1rem;
   }
 
   &:focus-visible {
@@ -68,9 +71,13 @@ const backTop = () => {
   }
 
   &-icon {
-    width: 18px;
-    height: 18px;
-    color: var(--color-action-default);
+    $size: 1.5rem;
+
+    width: $size;
+    height: $size;
+
+    color: var(--color-surface-default);
+
     transform: rotate(90deg);
   }
 }

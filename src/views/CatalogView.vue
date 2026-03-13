@@ -10,15 +10,11 @@
       <BaseIcon name="error" />
       <p>{{ useBooksStore().error }}</p>
       <button class="retry-btn" @click="useSheets().fetchBooks(true)">Tentar novamente</button>
-      <p class="error-hint">
-        Verifique se o <code>SHEET_ID</code> está configurado em <code>useSheets.js</code> e se a planilha está
-        publicada.
-      </p>
+      <p class="error-hint">Contacte o administrador do site se o erro persistir.</p>
     </div>
 
     <!-- Catalog -->
     <div v-else class="catalog-body">
-      <!-- enum-->
       <section class="catalog-intro">
         <div class="intro-inner">
           <h1 class="intro-title">Catálogo de Indicações</h1>
@@ -28,21 +24,27 @@
         </div>
       </section>
 
-      <!-- Row 1: Search + count -->
+      <!-- Row 1: Search + mobile filters button + count -->
       <div class="search-row">
-        <SearchBar v-model="search" :suggestions="searchSuggestions" @select="onSelectSuggestion" />
-        <div class="result-count" aria-live="polite" aria-atomic="true">
-          <template v-if="activeFilterCount > 0">
-            <strong>{{ filtered.length }}</strong> de {{ useBooksStore().size }} títulos
-          </template>
-          <template v-else>{{ useBooksStore().size }} títulos</template>
+        <div class="search-main">
+          <SearchBar v-model="search" :suggestions="searchSuggestions" @select="onSelectSuggestion" />
+          <button
+            v-if="isMobile"
+            class="show-all-btn mobile"
+            type="button"
+            aria-label="Abrir filtros"
+            @click="openMobileFilters"
+          >
+            <BaseIcon name="filter" aria-hidden="true" />
+          </button>
         </div>
+
+        <ResultCount :total="useBooksStore().size" :filtered="filtered.length" :active-filters="activeFilterCount" />
       </div>
 
-      <!-- Row 2: Filter bar -->
-      <div class="filter-bar">
+      <!-- Desktop filters -->
+      <div v-if="!isMobile" class="filter-bar">
         <MultiSelect
-          v-if="showFilters"
           class="multi-select"
           label="Mídia"
           :options="optionsMidia"
@@ -51,7 +53,6 @@
           @clear="clearKey('midia')"
         />
         <MultiSelect
-          v-if="showFilters"
           class="multi-select"
           label="Categoria"
           :options="optionsCategoria"
@@ -60,7 +61,6 @@
           @clear="clearKey('categoria')"
         />
         <MultiSelect
-          v-if="showFilters"
           class="multi-select"
           label="Sub-gêneros"
           :options="optionsSubgeneros"
@@ -69,7 +69,6 @@
           @clear="clearKey('subgeneros')"
         />
         <MultiSelect
-          v-if="showFilters"
           class="multi-select"
           label="Mencionado por"
           :options="optionsQuem"
@@ -77,11 +76,64 @@
           @toggle="(v) => handleToggle('quem', v)"
           @clear="clearKey('quem')"
         />
-        <button class="show-all-btn" @click="handleClickShowAll">
-          {{ showFilters ? 'Menos' : 'Mais' }} filtros
-          <BaseIcon name="chevron" :class="['chevron', { open: showFilters }]" aria-hidden="true" />
-        </button>
       </div>
+
+      <!-- Mobile sidebar -->
+      <Transition name="mobile-filters-overlay">
+        <div v-if="isMobile && mobileFiltersOpen" class="mobile-filters-overlay" @click="closeMobileFilters" />
+      </Transition>
+
+      <Transition name="mobile-filters-panel">
+        <aside v-if="isMobile && mobileFiltersOpen" class="mobile-filters-sidebar" aria-label="Filtros">
+          <div class="mobile-filters-header">
+            <h2 class="mobile-filters-title">Filtros</h2>
+
+            <button class="mobile-filters-close" type="button" aria-label="Fechar filtros" @click="closeMobileFilters">
+              <BaseIcon name="times" aria-hidden="true" />
+            </button>
+          </div>
+
+          <div class="mobile-filters-body">
+            <MultiSelect
+              class="multi-select mobile"
+              label="Mídia"
+              :options="optionsMidia"
+              :selected="selectedMidia"
+              @toggle="(v) => handleToggle('midia', v)"
+              @clear="clearKey('midia')"
+            />
+            <MultiSelect
+              class="multi-select mobile"
+              label="Categoria"
+              :options="optionsCategoria"
+              :selected="selectedCategoria"
+              @toggle="(v) => handleToggle('categoria', v)"
+              @clear="clearKey('categoria')"
+            />
+            <MultiSelect
+              class="multi-select mobile"
+              label="Sub-gêneros"
+              :options="optionsSubgeneros"
+              :selected="selectedSubgeneros"
+              @toggle="(v) => handleToggle('subgeneros', v)"
+              @clear="clearKey('subgeneros')"
+            />
+            <MultiSelect
+              class="multi-select mobile"
+              label="Mencionado por"
+              :options="optionsQuem"
+              :selected="selectedQuem"
+              @toggle="(v) => handleToggle('quem', v)"
+              @clear="clearKey('quem')"
+            />
+          </div>
+
+          <div class="mobile-filters-footer">
+            <button class="secondary-btn" type="button" @click="clearAll">Limpar</button>
+            <button class="retry-btn" type="button" @click="closeMobileFilters">Ver resultados</button>
+          </div>
+        </aside>
+      </Transition>
 
       <!-- Row 3: Active filter tags -->
       <ActiveFilters
@@ -101,7 +153,6 @@
           <BookCard v-for="book in filtered" :key="book.id" :book="book" />
         </TransitionGroup>
 
-        <!-- Empty state -->
         <div v-else class="empty-state">
           <BaseIcon name="book" />
           <p>Nenhum título encontrado com estes filtros.</p>
@@ -120,13 +171,12 @@ import { useBooksStore } from '@/stores'
 import { useSheets, useFilters } from '@/composables'
 
 import SearchBar from '@/components/SearchBar.vue'
+import ResultCount from '@/components/ResultCount.vue'
 import MultiSelect from '@/components/MultiSelect.vue'
 import ActiveFilters from '@/components/ActiveFilters.vue'
 import BookCard from '@/components/BookCard.vue'
 
 import type { Book } from '@/types'
-
-const emit = defineEmits(['top'])
 
 const {
   search,
@@ -147,10 +197,10 @@ const {
 onMounted(() => useSheets().fetchBooks())
 
 const isMobile = useMediaQuery('(max-width: 767px)')
-const showFilters = ref(!isMobile.value)
+const mobileFiltersOpen = ref(false)
 
 watch(isMobile, (mobile) => {
-  if (!mobile) showFilters.value = true
+  if (!mobile) mobileFiltersOpen.value = false
 })
 
 const handleToggle = (key: string, value: string) => {
@@ -160,8 +210,10 @@ const handleToggle = (key: string, value: string) => {
     subgeneros: selectedSubgeneros,
     quem: selectedQuem,
   }
+
   const arr = map[key as keyof typeof map]
   const idx = arr.value.indexOf(value)
+
   if (idx === -1) arr.value.push(value)
   else arr.value.splice(idx, 1)
 }
@@ -173,6 +225,7 @@ const clearKey = (key: string) => {
     subgeneros: selectedSubgeneros,
     quem: selectedQuem,
   }
+
   map[key as keyof typeof map].value = []
 }
 
@@ -182,9 +235,14 @@ const onSelectSuggestion = (book: Book) => {
   search.value = book.titulo
 }
 
-const handleClickShowAll = () => {
-  showFilters.value = !showFilters.value
-  emit('top')
+const openMobileFilters = () => {
+  mobileFiltersOpen.value = true
+  document.body.style.overflow = 'hidden'
+}
+
+const closeMobileFilters = () => {
+  mobileFiltersOpen.value = false
+  document.body.style.overflow = ''
 }
 </script>
 
@@ -192,14 +250,12 @@ const handleClickShowAll = () => {
 .catalog {
   &-intro {
     margin: 0 auto 2rem;
-
     background: var(--color-background-default);
     border-bottom: 1px solid rgba(var(--color-surface-default-rgb), 0.08);
   }
 
   &-body {
     margin: 0 auto;
-
     max-width: 1200px;
     padding: 20px 16px 48px;
   }
@@ -213,7 +269,6 @@ const handleClickShowAll = () => {
 
   &-title {
     margin-bottom: 0.25rem;
-
     font: {
       family: var(--font-family-display);
       size: 1.25rem;
@@ -230,17 +285,14 @@ const handleClickShowAll = () => {
   }
 }
 
-/* ── States ──────────────────────────────────── */
 .state {
   &-screen {
     display: flex;
     padding: 80px 24px;
-
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 16px;
-
     color: var(--color-text-subtle);
     text-align: center;
   }
@@ -253,7 +305,6 @@ const handleClickShowAll = () => {
 .error {
   &-hint {
     max-width: 440px;
-
     font-size: 0.82rem;
     color: var(--color-text-subtle);
 
@@ -261,7 +312,6 @@ const handleClickShowAll = () => {
       background: var(--color-background-subtle);
       padding: 1px 5px;
       border-radius: 3px;
-
       font-size: 0.8rem;
     }
   }
@@ -275,14 +325,15 @@ const handleClickShowAll = () => {
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-.retry-btn {
-  background: var(--color-action-default);
+.retry-btn,
+.secondary-btn {
   border: none;
   padding: 10px 20px;
   border-radius: var(--border-radius-sm);
@@ -296,6 +347,11 @@ const handleClickShowAll = () => {
 
   cursor: pointer;
   transition: opacity var(--motion-transition-default);
+}
+
+.retry-btn {
+  background: var(--color-action-default);
+  color: var(--color-surface-default);
 
   &:hover {
     opacity: 0.85;
@@ -303,7 +359,15 @@ const handleClickShowAll = () => {
   }
 }
 
-/* ── Search row ──────────────────────────────── */
+.secondary-btn {
+  background: var(--color-background-subtle);
+  color: var(--color-text-default);
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
 .search-row {
   margin-bottom: 12px;
 
@@ -313,18 +377,13 @@ const handleClickShowAll = () => {
   gap: 12px;
 }
 
-.result-count {
-  flex-shrink: 0;
-  font-size: 0.9rem;
-  color: var(--color-text-subtle);
-  white-space: nowrap;
-
-  strong {
-    color: var(--color-action-default);
-  }
+.search-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
 }
 
-/* ── Filter bar ──────────────────────────────── */
 .filter-bar {
   margin-bottom: 2rem;
 
@@ -339,11 +398,9 @@ const handleClickShowAll = () => {
 }
 
 .show-all-btn {
-  display: none;
-  height: 48px;
   background: var(--color-action-default);
   border: none;
-  padding: 0 20px;
+  padding: 0 16px;
   border-radius: var(--border-radius-sm);
   min-height: 44px;
 
@@ -356,22 +413,17 @@ const handleClickShowAll = () => {
   cursor: pointer;
   transition: opacity var(--motion-transition-default);
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 
   &:hover {
     opacity: 0.85;
     background: var(--color-action-default-hover);
   }
-
-  .chevron {
-    transition: transform var(--motion-transition-default);
-
-    &.open {
-      transform: rotate(180deg);
-    }
-  }
 }
 
-/* ── Grid ────────────────────────────────────── */
 .grid-area {
   position: relative;
   margin-top: 2rem;
@@ -394,28 +446,121 @@ const handleClickShowAll = () => {
   font-size: 1rem;
 }
 
-/* Grid transitions */
+.mobile-filters {
+  &-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 40;
+  }
+
+  &-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 50;
+
+    display: flex;
+    width: min(88dvw, 360px);
+    height: 100dvh;
+    padding-top: 4rem;
+    background: var(--color-surface-default);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.16);
+
+    flex-direction: column;
+  }
+
+  &-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    border-bottom: 1px solid var(--color-border-default);
+  }
+
+  &-title {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--color-text-default);
+  }
+
+  &-close {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    border-radius: 999px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: var(--color-text-default);
+  }
+
+  &-body {
+    // flex: 1;
+    // overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &-footer {
+    margin-top: auto;
+
+    display: grid;
+    padding: 16px;
+    border-top: 1px solid var(--color-border-default);
+    background: var(--color-surface-default);
+
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
+.mobile-filters-overlay-enter-active,
+.mobile-filters-overlay-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.mobile-filters-overlay-enter-from,
+.mobile-filters-overlay-leave-to {
+  opacity: 0;
+}
+
+.mobile-filters-panel-enter-active,
+.mobile-filters-panel-leave-active {
+  transition: transform 0.25s ease;
+}
+
+.mobile-filters-panel-enter-from,
+.mobile-filters-panel-leave-to {
+  transform: translateX(100%);
+}
+
 .grid-enter-active {
   transition:
     opacity var(--motion-transition-default),
     transform var(--motion-transition-default);
 }
+
 .grid-enter-from {
   opacity: 0;
   transform: scale(0.96);
 }
+
 .grid-leave-active {
   transition: opacity var(--motion-transition-default);
   position: absolute;
 }
+
 .grid-leave-to {
   opacity: 0;
 }
+
 .grid-move {
   transition: transform var(--motion-transition-default);
 }
 
-/* ── Responsive ──────────────────────────────── */
 @media (max-width: 767px) {
   .catalog-intro {
     margin-bottom: 1rem;
@@ -430,28 +575,16 @@ const handleClickShowAll = () => {
     font-size: 0.875rem;
   }
 
-  .filter-bar {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .multi-select {
-    min-width: 0;
-    flex: 1 1 100%;
-  }
-
-  .show-all-btn {
-    display: block;
-    width: 100%;
-  }
-
   .search-row {
     flex-wrap: wrap;
   }
 
-  .result-count {
-    order: -1;
+  .search-main {
     width: 100%;
+  }
+
+  .show-all-btn.mobile {
+    flex-shrink: 0;
   }
 
   .books-grid {

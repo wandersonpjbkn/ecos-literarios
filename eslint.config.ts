@@ -79,7 +79,14 @@ export default defineConfigWithVueTs(
     },
   },
 
-  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/src/components/_**/*', '**/src/views/_**/*']),
+  globalIgnores([
+    '**/dist/**',
+    '**/dist-ssr/**',
+    '**/dev-dist/**',
+    '**/coverage/**',
+    '**/src/components/_**/*',
+    '**/src/views/_**/*',
+  ]),
 
   skipFormatting,
 )

@@ -13,12 +13,14 @@
         <span class="categoria-tag">{{ book.categoria }}</span>
       </div>
 
-      <h3 class="card-titulo">{{ book.titulo }}</h3>
       <p class="card-autor">{{ book.autor }}</p>
+      <h3 class="card-titulo">{{ book.titulo }}</h3>
 
       <div v-if="book.subgenerosArr?.length" class="card-tags">
         <span v-for="tag in book.subgenerosArr.slice(0, 3)" :key="tag" class="sub-tag">{{ tag }}</span>
       </div>
+
+      <hr class="card-divider" />
 
       <div class="card-footer">
         <span v-if="book.quem" class="quem-badge">
@@ -101,12 +103,13 @@ const isComponent = computed(() => (isMobile.value ? 'div' : 'RouterLink'))
     padding: 16px;
     min-width: 0;
 
-    gap: 6px;
     flex-direction: column;
     flex: 1;
   }
 
   &-meta-top {
+    margin-bottom: 1.5rem;
+
     display: flex;
 
     align-items: center;
@@ -119,7 +122,7 @@ const isComponent = computed(() => (isMobile.value ? 'div' : 'RouterLink'))
 
     font: {
       family: var(--font-family-display);
-      size: clamp(1rem, 2.5vw, 1.2rem);
+      size: clamp(1.35rem, 2.5vw, 1.2rem);
       weight: 600;
     }
     line-height: 1.35;
@@ -133,28 +136,33 @@ const isComponent = computed(() => (isMobile.value ? 'div' : 'RouterLink'))
 
   &-autor {
     font: {
-      size: 0.9rem;
+      size: 0.8rem;
       style: italic;
     }
     color: var(--color-text-subtle);
+    text-transform: lowercase;
   }
 
   &-tags {
-    margin: {
-      top: 2px;
-      bottom: auto;
-    }
+    margin-top: 0.75rem;
+    margin-bottom: auto;
 
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
   }
 
-  &-footer {
-    margin-top: 12px;
+  &-divider {
+    margin: {
+      top: 3rem;
+      bottom: 1rem;
+    }
+    border: none;
+    border-top: 1px solid var(--color-border-default);
+  }
 
+  &-footer {
     display: flex;
-    padding-top: 4px;
 
     align-items: center;
     justify-content: space-between;
