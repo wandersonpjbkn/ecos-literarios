@@ -1,5 +1,5 @@
 <template>
-  <div class="search-wrap">
+  <div ref="wrapRef" class="search-wrap">
     <div class="search-box" :class="{ 'is-focused': focused }">
       <BaseIcon name="search" class="search-icon" />
       <input
@@ -12,11 +12,11 @@
         class="search-input"
         @input="onInput"
         @focus="focused = true"
-        @blur="handleBlur"
         @keydown.down.prevent="moveSuggestion(1)"
         @keydown.up.prevent="moveSuggestion(-1)"
         @keydown.enter.prevent="selectCurrent"
         @keydown.escape="close"
+        @keydown.tab="close"
       />
       <button v-if="model" class="clear-search" aria-label="Limpar" @click="cleanAll">
         <BaseIcon name="times" />
@@ -25,13 +25,14 @@
 
     <!-- Autocomplete dropdown -->
     <Transition name="dropdown">
-      <ul v-if="showSuggestions" class="suggestions" role="listbox">
+      <ul v-if="showSuggestions" class="suggestions" role="listbox" aria-label="Sugestões de busca">
         <li
           v-for="(s, i) in suggestions"
           :key="s.id"
           class="suggestion"
           :class="{ 'is-active': i === activeIdx }"
           role="option"
+          :aria-selected="i === activeIdx"
           @mousedown.prevent="selectSuggestion(s)"
         >
           <span class="sug-titulo" v-html="highlight(s.titulo)" />
@@ -44,6 +45,7 @@
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
+import { onClickOutside } from '@vueuse/core'
 
 import type { Suggestion } from '@/types'
 
@@ -54,6 +56,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits(['update:modelValue', 'select'])
 
+const wrapRef = ref<HTMLDivElement | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
 const focused = ref(false)
 const activeIdx = ref(-1)
@@ -66,40 +69,41 @@ const onInput = (e: Event) => {
   activeIdx.value = -1
   emit('update:modelValue', (e.target as HTMLInputElement).value)
 }
-const handleBlur = () => {
-  setTimeout(() => {
-    focused.value = false
-  }, 150)
-}
+
 const moveSuggestion = (dir: number) => {
   const max = props.suggestions.length - 1
   activeIdx.value = Math.max(-1, Math.min(max, activeIdx.value + dir))
 }
+
 const selectCurrent = () => {
   if (activeIdx.value >= 0 && props.suggestions[activeIdx.value]) {
-    selectSuggestion(props.suggestions[activeIdx.value as number] as Suggestion)
+    selectSuggestion(props.suggestions[activeIdx.value] as Suggestion)
   }
 }
+
 const selectSuggestion = (s: Suggestion) => {
   emit('update:modelValue', s.titulo)
   emit('select', s)
-  focused.value = false
+  close()
 }
+
 const close = () => {
   focused.value = false
   activeIdx.value = -1
 }
+
 const highlight = (text: string) => {
   if (!model.value) return text
-
   const q = model.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-
   return text.replace(new RegExp(`(${q})`, 'gi'), '<mark>$1</mark>')
 }
+
 const cleanAll = () => {
   emit('update:modelValue', '')
   inputRef.value?.focus()
 }
+
+onClickOutside(wrapRef, () => close())
 </script>
 
 <style lang="scss" scoped>

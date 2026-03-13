@@ -1,52 +1,38 @@
 <template>
   <Transition name="fade">
-    <aside v-if="isVisible" class="back-top">
-      <BaseIcon name="arrow-left" class="back-top-icon" @click="backTop" />
+    <aside
+      v-if="isVisible"
+      class="back-top"
+      aria-label="Voltar ao topo"
+      role="button"
+      tabindex="0"
+      @click="backTop"
+      @keydown.enter="backTop"
+      @keydown.space.prevent="backTop"
+    >
+      <BaseIcon name="arrow-left" class="back-top-icon" aria-hidden="true" />
     </aside>
   </Transition>
 </template>
 
 <script lang="ts" setup>
-import { ref, onUnmounted, watch } from 'vue'
+import { computed } from 'vue'
+import { useScroll } from '@vueuse/core'
 
 const props = defineProps<{
   target: HTMLElement | null
 }>()
 
-const isVisible = ref(false)
 const THRESHOLD = 300
 
-const handleScroll = () => {
-  const scrollTop = props.target ? props.target.scrollTop : window.scrollY || document.documentElement.scrollTop
+const { y } = useScroll(() => props.target ?? window)
 
-  isVisible.value = scrollTop > THRESHOLD
-}
+const isVisible = computed(() => y.value > THRESHOLD)
 
 const backTop = () => {
-  const target = props.target || window
-  target.scrollTo({ top: 0, behavior: 'smooth' })
+  const el = props.target ?? window
+  el.scrollTo({ top: 0, behavior: 'smooth' })
 }
-
-const updateListener = (newTarget: HTMLElement | null | undefined, oldTarget: HTMLElement | null | undefined) => {
-  const oldEl = oldTarget || window
-  oldEl.removeEventListener('scroll', handleScroll)
-
-  const newEl = newTarget || window
-  newEl.addEventListener('scroll', handleScroll)
-}
-
-watch(
-  () => props.target,
-  (newVal, oldVal) => {
-    updateListener(newVal, oldVal)
-  },
-  { immediate: true },
-)
-
-onUnmounted(() => {
-  const el = props.target || window
-  el.removeEventListener('scroll', handleScroll)
-})
 </script>
 
 <style lang="scss" scoped>
@@ -58,27 +44,41 @@ onUnmounted(() => {
   bottom: 1rem;
   z-index: 100;
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   background-color: var(--color-surface-default);
   border: 1px solid var(--color-border-default);
   border-radius: var(--border-radius-default);
   width: $size;
   height: $size;
+  cursor: pointer;
+
+  @media (max-width: 767px) {
+    $size-mobile: 44px;
+    width: $size-mobile;
+    height: $size-mobile;
+    right: 1rem;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 2px;
+  }
 
   &-icon {
-    width: inherit;
-    height: inherit;
+    width: 18px;
+    height: 18px;
     color: var(--color-action-default);
-    cursor: pointer;
     transform: rotate(90deg);
   }
 }
 
-// Estilo para a transição de fade
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity var(--motion-transition-default);
 }
-
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;

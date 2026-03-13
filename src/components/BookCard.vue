@@ -1,11 +1,15 @@
 <template>
-  <component :is="isComponent" :to="`/livro/${book.id}`" class="book-card">
-    <!-- Color swatch based on category -->
-    <div class="card-spine" :style="{ '--background': useCategoryColors().categoryClass(book.categoria) }" />
+  <component
+    :is="isComponent"
+    :to="!isMobile ? `/livro/${book.id}` : undefined"
+    class="book-card"
+    :role="isMobile ? 'article' : undefined"
+  >
+    <div class="card-spine" :style="{ '--background': useCategoryColors().categoryColor(book.categoria) }" />
 
     <div class="card-body">
       <div class="card-meta-top">
-        <span class="midia-badge" :class="useCategoryColors().midiaClass(book.midia)">{{ book.midia }}</span>
+        <span class="midia-badge" :class="useCategoryColors().midiaBadgeClass(book.midia)">{{ book.midia }}</span>
         <span class="categoria-tag">{{ book.categoria }}</span>
       </div>
 
@@ -21,12 +25,15 @@
           <BaseIcon name="user" />
           {{ book.quem }}
         </span>
-        <BaseIcon v-if="!isMobile" name="arrow-right" class="arrow" />
-
-        <!-- mobile -->
-        <RouterLink v-if="isMobile" :to="`/livro/${book.id}`" class="card-link">
+        <BaseIcon v-if="!isMobile" name="arrow-right" class="arrow" aria-hidden="true" />
+        <RouterLink
+          v-if="isMobile"
+          :to="`/livro/${book.id}`"
+          class="card-link"
+          :aria-label="`Ver detalhes de ${book.titulo}`"
+        >
           <span>Ver detalhe</span>
-          <BaseIcon name="arrow-right" class="arrow" />
+          <BaseIcon name="arrow-right" class="arrow" aria-hidden="true" />
         </RouterLink>
       </div>
     </div>
@@ -35,20 +42,19 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-
-import type { Book } from '@/types'
+import { useMediaQuery } from '@vueuse/core'
 
 import { useCategoryColors } from '@/composables'
+
+import type { Book } from '@/types'
 
 defineProps<{
   book: Book
 }>()
 
-const isMobile = computed(() => window.innerWidth < 768)
-const isComponent = computed(() => {
-  if (isMobile.value) return 'div'
-  return 'RouterLink'
-})
+const isMobile = useMediaQuery('(max-width: 767px)')
+
+const isComponent = computed(() => (isMobile.value ? 'div' : 'RouterLink'))
 </script>
 
 <style lang="scss" scoped>
@@ -153,7 +159,7 @@ const isComponent = computed(() => {
     align-items: center;
     justify-content: space-between;
 
-    @media (max-width: 768px) {
+    @media (max-width: 767px) {
       .arrow {
         color: var(--color-action-default);
       }
@@ -166,6 +172,7 @@ const isComponent = computed(() => {
     border: none;
     padding: 10px 16px;
     border-radius: var(--border-radius-sm);
+    min-height: 44px;
 
     font: {
       family: var(--font-family-body);

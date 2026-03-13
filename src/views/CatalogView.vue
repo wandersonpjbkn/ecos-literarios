@@ -31,7 +31,7 @@
       <!-- Row 1: Search + count -->
       <div class="search-row">
         <SearchBar v-model="search" :suggestions="searchSuggestions" @select="onSelectSuggestion" />
-        <div class="result-count">
+        <div class="result-count" aria-live="polite" aria-atomic="true">
           <template v-if="activeFilterCount > 0">
             <strong>{{ filtered.length }}</strong> de {{ useBooksStore().size }} títulos
           </template>
@@ -41,14 +41,6 @@
 
       <!-- Row 2: Filter bar -->
       <div class="filter-bar">
-        <MultiSelect
-          class="multi-select"
-          label="Mencionado por"
-          :options="optionsQuem"
-          :selected="selectedQuem"
-          @toggle="(v) => handleToggle('quem', v)"
-          @clear="clearKey('quem')"
-        />
         <MultiSelect
           v-if="showFilters"
           class="multi-select"
@@ -76,8 +68,18 @@
           @toggle="(v) => handleToggle('subgeneros', v)"
           @clear="clearKey('subgeneros')"
         />
+        <MultiSelect
+          v-if="showFilters"
+          class="multi-select"
+          label="Mencionado por"
+          :options="optionsQuem"
+          :selected="selectedQuem"
+          @toggle="(v) => handleToggle('quem', v)"
+          @clear="clearKey('quem')"
+        />
         <button class="show-all-btn" @click="handleClickShowAll">
-          {{ showFilters ? 'Ocultar' : 'Mostrar' }} filtros
+          {{ showFilters ? 'Menos' : 'Mais' }} filtros
+          <BaseIcon name="chevron" :class="['chevron', { open: showFilters }]" aria-hidden="true" />
         </button>
       </div>
 
@@ -111,7 +113,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, watch, onMounted } from 'vue'
+import { useMediaQuery } from '@vueuse/core'
 
 import { useBooksStore } from '@/stores'
 import { useSheets, useFilters } from '@/composables'
@@ -143,6 +146,13 @@ const {
 
 onMounted(() => useSheets().fetchBooks())
 
+const isMobile = useMediaQuery('(max-width: 767px)')
+const showFilters = ref(!isMobile.value)
+
+watch(isMobile, (mobile) => {
+  if (!mobile) showFilters.value = true
+})
+
 const handleToggle = (key: string, value: string) => {
   const map = {
     midia: selectedMidia,
@@ -172,22 +182,14 @@ const onSelectSuggestion = (book: Book) => {
   search.value = book.titulo
 }
 
-const showFilters = ref(false)
-const isMobile = computed(() => window.innerWidth < 768)
-
 const handleClickShowAll = () => {
   showFilters.value = !showFilters.value
   emit('top')
 }
-
-onMounted(() => {
-  if (!isMobile.value) showFilters.value = true
-})
 </script>
 
 <style lang="scss" scoped>
 .catalog {
-  /* ── Intro ────────────────────────────── */
   &-intro {
     margin: 0 auto 2rem;
 
@@ -195,7 +197,6 @@ onMounted(() => {
     border-bottom: 1px solid rgba(var(--color-surface-default-rgb), 0.08);
   }
 
-  /* ── Catalog body ────────────────────────────── */
   &-body {
     margin: 0 auto;
 
@@ -253,9 +254,7 @@ onMounted(() => {
   &-hint {
     max-width: 440px;
 
-    font: {
-      size: 0.82rem;
-    }
+    font-size: 0.82rem;
     color: var(--color-text-subtle);
 
     code {
@@ -263,9 +262,7 @@ onMounted(() => {
       padding: 1px 5px;
       border-radius: 3px;
 
-      font: {
-        size: 0.8rem;
-      }
+      font-size: 0.8rem;
     }
   }
 }
@@ -364,6 +361,14 @@ onMounted(() => {
     opacity: 0.85;
     background: var(--color-action-default-hover);
   }
+
+  .chevron {
+    transition: transform var(--motion-transition-default);
+
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
 }
 
 /* ── Grid ────────────────────────────────────── */
@@ -411,7 +416,7 @@ onMounted(() => {
 }
 
 /* ── Responsive ──────────────────────────────── */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .catalog-intro {
     margin-bottom: 1rem;
   }

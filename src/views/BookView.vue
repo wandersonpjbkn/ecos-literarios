@@ -28,7 +28,7 @@
       </div>
 
       <!-- Hero -->
-      <section class="book-hero" :style="{ '--spine-color': useCategoryColors().categoryClass(book.categoria) }">
+      <section class="book-hero" :style="{ '--spine-color': useCategoryColors().categoryColor(book.categoria) }">
         <div class="hero-inner">
           <!-- Book visual -->
           <div class="book-cover">
@@ -43,7 +43,7 @@
           <!-- Info -->
           <div class="book-info">
             <div class="info-badges">
-              <span class="midia-badge" :class="useCategoryColors().midiaClass(book.midia)">{{ book.midia }}</span>
+              <span class="midia-badge" :class="useCategoryColors().midiaBadgeClass(book.midia)">{{ book.midia }}</span>
               <span class="categoria-badge">{{ book.categoria }}</span>
             </div>
             <h1 class="book-titulo">{{ book.titulo }}</h1>
@@ -167,7 +167,7 @@
             </h3>
             <div class="related-grid">
               <RouterLink v-for="r in related" :key="r.id" :to="`/livro/${r.id}`" class="related-card">
-                <div class="related-spine" :style="{ background: useCategoryColors().categoryClass(book.categoria) }" />
+                <div class="related-spine" :style="{ background: useCategoryColors().categoryColor(book.categoria) }" />
                 <div class="related-body">
                   <strong>{{ r.titulo }}</strong>
                   <span>{{ r.autor }}</span>
@@ -302,6 +302,10 @@ const emitGTMEvent = (origin: string) => {
   &-hero {
     background: var(--color-text-default);
     padding: 48px 24px;
+
+    @media (max-width: 640px) {
+      padding: 24px 16px;
+    }
     position: relative;
     overflow: hidden;
 
@@ -426,16 +430,16 @@ const emitGTMEvent = (origin: string) => {
 
 .badge {
   &-livro {
-    background: #1e40af;
-    color: #dbeafe;
+    background: var(--badge-livro-background-color);
+    color: var(--badge-livro-text-color);
   }
   &-manga {
-    background: #9d174d;
-    color: #fce7f3;
+    background: var(--badge-manga-background-color);
+    color: var(--badge-manga-text-color);
   }
   &-hq {
-    background: #065f46;
-    color: #d1fae5;
+    background: var(--badge-hq-background-color);
+    color: var(--badge-hq-text-color);
   }
 }
 
@@ -574,7 +578,7 @@ const emitGTMEvent = (origin: string) => {
     color: #fff;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     border-color: transparent;
 
     &--amazon {
@@ -742,7 +746,7 @@ const emitGTMEvent = (origin: string) => {
   flex-shrink: 0;
   transition: all var(--motion-transition-default);
 
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     color: var(--color-action-default);
   }
 }

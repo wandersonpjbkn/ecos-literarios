@@ -1,0 +1,116 @@
+@use 'sass:map';
+
+@use '@/assets/scss/abstracts/functions' as *;
+@use '@/assets/scss/abstracts/mixins' as *;
+
+$palette: (
+  'amber-gold':   generate-palette(#ffbe0b),
+  'blaze-orange': generate-palette(#fb5607),
+  'neon-pink':    generate-palette(#ff006e),
+  'blue-violet':  generate-palette(#8338ec),
+  'azure-blue':   generate-palette(#3a86ff),
+  'white':        generate-palette(#ffffff),
+);
+
+$config: (
+  // ── Camada de Badges (Mídia) ────────────────────────────────────
+  'badges': (
+    'livro': (
+      // azure família — céu aberto, leitura, informação
+      'bg':  palette($palette, 'azure-blue', 'tint', '90'),     // #ebf3ff
+      'ink': palette($palette, 'azure-blue', 'shade', '30'),    // #295eb3   5.62:1 ✅
+    ),
+    'manga': (
+      // amber família — dourado quente, luxo
+      'bg':  palette($palette, 'amber-gold', 'tint', '80'),     // #fff2ce
+      'ink': palette($palette, 'amber-gold', 'shade', '60'),    // #664c04   7.25:1 ✅
+    ),
+    'hq': (
+      // neon-pink família — energia, ação
+      'bg':  palette($palette, 'neon-pink', 'tint', '90'),      // #ffe6f1
+      'ink': palette($palette, 'neon-pink', 'shade', '30'),     // #b3004d   5.90:1 ✅
+    ),
+    'tag': (
+      // blue-violet família — sofisticação, sub-gênero
+      'bg':  palette($palette, 'blue-violet', 'tint', '90'),    // #f3ebfd
+      'ink': palette($palette, 'blue-violet', 'shade', '40'),   // #4f228e   9.28:1 ✅
+    ),
+  ),
+
+  // ── Camada Semântica (Superfícies e Texto) ──────────────────────
+  'semantics': (
+    // azure tint-90: fundo geral — céu-azulado suave, conecta todas as 5 cores
+    'bg':            palette($palette, 'azure-blue', 'tint', '90'),            // #ebf3ff
+    // white como bg-subtle: cards e áreas lifted ficam pure white sobre o azul-céu
+    'bg-subtle':     palette($palette, 'white', 'base'),                       // #ffffff
+    'surface':       #ffffff,
+    'surface-raised': #ffffff,
+    // ink: blue-violet shade-90 — quase-preto com profundidade violeta
+    'ink':           palette($palette, 'blue-violet', 'shade', '90'),          // #0d0618  17.79:1 ✅
+    'ink-secondary': palette($palette, 'blue-violet', 'shade', '70'),          // #271147  14.95:1 ✅
+    // muted: azure shade-40 — azul médio, harmonioso, passa AA
+    'muted':         palette($palette, 'azure-blue', 'shade', '40'),           // #235099   7.02:1 ✅
+    'muted-light':   palette($palette, 'azure-blue', 'shade', '30'),           // #295eb3   5.62:1 ✅
+  ),
+
+  // ── Camada de Ações (Accents) ───────────────────────────────────
+  'actions': (
+    // primary: blue-violet — única cor base da paleta que passa AA sozinha (5.61:1)
+    // usada em botões, links, focus rings
+    'primary':        palette($palette, 'blue-violet', 'base'),                // #8338ec   5.61:1 ✅
+    'primary-hover':  palette($palette, 'blue-violet', 'shade', '10'),         // #7632d4   6.61:1 ✅
+    'primary-light':  palette($palette, 'blue-violet', 'tint', '90'),          // #f3ebfd  (chip/badge bg)
+    // primary-muted: amber tint-60 — texto/ícone sutil sobre o header violeta escuro
+    // #ffe59d sobre #1a0b2f: 14.96:1 ✅ — dourado suave, cria brilho sem gritar
+    'primary-muted':  palette($palette, 'amber-gold', 'tint', '60'),           // #ffe59d
+
+    // secondary: amber-gold — destaque de energia, NÃO usado como texto sobre bg claro
+    // usado como fundo de highlight, seleção, badges de atenção
+    'secondary':       palette($palette, 'amber-gold', 'base'),                // #ffbe0b
+    'secondary-hover': palette($palette, 'amber-gold', 'shade', '10'),         // #e6ab0a
+    'secondary-light': palette($palette, 'amber-gold', 'tint', '80'),          // #fff2ce
+    // secondary-text: amber shade-60 — versão escura segura para texto AA
+    'secondary-text':  palette($palette, 'amber-gold', 'shade', '60'),         // #664c04   8.08:1 ✅
+  ),
+
+  // ── Camada de Bordas ────────────────────────────────────────────
+  'borders': (
+    // default: azure tint-60 — borda sutil, quase invisível sobre o fundo azure
+    'default': palette($palette, 'azure-blue', 'tint', '60'),                  // #b0cfff
+    // strong: azure shade-20 — borda nítida quando necessário
+    'strong':  palette($palette, 'azure-blue', 'shade', '20'),                 // #2e6bcc   4.59:1 ✅
+    // focus: blue-violet base — anel de foco vibrante e inconfundível
+    'focus':   palette($palette, 'blue-violet', 'base'),                       // #8338ec
+  ),
+
+  // ── Categorias (Cores de lombada) ───────────────────────────────
+  //  Distribuição semântica:
+  //    violet family → peso, mistério, profundidade (suspense, terror, ficção)
+  //    azure family  → clareza, exploração (ficção-histórica, ficção-científica)
+  //    neon-pink     → emoção intensa (romance, drama)
+  //    amber-gold    → celebração, leveza (poesia)
+  //    blaze-orange  → tensão terrena (não-ficção)
+  //    violet tone   → neutro-cool (realismo)
+  'categories': (
+    'suspense':          palette($palette, 'blue-violet', 'shade', '20'),      // #692dbd
+    'terror':            palette($palette, 'blue-violet', 'shade', '70'),      // #271147
+    'fantasia':          palette($palette, 'blue-violet', 'base'),             // #8338ec
+    'ficcao':            palette($palette, 'blue-violet', 'shade', '30'),      // #5c27a5
+    'drama':             palette($palette, 'neon-pink', 'shade', '20'),        // #cc0058
+    'romance':           palette($palette, 'neon-pink', 'base'),               // #ff006e
+    'poesia':            palette($palette, 'amber-gold', 'base'),              // #ffbe0b
+    'nao-ficcao':        palette($palette, 'blaze-orange', 'shade', '30'),     // #b03c05
+    'realismo':          palette($palette, 'blue-violet', 'tone', '50'),       // #825cb6
+
+    // not used
+    'ficcao-historica':  palette($palette, 'azure-blue', 'shade', '20'),       // #2e6bcc
+    'ficcao-cientifica': palette($palette, 'azure-blue', 'base'),              // #3a86ff
+  ),
+
+  // ── Extras específicos ──────────────────────────────────────────
+  // header: blue-violet shade-80 — profundo violeta-noite
+  // white: 18.54:1 ✅ | amber: 11.14:1 ✅ — logo dourado sobre noite violeta
+  'header-bg': palette($palette, 'blue-violet', 'shade', '80'),                // #1a0b2f
+);
+
+@include create-theme('vibrant-fiesta', $config);

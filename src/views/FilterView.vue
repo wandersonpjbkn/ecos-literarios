@@ -32,7 +32,7 @@
       <!-- Search + count -->
       <div class="search-row">
         <SearchBar v-model="search" :suggestions="searchSuggestions" @select="onSelectSuggestion" />
-        <div class="result-count">
+        <div class="result-count" aria-live="polite" aria-atomic="true">
           <template v-if="activeFilterCount > 0">
             <strong>{{ filtered.length }}</strong> de {{ baseFiltered.length }} títulos
           </template>
@@ -86,11 +86,14 @@ import type { Book, Options } from '@/types'
 // ── Configuração por tipo de rota ─────────────
 type FilterType = 'midia' | 'categoria' | 'autor' | 'mencao'
 
-const filterConfigs: Record<FilterType, {
-  label: string
-  bookField: keyof Book
-  desc: (v: string) => string
-}> = {
+const filterConfigs: Record<
+  FilterType,
+  {
+    label: string
+    bookField: keyof Book
+    desc: (v: string) => string
+  }
+> = {
   midia: {
     label: 'Mídia',
     bookField: 'midia',
@@ -119,8 +122,7 @@ const filterType = computed(() => route.name as FilterType)
 const filterValue = computed(() => decodeURIComponent(route.params.id as string))
 const config = computed(() => filterConfigs[filterType.value] ?? filterConfigs.categoria)
 
-// Qual chave de Options corresponde ao filtro fixo desta rota
-const fixedKey = computed(() => filterType.value === 'mencao' ? 'quem' : filterType.value)
+const fixedKey = computed(() => (filterType.value === 'mencao' ? 'quem' : filterType.value))
 
 onMounted(() => useSheets().fetchBooks())
 
@@ -131,7 +133,6 @@ const selectedCategoria = ref<string[]>([])
 const selectedSubgeneros = ref<string[]>([])
 const selectedQuem = ref<string[]>([])
 
-// Reset ao mudar de rota
 watch(filterType, () => {
   search.value = ''
   selectedMidia.value = []
@@ -140,49 +141,39 @@ watch(filterType, () => {
   selectedQuem.value = []
 })
 
-// ── Escopo base: livros que batem com o filtro fixo da rota ──
 const baseFiltered = computed(() => {
   const field = config.value.bookField
   return useBooksStore().books.filter((b) => String(b[field]) === filterValue.value)
 })
 
-// ── Opções derivadas do escopo base ──────────
-// O conjunto de opções de cada dimensão é construído a partir
-// dos livros já dentro do escopo base, para evitar opções vazias.
-// A dimensão fixada pela rota recebe array vazio — o FilterPanel
-// não renderiza seções com options vazias via FilterSection.
 const optionsMidia = computed(() =>
-  fixedKey.value === 'midia' ? [] :
-  [...new Set(baseFiltered.value.map((b) => b.midia).filter(Boolean))].sort()
+  fixedKey.value === 'midia' ? [] : [...new Set(baseFiltered.value.map((b) => b.midia).filter(Boolean))].sort(),
 )
 const optionsCategoria = computed(() =>
-  fixedKey.value === 'categoria' ? [] :
-  [...new Set(baseFiltered.value.map((b) => b.categoria).filter(Boolean))].sort()
+  fixedKey.value === 'categoria' ? [] : [...new Set(baseFiltered.value.map((b) => b.categoria).filter(Boolean))].sort(),
 )
-const optionsSubgeneros = computed(() =>
-  [...new Set(baseFiltered.value.flatMap((b) => b.subgenerosArr || []))].sort()
-)
+const optionsSubgeneros = computed(() => [...new Set(baseFiltered.value.flatMap((b) => b.subgenerosArr || []))].sort())
 const optionsQuem = computed(() =>
-  fixedKey.value === 'quem' ? [] :
-  [...new Set(baseFiltered.value.map((b) => b.quem).filter(Boolean))].sort()
+  fixedKey.value === 'quem' ? [] : [...new Set(baseFiltered.value.map((b) => b.quem).filter(Boolean))].sort(),
 )
 
-// Objetos Options que o FilterPanel recebe
-const panelOptions = computed((): Options => ({
-  midia:      optionsMidia.value,
-  categoria:  optionsCategoria.value,
-  subgeneros: optionsSubgeneros.value,
-  quem:       optionsQuem.value,
-}))
+const panelOptions = computed(
+  (): Options => ({
+    midia: optionsMidia.value,
+    categoria: optionsCategoria.value,
+    subgeneros: optionsSubgeneros.value,
+    quem: optionsQuem.value,
+  }),
+)
+const panelSelected = computed(
+  (): Options => ({
+    midia: selectedMidia.value,
+    categoria: selectedCategoria.value,
+    subgeneros: selectedSubgeneros.value,
+    quem: selectedQuem.value,
+  }),
+)
 
-const panelSelected = computed((): Options => ({
-  midia:      selectedMidia.value,
-  categoria:  selectedCategoria.value,
-  subgeneros: selectedSubgeneros.value,
-  quem:       selectedQuem.value,
-}))
-
-// ── Filtro aplicado sobre o escopo base ──────
 const filtered = computed(() => {
   let list = baseFiltered.value
 
@@ -190,10 +181,11 @@ const filtered = computed(() => {
     const q = search.value.toLowerCase()
     list = list.filter((b) => b.titulo?.toLowerCase().includes(q) || b.autor?.toLowerCase().includes(q))
   }
-  if (selectedMidia.value.length)      list = list.filter((b) => selectedMidia.value.includes(b.midia))
-  if (selectedCategoria.value.length)  list = list.filter((b) => selectedCategoria.value.includes(b.categoria))
-  if (selectedSubgeneros.value.length) list = list.filter((b) => selectedSubgeneros.value.every((sg) => b.subgenerosArr?.includes(sg)))
-  if (selectedQuem.value.length)       list = list.filter((b) => selectedQuem.value.includes(b.quem))
+  if (selectedMidia.value.length) list = list.filter((b) => selectedMidia.value.includes(b.midia))
+  if (selectedCategoria.value.length) list = list.filter((b) => selectedCategoria.value.includes(b.categoria))
+  if (selectedSubgeneros.value.length)
+    list = list.filter((b) => selectedSubgeneros.value.every((sg) => b.subgenerosArr?.includes(sg)))
+  if (selectedQuem.value.length) list = list.filter((b) => selectedQuem.value.includes(b.quem))
 
   return list
 })
@@ -207,13 +199,12 @@ const activeFilterCount = computed(
     selectedQuem.value.length,
 )
 
-// ── Handlers ─────────────────────────────────
 const handleToggle = (key: string, value: string) => {
   const map: Record<string, { value: string[] }> = {
-    midia:      selectedMidia,
-    categoria:  selectedCategoria,
+    midia: selectedMidia,
+    categoria: selectedCategoria,
     subgeneros: selectedSubgeneros,
-    quem:       selectedQuem,
+    quem: selectedQuem,
   }
   const arr = map[key]
   if (!arr) return
@@ -230,7 +221,6 @@ const clearSecondary = () => {
   selectedQuem.value = []
 }
 
-// ── Autocomplete (escopo base) ────────────────
 const searchSuggestions = computed(() => {
   if (!search.value.trim() || search.value.length < 2) return []
   const q = search.value.toLowerCase()
@@ -248,9 +238,13 @@ const onSelectSuggestion = (book: Book) => {
 <style lang="scss" scoped>
 /* ── Intro ───────────────────────────────────── */
 .filter-intro {
-  background: var(--color-text-default);
+  background: var(--color-header-bg);
   border-bottom: 1px solid rgba(var(--color-surface-default-rgb), 0.08);
   padding: 20px 24px;
+
+  @media (max-width: 767px) {
+    padding: 16px;
+  }
 }
 
 .intro-inner {
@@ -269,11 +263,14 @@ const onSelectSuggestion = (book: Book) => {
   font-size: 0.875rem;
   white-space: nowrap;
   padding-top: 6px;
+  min-height: 44px;
   transition: color var(--motion-transition-default);
   text-decoration: none;
   flex-shrink: 0;
 
-  &:hover { color: var(--color-surface-default); }
+  &:hover {
+    color: var(--color-surface-default);
+  }
 }
 
 .intro-meta {
@@ -322,8 +319,9 @@ const onSelectSuggestion = (book: Book) => {
   color: var(--color-text-subtle);
   text-align: center;
 }
-
-.state-error { color: var(--color-action-default); }
+.state-error {
+  color: var(--color-action-default);
+}
 
 .spinner {
   width: 36px;
@@ -333,7 +331,11 @@ const onSelectSuggestion = (book: Book) => {
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 .retry-btn {
   background: var(--color-action-default);
@@ -347,7 +349,10 @@ const onSelectSuggestion = (book: Book) => {
   min-height: 44px;
   transition: opacity var(--motion-transition-default);
 
-  &:hover { opacity: 0.85; background: var(--color-action-default-hover); }
+  &:hover {
+    opacity: 0.85;
+    background: var(--color-action-default-hover);
+  }
 }
 
 /* ── Search row ──────────────────────────────── */
@@ -364,7 +369,9 @@ const onSelectSuggestion = (book: Book) => {
   color: var(--color-text-subtle);
   white-space: nowrap;
 
-  strong { color: var(--color-action-default); }
+  strong {
+    color: var(--color-action-default);
+  }
 }
 
 /* ── Layout sidebar + grid ───────────────────── */
@@ -374,7 +381,6 @@ const onSelectSuggestion = (book: Book) => {
   align-items: flex-start;
 }
 
-/* ── Grid ────────────────────────────────────── */
 .grid-area {
   flex: 1;
   min-width: 0;
@@ -398,34 +404,45 @@ const onSelectSuggestion = (book: Book) => {
 }
 
 /* Grid transitions */
-.grid-enter-active { transition: opacity var(--motion-transition-default), transform var(--motion-transition-default); }
-.grid-enter-from { opacity: 0; transform: scale(0.96); }
-.grid-leave-active { transition: opacity var(--motion-transition-default); position: absolute; }
-.grid-leave-to { opacity: 0; }
-.grid-move { transition: transform var(--motion-transition-default); }
+.grid-enter-active {
+  transition:
+    opacity var(--motion-transition-default),
+    transform var(--motion-transition-default);
+}
+.grid-enter-from {
+  opacity: 0;
+  transform: scale(0.96);
+}
+.grid-leave-active {
+  transition: opacity var(--motion-transition-default);
+  position: absolute;
+}
+.grid-leave-to {
+  opacity: 0;
+}
+.grid-move {
+  transition: transform var(--motion-transition-default);
+}
 
 /* ── Responsive ──────────────────────────────── */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .intro-inner {
     flex-direction: column;
     gap: 10px;
   }
-
-  .back-link { padding-top: 0; }
-
+  .back-link {
+    padding-top: 0;
+  }
   .filter-layout {
     flex-direction: column;
   }
-
   .search-row {
     flex-wrap: wrap;
   }
-
   .result-count {
     order: -1;
     width: 100%;
   }
-
   .books-grid {
     grid-template-columns: 1fr;
   }

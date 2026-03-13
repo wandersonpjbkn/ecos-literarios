@@ -1,15 +1,15 @@
 <template>
   <aside class="filter-panel" :class="{ 'is-open': isOpen }">
     <!-- Mobile toggle -->
-    <button class="filter-toggle" aria-label="Filtros" @click="isOpen = !isOpen">
-      <BaseIcon name="filter" />
+    <button class="filter-toggle" :aria-expanded="isOpen" aria-controls="filter-panel-body" @click="isOpen = !isOpen">
+      <BaseIcon name="filter" aria-hidden="true" />
       <span>Filtros</span>
-      <span v-if="activeCount > 0" class="badge">{{ activeCount }}</span>
-      <BaseIcon name="chevron" class="chevron" />
+      <span v-if="activeCount > 0" class="badge" aria-label="`${activeCount} filtros ativos`">{{ activeCount }}</span>
+      <BaseIcon name="chevron" class="chevron" aria-hidden="true" />
     </button>
 
     <!-- Panel body -->
-    <div class="panel-body">
+    <div id="filter-panel-body" class="panel-body">
       <!-- Clear -->
       <div class="panel-header">
         <span class="panel-title">Filtros</span>
@@ -17,10 +17,18 @@
       </div>
 
       <!-- Active tags -->
-      <TransitionGroup v-if="activeCount > 0" name="tag" tag="div" class="active-tags">
-        <span v-for="tag in activeTags" :key="tag.key + tag.value" class="active-tag" @click="removeTag(tag)">
+      <TransitionGroup v-if="activeCount > 0" name="tag" tag="div" class="active-tags" aria-label="Filtros ativos">
+        <span
+          v-for="tag in activeTags"
+          :key="tag.key + tag.value"
+          class="active-tag"
+          role="button"
+          tabindex="0"
+          @click="removeTag(tag)"
+          @keydown.enter="removeTag(tag)"
+        >
           {{ tag.value }}
-          <BaseIcon name="times" />
+          <BaseIcon name="times" aria-hidden="true" />
         </span>
       </TransitionGroup>
 
@@ -31,7 +39,7 @@
           title="Mídia"
           :options="options.midia"
           :selected="selected.midia"
-          collapsible
+          :default-open="false"
           @toggle="(val) => emit('toggle', 'midia', val)"
         />
 
@@ -124,6 +132,7 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
   color: var(--color-text-default);
   cursor: pointer;
   transition: background var(--motion-transition-default);
+  min-height: 44px;
 
   &:hover {
     background: var(--color-background-subtle);
@@ -211,14 +220,21 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
   border-radius: 100px;
   cursor: pointer;
   transition: opacity var(--motion-transition-default);
-}
-.active-tag:hover {
-  opacity: 0.75;
+  min-height: 36px;
+
+  &:hover {
+    opacity: 0.75;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 2px;
+  }
 }
 
 .filter-sections {
   overflow-y: auto;
-  max-height: calc(100vh - 280px);
+  max-height: calc(100dvh - 280px);
 }
 
 /* Tag transition */
@@ -232,7 +248,7 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
   transform: scale(0.85);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .filter-panel {
     width: 100%;
   }
@@ -247,7 +263,7 @@ const removeTag = ({ key, value }: { key: string; value: string }) => {
     display: block;
   }
   .filter-sections {
-    max-height: 60vh;
+    max-height: 60dvh;
   }
 }
 </style>

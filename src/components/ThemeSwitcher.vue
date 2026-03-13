@@ -16,13 +16,13 @@
     <Transition name="dropdown">
       <ul
         v-if="open"
-        tabindex="0"
+        tabindex="-1"
         class="theme-list"
         role="listbox"
         :aria-label="`Selecionar tema`"
-        pe="close"
         @keydown.arrow-up.prevent="focusPrev"
         @keydown.arrow-down.prevent="focusNext"
+        @keydown.escape="close"
       >
         <li
           v-for="theme in themes"
@@ -46,7 +46,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { onClickOutside } from '@vueuse/core'
 
 import { sendGtmEvent } from '@/utils/gtm'
 
@@ -56,6 +57,7 @@ const themes = [
   { id: 'sunny-beach', label: 'Sunny', emoji: '🏖️' },
   { id: 'gothic-glam', label: 'Gothic', emoji: '🖤' },
   { id: 'purple-haze', label: 'Purple', emoji: '🔮' },
+  { id: 'vibrant-fiesta', label: 'Fiesta', emoji: '🎉' },
 ]
 
 const STORAGE_KEY = 'ecos-theme'
@@ -65,18 +67,17 @@ const open = ref(false)
 const root = ref<HTMLElement | null>(null)
 const activeTheme = ref<string>(DEFAULT_THEME)
 
-const current = computed(() => themes.find((t) => t.id === activeTheme.value) || themes[0])
+const current = computed(() => themes.find((t) => t.id === activeTheme.value) ?? themes[0])
+
+onClickOutside(root, () => close())
 
 const applyTheme = (id: string) => {
-  const el = document.documentElement
-
   sendGtmEvent({
     event: 'theme_change',
     theme: id,
     theme_label: themes.find((t) => t.id === id)?.label ?? id,
   })
-
-  el.setAttribute('data-theme', id)
+  document.documentElement.setAttribute('data-theme', id)
   activeTheme.value = id
 }
 
@@ -107,23 +108,10 @@ const focusPrev = () => {
   items[Math.max(idx - 1, 0)]?.focus()
 }
 
-const onClickOutside = (e: MouseEvent) => {
-  if (root.value && !root.value.contains(e.target as Node)) {
-    close()
-  }
-}
-
 onMounted(() => {
   const saved = localStorage.getItem(STORAGE_KEY) ?? DEFAULT_THEME
   const valid = themes.some((t) => t.id === saved) ? saved : DEFAULT_THEME
-
   applyTheme(valid)
-
-  document.addEventListener('click', onClickOutside)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', onClickOutside)
 })
 </script>
 
@@ -143,13 +131,19 @@ onBeforeUnmount(() => {
   color: rgba(var(--color-surface-default-rgb), 0.75);
   cursor: pointer;
   transition: all var(--motion-transition-default);
-  min-height: 32px;
+  min-height: 44px;
+  min-width: 44px;
   white-space: nowrap;
 
   &:hover {
     background: rgba(var(--color-surface-default-rgb), 0.13);
     color: var(--color-surface-default);
     border-color: rgba(var(--color-surface-default-rgb), 0.25);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(var(--color-surface-default-rgb), 0.5);
+    outline-offset: 2px;
   }
 
   &-emoji {
@@ -201,9 +195,10 @@ onBeforeUnmount(() => {
   cursor: pointer;
   transition: background var(--motion-transition-default);
   outline: none;
+  min-height: 44px;
 
   &:hover,
-  &:focus {
+  &:focus-visible {
     background: var(--color-background-default);
   }
 
@@ -243,7 +238,6 @@ onBeforeUnmount(() => {
     transform var(--motion-transition-default);
   transform-origin: top right;
 }
-
 .dropdown-enter-from,
 .dropdown-leave-to {
   opacity: 0;

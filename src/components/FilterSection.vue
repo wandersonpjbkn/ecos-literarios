@@ -28,15 +28,16 @@ const props = withDefaults(
     title: string
     options: string[]
     selected: string[]
-    collapsible?: boolean
+    defaultOpen?: boolean
   }>(),
   {
-    collapsible: false,
+    defaultOpen: true,
   },
 )
+
 const emit = defineEmits(['toggle'])
 
-const open = ref(props.collapsible !== undefined ? props.collapsible : true)
+const open = ref(props.defaultOpen)
 
 const toggle = () => {
   open.value = !open.value
@@ -71,6 +72,7 @@ const toggle = () => {
   cursor: pointer;
   text-align: left;
   transition: color var(--motion-transition-default);
+  min-height: 44px;
 
   &:hover {
     color: var(--color-text-default);
@@ -108,6 +110,7 @@ const toggle = () => {
   cursor: pointer;
   transition: background var(--motion-transition-default);
   user-select: none;
+  min-height: 44px;
 
   &:hover {
     background: var(--color-background-subtle);

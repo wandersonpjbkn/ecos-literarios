@@ -70,13 +70,15 @@ $config: (
       'terror': palette($palette, 'cerulean', 'shade', '70'),           // #0a252f,
       'fantasia': palette($palette, 'cerulean', 'base'),                // #227c9d,
       'ficcao': palette($palette, 'cerulean', 'shade', '30'),           // #18576e,
-      'ficcao-historica': palette($palette, 'cerulean', 'tone', '40'),  // #487e91,
       'drama': palette($palette, 'seagreen', 'shade', '30'),            // #10897d,
-      'ficcao-cientifica': palette($palette, 'seagreen', 'base'),       // #17c3b2,
       'romance': palette($palette, 'grapefruit', 'shade', '20'),        // #cb575c,
       'poesia': palette($palette, 'grapefruit', 'base'),                // #fe6d73,
       'nao-ficcao': palette($palette, 'floral', 'shade', '60'),         // #666460,
-      'realismo': palette($palette, 'ice', 'shade', '50')               // #7c7d7e,
+      'realismo': palette($palette, 'ice', 'shade', '50'),              // #7c7d7e,
+
+      // not used
+      'ficcao-historica': palette($palette, 'cerulean', 'tone', '40'),  // #487e91,
+      'ficcao-cientifica': palette($palette, 'seagreen', 'base'),       // #17c3b2,
     ),
 
   // Extras específicos

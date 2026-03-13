@@ -1,18 +1,26 @@
 import CATEGORY_COLORS from '@/data/categoryColors.json'
 
 export function useCategoryColors() {
-  const categoryClass = (cat: keyof typeof CATEGORY_COLORS) => {
+  /**
+   * Retorna o valor CSS var() para a cor de lombada de uma categoria.
+   * Uso: :style="{ '--background': categoryColor(book.categoria) }"
+   */
+  const categoryColor = (cat: keyof typeof CATEGORY_COLORS): string => {
     return `var(--category-color-${CATEGORY_COLORS[cat]})`
   }
 
-  const midiaClass = (midia: string) => {
+  /**
+   * Retorna a classe CSS do badge de mídia.
+   * Uso: :class="midiaBadgeClass(book.midia)"
+   */
+  const midiaBadgeClass = (midia: string): string => {
     if (midia === 'Mangá') return 'badge-manga'
     if (midia === 'HQ') return 'badge-hq'
     return 'badge-livro'
   }
 
   return {
-    categoryClass,
-    midiaClass,
+    categoryColor,
+    midiaBadgeClass,
   }
 }

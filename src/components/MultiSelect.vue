@@ -18,6 +18,7 @@
             :placeholder="`Buscar ${label.toLowerCase()}…`"
             autocomplete="off"
             @keydown.escape="close"
+            @keydown.tab="close"
             @keydown.down.prevent="moveActive(1)"
             @keydown.up.prevent="moveActive(-1)"
             @keydown.enter.prevent="selectActive"
@@ -56,7 +57,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { onClickOutside } from '@vueuse/core'
 
 const props = defineProps<{
   label: string
@@ -110,11 +112,7 @@ watch(filteredOptions, () => {
   activeIdx.value = -1
 })
 
-const onClickOutside = (e: MouseEvent) => {
-  if (wrapRef.value && !wrapRef.value.contains(e.target as Node)) close()
-}
-onMounted(() => document.addEventListener('mousedown', onClickOutside))
-onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
+onClickOutside(wrapRef, () => close())
 </script>
 
 <style lang="scss" scoped>
@@ -197,7 +195,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onClickOutside))
   z-index: 300;
 
   display: flex;
-  min-width: 240px;
+  min-width: min(240px, 100vw - 32px);
   background: var(--color-surface-default);
   border: 1px solid var(--color-border-default);
   border-radius: var(--border-radius-default);
