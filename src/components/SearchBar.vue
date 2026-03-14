@@ -112,6 +112,7 @@ onClickOutside(wrapRef, () => close())
     position: relative;
 
     width: 100%;
+    min-width: 0;
   }
 
   &-box {

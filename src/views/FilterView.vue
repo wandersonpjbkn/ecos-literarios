@@ -60,12 +60,13 @@
               @toggle="handleToggle"
               @clear="clearSecondary"
             />
+            <SortOrderSelect v-model="sortOrder" />
           </div>
 
           <!-- Grid -->
           <div class="grid-area">
             <TransitionGroup v-if="filtered.length > 0" name="grid" tag="div" class="books-grid">
-              <BookCard v-for="book in filtered" :key="book.id" :book="book" />
+              <BookCard v-for="book in sortedBooks" :key="book.id" :book="book" />
             </TransitionGroup>
 
             <div v-else class="empty-state">
@@ -140,12 +141,13 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useBooksStore } from '@/stores'
-import { useSheets, useCategoryColors } from '@/composables'
+import { useSheets, useCategoryColors, useBookSort } from '@/composables'
 
 import SearchBar from '@/components/SearchBar.vue'
 import ResultCount from '@/components/ResultCount.vue'
 import FilterPanel from '@/components/FilterPanel.vue'
 import BookCard from '@/components/BookCard.vue'
+import SortOrderSelect from '@/components/SortOrderSelect.vue'
 
 import type { Book, Options, FilterType, ExploreKey, CategoryType } from '@/types'
 
@@ -181,6 +183,7 @@ const filterConfigs: Record<
 
 const route = useRoute()
 const colors = useCategoryColors()
+const { sortOrder, sortedBooks } = useBookSort(filtered)
 
 const filterType = computed(() => route.name as FilterType)
 const filterValue = computed(() => decodeURIComponent(route.params.id as string))

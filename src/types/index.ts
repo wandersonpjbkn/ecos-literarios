@@ -29,3 +29,5 @@ export type FilterType = 'midia' | 'categoria' | 'autor' | 'mencao'
 export type ExploreKey = 'midia' | 'categoria' | 'autor' | 'quem'
 
 export type CategoryType = keyof typeof CategoriesColors
+
+export type BookSortOrder = 'asc' | 'desc'

@@ -45,6 +45,7 @@
 
       <!-- Desktop filters -->
       <div v-if="!isMobile" class="filter-bar">
+        <SortOrderSelect v-model="sortOrder" class="filter-bar-sorted" />
         <MultiSelect
           class="multi-select"
           label="Mídia"
@@ -95,6 +96,7 @@
           </div>
 
           <div class="mobile-filters-body">
+            <SortOrderSelect v-model="sortOrder" class="filter-bar-sorted" />
             <MultiSelect
               class="multi-select mobile"
               label="Mídia"
@@ -151,7 +153,7 @@
       <!-- Grid -->
       <div class="grid-area">
         <TransitionGroup v-if="filtered.length > 0" name="grid" tag="div" class="books-grid">
-          <BookCard v-for="book in filtered" :key="book.id" :book="book" />
+          <BookCard v-for="book in sortedBooks" :key="book.id" :book="book" />
         </TransitionGroup>
 
         <div v-else class="empty-state">
@@ -169,11 +171,12 @@ import { ref, watch, onMounted } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
 import { useBooksStore } from '@/stores'
-import { useSheets, useFilters } from '@/composables'
+import { useSheets, useFilters, useBookSort } from '@/composables'
 
 import SearchBar from '@/components/SearchBar.vue'
 import ResultCount from '@/components/ResultCount.vue'
 import MultiSelect from '@/components/MultiSelect.vue'
+import SortOrderSelect from '@/components/SortOrderSelect.vue'
 import ActiveFilters from '@/components/ActiveFilters.vue'
 import BookCard from '@/components/BookCard.vue'
 
@@ -194,6 +197,7 @@ const {
   clearAll,
   searchSuggestions,
 } = useFilters()
+const { sortOrder, sortedBooks } = useBookSort(filtered)
 
 onMounted(() => useSheets().fetchBooks())
 
@@ -515,6 +519,12 @@ const closeMobileFilters = () => {
 
     grid-template-columns: 1fr 1fr;
     gap: 10px;
+  }
+}
+
+.mobile-filters-body {
+  .filter-bar-sorted {
+    width: 100%;
   }
 }
 
