@@ -28,7 +28,6 @@ export function useSheets() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
       const csv = await res.text()
-
       const parsed = parseCSV(csv)
 
       useBooksStore().books = parsed
@@ -37,36 +36,30 @@ export function useSheets() {
 
       console.log('Books loaded:', parsed.length)
     } catch (e: unknown) {
-      useBooksStore().error = (e instanceof Error ? e.message : String(e)) || 'Erro ao carregar dados'
+      const raw = e instanceof Error ? e.message : String(e)
+      useBooksStore().error = raw || 'Erro ao carregar dados'
       console.error('[useSheets]', e)
     } finally {
       useBooksStore().loading = false
     }
   }
 
-  return {
-    fetchBooks,
-  }
+  return { fetchBooks }
 }
 
 const parseCSV = (csv: string): Book[] => {
   const lines = csv.split(/\r?\n/)
-
   const dataStart = SHEET_CONFIG.HEADER_ROW
-
   const result = []
 
   for (let i = dataStart; i < lines.length; i++) {
     const line = lines[i] as string
-
     if (!line.trim()) continue
 
     const cols = splitCSV(line)
-
     if (cols.length < 8) continue
 
     const [, titulo, autor, midia, categoria, subgeneros, quem, porque] = cols
-
     if (!titulo && !autor) continue
 
     const tags = subgeneros
@@ -90,7 +83,6 @@ const parseCSV = (csv: string): Book[] => {
   }
 
   console.log('Parsed', result)
-
   return result as Book[]
 }
 
@@ -101,22 +93,18 @@ const splitCSV = (line: string) => {
 
   for (let i = 0; i < line.length; i++) {
     const char = line[i]
-
     if (char === '"') {
       insideQuotes = !insideQuotes
       continue
     }
-
     if (char === ',' && !insideQuotes) {
       result.push(current.trim())
       current = ''
       continue
     }
-
     current += char
   }
 
   result.push(current.trim())
-
   return result
 }

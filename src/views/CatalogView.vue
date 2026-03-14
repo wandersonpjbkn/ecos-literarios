@@ -1,21 +1,16 @@
 <template>
   <div class="page catalog-page" data-page="catalog">
-    <!-- Loading -->
-    <div v-if="useBooksStore().loading" class="state-screen">
-      <div class="spinner"></div>
-      <p>Carregando catálogo…</p>
-    </div>
-
-    <!-- Error -->
-    <div v-else-if="useBooksStore().error" class="state-screen state-error">
-      <BaseIcon name="error" />
-      <p>{{ useBooksStore().error }}</p>
-      <button class="retry-btn" @click="useSheets().fetchBooks(true)">Tentar novamente</button>
-      <p class="error-hint">Contacte o administrador do site se o erro persistir.</p>
-    </div>
+    <!-- Loading / Error -->
+    <PageStatus
+      :loading="useBooksStore().loading"
+      :error="useBooksStore().error"
+      loading-text="Carregando catálogo…"
+      error-hint="Contacte o administrador do site se o erro persistir."
+      :on-retry="() => useSheets().fetchBooks(true)"
+    />
 
     <!-- Catalog -->
-    <div v-else class="catalog-body">
+    <div v-if="!useBooksStore().loading && !useBooksStore().error" class="catalog-body">
       <section class="catalog-intro">
         <div class="intro-inner">
           <h1 class="intro-title">Catálogo de Indicações</h1>
@@ -25,7 +20,7 @@
         </div>
       </section>
 
-      <!-- Row 1: Search + mobile filters button + count -->
+      <!-- Search + count -->
       <div class="search-row">
         <div class="search-main">
           <SearchBar v-model="search" :suggestions="searchSuggestions" @select="onSelectSuggestion" />
@@ -89,7 +84,6 @@
         <aside v-if="isMobile && mobileFiltersOpen" class="mobile-filters-sidebar" aria-label="Filtros">
           <div class="mobile-filters-header">
             <h2 class="mobile-filters-title">Filtros</h2>
-
             <button class="mobile-filters-close" type="button" aria-label="Fechar filtros" @click="closeMobileFilters">
               <BaseIcon name="times" aria-hidden="true" />
             </button>
@@ -133,12 +127,12 @@
 
           <div class="mobile-filters-footer">
             <button class="secondary-btn" type="button" @click="clearAll">Limpar</button>
-            <button class="retry-btn" type="button" @click="closeMobileFilters">Ver resultados</button>
+            <button class="primary-btn" type="button" @click="closeMobileFilters">Ver resultados</button>
           </div>
         </aside>
       </Transition>
 
-      <!-- Row 3: Active filter tags -->
+      <!-- Active filter tags -->
       <ActiveFilters
         :selected="{
           midia: selectedMidia,
@@ -152,22 +146,14 @@
 
       <!-- Grid -->
       <div class="grid-area">
-        <TransitionGroup v-if="filtered.length > 0" name="grid" tag="div" class="books-grid">
-          <BookCard v-for="book in sortedBooks" :key="book.id" :book="book" />
-        </TransitionGroup>
-
-        <div v-else class="empty-state">
-          <BaseIcon name="book" />
-          <p>Nenhum título encontrado com estes filtros.</p>
-          <button class="retry-btn" @click="clearAll">Limpar filtros</button>
-        </div>
+        <BooksGrid :books="sortedBooks" @clear="clearAll" />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
 import { useBooksStore } from '@/stores'
@@ -178,7 +164,8 @@ import ResultCount from '@/components/ResultCount.vue'
 import MultiSelect from '@/components/MultiSelect.vue'
 import SortOrderSelect from '@/components/SortOrderSelect.vue'
 import ActiveFilters from '@/components/ActiveFilters.vue'
-import BookCard from '@/components/BookCard.vue'
+import PageStatus from '@/components/PageStatus.vue'
+import BooksGrid from '@/components/BooksGrid.vue'
 
 import type { Book } from '@/types'
 
@@ -215,10 +202,8 @@ const handleToggle = (key: string, value: string) => {
     subgeneros: selectedSubgeneros,
     quem: selectedQuem,
   }
-
   const arr = map[key as keyof typeof map]
   const idx = arr.value.indexOf(value)
-
   if (idx === -1) arr.value.push(value)
   else arr.value.splice(idx, 1)
 }
@@ -230,7 +215,6 @@ const clearKey = (key: string) => {
     subgeneros: selectedSubgeneros,
     quem: selectedQuem,
   }
-
   map[key as keyof typeof map].value = []
 }
 
@@ -249,6 +233,10 @@ const closeMobileFilters = () => {
   mobileFiltersOpen.value = false
   document.body.style.overflow = ''
 }
+
+onBeforeUnmount(() => {
+  document.body.style.overflow = ''
+})
 </script>
 
 <style lang="scss" scoped>
@@ -270,6 +258,7 @@ const closeMobileFilters = () => {
   &-inner {
     margin: 0 auto;
     max-width: 1200px;
+    padding: 0 16px;
   }
 
   &-title {
@@ -280,7 +269,6 @@ const closeMobileFilters = () => {
       weight: 600;
     }
     color: var(--color-text-default);
-    white-space: nowrap;
   }
 
   &-desc {
@@ -290,94 +278,9 @@ const closeMobileFilters = () => {
   }
 }
 
-.state {
-  &-screen {
-    display: flex;
-    padding: 80px 24px;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    color: var(--color-text-subtle);
-    text-align: center;
-  }
-
-  &-error {
-    color: var(--color-action-default);
-  }
-}
-
-.error {
-  &-hint {
-    max-width: 440px;
-    font-size: 0.82rem;
-    color: var(--color-text-subtle);
-
-    code {
-      background: var(--color-background-subtle);
-      padding: 1px 5px;
-      border-radius: 3px;
-      font-size: 0.8rem;
-    }
-  }
-}
-
-.spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid var(--color-border-default);
-  border-top-color: var(--color-action-default);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.retry-btn,
-.secondary-btn {
-  border: none;
-  padding: 10px 20px;
-  border-radius: var(--border-radius-sm);
-  min-height: 44px;
-
-  font: {
-    family: var(--font-family-body);
-    size: 1rem;
-  }
-  color: var(--color-surface-default);
-
-  cursor: pointer;
-  transition: opacity var(--motion-transition-default);
-}
-
-.retry-btn {
-  background: var(--color-action-default);
-  color: var(--color-surface-default);
-
-  &:hover {
-    opacity: 0.85;
-    background: var(--color-action-default-hover);
-  }
-}
-
-.secondary-btn {
-  background: var(--color-background-subtle);
-  color: var(--color-text-default);
-
-  &:hover {
-    opacity: 0.85;
-  }
-}
-
 .search-row {
   margin-bottom: 12px;
-
   display: flex;
-
   align-items: center;
   gap: 12px;
 }
@@ -391,7 +294,6 @@ const closeMobileFilters = () => {
 
 .filter-bar {
   margin-bottom: 2rem;
-
   display: flex;
   gap: 10px;
 }
@@ -408,13 +310,9 @@ const closeMobileFilters = () => {
   padding: 0 16px;
   border-radius: var(--border-radius-sm);
   min-height: 44px;
-
-  font: {
-    family: var(--font-family-body);
-    size: 1rem;
-  }
+  font-family: var(--font-family-body);
+  font-size: 1rem;
   color: var(--color-surface-default);
-
   cursor: pointer;
   transition: opacity var(--motion-transition-default);
   white-space: nowrap;
@@ -430,25 +328,7 @@ const closeMobileFilters = () => {
 }
 
 .grid-area {
-  position: relative;
   margin-top: 2rem;
-}
-
-.books-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.5rem;
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 60px 24px;
-  color: var(--color-text-subtle);
-  text-align: center;
-  font-size: 1rem;
 }
 
 .mobile-filters {
@@ -464,14 +344,12 @@ const closeMobileFilters = () => {
     top: 0;
     right: 0;
     z-index: 50;
-
     display: flex;
     width: min(88dvw, 360px);
     height: 100dvh;
     padding-top: 4rem;
     background: var(--color-surface-default);
     box-shadow: -8px 0 24px rgba(0, 0, 0, 0.16);
-
     flex-direction: column;
   }
 
@@ -495,91 +373,84 @@ const closeMobileFilters = () => {
     border: none;
     background: transparent;
     border-radius: 999px;
-    font-size: 1.1rem;
     cursor: pointer;
     color: var(--color-text-default);
   }
 
   &-body {
-    // flex: 1;
-    // overflow-y: auto;
     padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 12px;
+
+    .filter-bar-sorted {
+      width: 100%;
+    }
   }
 
   &-footer {
     margin-top: auto;
-
     display: grid;
     padding: 16px;
     border-top: 1px solid var(--color-border-default);
     background: var(--color-surface-default);
-
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
 }
 
-.mobile-filters-body {
-  .filter-bar-sorted {
-    width: 100%;
+.primary-btn,
+.secondary-btn {
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--border-radius-sm);
+  min-height: 44px;
+  font-family: var(--font-family-body);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity var(--motion-transition-default);
+}
+
+.primary-btn {
+  background: var(--color-action-default);
+  color: var(--color-surface-default);
+
+  &:hover {
+    opacity: 0.85;
+    background: var(--color-action-default-hover);
   }
 }
 
+.secondary-btn {
+  background: var(--color-background-subtle);
+  color: var(--color-text-default);
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+/* Drawer transitions */
 .mobile-filters-overlay-enter-active,
 .mobile-filters-overlay-leave-active {
   transition: opacity 0.25s ease;
 }
-
 .mobile-filters-overlay-enter-from,
 .mobile-filters-overlay-leave-to {
   opacity: 0;
 }
-
 .mobile-filters-panel-enter-active,
 .mobile-filters-panel-leave-active {
   transition: transform 0.25s ease;
 }
-
 .mobile-filters-panel-enter-from,
 .mobile-filters-panel-leave-to {
   transform: translateX(100%);
 }
 
-.grid-enter-active {
-  transition:
-    opacity var(--motion-transition-default),
-    transform var(--motion-transition-default);
-}
-
-.grid-enter-from {
-  opacity: 0;
-  transform: scale(0.96);
-}
-
-.grid-leave-active {
-  transition: opacity var(--motion-transition-default);
-  position: absolute;
-}
-
-.grid-leave-to {
-  opacity: 0;
-}
-
-.grid-move {
-  transition: transform var(--motion-transition-default);
-}
-
 @media (max-width: 767px) {
   .catalog-intro {
     margin-bottom: 1rem;
-  }
-
-  .intro-inner {
-    flex-direction: column;
-    gap: 4px;
   }
 
   .intro-desc {
@@ -596,10 +467,6 @@ const closeMobileFilters = () => {
 
   .show-all-btn.mobile {
     flex-shrink: 0;
-  }
-
-  .books-grid {
-    grid-template-columns: 1fr;
   }
 }
 </style>

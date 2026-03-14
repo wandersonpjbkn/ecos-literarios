@@ -1,13 +1,10 @@
 <template>
   <div class="page book-page" data-page="book">
     <!-- Loading -->
-    <div v-if="useBooksStore().loading" class="state-screen">
-      <div class="spinner"></div>
-      <p>Carregando livro…</p>
-    </div>
+    <PageStatus :loading="useBooksStore().loading" loading-text="Carregando livro…" />
 
-    <!-- Error -->
-    <div v-else-if="!book" class="state-screen">
+    <!-- Not found (só mostra se não está loading E livro não existe) -->
+    <div v-if="!useBooksStore().loading && !book" class="state-screen">
       <p>Livro não encontrado.</p>
       <RouterLink to="/" class="back-btn">
         <BaseIcon name="arrow-left" />
@@ -16,7 +13,7 @@
     </div>
 
     <!-- Book -->
-    <template v-else>
+    <template v-if="!useBooksStore().loading && book">
       <div class="top-bar">
         <div class="top-bar-inner">
           <RouterLink to="/" class="back-link back-link--primary">
@@ -31,59 +28,94 @@
         </div>
       </div>
 
-      <section class="book-hero accent" :style="{ '--accent': categoryColor }">
-        <div class="hero-inner">
-          <div class="hero-rail" aria-hidden="true"></div>
+      <!-- Hero -->
+      <section class="book-hero-wrap" :style="{ '--accent': categoryColor }">
+        <div class="hero-shell">
+          <RailCard :accent="categoryColor">
+            <div class="hero-main">
+              <div class="hero-meta">
+                <span class="midia-badge" :class="midiaBadgeClass">{{ book.midia }}</span>
 
-          <div class="hero-main">
-            <div class="hero-meta">
-              <span class="midia-badge" :class="midiaBadgeClass">
-                {{ book.midia }}
-              </span>
+                <span v-if="book.categoria" class="categoria-pill">
+                  <span class="categoria-dot" />
+                  {{ formatCategoria(book.categoria) }}
+                </span>
+              </div>
 
-              <span v-if="book.categoria" class="categoria-pill">
-                <span class="categoria-dot" />
-                {{ formatCategoria(book.categoria) }}
-              </span>
+              <h1 class="book-titulo">{{ book.titulo }}</h1>
+              <p class="book-autor">{{ book.autor }}</p>
+
+              <div v-if="book.subgenerosArr?.length" class="subgeneros-list">
+                <span v-for="sg in book.subgenerosArr" :key="sg" class="sg-tag">{{ sg }}</span>
+              </div>
             </div>
-
-            <h1 class="book-titulo">
-              {{ book.titulo }}
-            </h1>
-
-            <p class="book-autor">
-              {{ book.autor }}
-            </p>
-
-            <div v-if="book.subgenerosArr?.length" class="subgeneros-list">
-              <span v-for="sg in book.subgenerosArr" :key="sg" class="sg-tag">
-                {{ sg }}
-              </span>
-            </div>
-          </div>
+          </RailCard>
         </div>
       </section>
 
+      <!-- Content -->
       <section class="book-content">
         <div class="content-inner">
+          <!-- Indicação -->
           <div v-if="book.quem || book.porque" class="indicacao-card" :style="{ '--accent': categoryColor }">
             <div v-if="book.quem" class="indicacao-header">
               <BaseIcon name="user" class="icon-user" />
-              <span>
-                Mencionado por <strong>{{ book.quem }}</strong>
-              </span>
+              <span
+                >Mencionado por <strong>{{ book.quem }}</strong></span
+              >
             </div>
-
-            <blockquote v-if="book.porque" class="porque-quote">
-              {{ book.porque }}
-            </blockquote>
+            <blockquote v-if="book.porque" class="porque-quote">{{ book.porque }}</blockquote>
           </div>
 
-          <section class="nav-section">
-            <div class="section-heading section-heading--spaced">
-              <h2 class="section-title">Explore mais</h2>
-              <p class="section-desc">Continue navegando pelo catálogo com estes atalhos relacionados.</p>
+          <!-- Busca externa -->
+          <section class="external-search">
+            <SectionHeading
+              title="Buscar mundo à fora"
+              :description-html="`Pesquise mais sobre <strong>${book.titulo}</strong> em outras plataformas:`"
+              variant="spaced"
+            />
+
+            <div class="external-search-btns">
+              <a
+                :href="`https://www.amazon.com.br/s?k=${encodeURIComponent(`${book.titulo} ${book.autor}`)}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="ext-btn ext-btn--amazon"
+                aria-label="Buscar na Amazon"
+                @click="emitGTMEvent('amazon')"
+              >
+                <BaseIcon name="amazon" /><span>Amazon</span>
+              </a>
+              <a
+                :href="`https://www.youtube.com/results?search_query=${encodeURIComponent(`${book.titulo} ${book.autor}`)}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="ext-btn ext-btn--youtube"
+                aria-label="Buscar no YouTube"
+                @click="emitGTMEvent('youtube')"
+              >
+                <BaseIcon name="youtube" /><span>YouTube</span>
+              </a>
+              <a
+                :href="`https://www.google.com/search?q=${encodeURIComponent(`${book.titulo} ${book.autor}`)}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="ext-btn ext-btn--google"
+                aria-label="Buscar no Google"
+                @click="emitGTMEvent('google')"
+              >
+                <BaseIcon name="chrome" /><span>Google</span>
+              </a>
             </div>
+          </section>
+
+          <!-- Explore mais -->
+          <section class="nav-section">
+            <SectionHeading
+              title="Explore mais"
+              description="Continue navegando pelo catálogo com estes atalhos relacionados."
+              variant="spaced"
+            />
 
             <div class="meta-grid">
               <RouterLink
@@ -135,88 +167,35 @@
               </RouterLink>
             </div>
           </section>
-
-          <section class="external-search">
-            <div class="section-heading section-heading--spaced external-search-heading">
-              <h2 class="section-title">Buscar mundo à fora</h2>
-              <p class="section-desc">
-                Pesquise mais sobre <strong>{{ book.titulo }}</strong> em outras plataformas:
-              </p>
-            </div>
-
-            <div class="external-search-btns">
-              <a
-                :href="`https://www.amazon.com.br/s?k=${encodeURIComponent(`${book.titulo} ${book.autor}`)}`"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="ext-btn ext-btn--amazon"
-                aria-label="Buscar na Amazon"
-                @click="emitGTMEvent('amazon')"
-              >
-                <BaseIcon name="amazon" />
-                <span>Amazon</span>
-              </a>
-
-              <a
-                :href="`https://www.youtube.com/results?search_query=${encodeURIComponent(`${book.titulo} ${book.autor}`)}`"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="ext-btn ext-btn--youtube"
-                aria-label="Buscar no YouTube"
-                @click="emitGTMEvent('youtube')"
-              >
-                <BaseIcon name="youtube" />
-                <span>YouTube</span>
-              </a>
-
-              <a
-                :href="`https://www.google.com/search?q=${encodeURIComponent(`${book.titulo} ${book.autor}`)}`"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="ext-btn ext-btn--google"
-                aria-label="Buscar no Google"
-                @click="emitGTMEvent('google')"
-              >
-                <BaseIcon name="chrome" />
-                <span>Google</span>
-              </a>
-            </div>
-          </section>
         </div>
       </section>
 
-      <section class="book-hero" style="--accent: var(--color-surface-default)">
+      <!-- Related -->
+      <section v-if="related.length" class="related-wrap">
         <div class="content-inner">
-          <section v-if="related.length" class="related-section">
-            <div class="section-heading section-heading--between section-heading--spaced">
-              <div class="related-heading-copy">
-                <h2 class="section-title">Continue explorando</h2>
-                <p class="section-desc">
-                  Outros títulos em <strong>{{ formatCategoria(book.categoria) }}</strong
-                  >.
-                </p>
-              </div>
-
+          <SectionHeading variant="between">
+            <template #default>
               <RouterLink :to="`/categoria/${encodeURIComponent(book.categoria)}`" class="section-link">
-                Ver todos
-                <BaseIcon name="arrow-right" />
+                Ver todos <BaseIcon name="arrow-right" />
               </RouterLink>
-            </div>
+            </template>
+            <template #description>
+              Outros títulos em <strong>{{ formatCategoria(book.categoria) }}</strong
+              >.
+            </template>
+          </SectionHeading>
 
-            <div class="related-grid">
-              <RouterLink v-for="r in related" :key="r.id" :to="`/livro/${r.id}`" class="related-card">
-                <div class="related-spine" :style="{ background: getCategoryColor(r.categoria) }"></div>
-
-                <div class="related-body">
-                  <span class="related-kicker">{{ r.midia }} · {{ formatCategoria(r.categoria) }}</span>
-                  <strong>{{ r.titulo }}</strong>
-                  <span>{{ r.autor }}</span>
-                </div>
-
-                <BaseIcon name="arrow-right" class="arrow" />
-              </RouterLink>
-            </div>
-          </section>
+          <div class="related-grid">
+            <RouterLink v-for="r in related" :key="r.id" :to="`/livro/${r.id}`" class="related-card">
+              <div class="related-spine" :style="{ background: getCategoryColor(r.categoria) }" />
+              <div class="related-body">
+                <span class="related-kicker">{{ r.midia }} · {{ formatCategoria(r.categoria) }}</span>
+                <strong>{{ r.titulo }}</strong>
+                <span>{{ r.autor }}</span>
+              </div>
+              <BaseIcon name="arrow-right" class="arrow" />
+            </RouterLink>
+          </div>
         </div>
       </section>
     </template>
@@ -231,6 +210,10 @@ import { useBooksStore } from '@/stores'
 import { useCategoryColors, useSheets } from '@/composables'
 import { sendGtmEvent } from '@/utils/gtm'
 
+import PageStatus from '@/components/PageStatus.vue'
+import RailCard from '@/components/RailCard.vue'
+import SectionHeading from '@/components/SectionHeading.vue'
+
 import type { Book, CategoryType } from '@/types'
 
 const route = useRoute()
@@ -244,7 +227,6 @@ const book = computed((): Book | undefined =>
 
 const related = computed(() => {
   if (!book.value) return []
-
   return useBooksStore()
     .books.filter((b) => b.id !== book.value?.id && b.categoria === book.value?.categoria)
     .slice(0, 4)
@@ -253,19 +235,13 @@ const related = computed(() => {
 const categoryColor = computed(() =>
   book.value ? colors.categoryColor(book.value.categoria) : 'var(--color-action-default)',
 )
-
 const midiaBadgeClass = computed(() => (book.value ? colors.midiaBadgeClass(book.value.midia) : ''))
 
-const formatCategoria = (value?: string) => {
-  if (!value) return ''
-  return value.replace(/-/g, ' ')
-}
-
-const getCategoryColor = (value?: CategoryType) => colors.categoryColor(value!)
+const formatCategoria = (v?: string) => (v ? v.replace(/-/g, ' ') : '')
+const getCategoryColor = (v?: CategoryType) => colors.categoryColor(v!)
 
 const emitGTMEvent = (origin: string) => {
   if (!book.value) return
-
   sendGtmEvent({
     event: 'external_link',
     external_link_origin: origin,
@@ -276,32 +252,7 @@ const emitGTMEvent = (origin: string) => {
 </script>
 
 <style lang="scss" scoped>
-.state-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 80px 24px;
-  color: var(--color-text-subtle);
-  text-align: center;
-}
-
-.spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid var(--color-border-default);
-  border-top-color: var(--color-action-default);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
+/* ── Top bar ───────────────────────────────────── */
 .top-bar {
   position: sticky;
   top: 0;
@@ -332,13 +283,11 @@ const emitGTMEvent = (origin: string) => {
   &:hover {
     color: var(--color-action-default);
   }
-
   &:focus-visible {
     outline: 2px solid var(--color-border-focus);
     outline-offset: 3px;
     border-radius: 6px;
   }
-
   &--primary {
     font-weight: 600;
     color: var(--color-text-default);
@@ -354,7 +303,6 @@ const emitGTMEvent = (origin: string) => {
   &-divider {
     color: var(--color-text-disabled);
   }
-
   &-current {
     color: var(--color-text-subtle);
     overflow: hidden;
@@ -363,33 +311,19 @@ const emitGTMEvent = (origin: string) => {
   }
 }
 
-.book-hero {
+/* ── Hero ──────────────────────────────────────── */
+.book-hero-wrap {
   background: var(--accent);
   padding: 40px 24px;
-
-  &.accent {
-    box-shadow: inset var(--shadow-lg);
-  }
+  box-shadow: inset var(--shadow-lg);
 }
 
-.hero-inner {
+.hero-shell {
   max-width: calc(1200px - (2 * 24px));
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1.2rem 1fr;
-  background: var(--color-surface-default);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--border-radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
-}
-
-.hero-rail {
-  background: var(--accent);
 }
 
 .hero-main {
-  padding: 28px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -433,12 +367,10 @@ const emitGTMEvent = (origin: string) => {
   background: var(--badge-livro-background-color);
   color: var(--badge-livro-text-color);
 }
-
 .badge-manga {
   background: var(--badge-manga-background-color);
   color: var(--badge-manga-text-color);
 }
-
 .badge-hq {
   background: var(--badge-hq-background-color);
   color: var(--badge-hq-text-color);
@@ -483,6 +415,7 @@ const emitGTMEvent = (origin: string) => {
   font-size: 0.8rem;
 }
 
+/* ── Content ───────────────────────────────────── */
 .book-content {
   padding: 40px 24px 72px;
   background: var(--color-background-default);
@@ -494,64 +427,6 @@ const emitGTMEvent = (origin: string) => {
   display: flex;
   flex-direction: column;
   gap: 32px;
-}
-
-.section-heading {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.section-heading--spaced {
-  gap: 0.25rem;
-  margin-bottom: 1rem;
-}
-
-.section-heading--between {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.related-heading-copy {
-  text-align: left;
-}
-
-.section-title {
-  margin: 0;
-  font-family: var(--font-family-display);
-  font-size: 1.15rem;
-  color: var(--color-text-default);
-  text-align: left;
-}
-
-.section-desc {
-  margin: 0;
-  color: var(--color-text-subtle);
-  font-size: 0.92rem;
-  line-height: 1.45;
-  text-align: left;
-}
-
-.section-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-action-default);
-  text-decoration: none;
-  font-weight: 600;
-  transition: color var(--motion-transition-default);
-
-  &:hover {
-    color: var(--color-action-default-hover);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--color-border-focus);
-    outline-offset: 3px;
-    border-radius: 6px;
-  }
 }
 
 .indicacao-card {
@@ -573,7 +448,6 @@ const emitGTMEvent = (origin: string) => {
   strong {
     color: var(--color-text-default);
   }
-
   svg {
     color: var(--accent);
     flex-shrink: 0;
@@ -594,6 +468,7 @@ const emitGTMEvent = (origin: string) => {
   line-height: 1.6;
 }
 
+/* ── Meta grid ─────────────────────────────────── */
 .meta-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -627,7 +502,6 @@ const emitGTMEvent = (origin: string) => {
       transform: translateX(3px);
       color: var(--color-action-default);
     }
-
     .meta-value {
       color: var(--color-action-default);
     }
@@ -672,27 +546,16 @@ const emitGTMEvent = (origin: string) => {
     color var(--motion-transition-default);
 }
 
+/* ── External search ───────────────────────────── */
 .external-search {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-}
-
-.external-search-heading {
-  width: 100%;
-  align-items: flex-end;
-}
-
-.external-search-heading .section-title,
-.external-search-heading .section-desc {
-  text-align: right;
 }
 
 .external-search-btns {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  justify-content: flex-end;
 }
 
 .ext-btn {
@@ -718,7 +581,6 @@ const emitGTMEvent = (origin: string) => {
     outline: 2px solid var(--color-border-focus);
     outline-offset: 3px;
   }
-
   svg {
     width: 18px;
     height: 18px;
@@ -730,19 +592,16 @@ const emitGTMEvent = (origin: string) => {
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
   }
-
   .ext-btn--amazon:hover {
     border-color: #ff9900;
     background: #ff9900;
     color: #fff;
   }
-
   .ext-btn--youtube:hover {
     border-color: #ff0000;
     background: #ff0000;
     color: #fff;
   }
-
   .ext-btn--google:hover {
     border-color: #4285f4;
     background: #4285f4;
@@ -753,31 +612,54 @@ const emitGTMEvent = (origin: string) => {
 @media (max-width: 767px) {
   .ext-btn {
     box-shadow: var(--shadow-sm);
+    justify-content: center;
+    width: 100%;
   }
-
   .ext-btn--amazon {
     border-color: #ff9900;
     background: #ff9900;
     color: #fff;
   }
-
   .ext-btn--youtube {
     border-color: #ff0000;
     background: #ff0000;
     color: #fff;
   }
-
   .ext-btn--google {
     border-color: #4285f4;
     background: #4285f4;
     color: #fff;
   }
+  .external-search-btns {
+    flex-direction: column;
+  }
 }
 
-.related-section {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+/* ── Related ───────────────────────────────────── */
+.related-wrap {
+  background: var(--color-surface-default);
+  padding: 40px 24px;
+}
+
+.section-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-action-default);
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color var(--motion-transition-default);
+  flex-shrink: 0;
+
+  &:hover {
+    color: var(--color-action-default-hover);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
 }
 
 .related-grid {
@@ -803,13 +685,11 @@ const emitGTMEvent = (origin: string) => {
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
     border-color: rgba(var(--color-action-default-rgb), 0.22);
-
     .arrow {
       color: var(--color-action-default);
       transform: translateX(3px);
     }
   }
-
   &:focus-visible {
     outline: 2px solid var(--color-border-focus);
     outline-offset: 3px;
@@ -834,7 +714,6 @@ const emitGTMEvent = (origin: string) => {
     font-size: 0.95rem;
     line-height: 1.3;
   }
-
   span {
     color: var(--color-text-subtle);
     font-size: 0.84rem;
@@ -854,6 +733,18 @@ const emitGTMEvent = (origin: string) => {
   transition:
     transform var(--motion-transition-default),
     color var(--motion-transition-default);
+}
+
+/* ── Not found / state ─────────────────────────── */
+.state-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 80px 24px;
+  color: var(--color-text-subtle);
+  text-align: center;
 }
 
 .back-btn {
@@ -877,54 +768,20 @@ const emitGTMEvent = (origin: string) => {
   }
 }
 
+/* ── Mobile ────────────────────────────────────── */
 @media (max-width: 767px) {
-  .hero-inner {
-    grid-template-columns: 0.9rem 1fr;
+  .book-hero-wrap {
+    padding: 16px 24px;
   }
-
-  .hero-main {
-    padding: 20px;
-  }
-
   .book-titulo {
     font-size: 1.7rem;
   }
-
   .book-autor {
     font-size: 0.95rem;
   }
-
-  .section-heading--between {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .meta-grid {
     grid-template-columns: 1fr;
   }
-
-  .external-search {
-    align-items: stretch;
-  }
-
-  .external-search-heading {
-    align-items: flex-start;
-  }
-
-  .external-search-heading .section-title,
-  .external-search-heading .section-desc {
-    text-align: left;
-  }
-
-  .external-search-btns {
-    flex-direction: column;
-    justify-content: flex-start;
-  }
-
-  .ext-btn {
-    justify-content: center;
-  }
-
   .related-grid {
     grid-template-columns: 1fr;
   }
