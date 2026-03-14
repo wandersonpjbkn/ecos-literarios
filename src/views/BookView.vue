@@ -207,7 +207,7 @@ import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useBooksStore } from '@/stores'
-import { useCategoryColors, useSheets } from '@/composables'
+import { useCategoryColors, useSheets, usePageMeta } from '@/composables'
 import { sendGtmEvent } from '@/utils/gtm'
 
 import PageStatus from '@/components/PageStatus.vue'
@@ -249,6 +249,12 @@ const emitGTMEvent = (origin: string) => {
     external_link_author: book.value.autor,
   })
 }
+
+const title = computed(() => book.value?.titulo ?? 'Livro')
+const description = computed(() =>
+  book.value ? `${book.value.titulo} · ${book.value.autor} — indicado por ${book.value.quem}` : '',
+)
+usePageMeta({ title: title.value, description: description.value, type: 'article' })
 </script>
 
 <style lang="scss" scoped>

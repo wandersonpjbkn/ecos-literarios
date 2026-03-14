@@ -157,7 +157,7 @@ import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
 import { useBooksStore } from '@/stores'
-import { useSheets, useFilters, useBookSort } from '@/composables'
+import { useSheets, useFilters, useBookSort, usePageMeta } from '@/composables'
 
 import SearchBar from '@/components/SearchBar.vue'
 import ResultCount from '@/components/ResultCount.vue'
@@ -168,6 +168,11 @@ import PageStatus from '@/components/PageStatus.vue'
 import BooksGrid from '@/components/BooksGrid.vue'
 
 import type { Book } from '@/types'
+
+usePageMeta({
+  title: 'Catálogo de Indicações',
+  description: 'Explore os livros, mangás e HQs indicados pelo Clube Ecos Literários.',
+})
 
 const {
   search,

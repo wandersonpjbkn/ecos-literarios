@@ -124,7 +124,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useBooksStore } from '@/stores'
-import { useSheets, useCategoryColors, useBookSort } from '@/composables'
+import { useSheets, useCategoryColors, useBookSort, usePageMeta } from '@/composables'
 
 import SearchBar from '@/components/SearchBar.vue'
 import ResultCount from '@/components/ResultCount.vue'
@@ -299,6 +299,11 @@ const exploreGroups = computed(() => [
 ])
 
 const { sortOrder, sortedBooks } = useBookSort(filtered)
+
+const description = computed(
+  () => `${baseFiltered.value.length} títulos em ${config.value.label}: ${filterValue.value}`,
+)
+usePageMeta({ title: filterValue.value, description: description.value })
 </script>
 
 <style lang="scss" scoped>

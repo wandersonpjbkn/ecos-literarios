@@ -30,6 +30,8 @@
 <script lang="ts" setup>
 import { defineAsyncComponent, ref, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
+import { useHead } from '@unhead/vue'
+
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue'
 
 const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
@@ -44,6 +46,11 @@ watch(route, async () => {
       content.value.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }, 350)
+})
+
+useHead({
+  htmlAttrs: { lang: 'pt-BR' },
+  meta: [{ name: 'robots', content: 'noindex, nofollow' }],
 })
 </script>
 

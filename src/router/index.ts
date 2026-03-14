@@ -18,8 +18,6 @@ const router = createRouter({
 })
 
 router.afterEach((to) => {
-  window.document.title = (to.meta.title as string) || 'Ecos Literários'
-
   sendGtmEvent({
     event: 'content_view',
     content_name: to.fullPath,
