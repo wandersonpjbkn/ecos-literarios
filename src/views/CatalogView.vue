@@ -1,11 +1,12 @@
 <template>
   <div class="page catalog-page" data-page="catalog">
-    <!-- Loading / Error -->
+    <!-- Loading -->
     <div v-if="useBooksStore().loading" class="state-screen">
       <div class="spinner"></div>
       <p>Carregando catálogo…</p>
     </div>
 
+    <!-- Error -->
     <div v-else-if="useBooksStore().error" class="state-screen state-error">
       <BaseIcon name="error" />
       <p>{{ useBooksStore().error }}</p>
@@ -432,7 +433,7 @@ const closeMobileFilters = () => {
 .books-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.5rem 1rem;
+  gap: 1.5rem;
 }
 
 .empty-state {

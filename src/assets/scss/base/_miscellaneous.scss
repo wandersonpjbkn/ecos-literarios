@@ -11,3 +11,18 @@ $radius-lg: 1rem;
 
 /** transition */
 $transition: 180ms ease;
+
+/** categories */
+$categories: (
+  'suspense': #6f42c1,
+  'terror': #3a0f1f,
+  'fantasia': #7b61ff,
+  'ficcao': #2563eb,
+  'drama': #d9485f,
+  'romance': #ff4d8d,
+  'poesia': #e6a700,
+  'nao-ficcao': #c05621,
+  'realismo': #2f855a,
+  'ficcao-historica': #8b5e3c,
+  'ficcao-cientifica': #0ea5e9,
+);

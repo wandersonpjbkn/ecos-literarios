@@ -54,7 +54,9 @@
     --color-header-bg: #{map.get($config, 'header-bg')};
 
     // Categorias
-    @each $category, $color in map.get($config, 'categories') {
+    // $cat: map.get($config, 'categories');
+    $cat: $categories;
+    @each $category, $color in $cat {
       --category-color-#{$category}: #{$color};
     }
 

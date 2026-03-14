@@ -3,179 +3,220 @@
     <!-- Loading -->
     <div v-if="useBooksStore().loading" class="state-screen">
       <div class="spinner"></div>
+      <p>Carregando livro…</p>
     </div>
 
-    <!-- Not found -->
+    <!-- Error -->
     <div v-else-if="!book" class="state-screen">
       <p>Livro não encontrado.</p>
-      <RouterLink to="/" class="back-btn">← Voltar ao catálogo</RouterLink>
+      <RouterLink to="/" class="back-btn">
+        <BaseIcon name="arrow-left" />
+        Voltar ao catálogo
+      </RouterLink>
     </div>
 
-    <!-- Book detail -->
+    <!-- Book -->
     <template v-else>
-      <!-- Top bar -->
       <div class="top-bar">
         <div class="top-bar-inner">
-          <RouterLink to="/" class="back-link">
+          <RouterLink to="/" class="back-link back-link--primary">
             <BaseIcon name="arrow-left" />
-            Catálogo
+            Voltar ao catálogo
           </RouterLink>
-          <div class="breadcrumb-divider">
-            <span>/</span>
+
+          <div class="breadcrumb">
+            <span class="breadcrumb-divider">/</span>
+            <span class="breadcrumb-current">{{ book.titulo }}</span>
           </div>
-          <span class="breadcrumb-current">{{ book.titulo }}</span>
         </div>
       </div>
 
-      <!-- Hero -->
-      <section class="book-hero" :style="{ '--spine-color': useCategoryColors().categoryColor(book.categoria) }">
+      <section class="book-hero accent" :style="{ '--accent': categoryColor }">
         <div class="hero-inner">
-          <!-- Book visual -->
-          <div class="book-cover">
-            <div class="cover-spine"></div>
-            <div class="cover-front">
-              <span class="cover-midia">{{ book.midia }}</span>
-              <h2 class="cover-titulo">{{ book.titulo }}</h2>
-              <p class="cover-autor">{{ book.autor }}</p>
-            </div>
-          </div>
+          <div class="hero-rail" aria-hidden="true"></div>
 
-          <!-- Info -->
-          <div class="book-info">
-            <div class="info-badges">
-              <span class="midia-badge" :class="useCategoryColors().midiaBadgeClass(book.midia)">{{ book.midia }}</span>
-              <span class="categoria-badge">{{ book.categoria }}</span>
+          <div class="hero-main">
+            <div class="hero-meta">
+              <span class="midia-badge" :class="midiaBadgeClass">
+                {{ book.midia }}
+              </span>
+
+              <span v-if="book.categoria" class="categoria-pill">
+                <span class="categoria-dot" />
+                {{ formatCategoria(book.categoria) }}
+              </span>
             </div>
-            <h1 class="book-titulo">{{ book.titulo }}</h1>
-            <p class="book-autor">{{ book.autor }}</p>
+
+            <h1 class="book-titulo">
+              {{ book.titulo }}
+            </h1>
+
+            <p class="book-autor">
+              {{ book.autor }}
+            </p>
 
             <div v-if="book.subgenerosArr?.length" class="subgeneros-list">
-              <span v-for="sg in book.subgenerosArr" :key="sg" class="sg-tag">{{ sg }}</span>
+              <span v-for="sg in book.subgenerosArr" :key="sg" class="sg-tag">
+                {{ sg }}
+              </span>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Content -->
       <section class="book-content">
         <div class="content-inner">
-          <!-- Quem mencionou + Por que -->
-          <div v-if="book.quem || book.porque" class="indicacao-card">
-            <div class="indicacao-header">
+          <div v-if="book.quem || book.porque" class="indicacao-card" :style="{ '--accent': categoryColor }">
+            <div v-if="book.quem" class="indicacao-header">
               <BaseIcon name="user" class="icon-user" />
-              <span v-if="book.quem"
-                >Mencionado por <strong>{{ book.quem }}</strong></span
-              >
+              <span>
+                Mencionado por <strong>{{ book.quem }}</strong>
+              </span>
             </div>
-            <blockquote v-if="book.porque" class="porque-quote">"{{ book.porque }}"</blockquote>
+
+            <blockquote v-if="book.porque" class="porque-quote">
+              {{ book.porque }}
+            </blockquote>
           </div>
 
-          <!-- Pesquisar em outras mídias -->
-          <div class="external-search">
-            <p class="external-search-label">
-              Buscar sobre <strong>{{ book.titulo }}</strong> em:
-            </p>
+          <section class="nav-section">
+            <div class="section-heading section-heading--spaced">
+              <h2 class="section-title">Explore mais</h2>
+              <p class="section-desc">Continue navegando pelo catálogo com estes atalhos relacionados.</p>
+            </div>
+
+            <div class="meta-grid">
+              <RouterLink
+                v-if="book.midia"
+                :to="`/midia/${encodeURIComponent(book.midia)}`"
+                class="meta-item meta-item--link"
+                aria-label="Ver outros títulos pelo mesmo formato"
+              >
+                <span class="meta-label">Mídia</span>
+                <span class="meta-value">{{ book.midia }}</span>
+                <span class="meta-hint">Ver outros títulos nesse formato</span>
+                <BaseIcon name="arrow-right" class="meta-arrow" />
+              </RouterLink>
+
+              <RouterLink
+                v-if="book.categoria"
+                :to="`/categoria/${encodeURIComponent(book.categoria)}`"
+                class="meta-item meta-item--link"
+                aria-label="Ver outros títulos da mesma categoria"
+              >
+                <span class="meta-label">Categoria</span>
+                <span class="meta-value">{{ formatCategoria(book.categoria) }}</span>
+                <span class="meta-hint">Abrir a seleção relacionada</span>
+                <BaseIcon name="arrow-right" class="meta-arrow" />
+              </RouterLink>
+
+              <RouterLink
+                v-if="book.autor"
+                :to="`/autor/${encodeURIComponent(book.autor)}`"
+                class="meta-item meta-item--link"
+                aria-label="Ver outros títulos do mesmo autor"
+              >
+                <span class="meta-label">Autor/a</span>
+                <span class="meta-value">{{ book.autor }}</span>
+                <span class="meta-hint">Ver mais obras deste autor</span>
+                <BaseIcon name="arrow-right" class="meta-arrow" />
+              </RouterLink>
+
+              <RouterLink
+                v-if="book.quem"
+                :to="`/mencao/${encodeURIComponent(book.quem)}`"
+                class="meta-item meta-item--link"
+                aria-label="Ver outras indicações da mesma pessoa"
+              >
+                <span class="meta-label">Mencionado por</span>
+                <span class="meta-value">{{ book.quem }}</span>
+                <span class="meta-hint">Ver outras indicações dessa pessoa</span>
+                <BaseIcon name="arrow-right" class="meta-arrow" />
+              </RouterLink>
+            </div>
+          </section>
+
+          <section class="external-search">
+            <div class="section-heading section-heading--spaced external-search-heading">
+              <h2 class="section-title">Buscar mundo à fora</h2>
+              <p class="section-desc">
+                Pesquise mais sobre <strong>{{ book.titulo }}</strong> em outras plataformas:
+              </p>
+            </div>
+
             <div class="external-search-btns">
               <a
-                :href="`https://www.amazon.com.br/s?k=${encodeURIComponent(book.titulo + ' ' + book.autor)}`"
+                :href="`https://www.amazon.com.br/s?k=${encodeURIComponent(`${book.titulo} ${book.autor}`)}`"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="ext-btn ext-btn--amazon"
                 aria-label="Buscar na Amazon"
-                title="Amazon"
                 @click="emitGTMEvent('amazon')"
               >
-                <!-- Amazon icon -->
                 <BaseIcon name="amazon" />
+                <span>Amazon</span>
               </a>
 
               <a
-                :href="`https://www.youtube.com/results?search_query=${encodeURIComponent(book.titulo + ' ' + book.autor)}`"
+                :href="`https://www.youtube.com/results?search_query=${encodeURIComponent(`${book.titulo} ${book.autor}`)}`"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="ext-btn ext-btn--youtube"
                 aria-label="Buscar no YouTube"
-                title="YouTube"
                 @click="emitGTMEvent('youtube')"
               >
-                <!-- YouTube icon -->
                 <BaseIcon name="youtube" />
+                <span>YouTube</span>
               </a>
 
               <a
-                :href="`https://www.google.com/search?q=${encodeURIComponent(book.titulo + ' ' + book.autor)}`"
+                :href="`https://www.google.com/search?q=${encodeURIComponent(`${book.titulo} ${book.autor}`)}`"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="ext-btn ext-btn--google"
                 aria-label="Buscar no Google"
-                title="Google"
                 @click="emitGTMEvent('google')"
               >
-                <!-- Google icon -->
                 <BaseIcon name="chrome" />
+                <span>Google</span>
               </a>
             </div>
-          </div>
+          </section>
+        </div>
+      </section>
 
-          <!-- Metadata grid — itens clicáveis -->
-          <div class="meta-grid">
-            <RouterLink
-              v-if="book.midia"
-              :to="`/midia/${encodeURIComponent(book.midia)}`"
-              class="meta-item meta-item--link"
-            >
-              <span class="meta-label">Mídia</span>
-              <span class="meta-value">{{ book.midia }}</span>
-              <BaseIcon name="arrow-right" class="meta-arrow" />
-            </RouterLink>
+      <section class="book-hero" style="--accent: var(--color-surface-default)">
+        <div class="content-inner">
+          <section v-if="related.length" class="related-section">
+            <div class="section-heading section-heading--between section-heading--spaced">
+              <div class="related-heading-copy">
+                <h2 class="section-title">Continue explorando</h2>
+                <p class="section-desc">
+                  Outros títulos em <strong>{{ formatCategoria(book.categoria) }}</strong
+                  >.
+                </p>
+              </div>
 
-            <RouterLink
-              v-if="book.categoria"
-              :to="`/categoria/${encodeURIComponent(book.categoria)}`"
-              class="meta-item meta-item--link"
-            >
-              <span class="meta-label">Categoria</span>
-              <span class="meta-value">{{ book.categoria }}</span>
-              <BaseIcon name="arrow-right" class="meta-arrow" />
-            </RouterLink>
+              <RouterLink :to="`/categoria/${encodeURIComponent(book.categoria)}`" class="section-link">
+                Ver todos
+                <BaseIcon name="arrow-right" />
+              </RouterLink>
+            </div>
 
-            <RouterLink
-              v-if="book.autor"
-              :to="`/autor/${encodeURIComponent(book.autor)}`"
-              class="meta-item meta-item--link"
-            >
-              <span class="meta-label">Autor/a</span>
-              <span class="meta-value">{{ book.autor }}</span>
-              <BaseIcon name="arrow-right" class="meta-arrow" />
-            </RouterLink>
-
-            <RouterLink
-              v-if="book.quem"
-              :to="`/mencao/${encodeURIComponent(book.quem)}`"
-              class="meta-item meta-item--link"
-            >
-              <span class="meta-label">Mencionado por</span>
-              <span class="meta-value">{{ book.quem }}</span>
-              <BaseIcon name="arrow-right" class="meta-arrow" />
-            </RouterLink>
-          </div>
-
-          <!-- Related: same category -->
-          <div v-if="related.length" class="related-section">
-            <h3 class="related-title">
-              Ver mais em <em>{{ book.categoria }}</em>
-            </h3>
             <div class="related-grid">
               <RouterLink v-for="r in related" :key="r.id" :to="`/livro/${r.id}`" class="related-card">
-                <div class="related-spine" :style="{ background: useCategoryColors().categoryColor(book.categoria) }" />
+                <div class="related-spine" :style="{ background: getCategoryColor(r.categoria) }"></div>
+
                 <div class="related-body">
+                  <span class="related-kicker">{{ r.midia }} · {{ formatCategoria(r.categoria) }}</span>
                   <strong>{{ r.titulo }}</strong>
                   <span>{{ r.autor }}</span>
                 </div>
+
                 <BaseIcon name="arrow-right" class="arrow" />
               </RouterLink>
             </div>
-          </div>
+          </section>
         </div>
       </section>
     </template>
@@ -188,27 +229,43 @@ import { useRoute } from 'vue-router'
 
 import { useBooksStore } from '@/stores'
 import { useCategoryColors, useSheets } from '@/composables'
-
 import { sendGtmEvent } from '@/utils/gtm'
 
 import type { Book } from '@/types'
 
 const route = useRoute()
+const colors = useCategoryColors()
 
 onMounted(() => useSheets().fetchBooks())
 
-const book = computed((): Book => useBooksStore().books.find((b) => String(b.id) === String(route.params.id)) as Book)
+const book = computed((): Book | undefined =>
+  useBooksStore().books.find((b) => String(b.id) === String(route.params.id)),
+)
 
 const related = computed(() => {
   if (!book.value) return []
 
   return useBooksStore()
-    .books.filter((b) => b.id !== book.value.id && b.categoria === book.value.categoria)
+    .books.filter((b) => b.id !== book.value?.id && b.categoria === book.value?.categoria)
     .slice(0, 4)
 })
 
-/** GTM :: external links */
+const categoryColor = computed(() =>
+  book.value ? colors.categoryColor(book.value.categoria) : 'var(--color-action-default)',
+)
+
+const midiaBadgeClass = computed(() => (book.value ? colors.midiaBadgeClass(book.value.midia) : ''))
+
+const formatCategoria = (value?: string) => {
+  if (!value) return ''
+  return value.replace(/-/g, ' ')
+}
+
+const getCategoryColor = (value?: string) => colors.categoryColor(value)
+
 const emitGTMEvent = (origin: string) => {
+  if (!book.value) return
+
   sendGtmEvent({
     event: 'external_link',
     external_link_origin: origin,
@@ -227,7 +284,9 @@ const emitGTMEvent = (origin: string) => {
   gap: 16px;
   padding: 80px 24px;
   color: var(--color-text-subtle);
+  text-align: center;
 }
+
 .spinner {
   width: 36px;
   height: 36px;
@@ -236,255 +295,269 @@ const emitGTMEvent = (origin: string) => {
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* ── Top bar ─────────────────────────────────── */
 .top-bar {
   position: sticky;
   top: 0;
-  z-index: 2;
-
+  z-index: 5;
   background: var(--color-surface-default);
   border-bottom: 1px solid var(--color-border-default);
   padding: 0 24px;
 
   &-inner {
     margin: 0 auto;
-
+    max-width: calc(1200px - (2 * 24px));
+    min-height: 56px;
     display: flex;
-    max-width: 900px;
-    height: 44px;
-
     align-items: center;
-    gap: 8px;
-
-    font-size: 0.875rem;
+    gap: 12px;
   }
 }
 
 .back-link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   color: var(--color-text-subtle);
-  transition: color var(--motion-transition-default);
+  text-decoration: none;
   white-space: nowrap;
+  transition: color var(--motion-transition-default);
 
   &:hover {
     color: var(--color-action-default);
   }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  &--primary {
+    font-weight: 600;
+    color: var(--color-text-default);
+  }
 }
 
 .breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+
   &-divider {
-    display: inline-flex;
-
-    color: var(--color-text-subtle);
-
-    align-items: center;
+    color: var(--color-text-disabled);
   }
 
   &-current {
-    color: var(--color-text-default);
-    font-weight: 500;
+    color: var(--color-text-subtle);
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
 }
 
-.book {
-  /* ── Hero ────────────────────────────────────── */
-  &-hero {
-    background: var(--color-text-default);
-    padding: 48px 24px;
+.book-hero {
+  background: var(--accent);
+  padding: 40px 24px;
 
-    @media (max-width: 640px) {
-      padding: 24px 16px;
-    }
-    position: relative;
-    overflow: hidden;
-
-    &::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(
-        ellipse 50% 100% at 0% 50%,
-        rgba(var(--color-action-default-rgb), 0.2) 0%,
-        transparent 60%
-      );
-      pointer-events: none;
-    }
-  }
-
-  /* Book 3D cover visual */
-  &-cover {
-    display: flex;
-    flex-shrink: 0;
-    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.5));
-  }
-
-  /* Info */
-  &-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding-top: 8px;
-  }
-
-  &-titulo {
-    font-family: var(--font-family-display);
-    font-size: clamp(1.6rem, 4vw, 2.4rem);
-    font-weight: 700;
-    color: var(--color-surface-default);
-    line-height: 1.15;
-  }
-
-  &-autor {
-    font-size: 1rem;
-    color: rgba(var(--color-surface-default-rgb), 0.65);
-    font-style: italic;
+  &.accent {
+    box-shadow: inset var(--shadow-lg);
   }
 }
 
 .hero-inner {
-  max-width: 900px;
+  max-width: calc(1200px - (2 * 24px));
   margin: 0 auto;
-  display: flex;
-  gap: 48px;
-  align-items: flex-start;
-  position: relative;
+  display: grid;
+  grid-template-columns: 1.2rem 1fr;
+  background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
 }
 
-.cover {
-  &-spine {
-    width: 18px;
-    background: var(--spine-color, #5a5a5a);
-    border-radius: 2px 0 0 2px;
-    filter: brightness(0.7);
-  }
-
-  &-front {
-    width: 140px;
-    min-height: 200px;
-    background: var(--spine-color, #5a5a5a);
-    border-radius: 0 4px 4px 0;
-    padding: 20px 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    position: relative;
-    overflow: hidden;
-
-    &::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(var(--color-surface-default-rgb), 0.08) 0%, transparent 60%);
-    }
-  }
-
-  &-midia {
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: rgba(var(--color-surface-default-rgb), 0.6);
-    font-weight: 600;
-  }
-
-  &-titulo {
-    font-family: var(--font-family-display);
-    font-size: 1rem;
-    color: rgba(var(--color-surface-default-rgb), 0.95);
-    font-weight: 700;
-    line-height: 1.3;
-  }
-
-  &-autor {
-    font-size: 0.8rem;
-    color: rgba(var(--color-surface-default-rgb), 0.55);
-    font-style: italic;
-  }
+.hero-rail {
+  background: var(--accent);
 }
 
-.info-badges {
+.hero-main {
+  padding: 28px;
   display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hero-meta {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  width: fit-content;
+}
+
+.book-titulo {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+  line-height: 1.1;
+  color: var(--color-text-default);
+}
+
+.book-autor {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
 }
 
 .midia-badge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  padding: 3px 9px;
-  border-radius: 3px;
 }
 
-.badge {
-  &-livro {
-    background: var(--badge-livro-background-color);
-    color: var(--badge-livro-text-color);
-  }
-  &-manga {
-    background: var(--badge-manga-background-color);
-    color: var(--badge-manga-text-color);
-  }
-  &-hq {
-    background: var(--badge-hq-background-color);
-    color: var(--badge-hq-text-color);
-  }
+.badge-livro {
+  background: var(--badge-livro-background-color);
+  color: var(--badge-livro-text-color);
 }
 
-.categoria-badge {
-  font-size: 0.875rem;
-  color: rgba(var(--color-surface-default-rgb), 0.65);
-  background: rgba(var(--color-surface-default-rgb), 0.07);
-  padding: 3px 9px;
-  border-radius: 3px;
+.badge-manga {
+  background: var(--badge-manga-background-color);
+  color: var(--badge-manga-text-color);
+}
+
+.badge-hq {
+  background: var(--badge-hq-background-color);
+  color: var(--badge-hq-text-color);
+}
+
+.categoria-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--color-background-subtle);
+  color: var(--color-text-subtle);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.categoria-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  flex-shrink: 0;
 }
 
 .subgeneros-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .sg-tag {
-  font-size: 0.8rem;
-  background: rgba(var(--color-surface-default-rgb), 0.1);
-  color: rgba(var(--color-surface-default-rgb), 0.8);
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
   padding: 4px 10px;
-  border-radius: 100px;
-  border: 1px solid rgba(var(--color-surface-default-rgb), 0.1);
+  border-radius: 999px;
+  background: var(--badge-tag-background-color);
+  color: var(--badge-tag-text-color);
+  font-size: 0.8rem;
 }
 
-/* ── Content ─────────────────────────────────── */
 .book-content {
-  padding: 40px 24px 64px;
+  padding: 40px 24px 72px;
   background: var(--color-background-default);
 }
 
 .content-inner {
-  max-width: 900px;
+  max-width: calc(1200px - (2 * 24px));
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 32px;
 }
 
-/* ── Indicação card ──────────────────────────── */
+.section-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.section-heading--spaced {
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.section-heading--between {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.related-heading-copy {
+  text-align: left;
+}
+
+.section-title {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: 1.15rem;
+  color: var(--color-text-default);
+  text-align: left;
+}
+
+.section-desc {
+  margin: 0;
+  color: var(--color-text-subtle);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.section-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-action-default);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color var(--motion-transition-default);
+
+  &:hover {
+    color: var(--color-action-default-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+}
+
 .indicacao-card {
   background: var(--color-surface-default);
   border: 1px solid var(--color-border-default);
-  border-left: 4px solid var(--color-action-default);
+  border-left: 6px solid var(--accent);
   border-radius: var(--border-radius-default);
   padding: 24px 28px;
 }
@@ -500,8 +573,9 @@ const emitGTMEvent = (origin: string) => {
   strong {
     color: var(--color-text-default);
   }
+
   svg {
-    color: var(--color-action-default);
+    color: var(--accent);
     flex-shrink: 0;
   }
 }
@@ -512,6 +586,7 @@ const emitGTMEvent = (origin: string) => {
 }
 
 .porque-quote {
+  margin: 0;
   font-family: var(--font-family-display);
   font-style: italic;
   font-size: 1.05rem;
@@ -519,131 +594,48 @@ const emitGTMEvent = (origin: string) => {
   line-height: 1.6;
 }
 
-/* ── External search ─────────────────────────── */
-.external-search {
-  margin-left: auto;
-
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.external-search-label {
-  font-size: 0.875rem;
-  color: var(--color-text-subtle);
-  flex-shrink: 0;
-}
-
-.external-search-btns {
-  display: flex;
-  gap: 10px;
-}
-
-.ext-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid var(--color-border-default);
-  background: var(--color-surface-default);
-  color: var(--color-text-subtle);
-  transition: all var(--motion-transition-default);
-  flex-shrink: 0;
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  &:hover {
-    border-color: transparent;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-default);
-  }
-
-  /* Cores de marca no hover */
-  &--amazon:hover {
-    background: #ff9900;
-    color: #fff;
-  }
-  &--youtube:hover {
-    background: #ff0000;
-    color: #fff;
-  }
-  &--google:hover {
-    background: #4285f4;
-    color: #fff;
-  }
-
-  @media (max-width: 767px) {
-    border-color: transparent;
-
-    &--amazon {
-      background: #ff9900;
-      color: #fff;
-    }
-    &--youtube {
-      background: #ff0000;
-      color: #fff;
-    }
-    &--google {
-      background: #4285f4;
-      color: #fff;
-    }
-  }
-}
-
-/* ── Meta grid — clicável ────────────────────── */
 .meta-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1px;
-  background: var(--color-border-default);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--border-radius-default);
-  overflow: hidden;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
 }
 
 .meta-item {
-  background: var(--color-surface-default);
-  padding: 16px 20px;
+  position: relative;
+  min-height: 132px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  /* min touch target */
-  min-height: 72px;
-  transition: background var(--motion-transition-default);
+  gap: 8px;
+  background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-default);
+  text-decoration: none;
+  transition:
+    transform var(--motion-transition-default),
+    border-color var(--motion-transition-default),
+    box-shadow var(--motion-transition-default),
+    background var(--motion-transition-default);
 
-  &--link {
-    position: relative;
-    cursor: pointer;
-    text-decoration: none;
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba(var(--color-action-default-rgb), 0.22);
+    background: var(--color-action-background-subtle);
+    box-shadow: var(--shadow-sm);
 
     .meta-arrow {
-      position: absolute;
-      bottom: 14px;
-      right: 14px;
-      color: var(--color-border-strong);
-      transition: all var(--motion-transition-default);
+      transform: translateX(3px);
+      color: var(--color-action-default);
     }
 
-    &:hover {
-      background: var(--color-action-background-subtle);
-
-      .meta-label {
-        color: var(--color-action-default);
-      }
-      .meta-value {
-        color: var(--color-action-default);
-      }
-      .meta-arrow {
-        color: var(--color-action-default);
-        transform: translateX(3px);
-      }
+    .meta-value {
+      color: var(--color-action-default);
     }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 3px;
   }
 }
 
@@ -652,103 +644,216 @@ const emitGTMEvent = (origin: string) => {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-text-subtle);
-  font-weight: 500;
-  transition: color var(--motion-transition-default);
+  font-weight: 700;
 }
 
 .meta-value {
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: var(--color-text-default);
-  font-weight: 500;
+  font-weight: 600;
   transition: color var(--motion-transition-default);
 }
 
-/* ── Related ─────────────────────────────────── */
-.related {
-  &-title {
-    font-family: var(--font-family-display);
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 16px;
+.meta-hint {
+  margin-top: auto;
+  padding-right: 24px;
+  font-size: 0.84rem;
+  color: var(--color-text-subtle);
+  line-height: 1.4;
+}
 
-    em {
-      font-style: italic;
-      color: var(--color-action-default);
-    }
+.meta-arrow {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  color: var(--color-border-strong);
+  transition:
+    transform var(--motion-transition-default),
+    color var(--motion-transition-default);
+}
+
+.external-search {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.external-search-heading {
+  width: 100%;
+  align-items: flex-end;
+}
+
+.external-search-heading .section-title,
+.external-search-heading .section-desc {
+  text-align: right;
+}
+
+.external-search-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.ext-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-surface-default);
+  color: var(--color-text-default);
+  text-decoration: none;
+  font-weight: 600;
+  transition:
+    transform var(--motion-transition-default),
+    box-shadow var(--motion-transition-default),
+    border-color var(--motion-transition-default),
+    background var(--motion-transition-default),
+    color var(--motion-transition-default);
+
+  &:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 3px;
   }
 
-  &-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
-  }
-
-  &-card {
-    display: flex;
-    align-items: center;
-    background: var(--color-surface-default);
-    border: 1px solid var(--color-border-default);
-    border-radius: var(--border-radius-sm);
-    overflow: hidden;
-    transition: all var(--motion-transition-default);
-    min-height: 56px;
-    text-decoration: none;
-
-    @media (min-width: 768px) {
-      cursor: pointer;
-
-      &:hover {
-        box-shadow: var(--shadow-default);
-        transform: translateY(-2px);
-
-        .arrow {
-          color: var(--color-action-default);
-          transform: translateX(3px);
-        }
-      }
-    }
-  }
-
-  &-spine {
-    width: 4px;
-    align-self: stretch;
-    flex-shrink: 0;
-  }
-
-  &-body {
-    padding: 10px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-    flex: 1;
-
-    strong {
-      font-size: 0.9rem;
-      font-weight: 600;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      color: var(--color-text-default);
-    }
-
-    span {
-      font-size: 0.8rem;
-      color: var(--color-text-subtle);
-      font-style: italic;
-    }
+  svg {
+    width: 18px;
+    height: 18px;
   }
 }
 
-.arrow {
-  margin-right: 12px;
-  color: var(--color-border-default);
-  flex-shrink: 0;
-  transition: all var(--motion-transition-default);
-
-  @media (max-width: 767px) {
-    color: var(--color-action-default);
+@media (hover: hover) and (pointer: fine) {
+  .ext-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
   }
+
+  .ext-btn--amazon:hover {
+    border-color: #ff9900;
+    background: #ff9900;
+    color: #fff;
+  }
+
+  .ext-btn--youtube:hover {
+    border-color: #ff0000;
+    background: #ff0000;
+    color: #fff;
+  }
+
+  .ext-btn--google:hover {
+    border-color: #4285f4;
+    background: #4285f4;
+    color: #fff;
+  }
+}
+
+@media (max-width: 767px) {
+  .ext-btn {
+    box-shadow: var(--shadow-sm);
+  }
+
+  .ext-btn--amazon {
+    border-color: #ff9900;
+    background: #ff9900;
+    color: #fff;
+  }
+
+  .ext-btn--youtube {
+    border-color: #ff0000;
+    background: #ff0000;
+    color: #fff;
+  }
+
+  .ext-btn--google {
+    border-color: #4285f4;
+    background: #4285f4;
+    color: #fff;
+  }
+}
+
+.related-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.related-card {
+  display: flex;
+  align-items: stretch;
+  background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-default);
+  overflow: hidden;
+  text-decoration: none;
+  transition:
+    transform var(--motion-transition-default),
+    box-shadow var(--motion-transition-default),
+    border-color var(--motion-transition-default);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+    border-color: rgba(var(--color-action-default-rgb), 0.22);
+
+    .arrow {
+      color: var(--color-action-default);
+      transform: translateX(3px);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 3px;
+  }
+}
+
+.related-spine {
+  width: 8px;
+  flex-shrink: 0;
+}
+
+.related-body {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  strong {
+    color: var(--color-text-default);
+    font-size: 0.95rem;
+    line-height: 1.3;
+  }
+
+  span {
+    color: var(--color-text-subtle);
+    font-size: 0.84rem;
+  }
+}
+
+.related-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.68rem !important;
+  color: var(--color-text-disabled) !important;
+}
+
+.arrow {
+  margin: auto 14px auto 0;
+  color: var(--color-border-strong);
+  transition:
+    transform var(--motion-transition-default),
+    color var(--motion-transition-default);
 }
 
 .back-btn {
@@ -761,24 +866,67 @@ const emitGTMEvent = (origin: string) => {
   padding: 10px 18px;
   border-radius: var(--border-radius-sm);
   min-height: 44px;
-  transition: all var(--motion-transition-default);
+  text-decoration: none;
+  transition:
+    background var(--motion-transition-default),
+    color var(--motion-transition-default);
 
   &:hover {
     background: var(--color-action-default);
-    color: white;
+    color: var(--color-surface-default);
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
   .hero-inner {
+    grid-template-columns: 0.9rem 1fr;
+  }
+
+  .hero-main {
+    padding: 20px;
+  }
+
+  .book-titulo {
+    font-size: 1.7rem;
+  }
+
+  .book-autor {
+    font-size: 0.95rem;
+  }
+
+  .section-heading--between {
     flex-direction: column;
-    gap: 24px;
+    align-items: flex-start;
   }
-  .book-cover {
-    display: none;
-  }
+
   .meta-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
+  }
+
+  .external-search {
+    align-items: stretch;
+  }
+
+  .external-search-heading {
+    align-items: flex-start;
+  }
+
+  .external-search-heading .section-title,
+  .external-search-heading .section-desc {
+    text-align: left;
+  }
+
+  .external-search-btns {
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .ext-btn {
+    justify-content: center;
+  }
+
+  .related-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
