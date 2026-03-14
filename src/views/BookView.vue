@@ -231,7 +231,7 @@ import { useBooksStore } from '@/stores'
 import { useCategoryColors, useSheets } from '@/composables'
 import { sendGtmEvent } from '@/utils/gtm'
 
-import type { Book } from '@/types'
+import type { Book, CategoryType } from '@/types'
 
 const route = useRoute()
 const colors = useCategoryColors()
@@ -261,7 +261,7 @@ const formatCategoria = (value?: string) => {
   return value.replace(/-/g, ' ')
 }
 
-const getCategoryColor = (value?: string) => colors.categoryColor(value)
+const getCategoryColor = (value?: CategoryType) => colors.categoryColor(value!)
 
 const emitGTMEvent = (origin: string) => {
   if (!book.value) return

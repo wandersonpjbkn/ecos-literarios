@@ -64,23 +64,6 @@ $config: (
     'focus': palette($palette, 'olive-leaf', 'base') // #606c38
   ),
 
-  // Categorias (Cores de lombada - Spine Colors)
-  'categories': (
-    'suspense': palette($palette, 'olive-leaf', 'shade', '20'), // #4d562d
-    'terror': palette($palette, 'olive-leaf', 'shade', '70'), // #1d2011
-    'fantasia': palette($palette, 'olive-leaf', 'base'), // #606c38
-    'ficcao': palette($palette, 'olive-leaf', 'shade', '30'), // #434c27
-    'drama': palette($palette, 'copper', 'shade', '30'), // #844c1a
-    'romance': palette($palette, 'light-caramel', 'shade', '20'), // #b1814b
-    'poesia': palette($palette, 'light-caramel', 'base'), // #dda15e
-    'nao-ficcao': palette($palette, 'cornsilk', 'shade', '60'), // #66645a
-    'realismo': palette($palette, 'parchment', 'shade', '50'), // #7b7a76
-
-    // not used
-    'ficcao-historica': palette($palette, 'olive-leaf', 'tone', '40'), // #6d7455
-    'ficcao-cientifica': palette($palette, 'copper', 'base'), // #bc6c25
-  ),
-
   // Extras específicos
   'header-bg': palette($palette, 'black-forest', 'shade', '90') // #040502 (conforme o --color-header-bg: #{$ink})
 );

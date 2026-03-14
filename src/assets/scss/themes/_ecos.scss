@@ -64,23 +64,6 @@ $config: (
       'focus': palette($palette, 'cerulean', 'base')          // #227c9d,
     ),
 
-  // Categorias (Cores de lombada)
-  'categories': (
-      'suspense': palette($palette, 'cerulean', 'shade', '20'),         // #1b637e,
-      'terror': palette($palette, 'cerulean', 'shade', '70'),           // #0a252f,
-      'fantasia': palette($palette, 'cerulean', 'base'),                // #227c9d,
-      'ficcao': palette($palette, 'cerulean', 'shade', '30'),           // #18576e,
-      'drama': palette($palette, 'seagreen', 'shade', '30'),            // #10897d,
-      'romance': palette($palette, 'grapefruit', 'shade', '20'),        // #cb575c,
-      'poesia': palette($palette, 'grapefruit', 'base'),                // #fe6d73,
-      'nao-ficcao': palette($palette, 'floral', 'shade', '60'),         // #666460,
-      'realismo': palette($palette, 'ice', 'shade', '50'),              // #7c7d7e,
-
-      // not used
-      'ficcao-historica': palette($palette, 'cerulean', 'tone', '40'),  // #487e91,
-      'ficcao-cientifica': palette($palette, 'seagreen', 'base'),       // #17c3b2,
-    ),
-
   // Extras específicos
   'header-bg': palette($palette, 'cerulean', 'shade', '90')     // #030c10
 );

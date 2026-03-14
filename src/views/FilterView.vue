@@ -147,10 +147,7 @@ import ResultCount from '@/components/ResultCount.vue'
 import FilterPanel from '@/components/FilterPanel.vue'
 import BookCard from '@/components/BookCard.vue'
 
-import type { Book, Options } from '@/types'
-
-type FilterType = 'midia' | 'categoria' | 'autor' | 'mencao'
-type ExploreKey = 'midia' | 'categoria' | 'autor' | 'quem'
+import type { Book, Options, FilterType, ExploreKey, CategoryType } from '@/types'
 
 const filterConfigs: Record<
   FilterType,
@@ -193,18 +190,7 @@ const fixedKey = computed<ExploreKey>(() => (filterType.value === 'mencao' ? 'qu
 
 const introAccent = computed(() => {
   if (filterType.value === 'categoria') {
-    return colors.categoryColor(
-      filterValue.value as
-        | 'Suspense'
-        | 'Terror'
-        | 'Fantasia'
-        | 'Romance'
-        | 'Drama'
-        | 'Ficção'
-        | 'Não Ficção'
-        | 'Poesia'
-        | 'Realismo',
-    )
+    return colors.categoryColor(filterValue.value as CategoryType)
   }
   return 'var(--color-action-default)'
 })

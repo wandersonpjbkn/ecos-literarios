@@ -83,30 +83,6 @@ $config: (
     'focus':   palette($palette, 'blue-violet', 'base'),                       // #8338ec
   ),
 
-  // ── Categorias (Cores de lombada) ───────────────────────────────
-  //  Distribuição semântica:
-  //    violet family → peso, mistério, profundidade (suspense, terror, ficção)
-  //    azure family  → clareza, exploração (ficção-histórica, ficção-científica)
-  //    neon-pink     → emoção intensa (romance, drama)
-  //    amber-gold    → celebração, leveza (poesia)
-  //    blaze-orange  → tensão terrena (não-ficção)
-  //    violet tone   → neutro-cool (realismo)
-  'categories': (
-    'suspense':          palette($palette, 'blue-violet', 'shade', '20'),      // #692dbd
-    'terror':            palette($palette, 'blue-violet', 'shade', '70'),      // #271147
-    'fantasia':          palette($palette, 'blue-violet', 'base'),             // #8338ec
-    'ficcao':            palette($palette, 'blue-violet', 'shade', '30'),      // #5c27a5
-    'drama':             palette($palette, 'neon-pink', 'shade', '20'),        // #cc0058
-    'romance':           palette($palette, 'neon-pink', 'base'),               // #ff006e
-    'poesia':            palette($palette, 'amber-gold', 'base'),              // #ffbe0b
-    'nao-ficcao':        palette($palette, 'blaze-orange', 'shade', '30'),     // #b03c05
-    'realismo':          palette($palette, 'blue-violet', 'tone', '50'),       // #825cb6
-
-    // not used
-    'ficcao-historica':  palette($palette, 'azure-blue', 'shade', '20'),       // #2e6bcc
-    'ficcao-cientifica': palette($palette, 'azure-blue', 'base'),              // #3a86ff
-  ),
-
   // ── Extras específicos ──────────────────────────────────────────
   // header: blue-violet shade-80 — profundo violeta-noite
   // white: 18.54:1 ✅ | amber: 11.14:1 ✅ — logo dourado sobre noite violeta
