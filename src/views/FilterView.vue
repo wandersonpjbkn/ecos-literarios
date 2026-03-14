@@ -52,6 +52,7 @@
         <div class="filter-layout">
           <!-- Sidebar -->
           <div id="filters">
+            <SortOrderSelect v-model="sortOrder" class="filters-sorted" />
             <FilterPanel
               :options="panelOptions"
               :selected="panelSelected"
@@ -60,7 +61,6 @@
               @toggle="handleToggle"
               @clear="clearSecondary"
             />
-            <SortOrderSelect v-model="sortOrder" />
           </div>
 
           <!-- Grid -->
@@ -183,7 +183,6 @@ const filterConfigs: Record<
 
 const route = useRoute()
 const colors = useCategoryColors()
-const { sortOrder, sortedBooks } = useBookSort(filtered)
 
 const filterType = computed(() => route.name as FilterType)
 const filterValue = computed(() => decodeURIComponent(route.params.id as string))
@@ -346,6 +345,8 @@ const exploreGroups = computed(() => [
     items: [...new Set(baseFiltered.value.map((b) => b.quem).filter(Boolean))].sort(),
   },
 ])
+
+const { sortOrder, sortedBooks } = useBookSort(filtered)
 </script>
 
 <style lang="scss" scoped>
@@ -567,6 +568,11 @@ const exploreGroups = computed(() => [
   align-items: start;
 }
 
+.filters-sorted {
+  margin-bottom: 1rem;
+  width: 260px;
+}
+
 .grid-area {
   min-width: 0;
 }
@@ -683,6 +689,10 @@ const exploreGroups = computed(() => [
 
   .books-grid {
     grid-template-columns: 1fr;
+  }
+
+  .filters-sorted {
+    width: 100%;
   }
 }
 </style>
