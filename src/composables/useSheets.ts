@@ -21,7 +21,7 @@ export function useSheets() {
     try {
       const url = `https://docs.google.com/spreadsheets/d/e/${SHEET_CONFIG.SHEET_ID}/pub?gid=${SHEET_CONFIG.GID}&single=true&output=csv`
 
-      console.log('Fetching books...')
+      if (import.meta.env.DEV) console.log('Fetching books...')
 
       const res = await fetch(url)
 
@@ -34,11 +34,19 @@ export function useSheets() {
       useCacheStore().cache = parsed
       useCacheStore().ts = Date.now()
 
-      console.log('Books loaded:', parsed.length)
+      if (import.meta.env.DEV) console.log('Books loaded:', parsed.length)
     } catch (e: unknown) {
+      // Se estiver offline, usa os dados do Pinia
+      if (!navigator.onLine && useBooksStore().books.length > 0) {
+        if (import.meta.env.DEV) console.warn('[useSheets] Offline, usando dados persistidos do Pinia')
+        useBooksStore().error = null
+        return
+      }
+
+      // Caso contrário, mostra o erro
       const raw = e instanceof Error ? e.message : String(e)
       useBooksStore().error = raw || 'Erro ao carregar dados'
-      console.error('[useSheets]', e)
+      if (import.meta.env.DEV) console.error('[useSheets]', e)
     } finally {
       useBooksStore().loading = false
     }
@@ -82,7 +90,7 @@ const parseCSV = (csv: string): Book[] => {
     })
   }
 
-  console.log('Parsed', result)
+  if (import.meta.env.DEV) console.log('Parsed', result)
   return result as Book[]
 }
 

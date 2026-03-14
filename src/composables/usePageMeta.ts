@@ -1,4 +1,5 @@
 import { useSeoMeta, useHead } from '@unhead/vue'
+import { toValue } from 'vue'
 import { useRoute } from 'vue-router'
 
 interface PageMetaOptions {
@@ -7,21 +8,23 @@ interface PageMetaOptions {
   type?: 'website' | 'article'
 }
 
-export function usePageMeta(options: PageMetaOptions) {
+type MaybeRefOrGetter<T> = T | (() => T) | import('vue').Ref<T>
+
+export function usePageMeta(options: MaybeRefOrGetter<PageMetaOptions>) {
   const route = useRoute()
   const siteUrl = import.meta.env.VITE_SITE_URL ?? 'https://ecosliterarios.com.br'
   const siteName = 'Ecos Literários'
   const canonical = `${siteUrl}${route.path}`
 
-  const fullTitle = `${options.title} | ${siteName}`
+  const fullTitle = `${toValue(options).title} | ${siteName}`
 
   useSeoMeta({
     title: fullTitle,
-    description: options.description,
+    description: toValue(options).description,
     ogTitle: fullTitle,
-    ogDescription: options.description,
+    ogDescription: toValue(options).description,
     ogUrl: canonical,
-    ogType: options.type ?? 'website',
+    ogType: toValue(options).type ?? 'website',
     ogSiteName: siteName,
     twitterCard: 'summary',
   })

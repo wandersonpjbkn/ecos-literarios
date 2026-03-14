@@ -250,11 +250,13 @@ const emitGTMEvent = (origin: string) => {
   })
 }
 
-const title = computed(() => book.value?.titulo ?? 'Livro')
-const description = computed(() =>
-  book.value ? `${book.value.titulo} · ${book.value.autor} — indicado por ${book.value.quem}` : '',
+usePageMeta(
+  computed(() => ({
+    title: book.value?.titulo ?? 'Livro',
+    description: book.value ? `${book.value.titulo} · ${book.value.autor} — indicado por ${book.value.quem}` : '',
+    type: 'article' as const,
+  })),
 )
-usePageMeta({ title: title.value, description: description.value, type: 'article' })
 </script>
 
 <style lang="scss" scoped>

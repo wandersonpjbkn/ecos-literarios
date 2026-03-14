@@ -300,10 +300,12 @@ const exploreGroups = computed(() => [
 
 const { sortOrder, sortedBooks } = useBookSort(filtered)
 
-const description = computed(
-  () => `${baseFiltered.value.length} títulos em ${config.value.label}: ${filterValue.value}`,
+usePageMeta(
+  computed(() => ({
+    title: filterValue.value,
+    description: `${baseFiltered.value.length} títulos em ${config.value.label}: ${filterValue.value}`,
+  })),
 )
-usePageMeta({ title: filterValue.value, description: description.value })
 </script>
 
 <style lang="scss" scoped>
