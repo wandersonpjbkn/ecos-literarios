@@ -9,10 +9,21 @@ const normalizeText = (value?: string) =>
     .toLowerCase()
     .trim()
 
-export function useBookSort(source: Ref<Book[]>, initialOrder: BookSortOrder = 'asc') {
+export function useBookSort(source: Ref<Book[]>, initialOrder: BookSortOrder = 'old') {
   const sortOrder = ref<BookSortOrder>(initialOrder)
 
+  const sortOptions = ref<{ label: string; value: BookSortOrder }[]>([
+    { label: 'Mais antigos', value: 'old' },
+    { label: 'Mais recentes', value: 'new' },
+    { label: 'A → Z', value: 'asc' },
+    { label: 'Z → A', value: 'desc' },
+  ])
+
   const sortedBooks = computed<Book[]>(() => {
+    if (sortOrder.value === 'old') return [...source.value]
+
+    if (sortOrder.value === 'new') return [...source.value].reverse()
+
     return [...source.value].sort((a, b) => {
       const titleA = normalizeText(a.titulo)
       const titleB = normalizeText(b.titulo)
@@ -22,18 +33,14 @@ export function useBookSort(source: Ref<Book[]>, initialOrder: BookSortOrder = '
     })
   })
 
-  const toggleSortOrder = () => {
-    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-  }
-
   const setSortOrder = (value: BookSortOrder) => {
     sortOrder.value = value
   }
 
   return {
     sortOrder,
+    sortOptions,
     sortedBooks,
-    toggleSortOrder,
     setSortOrder,
   }
 }

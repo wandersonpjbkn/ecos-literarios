@@ -40,7 +40,19 @@
 
       <!-- Desktop filters -->
       <div v-if="!isMobile" class="filter-bar">
-        <SortOrderSelect v-model="sortOrder" class="filter-bar-sorted" />
+        <!-- sort -->
+        <MultiSelect
+          class="filter-bar-sorted"
+          label="Ordenação"
+          :multiple="false"
+          :searchable="false"
+          :options="sortOptions"
+          :selected="sortOrder"
+          no-empty
+          @toggle="(v) => (sortOrder = v as BookSortOrder)"
+        />
+
+        <!-- filters -->
         <MultiSelect
           class="multi-select"
           label="Mídia"
@@ -90,7 +102,19 @@
           </div>
 
           <div class="mobile-filters-body">
-            <SortOrderSelect v-model="sortOrder" class="filter-bar-sorted" />
+            <!-- sort -->
+            <MultiSelect
+              class="filter-bar-sorted"
+              label="Ordenação"
+              :multiple="false"
+              :searchable="false"
+              :options="sortOptions"
+              :selected="sortOrder"
+              no-empty
+              @toggle="(v) => (sortOrder = v as BookSortOrder)"
+            />
+
+            <!-- filters -->
             <MultiSelect
               class="multi-select mobile"
               label="Mídia"
@@ -127,7 +151,7 @@
 
           <div class="mobile-filters-footer">
             <button class="secondary-btn" type="button" @click="clearAll">Limpar</button>
-            <button class="primary-btn" type="button" @click="closeMobileFilters">Ver resultados</button>
+            <button class="primary-btn" type="button" @click="closeMobileFilters">Mostrar</button>
           </div>
         </aside>
       </Transition>
@@ -162,12 +186,11 @@ import { useSheets, useFilters, useBookSort, usePageMeta } from '@/composables'
 import SearchBar from '@/components/SearchBar.vue'
 import ResultCount from '@/components/ResultCount.vue'
 import MultiSelect from '@/components/MultiSelect.vue'
-import SortOrderSelect from '@/components/SortOrderSelect.vue'
 import ActiveFilters from '@/components/ActiveFilters.vue'
 import PageStatus from '@/components/PageStatus.vue'
 import BooksGrid from '@/components/BooksGrid.vue'
 
-import type { Book } from '@/types'
+import type { Book, BookSortOrder } from '@/types'
 
 usePageMeta({
   title: 'Catálogo de Indicações',
@@ -189,7 +212,7 @@ const {
   clearAll,
   searchSuggestions,
 } = useFilters()
-const { sortOrder, sortedBooks } = useBookSort(filtered)
+const { sortOrder, sortedBooks, sortOptions } = useBookSort(filtered)
 
 onMounted(() => useSheets().fetchBooks())
 

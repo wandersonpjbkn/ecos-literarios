@@ -44,7 +44,19 @@
         <div class="filter-layout">
           <!-- Sidebar -->
           <div id="filters">
-            <SortOrderSelect v-model="sortOrder" class="filters-sorted" />
+            <!-- sort -->
+            <MultiSelect
+              class="filters-sorted"
+              label="Ordenação"
+              :multiple="false"
+              :searchable="false"
+              :options="sortOptions"
+              :selected="sortOrder"
+              no-empty
+              @toggle="(v) => (sortOrder = v as BookSortOrder)"
+            />
+
+            <!-- panel -->
             <FilterPanel
               :options="panelOptions"
               :selected="panelSelected"
@@ -129,13 +141,13 @@ import { useSheets, useCategoryColors, useBookSort, usePageMeta } from '@/compos
 import SearchBar from '@/components/SearchBar.vue'
 import ResultCount from '@/components/ResultCount.vue'
 import FilterPanel from '@/components/FilterPanel.vue'
-import SortOrderSelect from '@/components/SortOrderSelect.vue'
+import MultiSelect from '@/components/MultiSelect.vue'
 import PageStatus from '@/components/PageStatus.vue'
 import RailCard from '@/components/RailCard.vue'
 import BooksGrid from '@/components/BooksGrid.vue'
 import SectionHeading from '@/components/SectionHeading.vue'
 
-import type { Book, Options, FilterType, ExploreKey, CategoryType } from '@/types'
+import type { Book, BookSortOrder, Options, FilterType, ExploreKey, CategoryType } from '@/types'
 
 const filterConfigs: Record<FilterType, { label: string; bookField: keyof Book; desc: (v: string) => string }> = {
   midia: { label: 'Mídia', bookField: 'midia', desc: (v) => `Todos os títulos em formato ${v} indicados no clube.` },
@@ -298,7 +310,7 @@ const exploreGroups = computed(() => [
   },
 ])
 
-const { sortOrder, sortedBooks } = useBookSort(filtered)
+const { sortOrder, sortedBooks, sortOptions } = useBookSort(filtered)
 
 usePageMeta(
   computed(() => ({

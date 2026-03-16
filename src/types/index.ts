@@ -30,4 +30,4 @@ export type ExploreKey = 'midia' | 'categoria' | 'autor' | 'quem'
 
 export type CategoryType = keyof typeof CategoriesColors
 
-export type BookSortOrder = 'asc' | 'desc'
+export type BookSortOrder = 'old' | 'new' | 'asc' | 'desc'

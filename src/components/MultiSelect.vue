@@ -1,14 +1,33 @@
 <template>
-  <div ref="wrapRef" :class="{ 'is-open': isOpen, 'has-value': selected.length > 0 }">
+  <div
+    ref="wrapRef"
+    class="ms-root"
+    :class="{
+      'is-open': isOpen,
+      'has-value': hasValue,
+      'is-single': !multiple,
+    }"
+  >
     <div class="ms-control" @click="toggleOpen">
-      <span class="ms-label">{{ label }}</span>
-      <span v-if="selected.length > 0" class="ms-count">{{ selected.length }}</span>
+      <span class="ms-label">
+        <template v-if="!multiple && selectedOption">
+          {{ selectedOption.label }}
+        </template>
+        <template v-else>
+          {{ label }}
+        </template>
+      </span>
+
+      <span v-if="multiple && selectedCount > 0" class="ms-count">
+        {{ selectedCount }}
+      </span>
+
       <BaseIcon name="chevron" class="ms-chevron" />
     </div>
 
     <Transition name="ms-dropdown">
       <div v-if="isOpen" class="ms-dropdown">
-        <div class="ms-search-wrap">
+        <div v-if="searchable" class="ms-search-wrap">
           <BaseIcon name="search" class="ms-search-icon" />
           <input
             ref="inputRef"
@@ -30,24 +49,29 @@
 
         <ul class="ms-list" role="listbox">
           <li
-            v-for="(opt, i) in filteredOptions"
-            :key="opt"
+            v-for="(opt, i) in normalizedOptions"
+            :key="opt.value"
             class="ms-option"
-            :class="{ 'is-selected': selected.includes(opt), 'is-active': i === activeIdx }"
+            :class="{
+              'is-selected': isSelected(opt.value),
+              'is-active': i === activeIdx,
+            }"
             role="option"
-            :aria-selected="selected.includes(opt)"
-            @mousedown.prevent="emit('toggle', opt)"
+            :aria-selected="isSelected(opt.value)"
+            @mousedown.prevent="handleSelect(opt.value)"
             @mousemove="activeIdx = i"
           >
-            <span class="ms-checkbox" :class="{ 'is-checked': selected.includes(opt) }">
-              <BaseIcon v-if="selected.includes(opt)" name="checkbox" />
+            <span v-if="multiple" class="ms-checkbox" :class="{ 'is-checked': isSelected(opt.value) }">
+              <BaseIcon v-if="isSelected(opt.value)" name="checkbox" />
             </span>
-            <span class="ms-opt-label">{{ opt }}</span>
+
+            <span class="ms-opt-label">{{ opt.label }}</span>
           </li>
-          <li v-if="filteredOptions.length === 0" class="ms-empty">Nenhuma opção encontrada</li>
+
+          <li v-if="normalizedOptions.length === 0" class="ms-empty">Nenhuma opção encontrada</li>
         </ul>
 
-        <div v-if="selected.length > 0" class="ms-footer">
+        <div v-if="multiple && noEmpty" class="ms-footer">
           <button class="ms-clear-all" @click.stop="emit('clear')">Limpar</button>
           <span class="ms-footer-count">{{ selected.length }} selecionado{{ selected.length > 1 ? 's' : '' }}</span>
         </div>
@@ -57,14 +81,33 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 
-const props = defineProps<{
-  label: string
-  options: string[]
-  selected: string[]
-}>()
+type OptionValue = string
+
+type Option =
+  | string
+  | {
+      label: string
+      value: string
+    }
+
+const props = withDefaults(
+  defineProps<{
+    label: string
+    options: Option[]
+    selected: string | string[]
+    multiple?: boolean
+    searchable?: boolean
+    noEmpty?: boolean
+  }>(),
+  {
+    multiple: true,
+    searchable: true,
+    noEmpty: false,
+  },
+)
 
 const emit = defineEmits<{
   toggle: [value: string]
@@ -77,11 +120,47 @@ const isOpen = ref(false)
 const query = ref('')
 const activeIdx = ref(-1)
 
-const filteredOptions = computed(() => {
-  if (!query.value.trim()) return props.options
+const multiple = computed(() => props.multiple !== false)
+const searchable = computed(() => props.searchable !== false)
+
+const normalizedOptions = computed(() => {
+  const base = props.options.map((opt) =>
+    typeof opt === 'string' ? { label: opt, value: opt } : { label: opt.label, value: opt.value },
+  )
+
+  if (!searchable.value || !query.value.trim()) return base
+
   const q = query.value.toLowerCase()
-  return props.options.filter((o) => o.toLowerCase().includes(q))
+  return base.filter((opt) => opt.label.toLowerCase().includes(q))
 })
+
+const hasValue = computed(() => {
+  if (multiple.value) return Array.isArray(props.selected) && props.selected.length > 0
+  return typeof props.selected === 'string' && props.selected !== ''
+})
+
+const selectedCount = computed(() => {
+  return Array.isArray(props.selected) ? props.selected.length : 0
+})
+
+const selectedOption = computed(() => {
+  if (multiple.value || typeof props.selected !== 'string') return null
+  return normalizedOptions.value.find((opt) => opt.value === props.selected) ?? null
+})
+
+const isSelected = (value: OptionValue): boolean => {
+  if (multiple.value) {
+    return Array.isArray(props.selected) && props.selected.includes(value)
+  }
+
+  return props.selected === value
+}
+
+const handleSelect = (value: string) => {
+  emit('toggle', value)
+
+  if (!multiple.value) close()
+}
 
 const toggleOpen = () => {
   if (isOpen.value) {
@@ -99,23 +178,28 @@ const close = () => {
 }
 
 const moveActive = (dir: number) => {
-  const max = filteredOptions.value.length - 1
+  const max = normalizedOptions.value.length - 1
   activeIdx.value = Math.max(0, Math.min(max, activeIdx.value + dir))
 }
 
 const selectActive = () => {
-  const opt = filteredOptions.value[activeIdx.value]
-  if (activeIdx.value >= 0 && opt) emit('toggle', opt)
+  const opt = normalizedOptions.value[activeIdx.value]
+  if (activeIdx.value >= 0 && opt) handleSelect(opt.value)
 }
 
-watch(filteredOptions, () => {
+watch(normalizedOptions, () => {
   activeIdx.value = -1
 })
 
-onClickOutside(wrapRef, () => close())
+onClickOutside(wrapRef, close)
 </script>
 
 <style lang="scss" scoped>
+/* ── Wrap ────────────────────────────────────── */
+.ms-root {
+  position: relative;
+}
+
 /* ── Control ─────────────────────────────────── */
 .ms-control {
   display: flex;
@@ -152,8 +236,13 @@ onClickOutside(wrapRef, () => close())
   overflow: hidden;
   text-overflow: ellipsis;
 
-  .has-value & {
+  .has-value:not(.is-single) & {
     color: var(--color-action-default);
+    font-weight: 500;
+  }
+
+  .has-value.is-single & {
+    color: var(--color-text-default);
     font-weight: 500;
   }
 }
@@ -172,6 +261,34 @@ onClickOutside(wrapRef, () => close())
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
+}
+
+.ms-clear-inline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  min-width: 20px;
+  min-height: 20px;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--color-text-subtle);
+  flex-shrink: 0;
+  transition:
+    color var(--motion-transition-default),
+    background var(--motion-transition-default);
+
+  &:hover {
+    color: var(--color-text-default);
+    background: rgba(var(--color-text-default-rgb), 0.08);
+  }
+
+  svg {
+    width: 10px;
+    height: 10px;
+  }
 }
 
 .ms-chevron {
@@ -291,6 +408,13 @@ onClickOutside(wrapRef, () => close())
 
   &.is-selected {
     background: var(--color-action-background-subtle);
+
+    .is-single & {
+      .ms-opt-label {
+        color: var(--color-action-default);
+        font-weight: 500;
+      }
+    }
   }
 }
 
@@ -317,6 +441,7 @@ onClickOutside(wrapRef, () => close())
   font-size: 1rem;
   color: var(--color-text-default);
   line-height: 1.3;
+  transition: color var(--motion-transition-default);
 }
 
 .ms-empty {
@@ -326,7 +451,7 @@ onClickOutside(wrapRef, () => close())
   text-align: center;
 }
 
-/* ── Footer ──────────────────────────────────── */
+/* ── Footer (somente multi) ──────────────────── */
 .ms-footer {
   display: flex;
   align-items: center;
