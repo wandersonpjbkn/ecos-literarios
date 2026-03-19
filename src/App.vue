@@ -80,8 +80,7 @@ const themesOptions = themes.map((t) => ({
 }))
 
 const toggleMenu = () => {
-  if (menuSidebar.value?.isOpen) menuSidebar.value?.close()
-  else menuSidebar.value?.open()
+  menuSidebar.value?.toggle()
 }
 
 const forceRefresh = () => {

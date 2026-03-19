@@ -34,7 +34,11 @@ const toggle = () => {
   else open()
 }
 
-onClickOutside(painelRef, close)
+onClickOutside(painelRef, () => {
+  setTimeout(() => {
+    if (isOpen.value) close()
+  }, 350)
+})
 
 watch(isMobile, (mobile) => {
   if (!mobile) {
