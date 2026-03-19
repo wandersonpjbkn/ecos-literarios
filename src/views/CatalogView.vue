@@ -48,7 +48,6 @@
           :searchable="false"
           :options="sortOptions"
           :selected="sortOrder"
-          no-empty
           @toggle="(v) => (sortOrder = v as BookSortOrder)"
         />
 
@@ -88,73 +87,58 @@
       </div>
 
       <!-- Mobile sidebar -->
-      <Transition name="mobile-filters-overlay">
-        <div v-if="isMobile && mobileFiltersOpen" class="mobile-filters-overlay" @click="closeMobileFilters" />
-      </Transition>
+      <SideBar ref="filtersSidebar" title="Filtros">
+        <template #body>
+          <!-- sort -->
+          <MultiSelect
+            class="filter-bar-sorted"
+            label="Ordenação"
+            :multiple="false"
+            :searchable="false"
+            :options="sortOptions"
+            :selected="sortOrder"
+            @toggle="(v) => (sortOrder = v as BookSortOrder)"
+          />
 
-      <Transition name="mobile-filters-panel">
-        <aside v-if="isMobile && mobileFiltersOpen" class="mobile-filters-sidebar" aria-label="Filtros">
-          <div class="mobile-filters-header">
-            <h2 class="mobile-filters-title">Filtros</h2>
-            <button class="mobile-filters-close" type="button" aria-label="Fechar filtros" @click="closeMobileFilters">
-              <BaseIcon name="times" aria-hidden="true" />
-            </button>
-          </div>
-
-          <div class="mobile-filters-body">
-            <!-- sort -->
-            <MultiSelect
-              class="filter-bar-sorted"
-              label="Ordenação"
-              :multiple="false"
-              :searchable="false"
-              :options="sortOptions"
-              :selected="sortOrder"
-              no-empty
-              @toggle="(v) => (sortOrder = v as BookSortOrder)"
-            />
-
-            <!-- filters -->
-            <MultiSelect
-              class="multi-select mobile"
-              label="Mídia"
-              :options="optionsMidia"
-              :selected="selectedMidia"
-              @toggle="(v) => handleToggle('midia', v)"
-              @clear="clearKey('midia')"
-            />
-            <MultiSelect
-              class="multi-select mobile"
-              label="Categoria"
-              :options="optionsCategoria"
-              :selected="selectedCategoria"
-              @toggle="(v) => handleToggle('categoria', v)"
-              @clear="clearKey('categoria')"
-            />
-            <MultiSelect
-              class="multi-select mobile"
-              label="Sub-gêneros"
-              :options="optionsSubgeneros"
-              :selected="selectedSubgeneros"
-              @toggle="(v) => handleToggle('subgeneros', v)"
-              @clear="clearKey('subgeneros')"
-            />
-            <MultiSelect
-              class="multi-select mobile"
-              label="Mencionado por"
-              :options="optionsQuem"
-              :selected="selectedQuem"
-              @toggle="(v) => handleToggle('quem', v)"
-              @clear="clearKey('quem')"
-            />
-          </div>
-
-          <div class="mobile-filters-footer">
-            <button class="secondary-btn" type="button" @click="clearAll">Limpar</button>
-            <button class="primary-btn" type="button" @click="closeMobileFilters">Mostrar</button>
-          </div>
-        </aside>
-      </Transition>
+          <!-- filters -->
+          <MultiSelect
+            class="multi-select mobile"
+            label="Mídia"
+            :options="optionsMidia"
+            :selected="selectedMidia"
+            @toggle="(v) => handleToggle('midia', v)"
+            @clear="clearKey('midia')"
+          />
+          <MultiSelect
+            class="multi-select mobile"
+            label="Categoria"
+            :options="optionsCategoria"
+            :selected="selectedCategoria"
+            @toggle="(v) => handleToggle('categoria', v)"
+            @clear="clearKey('categoria')"
+          />
+          <MultiSelect
+            class="multi-select mobile"
+            label="Sub-gêneros"
+            :options="optionsSubgeneros"
+            :selected="selectedSubgeneros"
+            @toggle="(v) => handleToggle('subgeneros', v)"
+            @clear="clearKey('subgeneros')"
+          />
+          <MultiSelect
+            class="multi-select mobile"
+            label="Mencionado por"
+            :options="optionsQuem"
+            :selected="selectedQuem"
+            @toggle="(v) => handleToggle('quem', v)"
+            @clear="clearKey('quem')"
+          />
+        </template>
+        <template #footer="{ close }">
+          <button class="secondary-btn" type="button" @click="clearAll">Limpar</button>
+          <button class="primary-btn" type="button" @click="close">Mostrar</button>
+        </template>
+      </SideBar>
 
       <!-- Active filter tags -->
       <ActiveFilters
@@ -177,7 +161,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, defineAsyncComponent } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
 import { useBooksStore } from '@/stores'
@@ -196,6 +180,8 @@ usePageMeta({
   title: 'Catálogo de Indicações',
   description: 'Explore os livros, mangás e HQs indicados pelo Clube Ecos Literários.',
 })
+
+const SideBar = defineAsyncComponent(() => import('@/components/SideBar.vue'))
 
 const {
   search,
@@ -216,12 +202,9 @@ const { sortOrder, sortedBooks, sortOptions } = useBookSort(filtered)
 
 onMounted(() => useSheets().fetchBooks())
 
-const isMobile = useMediaQuery('(max-width: 767px)')
-const mobileFiltersOpen = ref(false)
+const filtersSidebar = ref<InstanceType<typeof SideBar> | null>(null)
 
-watch(isMobile, (mobile) => {
-  if (!mobile) mobileFiltersOpen.value = false
-})
+const isMobile = useMediaQuery('(max-width: 767px)')
 
 const handleToggle = (key: string, value: string) => {
   const map = {
@@ -253,18 +236,8 @@ const onSelectSuggestion = (book: Book) => {
 }
 
 const openMobileFilters = () => {
-  mobileFiltersOpen.value = true
-  document.body.style.overflow = 'hidden'
+  filtersSidebar.value?.open()
 }
-
-const closeMobileFilters = () => {
-  mobileFiltersOpen.value = false
-  document.body.style.overflow = ''
-}
-
-onBeforeUnmount(() => {
-  document.body.style.overflow = ''
-})
 </script>
 
 <style lang="scss" scoped>
@@ -278,7 +251,7 @@ onBeforeUnmount(() => {
   &-body {
     margin: 0 auto;
     max-width: 1200px;
-    padding: 20px 16px 48px;
+    padding: 20px 1rem 48px;
   }
 }
 
@@ -286,7 +259,6 @@ onBeforeUnmount(() => {
   &-inner {
     margin: 0 auto;
     max-width: 1200px;
-    padding: 0 16px;
   }
 
   &-title {
@@ -359,74 +331,6 @@ onBeforeUnmount(() => {
   margin-top: 2rem;
 }
 
-.mobile-filters {
-  &-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 40;
-  }
-
-  &-sidebar {
-    position: fixed;
-    top: 0;
-    right: 0;
-    z-index: 50;
-    display: flex;
-    width: min(88dvw, 360px);
-    height: 100dvh;
-    padding-top: 4rem;
-    background: var(--color-surface-default);
-    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.16);
-    flex-direction: column;
-  }
-
-  &-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px;
-    border-bottom: 1px solid var(--color-border-default);
-  }
-
-  &-title {
-    margin: 0;
-    font-size: 1rem;
-    color: var(--color-text-default);
-  }
-
-  &-close {
-    width: 40px;
-    height: 40px;
-    border: none;
-    background: transparent;
-    border-radius: 999px;
-    cursor: pointer;
-    color: var(--color-text-default);
-  }
-
-  &-body {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-
-    .filter-bar-sorted {
-      width: 100%;
-    }
-  }
-
-  &-footer {
-    margin-top: auto;
-    display: grid;
-    padding: 16px;
-    border-top: 1px solid var(--color-border-default);
-    background: var(--color-surface-default);
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-}
-
 .primary-btn,
 .secondary-btn {
   border: none;
@@ -456,24 +360,6 @@ onBeforeUnmount(() => {
   &:hover {
     opacity: 0.85;
   }
-}
-
-/* Drawer transitions */
-.mobile-filters-overlay-enter-active,
-.mobile-filters-overlay-leave-active {
-  transition: opacity 0.25s ease;
-}
-.mobile-filters-overlay-enter-from,
-.mobile-filters-overlay-leave-to {
-  opacity: 0;
-}
-.mobile-filters-panel-enter-active,
-.mobile-filters-panel-leave-active {
-  transition: transform 0.25s ease;
-}
-.mobile-filters-panel-enter-from,
-.mobile-filters-panel-leave-to {
-  transform: translateX(100%);
 }
 
 @media (max-width: 767px) {

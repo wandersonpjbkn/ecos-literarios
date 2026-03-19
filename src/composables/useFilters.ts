@@ -51,12 +51,18 @@ export function useFilters() {
       list = list.filter((b) => b.titulo?.toLowerCase().includes(q) || b.autor?.toLowerCase().includes(q))
     }
 
-    if (selectedMidia.value.length) list = list.filter((b) => selectedMidia.value.includes(b.midia))
+    if (selectedMidia.value.length) {
+      list = list.filter((b) => selectedMidia.value.includes(b.midia))
+    }
 
-    if (selectedCategoria.value.length) list = list.filter((b) => selectedCategoria.value.includes(b.categoria))
+    if (selectedCategoria.value.length) {
+      list = list.filter((b) => selectedCategoria.value.includes(b.categoria))
+    }
 
-    if (selectedSubgeneros.value.length)
-      list = list.filter((b) => selectedSubgeneros.value.every((sg) => b.subgenerosArr?.includes(sg)))
+    if (selectedSubgeneros.value.length) {
+      list = list.filter((b) => selectedSubgeneros.value.some((sg) => b.subgenerosArr?.includes(sg)))
+    }
+
     if (selectedQuem.value.length) list = list.filter((b) => selectedQuem.value.includes(b.quem))
 
     return list

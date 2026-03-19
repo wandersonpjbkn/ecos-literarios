@@ -52,7 +52,6 @@
               :searchable="false"
               :options="sortOptions"
               :selected="sortOrder"
-              no-empty
               @toggle="(v) => (sortOrder = v as BookSortOrder)"
             />
 

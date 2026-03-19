@@ -5,27 +5,26 @@
 <script lang="ts" setup>
 import { computed, defineAsyncComponent } from 'vue'
 
-type UIcons =
-  // UI
-  | 'arrow-left'
-  | 'arrow-right'
-  | 'book'
-  | 'checkbox'
-  | 'check'
-  | 'chevron'
-  | 'error'
-  | 'filter'
-  | 'funil'
-  | 'search'
-  | 'times'
-  | 'user'
-  // brand
-  | 'amazon'
-  | 'chrome'
-  | 'youtube'
-
 const props = defineProps<{
-  name: UIcons
+  name: // UI
+    | 'arrow-left'
+    | 'arrow-right'
+    | 'book'
+    | 'checkbox'
+    | 'check'
+    | 'chevron'
+    | 'error'
+    | 'filter'
+    | 'funil'
+    | 'menu'
+    | 'reload'
+    | 'search'
+    | 'times'
+    | 'user'
+    // brands
+    | 'amazon'
+    | 'chrome'
+    | 'youtube'
 }>()
 
 const dynamicIcon = computed(() => {

@@ -71,7 +71,7 @@
           <li v-if="normalizedOptions.length === 0" class="ms-empty">Nenhuma opção encontrada</li>
         </ul>
 
-        <div v-if="multiple && noEmpty" class="ms-footer">
+        <div v-if="multiple && selected.length > 0" class="ms-footer">
           <button class="ms-clear-all" @click.stop="emit('clear')">Limpar</button>
           <span class="ms-footer-count">{{ selected.length }} selecionado{{ selected.length > 1 ? 's' : '' }}</span>
         </div>
@@ -100,12 +100,10 @@ const props = withDefaults(
     selected: string | string[]
     multiple?: boolean
     searchable?: boolean
-    noEmpty?: boolean
   }>(),
   {
     multiple: true,
     searchable: true,
-    noEmpty: false,
   },
 )
 
