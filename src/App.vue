@@ -145,7 +145,6 @@ useHead({
 
   &-nav {
     position: relative;
-    right: 0;
 
     display: flex;
     gap: 8px;
@@ -154,7 +153,8 @@ useHead({
 
     &.open {
       @media (min-width: 768px) {
-        right: calc(-95px + 1rem);
+        position: absolute;
+        right: 258px;
       }
     }
 

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, watch, onBeforeUnmount } from 'vue'
-import { useMediaQuery } from '@vueuse/core'
+import { useMediaQuery, onClickOutside } from '@vueuse/core'
 
 defineProps<{
   title: string
@@ -9,6 +9,7 @@ defineProps<{
 const isMobile = useMediaQuery('(max-width: 767px)')
 
 const isOpen = ref(false)
+const painelRef = ref<HTMLElement | null>(null)
 
 const lockBody = () => {
   document.body.style.overflow = 'hidden'
@@ -33,6 +34,8 @@ const toggle = () => {
   else open()
 }
 
+onClickOutside(painelRef, close)
+
 watch(isMobile, (mobile) => {
   if (!mobile) {
     close()
@@ -54,12 +57,12 @@ defineExpose({
 <template>
   <!-- overlay -->
   <Transition name="mobile-filters-overlay">
-    <div v-if="isOpen" class="mobile-filters-overlay" @click="close" />
+    <div v-if="isOpen" class="mobile-filters-overlay" aria-hidden="true" @click="close" />
   </Transition>
 
   <!-- panel -->
   <Transition name="mobile-filters-panel">
-    <aside v-if="isOpen" class="mobile-filters-sidebar" :aria-label="title">
+    <aside v-if="isOpen" ref="painelRef" class="mobile-filters-sidebar" :aria-label="title">
       <!-- header -->
       <div class="mobile-filters-header">
         <slot name="header" :open="open" :close="close" :toggle="toggle" :is-open="isOpen">
