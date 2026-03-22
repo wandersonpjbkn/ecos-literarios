@@ -35,7 +35,7 @@
           :aria-selected="i === activeIdx"
           @mousedown.prevent="selectSuggestion(s)"
         >
-          <span class="sug-titulo" v-html="highlight(s.titulo)" />
+          <span class="sug-titulo" v-html="useUtils().sanitizeText(highlight(s.titulo))" />
           <span class="sug-autor">{{ s.autor }}</span>
         </li>
       </ul>
@@ -46,6 +46,8 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import { onClickOutside } from '@vueuse/core'
+
+import { useUtils } from '@/composables'
 
 import type { Suggestion } from '@/types'
 

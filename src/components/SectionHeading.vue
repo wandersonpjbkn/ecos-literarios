@@ -4,7 +4,7 @@
       <h2 v-if="title" class="section-heading__title">{{ title }}</h2>
       <p v-if="description || descriptionHtml" class="section-heading__desc">
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <span v-if="descriptionHtml" v-html="descriptionHtml" />
+        <span v-if="descriptionHtml" v-html="useUtils().sanitizeText(descriptionHtml)" />
         <template v-else>{{ description }}</template>
       </p>
     </div>
@@ -13,6 +13,8 @@
 </template>
 
 <script lang="ts" setup>
+import { useUtils } from '@/composables'
+
 withDefaults(
   defineProps<{
     title?: string

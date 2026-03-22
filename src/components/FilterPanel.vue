@@ -17,7 +17,13 @@
       </div>
 
       <!-- Active tags -->
-      <TransitionGroup v-if="activeCount > 0" name="tag" tag="div" class="active-tags" aria-label="Filtros ativos">
+      <TransitionGroup
+        v-if="activeCount > 0 && activeTags.length > 0"
+        name="tag"
+        tag="div"
+        class="active-tags"
+        aria-label="Filtros ativos"
+      >
         <span
           v-for="tag in activeTags"
           :key="tag.key + tag.value"

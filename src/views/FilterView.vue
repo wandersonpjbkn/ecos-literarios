@@ -304,7 +304,7 @@ const onSelectSuggestion = (book: Book) => {
 const routeNameFor = (key: ExploreKey): FilterType => (key === 'quem' ? 'mencao' : key)
 const routeFor = (key: ExploreKey, value: string) => ({
   name: routeNameFor(key),
-  params: { id: useUtils().slugify(value) },
+  params: { slug: useUtils().slugify(value) },
 })
 
 const exploreGroups = computed(() => [
