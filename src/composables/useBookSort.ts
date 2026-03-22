@@ -1,13 +1,8 @@
 import { computed, ref, type Ref } from 'vue'
 
-import type { Book, BookSortOrder } from '@/types'
+import { useUtils } from '@/composables/useUtils'
 
-const normalizeText = (value?: string) =>
-  (value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim()
+import type { Book, BookSortOrder } from '@/types'
 
 export function useBookSort(source: Ref<Book[]>, initialOrder: BookSortOrder = 'new') {
   const sortOrder = ref<BookSortOrder>(initialOrder)
@@ -25,8 +20,8 @@ export function useBookSort(source: Ref<Book[]>, initialOrder: BookSortOrder = '
     if (sortOrder.value === 'new') return [...source.value].reverse()
 
     return [...source.value].sort((a, b) => {
-      const titleA = normalizeText(a.titulo)
-      const titleB = normalizeText(b.titulo)
+      const titleA = useUtils().normalizeText(a.titulo)
+      const titleB = useUtils().normalizeText(b.titulo)
 
       const result = titleA.localeCompare(titleB, 'pt-BR')
       return sortOrder.value === 'asc' ? result : -result

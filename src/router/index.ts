@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import { sendGtmEvent } from '@/utils/gtm'
+import { useUtils } from '@/composables'
 
 import Catalog from './modules/catalog'
 import Book from './modules/books'
@@ -18,7 +18,7 @@ const router = createRouter({
 })
 
 router.afterEach((to) => {
-  sendGtmEvent({
+  useUtils().sendGtmEvent({
     event: 'content_view',
     content_name: to.fullPath,
     content_view_name: to.name || to.meta.title || 'unknown',

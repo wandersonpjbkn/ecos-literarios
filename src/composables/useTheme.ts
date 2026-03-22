@@ -1,7 +1,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 
-import { sendGtmEvent } from '@/utils/gtm'
+import { useUtils } from '@/composables'
 
 export function useTheme() {
   const themes = [
@@ -25,7 +25,7 @@ export function useTheme() {
   onClickOutside(root, () => close())
 
   const applyTheme = (value: string) => {
-    sendGtmEvent({
+    useUtils().sendGtmEvent({
       event: 'theme_change',
       theme: value,
       theme_label: themes.find((t) => t.value === value)?.label ?? value,

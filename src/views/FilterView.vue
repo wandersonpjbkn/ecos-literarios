@@ -12,7 +12,7 @@
               <div class="intro-meta">
                 <span class="intro-type-label">{{ config.label }}</span>
               </div>
-              <h1 class="intro-title">{{ filterValue }}</h1>
+              <h1 class="intro-title">{{ canonicalValue }}</h1>
               <p class="intro-kicker">
                 <template v-if="activeFilterCount > 0">
                   <strong>{{ filtered.length }}</strong> de {{ baseFiltered.length }} resultados
@@ -79,7 +79,7 @@
           <section id="explore-menu" class="explore-menu-section">
             <SectionHeading title="Explore mais" variant="spaced">
               <template #description>
-                A partir de <strong>{{ filterValue }}</strong
+                A partir de <strong>{{ canonicalValue }}</strong
                 >, navegue para outras visões do mesmo conjunto.
               </template>
             </SectionHeading>
@@ -103,7 +103,7 @@
 
                 <div class="explore-card__chips">
                   <template v-if="group.key === fixedKey">
-                    <span class="explore-chip explore-chip--muted">{{ filterValue }}</span>
+                    <span class="explore-chip explore-chip--muted">{{ canonicalValue }}</span>
                   </template>
 
                   <template v-else-if="group.items.length">
@@ -135,7 +135,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useBooksStore } from '@/stores'
-import { useSheets, useCategoryColors, useBookSort, usePageMeta } from '@/composables'
+import { useSheets, useCategoryColors, useBookSort, usePageMeta, useUtils } from '@/composables'
 
 import SearchBar from '@/components/SearchBar.vue'
 import ResultCount from '@/components/ResultCount.vue'
@@ -148,6 +148,7 @@ import SectionHeading from '@/components/SectionHeading.vue'
 
 import type { Book, BookSortOrder, Options, FilterType, ExploreKey, CategoryType } from '@/types'
 
+// ── Config ────────────────────────────────────────────────────────
 const filterConfigs: Record<FilterType, { label: string; bookField: keyof Book; desc: (v: string) => string }> = {
   midia: { label: 'Mídia', bookField: 'midia', desc: (v) => `Todos os títulos em formato ${v} indicados no clube.` },
   categoria: {
@@ -163,18 +164,28 @@ const route = useRoute()
 const colors = useCategoryColors()
 
 const filterType = computed(() => route.name as FilterType)
-const filterValue = computed(() => decodeURIComponent(route.params.id as string))
+const filterValue = computed(() => decodeURIComponent(route.params?.slug as string))
 const config = computed(() => filterConfigs[filterType.value] ?? filterConfigs.categoria)
 const fixedKey = computed<ExploreKey>(() => (filterType.value === 'mencao' ? 'quem' : filterType.value))
 
+// ── Valor canônico ────────────────────────────────────────────────
+const canonicalValue = computed(() => {
+  const field = config.value.bookField
+  const target = useUtils().slugify(filterValue.value)
+  const match = useBooksStore().books.find((b) => useUtils().slugify(String(b[field])) === target)
+  return match ? String(match[field]) : filterValue.value
+})
+
+// ── Accent ────────────────────────────────────────────────────────
 const introAccent = computed(() =>
   filterType.value === 'categoria'
-    ? colors.categoryColor(filterValue.value as CategoryType)
+    ? colors.categoryColor(canonicalValue.value as CategoryType)
     : 'var(--color-action-default)',
 )
 
 onMounted(() => useSheets().fetchBooks())
 
+// ── Filtros secundários ───────────────────────────────────────────
 const search = ref('')
 const selectedMidia = ref<string[]>([])
 const selectedCategoria = ref<string[]>([])
@@ -189,11 +200,14 @@ watch(filterType, () => {
   selectedQuem.value = []
 })
 
+// ── Base filtrada (comparação normalizada) ────────────────────────
 const baseFiltered = computed(() => {
   const field = config.value.bookField
-  return useBooksStore().books.filter((b) => String(b[field]) === filterValue.value)
+  const target = useUtils().slugify(filterValue.value)
+  return useBooksStore().books.filter((b) => useUtils().slugify(String(b[field])) === target)
 })
 
+// ── Opções dos filtros secundários ────────────────────────────────
 const optionsMidia = computed(() =>
   fixedKey.value === 'midia' ? [] : [...new Set(baseFiltered.value.map((b) => b.midia).filter(Boolean))].sort(),
 )
@@ -222,8 +236,10 @@ const panelSelected = computed(
   }),
 )
 
+// ── Filtro aplicado ───────────────────────────────────────────────
 const filtered = computed(() => {
   let list = baseFiltered.value
+
   if (search.value.trim()) {
     const q = search.value.toLowerCase()
     list = list.filter((b) => b.titulo?.toLowerCase().includes(q) || b.autor?.toLowerCase().includes(q))
@@ -231,8 +247,9 @@ const filtered = computed(() => {
   if (selectedMidia.value.length) list = list.filter((b) => selectedMidia.value.includes(b.midia))
   if (selectedCategoria.value.length) list = list.filter((b) => selectedCategoria.value.includes(b.categoria))
   if (selectedSubgeneros.value.length)
-    list = list.filter((b) => selectedSubgeneros.value.every((sg) => b.subgenerosArr?.includes(sg)))
+    list = list.filter((b) => selectedSubgeneros.value.some((sg) => b.subgenerosArr?.includes(sg)))
   if (selectedQuem.value.length) list = list.filter((b) => selectedQuem.value.includes(b.quem))
+
   return list
 })
 
@@ -252,8 +269,10 @@ const handleToggle = (key: string, value: string) => {
     subgeneros: selectedSubgeneros,
     quem: selectedQuem,
   }
+
   const arr = map[key]
   if (!arr) return
+
   const idx = arr.value.indexOf(value)
   if (idx === -1) arr.value.push(value)
   else arr.value.splice(idx, 1)
@@ -267,6 +286,7 @@ const clearSecondary = () => {
   selectedQuem.value = []
 }
 
+// ── Autocomplete ──────────────────────────────────────────────────
 const searchSuggestions = computed(() => {
   if (!search.value.trim() || search.value.length < 2) return []
   const q = search.value.toLowerCase()
@@ -280,10 +300,11 @@ const onSelectSuggestion = (book: Book) => {
   search.value = book.titulo
 }
 
+// ── Explore ───────────────────────────────────────────────────────
 const routeNameFor = (key: ExploreKey): FilterType => (key === 'quem' ? 'mencao' : key)
 const routeFor = (key: ExploreKey, value: string) => ({
   name: routeNameFor(key),
-  params: { id: encodeURIComponent(value) },
+  params: { id: useUtils().slugify(value) },
 })
 
 const exploreGroups = computed(() => [
@@ -309,12 +330,13 @@ const exploreGroups = computed(() => [
   },
 ])
 
+// ── Sort + SEO ────────────────────────────────────────────────────
 const { sortOrder, sortedBooks, sortOptions } = useBookSort(filtered)
 
 usePageMeta(
   computed(() => ({
-    title: filterValue.value,
-    description: `${baseFiltered.value.length} títulos em ${config.value.label}: ${filterValue.value}`,
+    title: canonicalValue.value,
+    description: `${baseFiltered.value.length} títulos em ${config.value.label}: ${canonicalValue.value}`,
   })),
 )
 </script>

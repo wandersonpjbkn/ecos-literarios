@@ -4,5 +4,6 @@ import { useFilters } from '@/composables/useFilters'
 import { usePageMeta } from '@/composables/usePageMeta'
 import { useSheets } from '@/composables/useSheets'
 import { useTheme } from '@/composables/useTheme'
+import { useUtils } from '@/composables/useUtils'
 
-export { useBookSort, useCategoryColors, useFilters, usePageMeta, useSheets, useTheme }
+export { useBookSort, useCategoryColors, useFilters, usePageMeta, useSheets, useTheme, useUtils }

@@ -120,7 +120,7 @@
             <div class="meta-grid">
               <RouterLink
                 v-if="book.midia"
-                :to="`/midia/${encodeURIComponent(book.midia)}`"
+                :to="`/midia/${useUtils().slugify(book.midia)}`"
                 class="meta-item meta-item--link"
                 aria-label="Ver outros títulos pelo mesmo formato"
               >
@@ -132,7 +132,7 @@
 
               <RouterLink
                 v-if="book.categoria"
-                :to="`/categoria/${encodeURIComponent(book.categoria)}`"
+                :to="`/categoria/${useUtils().slugify(book.categoria)}`"
                 class="meta-item meta-item--link"
                 aria-label="Ver outros títulos da mesma categoria"
               >
@@ -144,7 +144,7 @@
 
               <RouterLink
                 v-if="book.autor"
-                :to="`/autor/${encodeURIComponent(book.autor)}`"
+                :to="`/autor/${useUtils().slugify(book.autor)}`"
                 class="meta-item meta-item--link"
                 aria-label="Ver outros títulos do mesmo autor"
               >
@@ -156,7 +156,7 @@
 
               <RouterLink
                 v-if="book.quem"
-                :to="`/mencao/${encodeURIComponent(book.quem)}`"
+                :to="`/mencao/${useUtils().slugify(book.quem)}`"
                 class="meta-item meta-item--link"
                 aria-label="Ver outras indicações da mesma pessoa"
               >
@@ -175,7 +175,7 @@
         <div class="content-inner">
           <SectionHeading variant="between">
             <template #default>
-              <RouterLink :to="`/categoria/${encodeURIComponent(book.categoria)}`" class="section-link">
+              <RouterLink :to="`/categoria/${useUtils().slugify(book.categoria)}`" class="section-link">
                 Ver todos <BaseIcon name="arrow-right" />
               </RouterLink>
             </template>
@@ -207,8 +207,7 @@ import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useBooksStore } from '@/stores'
-import { useCategoryColors, useSheets, usePageMeta } from '@/composables'
-import { sendGtmEvent } from '@/utils/gtm'
+import { useCategoryColors, useSheets, usePageMeta, useUtils } from '@/composables'
 
 import PageStatus from '@/components/PageStatus.vue'
 import RailCard from '@/components/RailCard.vue'
@@ -242,7 +241,7 @@ const getCategoryColor = (v?: CategoryType) => colors.categoryColor(v!)
 
 const emitGTMEvent = (origin: string) => {
   if (!book.value) return
-  sendGtmEvent({
+  useUtils().sendGtmEvent({
     event: 'external_link',
     external_link_origin: origin,
     external_link_name: book.value.titulo,

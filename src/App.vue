@@ -61,7 +61,7 @@ import { defineAsyncComponent, ref, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useHead } from '@unhead/vue'
 
-import { useSheets, useTheme } from './composables'
+import { useSheets, useTheme, useUtils } from '@/composables'
 
 const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
 const MultiSelect = defineAsyncComponent(() => import('@/components/MultiSelect.vue'))
@@ -86,6 +86,11 @@ const toggleMenu = () => {
 const forceRefresh = () => {
   useSheets().fetchBooks(true)
   menuSidebar.value?.close()
+
+  useUtils().sendGtmEvent({
+    event: 'force_refresh',
+    force_refresh_origin: route.fullPath,
+  })
 }
 
 watch(route, async () => {
