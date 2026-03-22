@@ -42,7 +42,7 @@ const backTop = () => {
   position: fixed;
   right: 3rem;
   bottom: 1rem;
-  z-index: 100;
+  z-index: 10;
 
   display: flex;
   align-items: center;
