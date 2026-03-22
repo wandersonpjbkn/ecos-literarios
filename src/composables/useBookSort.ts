@@ -9,12 +9,12 @@ const normalizeText = (value?: string) =>
     .toLowerCase()
     .trim()
 
-export function useBookSort(source: Ref<Book[]>, initialOrder: BookSortOrder = 'old') {
+export function useBookSort(source: Ref<Book[]>, initialOrder: BookSortOrder = 'new') {
   const sortOrder = ref<BookSortOrder>(initialOrder)
 
   const sortOptions = ref<{ label: string; value: BookSortOrder }[]>([
-    { label: 'Mais antigos', value: 'old' },
     { label: 'Mais recentes', value: 'new' },
+    { label: 'Mais antigos', value: 'old' },
     { label: 'A → Z', value: 'asc' },
     { label: 'Z → A', value: 'desc' },
   ])
