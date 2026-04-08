@@ -15,9 +15,9 @@ export function useBookSort(source: Ref<Book[]>, initialOrder: BookSortOrder = '
   ])
 
   const sortedBooks = computed<Book[]>(() => {
-    if (sortOrder.value === 'old') return [...source.value]
+    if (sortOrder.value === 'old') return [...source.value].reverse()
 
-    if (sortOrder.value === 'new') return [...source.value].reverse()
+    if (sortOrder.value === 'new') return [...source.value]
 
     return [...source.value].sort((a, b) => {
       const titleA = useUtils().normalizeText(a.titulo)

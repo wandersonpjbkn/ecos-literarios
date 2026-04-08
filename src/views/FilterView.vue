@@ -135,7 +135,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useBooksStore } from '@/stores'
-import { useSheets, useCategoryColors, useBookSort, usePageMeta, useUtils } from '@/composables'
+import { useApi, useCategoryColors, useBookSort, usePageMeta, useUtils } from '@/composables'
 
 import SearchBar from '@/components/SearchBar.vue'
 import ResultCount from '@/components/ResultCount.vue'
@@ -183,7 +183,7 @@ const introAccent = computed(() =>
     : 'var(--color-action-default)',
 )
 
-onMounted(() => useSheets().fetchBooks())
+onMounted(() => useApi().fetchBooks())
 
 // ── Filtros secundários ───────────────────────────────────────────
 const search = ref('')

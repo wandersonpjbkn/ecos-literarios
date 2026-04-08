@@ -6,7 +6,7 @@
       :error="useBooksStore().error"
       loading-text="Carregando catálogo…"
       error-hint="Contacte o administrador do site se o erro persistir."
-      :on-retry="() => useSheets().fetchBooks(true)"
+      :on-retry="() => useApi().fetchBooks(true)"
     />
 
     <!-- Catalog -->
@@ -165,7 +165,7 @@ import { ref, onMounted, defineAsyncComponent } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
 import { useBooksStore } from '@/stores'
-import { useSheets, useFilters, useBookSort, usePageMeta } from '@/composables'
+import { useApi, useFilters, useBookSort, usePageMeta } from '@/composables'
 
 import SearchBar from '@/components/SearchBar.vue'
 import ResultCount from '@/components/ResultCount.vue'
@@ -200,7 +200,7 @@ const {
 } = useFilters()
 const { sortOrder, sortedBooks, sortOptions } = useBookSort(filtered)
 
-onMounted(() => useSheets().fetchBooks())
+onMounted(() => useApi().fetchBooks())
 
 const filtersSidebar = ref<InstanceType<typeof SideBar> | null>(null)
 

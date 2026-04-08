@@ -207,7 +207,7 @@ import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useBooksStore } from '@/stores'
-import { useCategoryColors, useSheets, usePageMeta, useUtils } from '@/composables'
+import { useCategoryColors, useApi, usePageMeta, useUtils } from '@/composables'
 
 import PageStatus from '@/components/PageStatus.vue'
 import RailCard from '@/components/RailCard.vue'
@@ -218,7 +218,7 @@ import type { Book, CategoryType } from '@/types'
 const route = useRoute()
 const colors = useCategoryColors()
 
-onMounted(() => useSheets().fetchBooks())
+onMounted(() => useApi().fetchBooks())
 
 const book = computed((): Book | undefined =>
   useBooksStore().books.find((b) => String(b.id) === String(route.params.id)),
