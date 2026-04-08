@@ -5,8 +5,9 @@ import { useUtils } from '@/composables'
 import Catalog from './modules/catalog'
 import Book from './modules/books'
 import Filter from './modules/filter'
+import Auth from './modules/auth'
 
-const routes = [...Catalog.routes, ...Book.routes, ...Filter.routes]
+const routes = [...Catalog.routes, ...Book.routes, ...Filter.routes, ...Auth.routes]
 
 const router = createRouter({
   history: createWebHistory(),

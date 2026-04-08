@@ -9,12 +9,22 @@
             <span class="brand-sub">Catálogo do clube</span>
           </div>
         </RouterLink>
-        <nav :class="['header-nav', { open: menuSidebar?.isOpen }]">
-          <button type="button" @click="toggleMenu">
-            {{ menuSidebar?.isOpen ? 'Fechar' : 'Menu' }}
-            <BaseIcon :name="menuSidebar?.isOpen ? 'times' : 'menu'" class="icon" />
+
+        <div class="header-actions">
+          <!-- Usuário: login ou avatar com dropdown -->
+          <UserButton />
+
+          <!-- Configurações: tema + cache -->
+          <button
+            class="config-btn"
+            type="button"
+            :aria-expanded="menuSidebar?.isOpen"
+            aria-label="Configurações"
+            @click="toggleMenu"
+          >
+            <BaseIcon name="filter" class="config-btn__icon" aria-hidden="true" />
           </button>
-        </nav>
+        </div>
       </div>
     </header>
 
@@ -57,11 +67,12 @@
 </template>
 
 <script lang="ts" setup>
-import { defineAsyncComponent, ref, watch, nextTick } from 'vue'
+import { defineAsyncComponent, ref, watch, nextTick, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useHead } from '@unhead/vue'
 
-import { useApi, useTheme, useUtils } from '@/composables'
+import { useApi, useTheme, useUtils, useAuth } from '@/composables'
+import UserButton from '@/components/UserButton.vue'
 
 const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
 const MultiSelect = defineAsyncComponent(() => import('@/components/MultiSelect.vue'))
@@ -69,36 +80,34 @@ const SideBar = defineAsyncComponent(() => import('@/components/SideBar.vue'))
 
 const route = useRoute()
 const { themes, activeTheme, select } = useTheme()
+const { restoreSession } = useAuth()
 
 const content = ref<HTMLElement | null>(null)
 const menuSidebar = ref<InstanceType<typeof SideBar> | null>(null)
 
 const themesOptions = themes.map((t) => ({
   value: t.value,
-  label: `${t.emoji}
-  ${t.label}`,
+  label: `${t.emoji} ${t.label}`,
 }))
 
-const toggleMenu = () => {
-  menuSidebar.value?.toggle()
-}
+const toggleMenu = () => menuSidebar.value?.toggle()
 
 const forceRefresh = () => {
   useApi().fetchBooks(true)
   menuSidebar.value?.close()
-
   useUtils().sendGtmEvent({
     event: 'force_refresh',
     force_refresh_origin: route.fullPath,
   })
 }
 
+// Restaura sessão do Supabase ao recarregar a página
+onMounted(() => restoreSession())
+
 watch(route, async () => {
   await nextTick()
   setTimeout(() => {
-    if (content.value) {
-      content.value.scrollTo({ top: 0, behavior: 'smooth' })
-    }
+    if (content.value) content.value.scrollTo({ top: 0, behavior: 'smooth' })
   }, 350)
 })
 
@@ -148,54 +157,17 @@ useHead({
     gap: 24px;
   }
 
-  &-nav {
-    position: relative;
-
+  &-actions {
     display: flex;
+    align-items: center;
     gap: 8px;
-
-    transition: all var(--motion-transition-default);
-
-    &.open {
-      @media (min-width: 768px) {
-        position: absolute;
-        right: 258px;
-      }
-    }
-
-    button {
-      display: flex;
-      width: fit-content;
-      height: 34px;
-      padding: 01rem;
-      background: none;
-      border: 1px solid var(--color-action-text-subtle);
-
-      font: {
-        size: 0.8rem;
-        weight: 400;
-      }
-      color: var(--color-action-text-subtle);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-
-      cursor: pointer;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .icon {
-      margin-top: 0.06rem;
-      margin-left: 4px;
-    }
   }
 }
 
+// ── Brand ─────────────────────────────────────────────────────────
 .brand {
   display: flex;
-
   color: var(--color-action-text-subtle);
-
   align-items: center;
   gap: 12px;
   transition: opacity var(--motion-transition-default);
@@ -219,7 +191,7 @@ useHead({
     font: {
       family: var(--font-family-display);
       size: 1.1rem;
-      weight: 600;
+      weight: 400;
     }
     color: var(--color-surface-default);
   }
@@ -235,27 +207,36 @@ useHead({
   }
 }
 
-.nav {
-  &-link {
-    padding: 6px 14px;
-    border-radius: var(--border-radius-sm);
+// ── Botão de configurações ────────────────────────────────────────
+.config-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--color-action-text-subtle);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: opacity var(--motion-transition-default);
 
-    font: {
-      weight: 400;
-      size: 0.9rem;
-    }
-    color: var(--color-text-subtle);
+  &:hover {
+    opacity: 0.75;
+  }
 
-    transition: all var(--motion-transition-default);
+  &[aria-expanded='true'] {
+    background: rgba(var(--color-surface-default-rgb), 0.08);
+  }
 
-    &:hover,
-    &.router-link-active {
-      color: var(--color-surface-default);
-      background: rgba(var(--color-surface-default-rgb), 0.08);
-    }
+  &__icon {
+    width: 16px;
+    height: 16px;
+    color: var(--color-action-text-subtle);
   }
 }
 
+// ── Menu painel (SideBar body) ────────────────────────────────────
 .menu-painel {
   display: grid;
   grid-template-rows: 1fr 1fr;
@@ -264,10 +245,7 @@ useHead({
   &-card {
     p {
       margin-bottom: 0.15rem;
-
-      font: {
-        size: 1rem;
-      }
+      font-size: 1rem;
       color: var(--color-text-default);
     }
   }
@@ -280,11 +258,9 @@ useHead({
     border-radius: var(--border-radius-sm);
     background: var(--color-background-subtle);
     border: 1px solid var(--color-border-default);
-
     font-family: var(--font-family-body);
     font-size: 1rem;
     color: var(--color-text-default);
-
     align-items: center;
     justify-content: center;
     transition: opacity var(--motion-transition-default);
