@@ -67,7 +67,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineAsyncComponent, ref, watch, nextTick, onMounted } from 'vue'
+import { defineAsyncComponent, ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useHead } from '@unhead/vue'
 
@@ -80,7 +80,7 @@ const SideBar = defineAsyncComponent(() => import('@/components/SideBar.vue'))
 
 const route = useRoute()
 const { themes, activeTheme, select } = useTheme()
-const { restoreSession } = useAuth()
+const { restoreSession, watchSession } = useAuth()
 
 const content = ref<HTMLElement | null>(null)
 const menuSidebar = ref<InstanceType<typeof SideBar> | null>(null)
@@ -101,8 +101,15 @@ const forceRefresh = () => {
   })
 }
 
-// Restaura sessão do Supabase ao recarregar a página
-onMounted(() => restoreSession())
+// Restaura sessão e inicia listener de renovação de token
+let stopWatchSession: (() => void) | null = null
+
+onMounted(() => {
+  restoreSession()
+  stopWatchSession = watchSession()
+})
+
+onUnmounted(() => stopWatchSession?.())
 
 watch(route, async () => {
   await nextTick()
