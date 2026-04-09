@@ -81,13 +81,6 @@ export function useApi() {
    * nenhuma view ou componente precisa ser alterado além da importação.
    */
   const fetchBooks = async (forceRefresh = false) => {
-    console.log(
-      '%c force-refresh ',
-      'background:purple;color:#fff',
-      `forceRefresh: ${forceRefresh}`,
-      `isCacheValid: ${useCacheStore().isCacheValid}`,
-    )
-
     // Cache do Pinia ainda válido
     if (!forceRefresh && useCacheStore().isCacheValid) {
       useBooksStore().books = useCacheStore().cache!
