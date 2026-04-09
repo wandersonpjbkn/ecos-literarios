@@ -8,7 +8,7 @@ export const useCacheStore = defineStore(
   () => {
     const cache = ref<Book[] | null>(null)
     const ts = ref<number>(0)
-    const ttl = ref(24 * 60 * 60 * 1000) // 24h
+    const ttl = 24 * 60 * 60 * 1000 // 24h
 
     const isCacheValid = computed(() => {
       const now = Date.now()
@@ -16,7 +16,7 @@ export const useCacheStore = defineStore(
       if (!cache.value || ts.value === 0) return false
       if (ts.value > now) return false
 
-      return now - ts.value < ttl.value
+      return now - ts.value < ttl
     })
 
     const clear = () => {
@@ -28,7 +28,6 @@ export const useCacheStore = defineStore(
       // state
       cache,
       ts,
-      ttl,
 
       // getters
       isCacheValid,
