@@ -1,42 +1,64 @@
 <template>
   <div class="app">
-    <header class="site-header">
-      <div class="header-inner">
-        <RouterLink to="/" class="brand">
-          <span class="brand-icon">📚</span>
-          <div class="brand-text">
-            <span class="brand-name">Ecos Literários</span>
-            <span class="brand-sub">Catálogo do clube</span>
-          </div>
-        </RouterLink>
+    <!-- Sidebar vertical de ícones (desktop only) -->
+    <AppSidebar @settings="toggleSettings" @indicate="openIndicate" />
 
-        <div class="header-actions">
-          <!-- Usuário: login ou avatar com dropdown -->
-          <UserButton />
+    <!-- Área principal: header + conteúdo -->
+    <div class="app__main-area">
+      <!-- Header global com search + filtros + usuário -->
+      <AppHeader
+        v-model:search="search"
+        :suggestions="searchSuggestions"
+        :active-filters="activeFilters"
+        :active-filter-count="activeFilterCount"
+        :show-filters-button="showFiltersButton"
+        @select="onSelectSuggestion"
+        @open-filters="openFilters"
+        @remove-filter="removeFilter"
+        @clear-filters="clearFilters"
+      />
 
-          <!-- Configurações: tema + cache -->
-          <button
-            class="config-btn"
-            type="button"
-            :aria-expanded="menuSidebar?.isOpen"
-            aria-label="Configurações"
-            @click="toggleMenu"
-          >
-            <BaseIcon name="filter" class="config-btn__icon" aria-hidden="true" />
-          </button>
-        </div>
+      <!-- Layout: FilterPanel contextual (desktop) + view -->
+      <div class="app__content-area">
+        <!-- FilterPanel sidebar contextual — empurra o grid no desktop -->
+        <FilterPanel
+          v-if="!isMobile && showFiltersButton"
+          :show="filtersOpen"
+          :contextual="true"
+          :options="filterOptions"
+          :selected="activeFilters"
+          :active-count="activeFilterCount"
+          @update:show="filtersOpen = $event"
+          @toggle="toggleFilter"
+          @clear="clearFilters"
+        />
+
+        <main ref="content" class="app__view">
+          <RouterView v-slot="{ Component }">
+            <Transition name="fade" mode="out-in">
+              <component :is="Component" />
+            </Transition>
+          </RouterView>
+        </main>
       </div>
-    </header>
+    </div>
 
-    <main ref="content" class="site-main">
-      <RouterView v-slot="{ Component }">
-        <Transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </Transition>
-      </RouterView>
-    </main>
+    <!-- Bottom navigation (mobile only) -->
+    <BottomNav @indicate="openIndicate" />
 
-    <SideBar ref="menuSidebar" title="Configurações">
+    <!-- FilterSheet bottom sheet (mobile only) -->
+    <FilterSheet
+      v-if="isMobile"
+      v-model="filtersOpen"
+      :options="filterOptions"
+      :selected="activeFilters"
+      :active-count="activeFilterCount"
+      @toggle="toggleFilter"
+      @clear="clearFilters"
+    />
+
+    <!-- Settings sidebar (tema + cache) -->
+    <SideBar ref="settingsSidebar" title="Configurações">
       <template #body>
         <div class="menu-painel">
           <div class="menu-painel-card">
@@ -50,7 +72,6 @@
               @toggle="(value) => select(value)"
             />
           </div>
-
           <div class="menu-painel-card">
             <p>Cache</p>
             <button class="btn" type="button" @click="forceRefresh">
@@ -67,41 +88,131 @@
 </template>
 
 <script lang="ts" setup>
-import { defineAsyncComponent, ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
+import { defineAsyncComponent, ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useMediaQuery } from '@vueuse/core'
 import { useHead } from '@unhead/vue'
 
-import { useApi, useTheme, useUtils, useAuth } from '@/composables'
-import UserButton from '@/components/UserButton.vue'
+import { useApi, useTheme, useUtils, useAuth, useFilters } from '@/composables'
+
+import AppSidebar from '@/components/AppSidebar.vue'
+import AppHeader from '@/components/AppHeader.vue'
+import BottomNav from '@/components/BottomNav.vue'
+import FilterPanel from '@/components/FilterPanel.vue'
+import FilterSheet from '@/components/FilterSheet.vue'
 
 const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
 const MultiSelect = defineAsyncComponent(() => import('@/components/MultiSelect.vue'))
 const SideBar = defineAsyncComponent(() => import('@/components/SideBar.vue'))
 
+// ── Rota e breakpoint ────────────────────────
 const route = useRoute()
-const { themes, activeTheme, select } = useTheme()
+const isMobile = useMediaQuery('(max-width: 767px)')
+
+// ── Auth ─────────────────────────────────────
 const { restoreSession, watchSession } = useAuth()
 
-const content = ref<HTMLElement | null>(null)
-const menuSidebar = ref<InstanceType<typeof SideBar> | null>(null)
-
+// ── Tema ─────────────────────────────────────
+const { themes, activeTheme, select } = useTheme()
 const themesOptions = themes.map((t) => ({
   value: t.value,
   label: `${t.emoji} ${t.label}`,
 }))
 
-const toggleMenu = () => menuSidebar.value?.toggle()
+// ── Filtros globais ───────────────────────────
+// Botão só aparece em rotas com catálogo
+const FILTER_ROUTES = ['catalog']
+const showFiltersButton = computed(() => FILTER_ROUTES.includes(String(route.name)))
+const filtersOpen = ref(false)
+
+const {
+  search,
+  selectedMidia,
+  selectedCategoria,
+  selectedSubgeneros,
+  selectedQuem,
+  optionsMidia,
+  optionsCategoria,
+  optionsSubgeneros,
+  optionsQuem,
+  activeFilterCount,
+  clearAll,
+  searchSuggestions,
+} = useFilters()
+
+const filterOptions = computed(() => ({
+  midia: optionsMidia.value,
+  categoria: optionsCategoria.value,
+  subgeneros: optionsSubgeneros.value,
+  quem: optionsQuem.value,
+}))
+
+const activeFilters = computed(() => ({
+  midia: selectedMidia.value,
+  categoria: selectedCategoria.value,
+  subgeneros: selectedSubgeneros.value,
+  quem: selectedQuem.value,
+}))
+
+const toggleFilter = (key: string, value: string) => {
+  const map: Record<string, typeof selectedMidia> = {
+    midia: selectedMidia,
+    categoria: selectedCategoria,
+    subgeneros: selectedSubgeneros,
+    quem: selectedQuem,
+  }
+  const arr = map[key]
+  if (!arr) return
+  const idx = arr.value.indexOf(value)
+  if (idx === -1) arr.value.push(value)
+  else arr.value.splice(idx, 1)
+}
+
+const removeFilter = (key: string, value: string) => toggleFilter(key, value)
+const clearFilters = () => clearAll()
+const openFilters = () => {
+  filtersOpen.value = true
+}
+
+const onSelectSuggestion = (book: { titulo: string }) => {
+  search.value = book.titulo
+}
+
+// Fecha filtros ao trocar de rota
+watch(route, () => {
+  filtersOpen.value = false
+})
+
+// ── Settings sidebar ──────────────────────────
+const settingsSidebar = ref<InstanceType<typeof SideBar> | null>(null)
+const toggleSettings = () => settingsSidebar.value?.toggle()
 
 const forceRefresh = () => {
   useApi().fetchBooks(true)
-  menuSidebar.value?.close()
+  settingsSidebar.value?.close()
   useUtils().sendGtmEvent({
     event: 'force_refresh',
     force_refresh_origin: route.fullPath,
   })
 }
 
-// Restaura sessão e inicia listener de renovação de token
+// ── Indicar livro ─────────────────────────────
+// TODO: implementar modal ou rota de indicação
+const openIndicate = () => {
+  console.warn('[App] openIndicate: implementar modal de indicação')
+}
+
+// ── Scroll ao topo na troca de rota ──────────
+const content = ref<HTMLElement | null>(null)
+
+watch(route, async () => {
+  await nextTick()
+  setTimeout(() => {
+    if (content.value) content.value.scrollTo({ top: 0, behavior: 'smooth' })
+  }, 350)
+})
+
+// ── Init — restaura sessão e inicia listener de renovação de token
 let stopWatchSession: (() => void) | null = null
 
 onMounted(() => {
@@ -110,13 +221,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => stopWatchSession?.())
-
-watch(route, async () => {
-  await nextTick()
-  setTimeout(() => {
-    if (content.value) content.value.scrollTo({ top: 0, behavior: 'smooth' })
-  }, 350)
-})
 
 useHead({
   htmlAttrs: { lang: 'pt-BR' },
@@ -129,121 +233,46 @@ useHead({
   margin-left: 0.5rem;
 }
 
+// ── Shell ─────────────────────────────────────
 .app {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100dvh;
+  overflow: hidden;
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+    // Espaço para o BottomNav fixo
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+}
+
+// ── Coluna principal (header + conteúdo) ──────
+.app__main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   overflow: hidden;
 }
 
-.site {
-  &-header {
-    position: relative;
-    z-index: 100;
-    flex-shrink: 0;
-    height: 4rem;
-    background: var(--color-header-bg, var(--color-text-default));
-    border-bottom: 1px solid rgba(var(--color-surface-default-rgb), 0.08);
-  }
-
-  &-main {
-    flex: 1;
-    overflow-y: auto;
-  }
-}
-
-.header {
-  &-inner {
-    margin: 0 auto;
-    display: flex;
-    max-width: 1200px;
-    height: 64px;
-    padding: 0 1rem;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-  }
-
-  &-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-}
-
-// ── Brand ─────────────────────────────────────────────────────────
-.brand {
+// ── Linha de conteúdo (FilterPanel + view) ───
+.app__content-area {
+  flex: 1;
   display: flex;
-  color: var(--color-action-text-subtle);
-  align-items: center;
-  gap: 12px;
-  transition: opacity var(--motion-transition-default);
-
-  &:hover {
-    opacity: 0.85;
-  }
-
-  &-icon {
-    font-size: 1.5rem;
-    line-height: 1;
-  }
-
-  &-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.2;
-  }
-
-  &-name {
-    font: {
-      family: var(--font-family-display);
-      size: 1.1rem;
-      weight: 400;
-    }
-    color: var(--color-surface-default);
-  }
-
-  &-sub {
-    font: {
-      size: 0.7rem;
-      weight: 500;
-    }
-    color: var(--color-action-text-subtle);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
+  flex-direction: row;
+  min-height: 0;
+  overflow: hidden;
 }
 
-// ── Botão de configurações ────────────────────────────────────────
-.config-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  background: none;
-  border: 1px solid var(--color-action-text-subtle);
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  transition: opacity var(--motion-transition-default);
-
-  &:hover {
-    opacity: 0.75;
-  }
-
-  &[aria-expanded='true'] {
-    background: rgba(var(--color-surface-default-rgb), 0.08);
-  }
-
-  &__icon {
-    width: 16px;
-    height: 16px;
-    color: var(--color-action-text-subtle);
-  }
+// ── RouterView ───────────────────────────────
+.app__view {
+  flex: 1;
+  overflow-y: auto;
+  min-width: 0;
 }
 
-// ── Menu painel (SideBar body) ────────────────────────────────────
+// ── Menu painel (body do SideBar de settings) ─
 .menu-painel {
   display: grid;
   grid-template-rows: 1fr 1fr;
@@ -280,7 +309,7 @@ useHead({
   }
 }
 
-/* Route transitions */
+// ── Transições de rota ────────────────────────
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity var(--motion-transition-default);
