@@ -1,15 +1,14 @@
 <template>
-  <div ref="wrapRef" class="user-btn-wrap">
-    <!-- Não logado -->
+  <div ref="wrapRef" class="'user-btn-wrap'">
+    <!-- guest -->
     <RouterLink v-if="!store.isLoggedIn" to="/login" class="user-btn user-btn--guest">
       <BaseIcon name="user" class="user-btn__icon" aria-hidden="true" />
-      <span class="user-btn__label">Entrar</span>
     </RouterLink>
 
-    <!-- Logado -->
+    <!-- logged in -->
     <button
       v-else
-      class="user-btn user-btn--auth"
+      :class="['user-btn user-btn--auth', { 'is-logged': store.isLoggedIn }]"
       :aria-expanded="isOpen"
       aria-haspopup="true"
       @click="isOpen = !isOpen"
@@ -89,9 +88,10 @@ const handleLogout = async () => {
 .user-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  height: 34px;
-  padding: 0 0.75rem;
+  width: 2rem;
+  height: 2rem;
   border: 1px solid var(--color-action-text-subtle);
   border-radius: var(--border-radius-sm);
   background: none;
@@ -99,7 +99,6 @@ const handleLogout = async () => {
   text-decoration: none;
   transition:
     background var(--motion-transition-default),
-    border-color var(--motion-transition-default),
     opacity var(--motion-transition-default);
 
   &:hover {
@@ -115,7 +114,6 @@ const handleLogout = async () => {
   }
 
   &--auth {
-    padding: 0 0.4rem;
     border-color: transparent;
 
     &[aria-expanded='true'] {
@@ -124,21 +122,25 @@ const handleLogout = async () => {
   }
 
   &__icon {
-    width: 12px;
-    height: 12px;
+    width: 1rem;
+    height: 1rem;
     color: var(--color-action-text-subtle);
   }
 
   &__label {
     color: var(--color-action-text-subtle);
   }
+
+  &.is-logged {
+    border: none !important;
+  }
 }
 
 // ── Dropdown ──────────────────────────────────────────────────────
 .user-dropdown {
   position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
+  top: calc(100% - 0.5rem);
+  right: 1rem;
   z-index: 200;
 
   min-width: 200px;

@@ -11,7 +11,7 @@
 
     <!-- Catalog -->
     <div v-if="!useBooksStore().loading && !useBooksStore().error" class="catalog-body">
-      <section class="catalog-intro">
+      <section class="catalog-intro" aria-hidden="true">
         <div class="intro-inner">
           <h1 class="intro-title">Catálogo de Indicações</h1>
           <p class="intro-desc">
@@ -244,6 +244,8 @@ const openMobileFilters = () => {
 .catalog {
   &-intro {
     margin: 0 auto 2rem;
+
+    display: none;
     background: var(--color-background-default);
     border-bottom: 1px solid rgba(var(--color-surface-default-rgb), 0.08);
   }
@@ -363,10 +365,6 @@ const openMobileFilters = () => {
 }
 
 @media (max-width: 767px) {
-  .catalog-intro {
-    margin-bottom: 1rem;
-  }
-
   .intro-desc {
     font-size: 0.875rem;
   }

@@ -1,20 +1,16 @@
 <template>
-  <div class="app">
+  <div class="app-wrapper">
     <header class="site-header">
-      <div class="header-inner">
+      <nav class="header-inner">
         <RouterLink to="/" class="brand">
           <span class="brand-icon">📚</span>
-          <div class="brand-text">
-            <span class="brand-name">Ecos Literários</span>
-            <span class="brand-sub">Catálogo do clube</span>
-          </div>
         </RouterLink>
 
-        <div class="header-actions">
-          <!-- Usuário: login ou avatar com dropdown -->
-          <UserButton />
+        <div class="header-content">
+          <!-- content -->
+        </div>
 
-          <!-- Configurações: tema + cache -->
+        <div class="header-actions">
           <button
             class="config-btn"
             type="button"
@@ -25,10 +21,37 @@
             <BaseIcon name="filter" class="config-btn__icon" aria-hidden="true" />
           </button>
         </div>
-      </div>
+      </nav>
     </header>
 
     <main ref="content" class="site-main">
+      <!-- user -->
+      <div class="site-user">
+        <div class="site-user--content">
+          <RouterLink to="/" class="brand">
+            <span class="brand-icon">📚</span>
+            <div class="brand-text">
+              <span class="brand-name">Ecos Literários</span>
+              <span class="brand-sub">Catálogo do clube</span>
+            </div>
+          </RouterLink>
+          <div class="site-user--actions">
+            <UserButton />
+            <button
+              v-if="isMobile"
+              class="config-btn"
+              type="button"
+              :aria-expanded="menuSidebar?.isOpen"
+              aria-label="Configurações"
+              @click="toggleMenu"
+            >
+              <BaseIcon name="filter" class="config-btn__icon" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- content -->
       <RouterView v-slot="{ Component }">
         <Transition name="fade" mode="out-in">
           <component :is="Component" />
@@ -36,7 +59,7 @@
       </RouterView>
     </main>
 
-    <SideBar ref="menuSidebar" title="Configurações">
+    <SideBar ref="menuSidebar" title="Preferências" :enter="isMobile ? 'right' : 'left'">
       <template #body>
         <div class="menu-painel">
           <div class="menu-painel-card">
@@ -70,9 +93,11 @@
 import { defineAsyncComponent, ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useHead } from '@unhead/vue'
+import { useMediaQuery } from '@vueuse/core'
 
 import { useApi, useTheme, useUtils, useAuth } from '@/composables'
 import UserButton from '@/components/UserButton.vue'
+import BaseIcon from './components/BaseIcon.vue'
 
 const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
 const MultiSelect = defineAsyncComponent(() => import('@/components/MultiSelect.vue'))
@@ -81,6 +106,8 @@ const SideBar = defineAsyncComponent(() => import('@/components/SideBar.vue'))
 const route = useRoute()
 const { themes, activeTheme, select } = useTheme()
 const { restoreSession, watchSession } = useAuth()
+
+const isMobile = useMediaQuery('(max-width: 767px)')
 
 const content = ref<HTMLElement | null>(null)
 const menuSidebar = ref<InstanceType<typeof SideBar> | null>(null)
@@ -101,7 +128,6 @@ const forceRefresh = () => {
   })
 }
 
-// Restaura sessão e inicia listener de renovação de token
 let stopWatchSession: (() => void) | null = null
 
 onMounted(() => {
@@ -129,45 +155,81 @@ useHead({
   margin-left: 0.5rem;
 }
 
-.app {
-  display: flex;
-  flex-direction: column;
+.app-wrapper {
+  display: grid;
   height: 100dvh;
+
+  grid-template-rows: 1fr;
+  grid-template-columns: auto 1fr;
   overflow: hidden;
 }
 
 .site {
   &-header {
     position: relative;
-    z-index: 100;
-    flex-shrink: 0;
-    height: 4rem;
+    z-index: 60;
+
+    width: fit-content;
     background: var(--color-header-bg, var(--color-text-default));
     border-bottom: 1px solid rgba(var(--color-surface-default-rgb), 0.08);
+
+    @media (max-width: 767px) {
+      display: none;
+    }
   }
 
   &-main {
-    flex: 1;
+    width: auto;
     overflow-y: auto;
+  }
+
+  &-user {
+    margin: 0 auto;
+
+    background-color: var(--color-surface-default);
+    border-bottom: 1px solid var(--color-border-default);
+
+    &--content {
+      position: relative;
+      margin: 0 auto;
+
+      display: flex;
+      max-width: 1200px;
+      padding: 1rem;
+
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    &--actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
   }
 }
 
 .header {
-  &-inner {
-    margin: 0 auto;
-    display: flex;
-    max-width: 1200px;
-    height: 64px;
-    padding: 0 1rem;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-  }
-
+  &-inner,
+  &-content,
   &-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    flex-direction: column;
+  }
+
+  &-inner {
+    height: 100%;
+    padding: 2rem 1.5rem;
+    gap: 4rem;
+  }
+
+  &-content {
+    gap: 2rem;
+  }
+
+  &-actions {
+    margin-top: auto;
   }
 }
 
@@ -184,7 +246,7 @@ useHead({
   }
 
   &-icon {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     line-height: 1;
   }
 
@@ -198,9 +260,9 @@ useHead({
     font: {
       family: var(--font-family-display);
       size: 1.1rem;
-      weight: 400;
+      weight: 500;
     }
-    color: var(--color-surface-default);
+    color: var(--color-text-default);
   }
 
   &-sub {
@@ -219,14 +281,20 @@ useHead({
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 2rem;
+  height: 2rem;
   padding: 0;
   background: none;
   border: 1px solid var(--color-action-text-subtle);
   border-radius: var(--border-radius-sm);
   cursor: pointer;
   transition: opacity var(--motion-transition-default);
+
+  &.is-expand {
+    :deep(svg) {
+      transform: rotate(-90deg);
+    }
+  }
 
   &:hover {
     opacity: 0.75;

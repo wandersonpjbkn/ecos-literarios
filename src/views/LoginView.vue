@@ -1,13 +1,6 @@
 <template>
   <div class="login-page">
     <div class="login-card">
-      <!-- Header -->
-      <div class="login-header">
-        <span class="login-icon">📚</span>
-        <h1 class="login-title">Ecos Literários</h1>
-        <p class="login-subtitle">Entre com seu email para acessar o clube</p>
-      </div>
-
       <!-- Formulário -->
       <div v-if="step === 'form'" class="login-form">
         <div class="field">
@@ -131,36 +124,6 @@ const startCooldown = () => {
   gap: 2rem;
 }
 
-// ── Header ────────────────────────────────────────────────────────
-.login-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  text-align: center;
-}
-
-.login-icon {
-  font-size: 2.5rem;
-  line-height: 1;
-  margin-bottom: 0.25rem;
-}
-
-.login-title {
-  margin: 0;
-  font-family: var(--font-family-display);
-  font-size: 1.75rem;
-  font-weight: 400;
-  color: var(--color-text-default);
-}
-
-.login-subtitle {
-  margin: 0;
-  font-size: 0.95rem;
-  color: var(--color-text-subtle);
-  line-height: 1.5;
-}
-
 // ── Formulário ────────────────────────────────────────────────────
 .login-form {
   display: flex;
@@ -174,7 +137,7 @@ const startCooldown = () => {
   gap: 6px;
 
   &-label {
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 500;
     color: var(--color-text-default);
   }

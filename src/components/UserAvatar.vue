@@ -57,7 +57,7 @@ const avatarStyle = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: var(--border-radius-sm);
   flex-shrink: 0;
   user-select: none;
 

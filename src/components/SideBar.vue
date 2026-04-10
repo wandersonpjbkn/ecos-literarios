@@ -1,15 +1,25 @@
 <script lang="ts" setup>
-import { ref, watch, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { useMediaQuery, onClickOutside } from '@vueuse/core'
 
-defineProps<{
-  title: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    title: string
+    enter?: 'left' | 'right'
+  }>(),
+  {
+    enter: 'right',
+  },
+)
 
 const isMobile = useMediaQuery('(max-width: 767px)')
 
 const isOpen = ref(false)
 const painelRef = ref<HTMLElement | null>(null)
+
+const panelClass = computed(() => {
+  return `mobile-filters-panel--${props.enter}`
+})
 
 const lockBody = () => {
   document.body.style.overflow = 'hidden'
@@ -65,8 +75,8 @@ defineExpose({
   </Transition>
 
   <!-- panel -->
-  <Transition name="mobile-filters-panel">
-    <aside v-if="isOpen" ref="painelRef" class="mobile-filters-sidebar" :aria-label="title">
+  <Transition :name="panelClass">
+    <aside v-if="isOpen" ref="painelRef" :class="['mobile-filters-sidebar', enter]" :aria-label="title">
       <!-- header -->
       <div class="mobile-filters-header">
         <slot name="header" :open="open" :close="close" :toggle="toggle" :is-open="isOpen">
@@ -104,15 +114,20 @@ defineExpose({
   &-sidebar {
     position: fixed;
     top: 0;
-    right: 0;
     z-index: 50;
     display: flex;
     width: min(88dvw, 360px);
     height: 100dvh;
-    padding-top: 4rem;
     background: var(--color-surface-default);
     box-shadow: -8px 0 24px rgba(0, 0, 0, 0.16);
     flex-direction: column;
+
+    &.left {
+      left: 5rem;
+    }
+    &.right {
+      right: 0rem;
+    }
   }
 
   &-header {
@@ -192,12 +207,18 @@ defineExpose({
 .mobile-filters-overlay-leave-to {
   opacity: 0;
 }
-.mobile-filters-panel-enter-active,
-.mobile-filters-panel-leave-active {
+.mobile-filters-panel--left-enter-active,
+.mobile-filters-panel--left-leave-active,
+.mobile-filters-panel--right-enter-active,
+.mobile-filters-panel--right-leave-active {
   transition: transform 0.25s ease;
 }
-.mobile-filters-panel-enter-from,
-.mobile-filters-panel-leave-to {
+.mobile-filters-panel--left-enter-from,
+.mobile-filters-panel--left-leave-to {
+  transform: translateX(-100%);
+}
+.mobile-filters-panel-right-enter-from,
+.mobile-filters-panel-right-leave-to {
   transform: translateX(100%);
 }
 </style>
