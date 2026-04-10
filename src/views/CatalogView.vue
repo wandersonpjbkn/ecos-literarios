@@ -13,7 +13,7 @@
     <div v-if="!useBooksStore().loading && !useBooksStore().error" class="catalog-body">
       <section class="catalog-intro" aria-hidden="true">
         <div class="intro-inner">
-          <h1 class="intro-title">Catálogo de Indicações</h1>
+          <h1 class="intro-title">Catálogo de Livros</h1>
           <p class="intro-desc">
             Use os filtros abaixo para navegar entre os livros já citados no Clube Ecos Literários.
           </p>
@@ -34,8 +34,6 @@
             <BaseIcon name="filter" aria-hidden="true" />
           </button>
         </div>
-
-        <ResultCount :total="useBooksStore().size" :filtered="filtered.length" :active-filters="activeFilterCount" />
       </div>
 
       <!-- Desktop filters -->
@@ -168,7 +166,6 @@ import { useBooksStore } from '@/stores'
 import { useApi, useFilters, useBookSort, usePageMeta } from '@/composables'
 
 import SearchBar from '@/components/SearchBar.vue'
-import ResultCount from '@/components/ResultCount.vue'
 import MultiSelect from '@/components/MultiSelect.vue'
 import ActiveFilters from '@/components/ActiveFilters.vue'
 import PageStatus from '@/components/PageStatus.vue'
@@ -177,7 +174,7 @@ import BooksGrid from '@/components/BooksGrid.vue'
 import type { Book, BookSortOrder } from '@/types'
 
 usePageMeta({
-  title: 'Catálogo de Indicações',
+  title: 'Catálogo de Livros',
   description: 'Explore os livros, mangás e HQs indicados pelo Clube Ecos Literários.',
 })
 

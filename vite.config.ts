@@ -83,7 +83,7 @@ export default defineConfig({
       manifest: {
         name: 'Ecos Catálogo',
         short_name: 'Ecos Catálogo',
-        description: 'Catálogo de indicações do Clube Ecos Literários',
+        description: 'Catálogo de livros do Clube Ecos Literários',
         start_url: '/',
         scope: '/',
         theme_color: '#0b1956',

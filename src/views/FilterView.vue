@@ -36,7 +36,6 @@
 
           <div class="search-row">
             <SearchBar v-model="search" :suggestions="searchSuggestions" @select="onSelectSuggestion" />
-            <ResultCount :total="baseFiltered.length" :filtered="filtered.length" :active-filters="activeFilterCount" />
           </div>
         </section>
 
@@ -138,7 +137,6 @@ import { useBooksStore } from '@/stores'
 import { useApi, useCategoryColors, useBookSort, usePageMeta, useUtils } from '@/composables'
 
 import SearchBar from '@/components/SearchBar.vue'
-import ResultCount from '@/components/ResultCount.vue'
 import FilterPanel from '@/components/FilterPanel.vue'
 import MultiSelect from '@/components/MultiSelect.vue'
 import PageStatus from '@/components/PageStatus.vue'

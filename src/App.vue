@@ -32,7 +32,7 @@
             <span class="brand-icon">📚</span>
             <div class="brand-text">
               <span class="brand-name">Ecos Literários</span>
-              <span class="brand-sub">Catálogo do clube</span>
+              <span class="brand-sub">Catálogo de livros do clube</span>
             </div>
           </RouterLink>
           <div class="site-user--actions">

@@ -158,11 +158,11 @@
                 v-if="book.quem"
                 :to="`/mencao/${useUtils().slugify(book.quem)}`"
                 class="meta-item meta-item--link"
-                aria-label="Ver outras indicações da mesma pessoa"
+                aria-label="Ver outras menções da mesma pessoa"
               >
                 <span class="meta-label">Mencionado por</span>
                 <span class="meta-value">{{ book.quem }}</span>
-                <span class="meta-hint">Ver outras indicações dessa pessoa</span>
+                <span class="meta-hint">Ver outras menções dessa pessoa</span>
                 <BaseIcon name="arrow-right" class="meta-arrow" />
               </RouterLink>
             </div>
