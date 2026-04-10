@@ -8,7 +8,7 @@ export const useCacheStore = defineStore(
   () => {
     const cache = ref<Book[] | null>(null)
     const ts = ref<number>(0)
-    const ttl = 24 * 60 * 60 * 1000 // 24h
+    const ttl = 7 * 24 * 60 * 60 * 1000 // 7d
 
     const isCacheValid = computed(() => {
       const now = Date.now()
