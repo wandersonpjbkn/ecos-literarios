@@ -1,88 +1,70 @@
 <template>
-  <component
-    :is="rootComponent"
-    :to="!isMobile ? `/livro/${book.id}` : undefined"
-    class="book-card"
-    :class="[`is-${normalize(book.midia)}`, `cat-${normalize(book.categoria)}`, { 'is-mobile': isMobile }]"
-    :role="isMobile ? 'article' : undefined"
-    :aria-label="`${book.titulo}, ${book.autor}`"
-  >
-    <div class="card-rail" :style="{ '--accent': categoryColor }" aria-hidden="true" />
-
-    <div class="card-body">
-      <div class="card-meta">
-        <span class="midia-badge" :class="midiaBadgeClass">
-          {{ book.midia }}
-        </span>
-
-        <span v-if="book.categoria" class="categoria-pill">
-          <span class="categoria-dot" :style="{ background: categoryColor }" />
-          {{ formatCategoria(book.categoria) }}
-        </span>
-      </div>
-
-      <div class="card-header">
-        <h3 class="card-title">
-          {{ book.titulo }}
-        </h3>
-
-        <p class="card-author">
-          {{ book.autor }}
-        </p>
-      </div>
-
-      <div v-if="book.subgenerosArr?.length" class="card-tags">
-        <span v-for="tag in book.subgenerosArr.slice(0, 3)" :key="tag" class="sub-tag">
-          {{ tag }}
-        </span>
-
-        <span v-if="book.subgenerosArr.length > 3" class="sub-tag sub-tag--more">
-          +{{ book.subgenerosArr.length - 3 }}
-        </span>
-      </div>
-
-      <div class="card-footer">
-        <div v-if="book.quem" class="quem-block">
-          <span class="quem-label">Mencionado por</span>
-          <span class="quem-value">
-            <BaseIcon name="user" />
-            {{ book.quem }}
-          </span>
+  <div class="book-card-wrap">
+    <RouterLink
+      :to="`/livro/${book.id}`"
+      class="book-card"
+      :class="`cat-${normalize(book.categoria)}`"
+      :aria-label="`${book.titulo}, ${book.autor}`"
+    >
+      <!-- Capa -->
+      <div class="card-cover" :style="{ '--accent': categoryColor }">
+        <img
+          v-if="book.cover_url"
+          :src="book.cover_url"
+          :alt="`Capa de ${book.titulo}`"
+          class="card-cover__img"
+          loading="lazy"
+        />
+        <div v-else class="card-cover__fallback" aria-hidden="true">
+          <BaseIcon name="book" class="card-cover__fallback-icon" />
         </div>
 
-        <BaseIcon v-if="!isMobile" name="arrow-right" class="arrow" aria-hidden="true" />
-
-        <RouterLink
-          v-if="isMobile"
-          :to="`/livro/${book.id}`"
-          class="card-link"
-          :aria-label="`Ver detalhes de ${book.titulo}`"
-        >
-          <span>Ver detalhes</span>
-          <BaseIcon name="arrow-right" class="arrow" aria-hidden="true" />
-        </RouterLink>
+        <!-- Badge de match quando há filtro ativo -->
+        <TransitionGroup v-if="matchTags.length" name="match-tag" tag="div" class="card-match-tags">
+          <span v-for="tag in matchTags.slice(0, 2)" :key="tag" class="card-match-tag">
+            {{ tag }}
+          </span>
+          <span v-if="matchTags.length > 2" :key="'more'" class="card-match-tag card-match-tag--more">
+            +{{ matchTags.length - 2 }}
+          </span>
+        </TransitionGroup>
       </div>
-    </div>
-  </component>
+
+      <!-- Info básica -->
+      <div class="card-info">
+        <h3 class="card-title">{{ book.titulo }}</h3>
+        <p class="card-author">{{ book.autor }}</p>
+      </div>
+    </RouterLink>
+
+    <!-- Botão i — fora do RouterLink para não propagar o clique de navegação -->
+    <button
+      class="card-info-btn"
+      type="button"
+      :aria-label="`Ver detalhes de ${book.titulo}`"
+      @click.stop="emit('detail', book)"
+    >
+      <BaseIcon name="info" aria-hidden="true" />
+    </button>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { useMediaQuery } from '@vueuse/core'
 import { useCategoryColors } from '@/composables'
-import type { Book } from '@/types'
+import type { Book, Options } from '@/types'
 
 const props = defineProps<{
   book: Book
+  activeFilters?: Options
 }>()
 
-const isMobile = useMediaQuery('(max-width: 767px)')
-const rootComponent = computed(() => (isMobile.value ? 'div' : 'RouterLink'))
+const emit = defineEmits<{
+  detail: [book: Book]
+}>()
 
 const colors = useCategoryColors()
-
 const categoryColor = computed(() => colors.categoryColor(props.book.categoria))
-const midiaBadgeClass = computed(() => colors.midiaBadgeClass(props.book.midia))
 
 const normalize = (value?: string) =>
   (value || '')
@@ -92,41 +74,57 @@ const normalize = (value?: string) =>
     .trim()
     .replace(/\s+/g, '-')
 
-const formatCategoria = (value?: string) => {
-  if (!value) return ''
-  return value.replace(/-/g, ' ')
-}
+// Tags dos filtros ativos que batem com este livro
+const matchTags = computed(() => {
+  const f = props.activeFilters
+  if (!f) return []
+
+  const tags: string[] = []
+
+  if (f.midia?.includes(props.book.midia)) tags.push(props.book.midia)
+  if (f.categoria?.includes(props.book.categoria)) tags.push(props.book.categoria)
+  if (f.quem?.includes(props.book.quem)) tags.push(props.book.quem)
+
+  const matchedSubs = f.subgeneros?.filter((sg) => props.book.subgenerosArr?.includes(sg)) ?? []
+  tags.push(...matchedSubs)
+
+  return tags
+})
 </script>
 
 <style lang="scss" scoped>
-.book-card {
+// ── Wrapper — necessário para posicionar o botão i fora do link ───
+.book-card-wrap {
   position: relative;
-  display: grid;
-  grid-template-columns: 1.1rem 1fr;
+  display: flex;
+  flex-direction: column;
   min-height: 100%;
-  background: var(--color-surface-default);
-  border: 1px solid var(--color-border-default);
+}
+
+// ── Card principal (link) ─────────────────────────────────────────
+.book-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  text-decoration: none;
   border-radius: var(--border-radius-lg);
   overflow: hidden;
-  text-decoration: none;
+  background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
   box-shadow: var(--shadow-sm);
-
   transition:
     transform var(--motion-transition-default),
     box-shadow var(--motion-transition-default),
     border-color var(--motion-transition-default);
 
   @media (min-width: 768px) {
-    cursor: pointer;
-
     &:hover {
       transform: translateY(-4px);
       box-shadow: var(--shadow-lg);
       border-color: rgba(var(--color-action-default-rgb), 0.22);
 
-      .arrow {
-        transform: translateX(4px);
-        color: var(--color-action-default);
+      .card-cover__img {
+        transform: scale(1.03);
       }
     }
   }
@@ -137,232 +135,148 @@ const formatCategoria = (value?: string) => {
   }
 }
 
-.card-rail {
-  --accent: var(--color-action-default);
-  background: var(--accent);
+// ── Capa ──────────────────────────────────────────────────────────
+.card-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3; // proporção padrão de capa de livro
+  overflow: hidden;
+  flex-shrink: 0;
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform var(--motion-transition-default);
+  }
+
+  &__fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+  }
+
+  &__fallback-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    color: rgba(255, 255, 255, 0.55);
+  }
 }
 
-.card-body {
+// ── Match tags sobre a capa ───────────────────────────────────────
+.card-match-tags {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  right: 2.5rem; // margem para não colidir com o botão i
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-  padding: 1rem;
+  flex-wrap: wrap;
+  gap: 4px;
+  pointer-events: none;
 }
 
-.card-meta {
+.card-match-tag {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding: 6px 8px;
+  padding: 2px 8px;
   border-radius: 999px;
-  background: var(--color-background-subtle);
-  width: fit-content;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &--more {
+    background: rgba(0, 0, 0, 0.4);
+  }
 }
 
-.card-header {
+// ── Info básica ───────────────────────────────────────────────────
+.card-info {
+  padding: 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .card-title {
   margin: 0;
+  font-family: var(--font-family-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-text-default);
   display: -webkit-box;
-  overflow: hidden;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-
-  font-family: var(--font-family-display);
-  font-size: 1.08rem;
-  font-weight: 700;
-  line-height: 1.32;
-  letter-spacing: -0.01em;
-  color: var(--color-text-default);
+  overflow: hidden;
 }
 
 .card-author {
   margin: 0;
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  line-height: 1.35;
-}
-
-.card-tags {
-  margin-bottom: 2rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.card-footer {
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-border-default);
-
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.midia-badge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  padding: 4px 10px;
-  border-radius: 999px;
-
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.badge-livro {
-  background: var(--badge-livro-background-color);
-  color: var(--badge-livro-text-color);
-}
-
-.badge-manga {
-  background: var(--badge-manga-background-color);
-  color: var(--badge-manga-text-color);
-}
-
-.badge-hq {
-  background: var(--badge-hq-background-color);
-  color: var(--badge-hq-text-color);
-}
-
-.categoria-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 24px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: var(--color-background-subtle);
-  color: var(--color-text-subtle);
-
   font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-.categoria-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  flex-shrink: 0;
-}
-
-.sub-tag {
-  display: inline-flex;
-  align-items: center;
-  min-height: 26px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: var(--badge-tag-background-color);
-  color: var(--badge-tag-text-color);
-  font-size: 0.78rem;
-  line-height: 1;
-}
-
-.sub-tag--more {
-  background: var(--color-background-subtle);
   color: var(--color-text-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.quem-block {
+// ── Botão i ───────────────────────────────────────────────────────
+.card-info-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-
-.quem-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--color-text-disabled);
-}
-
-.quem-value {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  font-size: 0.88rem;
-  line-height: 1.3;
-  color: var(--color-text-subtle);
-}
-
-.arrow {
-  color: var(--color-border-strong);
-  flex-shrink: 0;
-  transition:
-    transform var(--motion-transition-default),
-    color var(--motion-transition-default);
-}
-
-.card-link {
-  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-
-  min-height: 44px;
-  padding: 10px 14px;
-  border-radius: var(--border-radius-default);
-
-  background: var(--color-background-subtle);
-  color: var(--color-action-default);
-  text-decoration: none;
-  font-size: 0.92rem;
-  font-weight: 600;
-
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
   transition:
     background var(--motion-transition-default),
-    color var(--motion-transition-default);
+    transform var(--motion-transition-default);
 
-  &:active {
-    background: var(--color-action-default);
-    color: var(--color-surface-default);
+  &:hover {
+    background: rgba(0, 0, 0, 0.75);
+    transform: scale(1.1);
+  }
 
-    .arrow {
-      color: var(--color-surface-default);
-    }
+  &:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 2px;
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
   }
 }
 
-@media (max-width: 767px) {
-  .book-card {
-    grid-template-columns: 0.85rem 1fr;
-    border-radius: var(--border-radius-default);
-  }
-
-  .card-body {
-    gap: 10px;
-  }
-
-  .card-title {
-    font-size: 0.98rem;
-  }
-
-  .card-author {
-    font-size: 0.84rem;
-  }
-
-  .card-footer {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-
-  .card-link {
-    width: 100%;
-  }
+// ── Transições dos match tags ─────────────────────────────────────
+.match-tag-enter-active,
+.match-tag-leave-active {
+  transition: all var(--motion-transition-default);
+}
+.match-tag-enter-from,
+.match-tag-leave-to {
+  opacity: 0;
+  transform: scale(0.85);
 }
 </style>

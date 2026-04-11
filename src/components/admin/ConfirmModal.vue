@@ -1,7 +1,14 @@
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div v-if="modelValue" class="modal-overlay" role="dialog" :aria-modal="true" :aria-labelledby="titleId" @click.self="emit('cancel')">
+      <div
+        v-if="modelValue"
+        class="modal-overlay"
+        role="dialog"
+        :aria-modal="true"
+        :aria-labelledby="titleId"
+        @click.self="emit('cancel')"
+      >
         <div class="modal-card">
           <div class="modal-header">
             <h2 :id="titleId" class="modal-title">{{ title }}</h2>
@@ -13,9 +20,7 @@
           </div>
 
           <div class="modal-footer">
-            <button class="modal-btn modal-btn--cancel" @click="emit('cancel')">
-              Cancelar
-            </button>
+            <button class="modal-btn modal-btn--cancel" @click="emit('cancel')">Cancelar</button>
             <button
               class="modal-btn modal-btn--confirm"
               :class="{ 'is-danger': danger }"
@@ -35,7 +40,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     modelValue: boolean
     title: string
@@ -127,15 +132,18 @@ const titleId = computed(() => `modal-title-${Math.random().toString(36).slice(2
   font-family: var(--font-family-body);
   font-size: 0.9rem;
   cursor: pointer;
-  transition: opacity var(--motion-transition-default),
-              background var(--motion-transition-default);
+  transition:
+    opacity var(--motion-transition-default),
+    background var(--motion-transition-default);
 
   &--cancel {
     background: var(--color-surface-default);
     border: 1px solid var(--color-border-default);
     color: var(--color-text-default);
 
-    &:hover { background: var(--color-background-subtle); }
+    &:hover {
+      background: var(--color-background-subtle);
+    }
   }
 
   &--confirm {
@@ -143,7 +151,9 @@ const titleId = computed(() => `modal-title-${Math.random().toString(36).slice(2
     color: var(--color-surface-default);
     font-weight: 500;
 
-    &:hover:not(:disabled) { opacity: 0.85; }
+    &:hover:not(:disabled) {
+      opacity: 0.85;
+    }
 
     &.is-danger {
       background: #c0392b;
@@ -169,14 +179,26 @@ const titleId = computed(() => `modal-title-${Math.random().toString(36).slice(2
     background: currentColor;
     animation: dot-bounce 0.9s ease-in-out infinite;
 
-    &:nth-child(2) { animation-delay: 0.15s; }
-    &:nth-child(3) { animation-delay: 0.3s; }
+    &:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+    &:nth-child(3) {
+      animation-delay: 0.3s;
+    }
   }
 }
 
 @keyframes dot-bounce {
-  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-  40%            { transform: translateY(-4px); opacity: 1; }
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
 }
 
 // Transition

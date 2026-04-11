@@ -67,7 +67,18 @@
 
           <!-- Grid -->
           <div class="grid-area">
-            <BooksGrid :books="sortedBooks" @clear="clearSecondary" />
+            <BooksGrid
+              :books="sortedBooks"
+              :active-filters="{
+                midia: selectedMidia,
+                categoria: selectedCategoria,
+                subgeneros: selectedSubgeneros,
+                quem: selectedQuem,
+              }"
+              @clear="clearSecondary"
+              @detail="openDetail"
+            />
+            <BookDetailDrawer :book="detailBook" @close="closeDetail" />
           </div>
         </div>
       </section>
@@ -143,6 +154,7 @@ import PageStatus from '@/components/PageStatus.vue'
 import RailCard from '@/components/RailCard.vue'
 import BooksGrid from '@/components/BooksGrid.vue'
 import SectionHeading from '@/components/SectionHeading.vue'
+import BookDetailDrawer from '@/components/BookDetailDrawer.vue'
 
 import type { Book, BookSortOrder, Options, FilterType, ExploreKey, CategoryType } from '@/types'
 
@@ -327,6 +339,15 @@ const exploreGroups = computed(() => [
     items: [...new Set(baseFiltered.value.map((b) => b.quem).filter(Boolean))].sort(),
   },
 ])
+
+// ── Detalhe ────────────────────────────────────────────────────
+const detailBook = ref<Book | null>(null)
+const openDetail = (book: Book) => {
+  detailBook.value = book
+}
+const closeDetail = () => {
+  detailBook.value = null
+}
 
 // ── Sort + SEO ────────────────────────────────────────────────────
 const { sortOrder, sortedBooks, sortOptions } = useBookSort(filtered)

@@ -13,6 +13,10 @@ export interface Book {
   // Campos novos — opcionais para manter compatibilidade durante a transição
   cover_url?: string
   synopsis?: string
+  google_books_id?: number
+  isbn?: string
+  page_count?: number
+  published_year?: number
 }
 
 export interface Options {

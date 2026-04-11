@@ -128,7 +128,7 @@ const fetchUsers = async () => {
     users.value = await res.json()
   } catch (e) {
     error.value = 'Não foi possível carregar os membros.'
-    console.error('[AdminMembros]', e)
+    console.error('[AdminMembers]', e)
   } finally {
     loading.value = false
   }

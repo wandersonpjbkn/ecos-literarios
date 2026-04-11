@@ -12,9 +12,9 @@
 
       <nav class="admin-sidebar__nav" aria-label="Navegação do painel">
         <RouterLink
-          :to="{ name: 'admin-membros' }"
+          :to="{ name: 'admin-members' }"
           class="admin-sidebar__link"
-          :class="{ 'is-active': route.name === 'admin-membros' }"
+          :class="{ 'is-active': route.name === 'admin-members' }"
         >
           <BaseIcon name="user" class="admin-sidebar__link-icon" />
           <span>Membros</span>
@@ -22,9 +22,9 @@
         </RouterLink>
 
         <RouterLink
-          :to="{ name: 'admin-permissoes' }"
+          :to="{ name: 'admin-permissions' }"
           class="admin-sidebar__link"
-          :class="{ 'is-active': route.name === 'admin-permissoes' }"
+          :class="{ 'is-active': route.name === 'admin-permissions' }"
         >
           <BaseIcon name="filter" class="admin-sidebar__link-icon" />
           <span>Permissões</span>
@@ -52,7 +52,14 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useAuthStore } from '@/stores'
+import { usePageMeta } from '@/composables'
+
 import UserAvatar from '@/components/UserAvatar.vue'
+
+usePageMeta({
+  title: 'Painel Admin',
+  description: 'Painel de administração do Ecos Literários',
+})
 
 const API_BASE = import.meta.env.VITE_API_URL as string
 
@@ -76,11 +83,27 @@ onMounted(async () => {
 })
 </script>
 
+<style lang="scss">
+.page-admin {
+  .site-main {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+    height: 100dvh;
+  }
+
+  .site-user--content {
+    max-width: none;
+  }
+}
+</style>
+
 <style lang="scss" scoped>
 .admin-layout {
   display: grid;
   grid-template-columns: 260px 1fr;
-  min-height: calc(100dvh - 4rem);
+  min-height: 100dvh;
 }
 
 // ── Sidebar ───────────────────────────────────────────────────────

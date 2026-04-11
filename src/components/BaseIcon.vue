@@ -13,6 +13,7 @@ const props = defineProps<{
     | 'checkbox'
     | 'check'
     | 'chevron'
+    | 'info'
     | 'error'
     | 'filter'
     | 'funil'

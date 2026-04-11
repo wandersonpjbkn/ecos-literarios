@@ -1,4 +1,7 @@
 <template>
+  <Head>
+    <bodyAttrs :class="[useRoute().meta.pageClass, `page-${useRoute().name as string}`]" />
+  </Head>
   <div class="app-wrapper">
     <header class="site-header">
       <nav class="header-inner">
@@ -32,7 +35,9 @@
             <span class="brand-icon">📚</span>
             <div class="brand-text">
               <span class="brand-name">Ecos Literários</span>
-              <span class="brand-sub">Catálogo de livros do clube</span>
+              <span class="brand-sub">
+                {{ isMobile ? 'Catálogo do clube' : 'Catálogo de livros do clube' }}
+              </span>
             </div>
           </RouterLink>
           <div class="site-user--actions">
@@ -93,6 +98,7 @@
 import { defineAsyncComponent, ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useHead } from '@unhead/vue'
+import { Head } from '@unhead/vue/components'
 import { useMediaQuery } from '@vueuse/core'
 
 import { useApi, useTheme, useUtils, useAuth } from '@/composables'
@@ -108,6 +114,11 @@ const { themes, activeTheme, select } = useTheme()
 const { restoreSession, watchSession } = useAuth()
 
 const isMobile = useMediaQuery('(max-width: 767px)')
+
+useHead({
+  htmlAttrs: { lang: 'pt-BR' },
+  meta: [{ name: 'robots', content: 'noindex, nofollow' }],
+})
 
 const content = ref<HTMLElement | null>(null)
 const menuSidebar = ref<InstanceType<typeof SideBar> | null>(null)
@@ -143,11 +154,6 @@ watch(route, async () => {
     if (content.value) content.value.scrollTo({ top: 0, behavior: 'smooth' })
   }, 350)
 })
-
-useHead({
-  htmlAttrs: { lang: 'pt-BR' },
-  meta: [{ name: 'robots', content: 'noindex, nofollow' }],
-})
 </script>
 
 <style lang="scss" scoped>
@@ -162,6 +168,10 @@ useHead({
   grid-template-rows: 1fr;
   grid-template-columns: auto 1fr;
   overflow: hidden;
+
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .site {
@@ -184,10 +194,10 @@ useHead({
   }
 
   &-user {
-    margin: 0 auto;
-
     background-color: var(--color-surface-default);
     border-bottom: 1px solid var(--color-border-default);
+
+    transform: width var(--motion-transition-default);
 
     &--content {
       position: relative;

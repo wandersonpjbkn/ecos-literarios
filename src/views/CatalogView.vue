@@ -152,7 +152,18 @@
 
       <!-- Grid -->
       <div class="grid-area">
-        <BooksGrid :books="sortedBooks" @clear="clearAll" />
+        <BooksGrid
+          :books="sortedBooks"
+          :active-filters="{
+            midia: selectedMidia,
+            categoria: selectedCategoria,
+            subgeneros: selectedSubgeneros,
+            quem: selectedQuem,
+          }"
+          @clear="clearAll"
+          @detail="openDetail"
+        />
+        <BookDetailDrawer :book="detailBook" @close="closeDetail" />
       </div>
     </div>
   </div>
@@ -170,6 +181,7 @@ import MultiSelect from '@/components/MultiSelect.vue'
 import ActiveFilters from '@/components/ActiveFilters.vue'
 import PageStatus from '@/components/PageStatus.vue'
 import BooksGrid from '@/components/BooksGrid.vue'
+import BookDetailDrawer from '@/components/BookDetailDrawer.vue'
 
 import type { Book, BookSortOrder } from '@/types'
 
@@ -191,7 +203,6 @@ const {
   optionsSubgeneros,
   optionsQuem,
   filtered,
-  activeFilterCount,
   clearAll,
   searchSuggestions,
 } = useFilters()
@@ -234,6 +245,14 @@ const onSelectSuggestion = (book: Book) => {
 
 const openMobileFilters = () => {
   filtersSidebar.value?.open()
+}
+
+const detailBook = ref<Book | null>(null)
+const openDetail = (book: Book) => {
+  detailBook.value = book
+}
+const closeDetail = () => {
+  detailBook.value = null
 }
 </script>
 

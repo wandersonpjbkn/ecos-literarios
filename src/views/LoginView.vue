@@ -56,7 +56,7 @@ import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { useAuthStore } from '@/stores'
 
-const { sendMagicLink, store } = useAuth()
+const { sendMagicLink } = useAuth()
 const authStore = useAuthStore()
 const router = useRouter()
 
@@ -100,7 +100,7 @@ const submit = async () => {
 const startCooldown = () => {
   resendCooldown.value = 60
   const interval = setInterval(() => {
-    resendCooldown.value--
+    resendCooldown.value -= 1
     if (resendCooldown.value <= 0) clearInterval(interval)
   }, 1000)
 }

@@ -12,7 +12,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/admin/forbidden',
     name: 'admin-forbidden',
     component: () => import('@/views/admin/AdminForbidden.vue'),
-    meta: { title: 'Sem permissão — Ecos Literários' },
+    meta: { title: 'Sem permissão — Ecos Literários', pageClass: 'page-admin' },
   },
 
   // Shell do painel admin com children
@@ -20,19 +20,19 @@ export const routes: RouteRecordRaw[] = [
     path: '/admin',
     component: () => import('@/views/admin/AdminLayout.vue'),
     beforeEnter: adminGuard,
-    redirect: { name: 'admin-membros' },
+    redirect: { name: 'admin-members' },
     children: [
       {
         path: 'membros',
-        name: 'admin-membros',
-        component: () => import('@/views/admin/AdminMembros.vue'),
-        meta: { title: 'Membros — Painel Admin' },
+        name: 'admin-members',
+        component: () => import('@/views/admin/AdminMembers.vue'),
+        meta: { title: 'Membros — Painel Admin', pageClass: 'page-admin' },
       },
       {
         path: 'permissoes',
-        name: 'admin-permissoes',
-        component: () => import('@/views/admin/AdminPermissoes.vue'),
-        meta: { title: 'Permissões — Painel Admin' },
+        name: 'admin-permissions',
+        component: () => import('@/views/admin/AdminPermissions.vue'),
+        meta: { title: 'Permissões — Painel Admin', pageClass: 'page-admin' },
       },
     ],
   },

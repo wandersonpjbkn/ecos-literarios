@@ -258,7 +258,7 @@ const fetchPermissions = async () => {
     permissions.value = await res.json()
   } catch (e) {
     error.value = 'Não foi possível carregar as permissões.'
-    console.error('[AdminPermissoes]', e)
+    console.error('[AdminPermissions]', e)
   } finally {
     loading.value = false
   }
