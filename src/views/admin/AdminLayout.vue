@@ -29,6 +29,15 @@
           <BaseIcon name="filter" class="admin-sidebar__link-icon" />
           <span>Permissões</span>
         </RouterLink>
+
+        <RouterLink
+          :to="{ name: 'admin-enrichment' }"
+          class="admin-sidebar__link"
+          :class="{ 'is-active': route.name === 'admin-enrichment' }"
+        >
+          <BaseIcon name="reload" class="admin-sidebar__link-icon" />
+          <span>Enriquecimento</span>
+        </RouterLink>
       </nav>
 
       <div class="admin-sidebar__footer">
@@ -103,7 +112,7 @@ onMounted(async () => {
 .admin-layout {
   display: grid;
   grid-template-columns: 260px 1fr;
-  min-height: 100dvh;
+  min-height: calc(100dvh - 4rem);
 }
 
 // ── Sidebar ───────────────────────────────────────────────────────
@@ -252,6 +261,13 @@ onMounted(async () => {
 .admin-main {
   overflow-y: auto;
   background: var(--color-background-default);
+
+  :deep(.admin-section) {
+    margin: 0 auto;
+
+    max-width: 1200px;
+    padding: 2rem;
+  }
 }
 
 // ── Mobile ────────────────────────────────────────────────────────

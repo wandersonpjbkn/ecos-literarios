@@ -194,6 +194,7 @@ watch(route, async () => {
   }
 
   &-user {
+    height: 4rem;
     background-color: var(--color-surface-default);
     border-bottom: 1px solid var(--color-border-default);
 

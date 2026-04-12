@@ -269,8 +269,6 @@ onMounted(fetchPermissions)
 
 <style lang="scss" scoped>
 .admin-section {
-  padding: 2rem;
-
   &__header {
     margin-bottom: 2rem;
   }

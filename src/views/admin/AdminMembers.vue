@@ -186,9 +186,6 @@ onMounted(fetchUsers)
 
 <style lang="scss" scoped>
 .admin-section {
-  padding: 2rem;
-  max-width: 900px;
-
   &__header {
     display: flex;
     align-items: flex-start;
