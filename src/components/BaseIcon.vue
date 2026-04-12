@@ -17,6 +17,7 @@ const props = defineProps<{
     | 'error'
     | 'filter'
     | 'funil'
+    | 'link'
     | 'menu'
     | 'reload'
     | 'search'

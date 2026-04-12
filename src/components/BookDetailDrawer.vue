@@ -78,11 +78,7 @@
 
       <!-- Footer -->
       <div class="drawer-footer">
-        <RouterLink
-          :to="`/livro/${book.id}`"
-          class="drawer-cta"
-          @click="close"
-        >
+        <RouterLink :to="`/livro/${book.id}`" class="drawer-cta" @click="close">
           Ver página completa
           <BaseIcon name="arrow-right" aria-hidden="true" />
         </RouterLink>

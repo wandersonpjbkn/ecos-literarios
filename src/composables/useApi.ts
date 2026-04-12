@@ -27,6 +27,30 @@ interface ApiBook {
   subgeneros: (ApiPopulated | string)[]
 }
 
+export interface RegisterResponse {
+  matched_count?: number
+  updated_count?: number
+  message?: string
+}
+
+export interface MyClaimStatus {
+  claimed_quem_nome: string | null
+}
+
+export interface ClaimHistoryEntry {
+  id: string
+  user_name: string
+  quem_nome: string | null
+  action: string
+  action_label: string
+  created_at?: string
+}
+
+export interface ClaimHistory {
+  total: number
+  history: ClaimHistoryEntry[]
+}
+
 // ── Helpers ───────────────────────────────────────────────────────
 
 /** Extrai o nome de um campo populado ou retorna a string diretamente */
@@ -151,4 +175,69 @@ export const verifyAuth = async (token: string) => {
   return res.json() as Promise<{
     user: { _id: string; email: string; name: string; role: string }
   }>
+}
+
+export const claimRegister = async (quemNome: string): Promise<RegisterResponse> => {
+  const res = await fetch(`${API_BASE}/users/me/claim`, {
+    method: 'POST',
+    headers: buildHeaders(),
+    body: JSON.stringify({ quem_nome: quemNome }),
+  })
+
+  if (!res.ok) {
+    const { error } = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+    throw new Error(error ?? 'Não foi possível concluir o vínculo do nome.')
+  }
+
+  return res.json() as Promise<RegisterResponse>
+}
+
+export const getMyClaimStatus = async (): Promise<MyClaimStatus> => {
+  const res = await fetch(`${API_BASE}/users/me/claim`, {
+    method: 'GET',
+    headers: buildHeaders(),
+  })
+
+  if (!res.ok) {
+    const { error } = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+    throw new Error(error ?? 'Não foi possível carregar o vínculo atual.')
+  }
+
+  return res.json() as Promise<MyClaimStatus>
+}
+
+export const unclaimRegister = async (): Promise<{ message?: string }> => {
+  const res = await fetch(`${API_BASE}/users/me/claim`, {
+    method: 'DELETE',
+    headers: buildHeaders(),
+  })
+
+  if (!res.ok) {
+    const { error } = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+    throw new Error(error ?? 'Não foi possível remover o vínculo atual.')
+  }
+
+  return res.json() as Promise<{ message?: string }>
+}
+
+export const getClaimHistory = async (): Promise<ClaimHistoryEntry[]> => {
+  const res = await fetch(`${API_BASE}/admin/users/claims/history`, {
+    method: 'GET',
+    headers: buildHeaders(),
+  })
+
+  if (!res.ok) {
+    const { error } = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+    throw new Error(error ?? 'Não foi possível carregar o histórico de vínculos.')
+  }
+
+  const raw = (await res.json()) as ClaimHistory
+
+  console.log(typeof raw)
+  console.log(raw)
+
+  return raw.history.map((entry) => ({
+    ...entry,
+    action_label: entry.action === 'unclaim' ? 'Desvinculou' : 'Vinculou',
+  }))
 }

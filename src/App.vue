@@ -10,7 +10,14 @@
         </RouterLink>
 
         <div class="header-content">
-          <!-- content -->
+          <RouterLink
+            v-if="storeAuth.isLoggedIn"
+            :to="{ name: 'profile-claim' }"
+            class="config-btn"
+            :class="{ 'is-active': route.name === 'profile-claim' }"
+          >
+            <BaseIcon name="user" class="config-btn__icon" aria-hidden="true" />
+          </RouterLink>
         </div>
 
         <div class="header-actions">
@@ -41,7 +48,7 @@
             </div>
           </RouterLink>
           <div class="site-user--actions">
-            <UserButton />
+            <UserInterface />
             <button
               v-if="isMobile"
               class="config-btn"
@@ -102,7 +109,7 @@ import { Head } from '@unhead/vue/components'
 import { useMediaQuery } from '@vueuse/core'
 
 import { useApi, useTheme, useUtils, useAuth } from '@/composables'
-import UserButton from '@/components/UserButton.vue'
+import UserInterface from '@/components/UserInterface.vue'
 import BaseIcon from './components/BaseIcon.vue'
 
 const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
@@ -111,7 +118,7 @@ const SideBar = defineAsyncComponent(() => import('@/components/SideBar.vue'))
 
 const route = useRoute()
 const { themes, activeTheme, select } = useTheme()
-const { restoreSession, watchSession } = useAuth()
+const { store: storeAuth, restoreSession, watchSession } = useAuth()
 
 const isMobile = useMediaQuery('(max-width: 767px)')
 
@@ -273,7 +280,7 @@ watch(route, async () => {
       size: 1.1rem;
       weight: 500;
     }
-    color: var(--color-text-default);
+    color: var(--color-action-default);
   }
 
   &-sub {
@@ -281,7 +288,7 @@ watch(route, async () => {
       size: 0.7rem;
       weight: 500;
     }
-    color: var(--color-action-default);
+    color: var(--color-text-subtle);
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }

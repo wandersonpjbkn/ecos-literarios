@@ -29,6 +29,11 @@
 
         <div class="user-dropdown__divider" />
 
+        <RouterLink to="/perfil" class="user-dropdown__item" role="menuitem" @click="isOpen = false">
+          <BaseIcon name="user" aria-hidden="true" />
+          <span>Meu perfil</span>
+        </RouterLink>
+
         <RouterLink
           v-if="store.isAdmin"
           to="/admin"
@@ -54,7 +59,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { onClickOutside } from '@vueuse/core'
 
-import { useAuth } from '@/composables/useAuth'
+import { useAuth } from '@/composables'
 import UserAvatar from '@/components/UserAvatar.vue'
 
 const { store, logout } = useAuth()

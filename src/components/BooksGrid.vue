@@ -66,7 +66,9 @@ const isLoading = ref(false)
 
 watch(
   () => props.books,
-  () => { visibleCount.value = PAGE_SIZE },
+  () => {
+    visibleCount.value = PAGE_SIZE
+  },
 )
 
 const sentinelRef = ref<HTMLElement | null>(null)
@@ -83,16 +85,22 @@ const loadMore = () => {
 
 const connectObserver = (el: HTMLElement) => {
   observer = new IntersectionObserver(
-    ([entry]) => { if (entry?.isIntersecting) loadMore() },
+    ([entry]) => {
+      if (entry?.isIntersecting) loadMore()
+    },
     { rootMargin: '300px' },
   )
   observer.observe(el)
 }
 
-watch(sentinelRef, (el) => {
-  observer?.disconnect()
-  if (el) connectObserver(el)
-}, { immediate: true })
+watch(
+  sentinelRef,
+  (el) => {
+    observer?.disconnect()
+    if (el) connectObserver(el)
+  },
+  { immediate: true },
+)
 
 onBeforeUnmount(() => observer?.disconnect())
 </script>
@@ -136,11 +144,20 @@ onBeforeUnmount(() => observer?.disconnect())
   color: var(--color-surface-default);
   transition: opacity var(--motion-transition-default);
 
-  &:hover { opacity: 0.85; background: var(--color-action-default-hover); }
-  &:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+  &:hover {
+    opacity: 0.85;
+    background: var(--color-action-default-hover);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 2px;
+  }
 }
 
-.sentinel { height: 1px; pointer-events: none; }
+.sentinel {
+  height: 1px;
+  pointer-events: none;
+}
 
 .load-indicator {
   display: flex;
@@ -157,13 +174,25 @@ onBeforeUnmount(() => observer?.disconnect())
   background: var(--color-border-strong);
   animation: bounce 0.9s ease-in-out infinite;
 
-  &:nth-child(2) { animation-delay: 0.15s; }
-  &:nth-child(3) { animation-delay: 0.3s; }
+  &:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  &:nth-child(3) {
+    animation-delay: 0.3s;
+  }
 }
 
 @keyframes bounce {
-  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-  40% { transform: translateY(-6px); opacity: 1; }
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
 }
 
 .end-label {
@@ -175,15 +204,31 @@ onBeforeUnmount(() => observer?.disconnect())
 }
 
 .loader-enter-active,
-.loader-leave-active { transition: opacity var(--motion-transition-default); }
+.loader-leave-active {
+  transition: opacity var(--motion-transition-default);
+}
 .loader-enter-from,
-.loader-leave-to { opacity: 0; }
+.loader-leave-to {
+  opacity: 0;
+}
 
 .grid-enter-active {
-  transition: opacity var(--motion-transition-default), transform var(--motion-transition-default);
+  transition:
+    opacity var(--motion-transition-default),
+    transform var(--motion-transition-default);
 }
-.grid-enter-from { opacity: 0; transform: scale(0.96); }
-.grid-leave-active { transition: opacity var(--motion-transition-default); position: absolute; }
-.grid-leave-to { opacity: 0; }
-.grid-move { transition: transform var(--motion-transition-default); }
+.grid-enter-from {
+  opacity: 0;
+  transform: scale(0.96);
+}
+.grid-leave-active {
+  transition: opacity var(--motion-transition-default);
+  position: absolute;
+}
+.grid-leave-to {
+  opacity: 0;
+}
+.grid-move {
+  transition: transform var(--motion-transition-default);
+}
 </style>
