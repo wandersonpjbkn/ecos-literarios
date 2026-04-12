@@ -206,7 +206,7 @@ watch(route, async () => {
 
       display: flex;
       max-width: 1200px;
-      padding: 1rem;
+      padding: 0.75rem;
 
       align-items: center;
       justify-content: space-between;
@@ -231,7 +231,7 @@ watch(route, async () => {
 
   &-inner {
     height: 100%;
-    padding: 2rem 1.5rem;
+    padding: 2rem 1.25rem;
     gap: 4rem;
   }
 
@@ -281,7 +281,7 @@ watch(route, async () => {
       size: 0.7rem;
       weight: 500;
     }
-    color: var(--color-action-text-subtle);
+    color: var(--color-action-default);
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
@@ -289,17 +289,20 @@ watch(route, async () => {
 
 // ── Botão de configurações ────────────────────────────────────────
 .config-btn {
+  $size: 2.5rem;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: $size;
+  height: $size;
   padding: 0;
-  background: none;
-  border: 1px solid var(--color-action-text-subtle);
+  background: var(--color-action-default);
+  border: none;
   border-radius: var(--border-radius-sm);
   cursor: pointer;
   transition: opacity var(--motion-transition-default);
+  color: var(--color-surface-default);
 
   &.is-expand {
     :deep(svg) {
@@ -311,14 +314,11 @@ watch(route, async () => {
     opacity: 0.75;
   }
 
-  &[aria-expanded='true'] {
-    background: rgba(var(--color-surface-default-rgb), 0.08);
-  }
-
   &__icon {
-    width: 16px;
-    height: 16px;
-    color: var(--color-action-text-subtle);
+    $size: 50%;
+
+    width: $size;
+    height: $size;
   }
 }
 

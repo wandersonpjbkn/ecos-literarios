@@ -13,7 +13,7 @@
       aria-haspopup="true"
       @click="isOpen = !isOpen"
     >
-      <UserAvatar :alt="store.user!.name" />
+      <UserAvatar class="user-btn--avatar" :alt="store.user!.name" />
     </button>
 
     <!-- Dropdown do usuário logado -->
@@ -86,15 +86,17 @@ const handleLogout = async () => {
 
 // ── Botão base ────────────────────────────────────────────────────
 .user-btn {
+  $size: 2.5rem;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  width: 2rem;
-  height: 2rem;
-  border: 1px solid var(--color-action-text-subtle);
+  width: $size;
+  height: $size;
+  background: var(--color-action-default);
+  border: none;
   border-radius: var(--border-radius-sm);
-  background: none;
   cursor: pointer;
   text-decoration: none;
   transition:
@@ -108,27 +110,31 @@ const handleLogout = async () => {
   &--guest {
     font-size: 0.8rem;
     font-weight: 400;
-    color: var(--color-action-text-subtle);
+    color: var(--color-surface-default);
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
 
   &--auth {
     border-color: transparent;
+  }
 
-    &[aria-expanded='true'] {
-      border-color: var(--color-action-text-subtle);
-    }
+  &--avatar {
+    width: $size;
+    height: $size;
   }
 
   &__icon {
-    width: 1rem;
-    height: 1rem;
-    color: var(--color-action-text-subtle);
+    $size: 50%;
+
+    width: $size;
+    height: $size;
+
+    color: var(--color-surface-default);
   }
 
   &__label {
-    color: var(--color-action-text-subtle);
+    color: var(--color-surface-default);
   }
 
   &.is-logged {

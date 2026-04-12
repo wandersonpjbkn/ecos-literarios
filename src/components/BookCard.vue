@@ -20,7 +20,7 @@
         </div>
 
         <!-- Badge de match quando há filtro ativo -->
-        <TransitionGroup v-if="matchTags.length" name="match-tag" tag="div" class="card-match-tags">
+        <TransitionGroup v-if="matchTags.length" name="match-tag" tag="div" class="card-match-tags is-inline">
           <span v-for="tag in matchTags.slice(0, 2)" :key="tag" class="card-match-tag">
             {{ tag }}
           </span>
@@ -28,6 +28,14 @@
             +{{ matchTags.length - 2 }}
           </span>
         </TransitionGroup>
+        <div v-else class="card-match-tags">
+          <span :class="['card-match-tag', colors.midiaBadgeClass(book.midia)]">
+            {{ book.midia }}
+          </span>
+          <span class="card-match-tag">
+            {{ book.categoria }}
+          </span>
+        </div>
       </div>
 
       <!-- Info básica -->
@@ -177,6 +185,10 @@ const matchTags = computed(() => {
   flex-wrap: wrap;
   gap: 4px;
   pointer-events: none;
+
+  &.is-inline {
+    flex-direction: column;
+  }
 }
 
 .card-match-tag {
@@ -184,6 +196,7 @@ const matchTags = computed(() => {
   align-items: center;
   padding: 2px 8px;
   border-radius: 999px;
+  width: fit-content;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.03em;
@@ -198,6 +211,19 @@ const matchTags = computed(() => {
   &--more {
     background: rgba(0, 0, 0, 0.4);
   }
+}
+
+.badge-livro {
+  background-color: var(--badge-livro-text-color);
+  color: var(--badge-livro-background-color);
+}
+.badge-manga {
+  background-color: var(--badge-manga-text-color);
+  color: var(--badge-manga-background-color);
+}
+.badge-hq {
+  background-color: var(--badge-hq-text-color);
+  color: var(--badge-hq-background-color);
 }
 
 // ── Info básica ───────────────────────────────────────────────────
@@ -232,6 +258,8 @@ const matchTags = computed(() => {
 
 // ── Botão i ───────────────────────────────────────────────────────
 .card-info-btn {
+  $color: rgba(0, 0, 0, 0.55);
+
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
@@ -240,21 +268,22 @@ const matchTags = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: fit-content;
+  height: fit-content;
   padding: 0;
-  border: none;
+  border: 2px solid #{$color};
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.5);
+  background: #{$color};
   color: #fff;
   cursor: pointer;
   backdrop-filter: blur(4px);
   transition:
-    background var(--motion-transition-default),
+    border-color var(--motion-transition-default),
     transform var(--motion-transition-default);
+  overflow: hidden;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.75);
+    border-color: rgba(0, 0, 0, 0.75);
     transform: scale(1.1);
   }
 
@@ -264,8 +293,10 @@ const matchTags = computed(() => {
   }
 
   svg {
-    width: 14px;
-    height: 14px;
+    background-color: inherit;
+    $size: 1.15rem;
+    width: $size;
+    height: $size;
   }
 }
 
