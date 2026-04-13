@@ -20,7 +20,7 @@
       <!-- Header -->
       <div class="drawer-header">
         <div class="drawer-header__meta">
-          <span class="midia-badge" :class="midiaBadgeClass">{{ book.midia }}</span>
+          <span class="midia-badge" :class="mediaBadgeClass">{{ book.midia }}</span>
           <span v-if="book.categoria" class="categoria-pill">
             <span class="categoria-dot" :style="{ background: categoryColor }" />
             {{ formatCategoria(book.categoria) }}
@@ -78,7 +78,14 @@
 
       <!-- Footer -->
       <div class="drawer-footer">
-        <RouterLink :to="`/livro/${book.id}`" class="drawer-cta" @click="close">
+        <RouterLink
+          :to="{
+            name: 'catalog-book-details',
+            params: { id: book.id },
+          }"
+          class="drawer-cta"
+          @click="close"
+        >
           Ver página completa
           <BaseIcon name="arrow-right" aria-hidden="true" />
         </RouterLink>
@@ -90,8 +97,9 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
 import { useMediaQuery, onClickOutside } from '@vueuse/core'
-import { useCategoryColors } from '@/composables'
 import type { Book } from '@/types'
+
+import { useCategoryColors } from '@/composables'
 
 const props = defineProps<{
   book: Book | null
@@ -108,14 +116,14 @@ const isOpen = ref(false)
 const colors = useCategoryColors()
 
 const categoryColor = ref('var(--color-action-default)')
-const midiaBadgeClass = ref('')
+const mediaBadgeClass = ref('')
 
 watch(
   () => props.book,
   (book) => {
     if (book) {
       categoryColor.value = colors.categoryColor(book.categoria)
-      midiaBadgeClass.value = colors.midiaBadgeClass(book.midia)
+      mediaBadgeClass.value = colors.mediaBadgeClass(book.midia)
       isOpen.value = true
       document.body.style.overflow = 'hidden'
     } else {

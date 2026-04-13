@@ -4,7 +4,7 @@
 
     <div v-if="!useBooksStore().loading && !book" class="state-screen">
       <p>Livro não encontrado.</p>
-      <RouterLink to="/" class="back-btn">
+      <RouterLink :to="{ name: 'catalog-books' }" class="back-btn">
         <BaseIcon name="arrow-left" />
         Voltar ao catálogo
       </RouterLink>
@@ -13,7 +13,7 @@
     <template v-if="!useBooksStore().loading && book">
       <nav class="top-bar">
         <div class="top-bar__inner">
-          <RouterLink to="/" class="top-bar__back">
+          <RouterLink :to="{ name: 'catalog-books' }" class="top-bar__back">
             <BaseIcon name="arrow-left" />
             <span>Catálogo</span>
           </RouterLink>
@@ -41,7 +41,7 @@
 
           <div class="hero__meta">
             <div class="hero__badges">
-              <span class="midia-badge" :class="midiaBadgeClass">{{ book.midia }}</span>
+              <span class="midia-badge" :class="mediaBadgeClass">{{ book.midia }}</span>
               <span v-if="book.categoria" class="categoria-pill">
                 <span class="categoria-dot" :style="{ background: categoryColor }" />
                 {{ formatCategoria(book.categoria) }}
@@ -86,17 +86,17 @@
                   <div class="porque-card__avatar" aria-hidden="true">{{ book.quem.charAt(0).toUpperCase() }}</div>
                   <span class="porque-card__name">{{ book.quem }}</span>
                 </div>
-                <blockquote class="porque-card__quote" :class="{ 'is-collapsed': !porqueExpanded && isLongPorque }">
+                <blockquote class="porque-card__quote" :class="{ 'is-collapsed': !reasonExpanded && isLongReason }">
                   {{ book.porque }}
                 </blockquote>
                 <button
-                  v-if="isLongPorque"
+                  v-if="isLongReason"
                   class="porque-card__toggle"
                   type="button"
-                  @click="porqueExpanded = !porqueExpanded"
+                  @click="reasonExpanded = !reasonExpanded"
                 >
-                  {{ porqueExpanded ? 'Mostrar menos' : 'Ler completo' }}
-                  <BaseIcon name="chevron" class="porque-card__chevron" :class="{ 'is-open': porqueExpanded }" />
+                  {{ reasonExpanded ? 'Mostrar menos' : 'Ler completo' }}
+                  <BaseIcon name="chevron" class="porque-card__chevron" :class="{ 'is-open': reasonExpanded }" />
                 </button>
               </div>
             </section>
@@ -138,30 +138,22 @@
           <aside class="content__sidebar">
             <h2 class="content-section__title">Explorar</h2>
             <div class="explore-list">
-              <RouterLink v-if="book.midia" :to="`/midia/${useUtils().slugify(book.midia)}`" class="explore-item">
-                <span class="explore-item__label">Mídia</span>
-                <span class="explore-item__value">{{ book.midia }}</span>
-                <BaseIcon name="arrow-right" class="explore-item__arrow" />
-              </RouterLink>
-              <RouterLink
-                v-if="book.categoria"
-                :to="`/categoria/${useUtils().slugify(book.categoria)}`"
-                class="explore-item"
-              >
-                <span class="explore-item__label">Categoria</span>
-                <span class="explore-item__value">{{ formatCategoria(book.categoria) }}</span>
-                <BaseIcon name="arrow-right" class="explore-item__arrow" />
-              </RouterLink>
-              <RouterLink v-if="book.autor" :to="`/autor/${useUtils().slugify(book.autor)}`" class="explore-item">
-                <span class="explore-item__label">Autor</span>
-                <span class="explore-item__value">{{ book.autor }}</span>
-                <BaseIcon name="arrow-right" class="explore-item__arrow" />
-              </RouterLink>
-              <RouterLink v-if="book.quem" :to="`/mencao/${useUtils().slugify(book.quem)}`" class="explore-item">
-                <span class="explore-item__label">Indicado por</span>
-                <span class="explore-item__value">{{ book.quem }}</span>
-                <BaseIcon name="arrow-right" class="explore-item__arrow" />
-              </RouterLink>
+              <template v-for="(item, index) in explore" :key="index">
+                <RouterLink
+                  v-if="item.show"
+                  :to="{
+                    name: item.name,
+                    params: {
+                      slug: item.slug,
+                    },
+                  }"
+                  class="explore-item"
+                >
+                  <span class="explore-item__label">{{ item.label }}</span>
+                  <span class="explore-item__value">{{ item.value }}</span>
+                  <BaseIcon name="arrow-right" class="explore-item__arrow" />
+                </RouterLink>
+              </template>
             </div>
           </aside>
         </div>
@@ -173,12 +165,28 @@
             <h2 class="related__title">
               Outros em <em>{{ formatCategoria(book.categoria) }}</em>
             </h2>
-            <RouterLink :to="`/categoria/${useUtils().slugify(book.categoria)}`" class="related__see-all">
+            <RouterLink
+              :to="{
+                name: 'catalog-category',
+                params: {
+                  slug: useUtils().slugify(book.categoria),
+                },
+              }"
+              class="related__see-all"
+            >
               Ver todos <BaseIcon name="arrow-right" />
             </RouterLink>
           </div>
           <div class="related__grid">
-            <RouterLink v-for="r in related" :key="r.id" :to="`/livro/${r.id}`" class="related-card">
+            <RouterLink
+              v-for="r in related"
+              :key="r.id"
+              :to="{
+                name: 'catalog-book-details',
+                params: { id: r.id },
+              }"
+              class="related-card"
+            >
               <div class="related-card__spine" :style="{ background: getCategoryColor(r.categoria) }" />
               <div class="related-card__body">
                 <span class="related-card__kicker">{{ r.midia }} · {{ formatCategoria(r.categoria) }}</span>
@@ -205,7 +213,7 @@ import PageStatus from '@/components/PageStatus.vue'
 
 import type { Book, CategoryType } from '@/types'
 
-const PORQUE_COLLAPSE_CHARS = 240
+const REASON_COLLAPSE_CHARS = 240
 
 const route = useRoute()
 const colors = useCategoryColors()
@@ -216,20 +224,53 @@ const book = computed((): Book | undefined =>
   useBooksStore().books.find((b) => String(b.id) === String(route.params.id)),
 )
 
+const reasonExpanded = ref(false)
+const isLongReason = computed(() => (book.value?.porque?.length ?? 0) > REASON_COLLAPSE_CHARS)
+
 const related = computed(() => {
   if (!book.value) return []
   return useBooksStore()
     .books.filter((b) => b.id !== book.value?.id && b.categoria === book.value?.categoria)
     .slice(0, 4)
 })
+const explore = computed(() => {
+  if (!book.value) return []
+  return [
+    {
+      show: !!book.value.midia,
+      name: 'catalog-midia',
+      slug: useUtils().slugify(book.value.midia),
+      label: 'Mídia',
+      value: book.value.midia,
+    },
+    {
+      show: !!book.value.categoria,
+      name: 'catalog-category',
+      slug: useUtils().slugify(book.value.categoria),
+      label: 'Categoria',
+      value: formatCategoria(book.value.categoria),
+    },
+    {
+      show: !!book.value.autor,
+      name: 'catalog-author',
+      slug: useUtils().slugify(book.value.autor),
+      label: 'Autor',
+      value: book.value.autor,
+    },
+    {
+      show: !!book.value.quem,
+      name: 'catalog-mention',
+      slug: useUtils().slugify(book.value.quem),
+      label: 'Indicado por',
+      value: book.value.quem,
+    },
+  ]
+})
 
 const categoryColor = computed(() =>
   book.value ? colors.categoryColor(book.value.categoria) : 'var(--color-action-default)',
 )
-const midiaBadgeClass = computed(() => (book.value ? colors.midiaBadgeClass(book.value.midia) : ''))
-
-const porqueExpanded = ref(false)
-const isLongPorque = computed(() => (book.value?.porque?.length ?? 0) > PORQUE_COLLAPSE_CHARS)
+const mediaBadgeClass = computed(() => (book.value ? colors.mediaBadgeClass(book.value.midia) : ''))
 
 const formatCategoria = (v?: string) => (v ? v.replace(/-/g, ' ') : '')
 const getCategoryColor = (v?: CategoryType) => colors.categoryColor(v!)

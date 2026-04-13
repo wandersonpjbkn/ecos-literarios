@@ -5,7 +5,7 @@
   <div class="app-wrapper">
     <header class="site-header">
       <nav class="header-inner">
-        <RouterLink to="/" class="brand">
+        <RouterLink :to="{ name: 'catalog-books' }" class="brand">
           <span class="brand-icon">📚</span>
         </RouterLink>
 
@@ -38,7 +38,7 @@
       <!-- user -->
       <div class="site-user">
         <div class="site-user--content">
-          <RouterLink to="/" class="brand">
+          <RouterLink :to="{ name: 'catalog-books' }" class="brand">
             <span class="brand-icon">📚</span>
             <div class="brand-text">
               <span class="brand-name">Ecos Literários</span>
@@ -48,7 +48,7 @@
             </div>
           </RouterLink>
           <div class="site-user--actions">
-            <UserInterface />
+            <UserMenu />
             <button
               v-if="isMobile"
               class="config-btn"
@@ -70,6 +70,8 @@
         </Transition>
       </RouterView>
     </main>
+
+    <aside id="sidebar" />
 
     <SideBar ref="menuSidebar" title="Preferências" :enter="isMobile ? 'right' : 'left'">
       <template #body>
@@ -109,8 +111,8 @@ import { Head } from '@unhead/vue/components'
 import { useMediaQuery } from '@vueuse/core'
 
 import { useApi, useTheme, useUtils, useAuth } from '@/composables'
-import UserInterface from '@/components/UserInterface.vue'
-import BaseIcon from './components/BaseIcon.vue'
+import UserMenu from '@/components/UserMenu.vue'
+import BaseIcon from '@/components/BaseIcon.vue'
 
 const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
 const MultiSelect = defineAsyncComponent(() => import('@/components/MultiSelect.vue'))

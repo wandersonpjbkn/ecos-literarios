@@ -41,7 +41,7 @@
       </div>
 
       <!-- Voltar -->
-      <RouterLink to="/" class="back-link">
+      <RouterLink :to="{ name: 'catalog-books' }" class="back-link">
         <BaseIcon name="arrow-left" />
         Voltar ao catálogo
       </RouterLink>

@@ -311,7 +311,18 @@ const onSelectSuggestion = (book: Book) => {
 }
 
 // ── Explore ───────────────────────────────────────────────────────
-const routeNameFor = (key: ExploreKey): FilterType => (key === 'quem' ? 'mencao' : key)
+const routeNameFor = (key: ExploreKey) => {
+  switch (key) {
+    case 'midia':
+      return 'catalog-midia'
+    case 'categoria':
+      return 'catalog-category'
+    case 'autor':
+      return 'catalog-author'
+    case 'quem':
+      return 'catalog-mention'
+  }
+}
 const routeFor = (key: ExploreKey, value: string) => ({
   name: routeNameFor(key),
   params: { slug: useUtils().slugify(value) },

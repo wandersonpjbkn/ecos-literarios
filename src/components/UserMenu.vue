@@ -1,7 +1,7 @@
 <template>
   <div ref="wrapRef" class="'user-btn-wrap'">
     <!-- guest -->
-    <RouterLink v-if="!store.isLoggedIn" to="/login" class="user-btn user-btn--guest">
+    <RouterLink v-if="!store.isLoggedIn" :to="{ name: 'auth-login' }" class="user-btn user-btn--guest">
       <BaseIcon name="user" class="user-btn__icon" aria-hidden="true" />
     </RouterLink>
 
@@ -29,14 +29,14 @@
 
         <div class="user-dropdown__divider" />
 
-        <RouterLink to="/perfil" class="user-dropdown__item" role="menuitem" @click="isOpen = false">
+        <RouterLink :to="{ name: 'profile-claim' }" class="user-dropdown__item" role="menuitem" @click="isOpen = false">
           <BaseIcon name="user" aria-hidden="true" />
           <span>Meu perfil</span>
         </RouterLink>
 
         <RouterLink
           v-if="store.isAdmin"
-          to="/admin"
+          :to="{ name: 'admin-members' }"
           class="user-dropdown__item"
           role="menuitem"
           @click="isOpen = false"

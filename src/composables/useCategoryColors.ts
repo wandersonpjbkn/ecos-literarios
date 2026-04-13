@@ -11,9 +11,9 @@ export function useCategoryColors() {
 
   /**
    * Retorna a classe CSS do badge de mídia.
-   * Uso: :class="midiaBadgeClass(book.midia)"
+   * Uso: :class="mediaBadgeClass(book.midia)"
    */
-  const midiaBadgeClass = (midia: string): string => {
+  const mediaBadgeClass = (midia: string): string => {
     if (midia === 'Mangá') return 'badge-manga'
     if (midia === 'HQ') return 'badge-hq'
     return 'badge-livro'
@@ -21,6 +21,6 @@ export function useCategoryColors() {
 
   return {
     categoryColor,
-    midiaBadgeClass,
+    mediaBadgeClass,
   }
 }

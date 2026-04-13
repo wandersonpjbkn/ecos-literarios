@@ -3,13 +3,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useUtils } from '@/composables'
 
 import Catalog from './modules/catalog'
-import Book from './modules/books'
-import Filter from './modules/filter'
 import Auth from './modules/auth'
 import Admin from './modules/admin'
 import Profile from './modules/profile'
 
-const routes = [...Catalog.routes, ...Book.routes, ...Filter.routes, ...Auth.routes, ...Profile.routes, ...Admin.routes]
+const routes = [...Catalog.routes, ...Auth.routes, ...Admin.routes, ...Profile.routes]
 
 const router = createRouter({
   history: createWebHistory(),

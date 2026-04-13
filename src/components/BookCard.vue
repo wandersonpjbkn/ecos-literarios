@@ -1,7 +1,10 @@
 <template>
   <div class="book-card-wrap">
     <RouterLink
-      :to="`/livro/${book.id}`"
+      :to="{
+        name: 'catalog-book-details',
+        params: { id: book.id },
+      }"
       class="book-card"
       :class="`cat-${normalize(book.categoria)}`"
       :aria-label="`${book.titulo}, ${book.autor}`"
@@ -29,7 +32,7 @@
           </span>
         </TransitionGroup>
         <div v-else class="card-match-tags">
-          <span :class="['card-match-tag', colors.midiaBadgeClass(book.midia)]">
+          <span :class="['card-match-tag', colors.mediaBadgeClass(book.midia)]">
             {{ book.midia }}
           </span>
           <span class="card-match-tag">

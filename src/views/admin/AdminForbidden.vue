@@ -7,7 +7,7 @@
         Esta área é restrita a administradores.<br />
         Você será redirecionado em <strong>{{ countdown }}s</strong>.
       </p>
-      <RouterLink to="/" class="forbidden-btn">Ir agora</RouterLink>
+      <RouterLink :to="{ name: 'catalog-books' }" class="forbidden-btn">Ir agora</RouterLink>
     </div>
   </div>
 </template>

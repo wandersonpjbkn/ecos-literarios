@@ -9,7 +9,7 @@
       <template v-else-if="status === 'error'">
         <BaseIcon name="error" class="callback-error-icon" aria-hidden="true" />
         <p class="callback-msg callback-msg--error">{{ errorMsg }}</p>
-        <RouterLink to="/login" class="callback-btn">Tentar novamente</RouterLink>
+        <RouterLink :to="{ name: 'auth-login' }" class="callback-btn">Tentar novamente</RouterLink>
       </template>
     </div>
   </div>

@@ -69,37 +69,39 @@ defineExpose({
 </script>
 
 <template>
-  <!-- overlay -->
-  <Transition name="mobile-filters-overlay">
-    <div v-if="isOpen" class="mobile-filters-overlay" aria-hidden="true" @click="close" />
-  </Transition>
+  <Teleport to="#sidebar">
+    <!-- overlay -->
+    <Transition name="mobile-filters-overlay">
+      <div v-if="isOpen" class="mobile-filters-overlay" aria-hidden="true" @click="close" />
+    </Transition>
 
-  <!-- panel -->
-  <Transition :name="panelClass">
-    <aside v-if="isOpen" ref="painelRef" :class="['mobile-filters-sidebar', enter]" :aria-label="title">
-      <!-- header -->
-      <div class="mobile-filters-header">
-        <slot name="header" :open="open" :close="close" :toggle="toggle" :is-open="isOpen">
-          <h2 class="mobile-filters-title">{{ title }}</h2>
-          <button class="mobile-filters-close" type="button" aria-label="Fechar filtros" @click="close">
-            <BaseIcon name="times" aria-hidden="true" />
-          </button>
-        </slot>
-      </div>
+    <!-- panel -->
+    <Transition :name="panelClass">
+      <aside v-if="isOpen" ref="painelRef" :class="['mobile-filters-sidebar', enter]" :aria-label="title">
+        <!-- header -->
+        <div class="mobile-filters-header">
+          <slot name="header" :open="open" :close="close" :toggle="toggle" :is-open="isOpen">
+            <h2 class="mobile-filters-title">{{ title }}</h2>
+            <button class="mobile-filters-close" type="button" aria-label="Fechar filtros" @click="close">
+              <BaseIcon name="times" aria-hidden="true" />
+            </button>
+          </slot>
+        </div>
 
-      <!-- body -->
-      <div class="mobile-filters-body">
-        <slot name="body" :open="open" :close="close" :toggle="toggle" :is-open="isOpen" />
-      </div>
+        <!-- body -->
+        <div class="mobile-filters-body">
+          <slot name="body" :open="open" :close="close" :toggle="toggle" :is-open="isOpen" />
+        </div>
 
-      <!-- footer -->
-      <div class="mobile-filters-footer">
-        <slot name="footer" :open="open" :close="close" :toggle="toggle" :is-open="isOpen">
-          <button class="btn" type="button" @click="close">Fechar</button>
-        </slot>
-      </div>
-    </aside>
-  </Transition>
+        <!-- footer -->
+        <div class="mobile-filters-footer">
+          <slot name="footer" :open="open" :close="close" :toggle="toggle" :is-open="isOpen">
+            <button class="btn" type="button" @click="close">Fechar</button>
+          </slot>
+        </div>
+      </aside>
+    </Transition>
+  </Teleport>
 </template>
 
 <style lang="scss" scoped>

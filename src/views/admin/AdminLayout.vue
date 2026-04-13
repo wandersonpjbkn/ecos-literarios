@@ -3,7 +3,7 @@
     <!-- Sidebar fixa -->
     <aside class="admin-sidebar">
       <div class="admin-sidebar__header">
-        <RouterLink to="/" class="admin-sidebar__back">
+        <RouterLink :to="{ name: 'catalog-books' }" class="admin-sidebar__back">
           <BaseIcon name="arrow-left" />
           <span>Catálogo</span>
         </RouterLink>
