@@ -1,3 +1,10 @@
+import { useAuthStore } from '@/stores'
+
+const authGuard = () => {
+  const auth = useAuthStore()
+  if (!auth.isLoggedIn) return { name: 'auth-login' }
+}
+
 export const routes = [
   {
     path: '/perfil',
@@ -7,6 +14,7 @@ export const routes = [
       {
         path: 'vinculos',
         name: 'profile-claim',
+        beforeEnter: authGuard,
         component: () => import('@/views/profile/ProfileClaim.vue'),
         meta: { title: 'Vínculos — Ecos Literários', pageClass: 'page-profile' },
       },

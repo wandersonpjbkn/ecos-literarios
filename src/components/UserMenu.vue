@@ -1,5 +1,5 @@
 <template>
-  <div ref="wrapRef" class="'user-btn-wrap'">
+  <div ref="wrapRef" class="user-btn-wrap">
     <!-- guest -->
     <RouterLink v-if="!store.isLoggedIn" :to="{ name: 'auth-login' }" class="user-btn user-btn--guest">
       <BaseIcon name="user" class="user-btn__icon" aria-hidden="true" />

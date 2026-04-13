@@ -17,9 +17,8 @@ const isMobile = useMediaQuery('(max-width: 767px)')
 const isOpen = ref(false)
 const painelRef = ref<HTMLElement | null>(null)
 
-const panelClass = computed(() => {
-  return `mobile-filters-panel--${props.enter}`
-})
+// Transition name must match the CSS class prefix exactly (double dash)
+const panelClass = computed(() => `mobile-filters-panel--${props.enter}`)
 
 const lockBody = () => {
   document.body.style.overflow = 'hidden'
@@ -51,21 +50,14 @@ onClickOutside(painelRef, () => {
 })
 
 watch(isMobile, (mobile) => {
-  if (!mobile) {
-    close()
-  }
+  if (!mobile) close()
 })
 
 onBeforeUnmount(() => {
   unlockBody()
 })
 
-defineExpose({
-  isOpen,
-  open,
-  close,
-  toggle,
-})
+defineExpose({ isOpen, open, close, toggle })
 </script>
 
 <template>
@@ -128,7 +120,7 @@ defineExpose({
       left: 5rem;
     }
     &.right {
-      right: 0rem;
+      right: 0;
     }
   }
 
@@ -209,18 +201,24 @@ defineExpose({
 .mobile-filters-overlay-leave-to {
   opacity: 0;
 }
+
+/* Left panel */
 .mobile-filters-panel--left-enter-active,
-.mobile-filters-panel--left-leave-active,
-.mobile-filters-panel--right-enter-active,
-.mobile-filters-panel--right-leave-active {
+.mobile-filters-panel--left-leave-active {
   transition: transform 0.25s ease;
 }
 .mobile-filters-panel--left-enter-from,
 .mobile-filters-panel--left-leave-to {
   transform: translateX(-100%);
 }
-.mobile-filters-panel-right-enter-from,
-.mobile-filters-panel-right-leave-to {
+
+/* Right panel */
+.mobile-filters-panel--right-enter-active,
+.mobile-filters-panel--right-leave-active {
+  transition: transform 0.25s ease;
+}
+.mobile-filters-panel--right-enter-from,
+.mobile-filters-panel--right-leave-to {
   transform: translateX(100%);
 }
 </style>

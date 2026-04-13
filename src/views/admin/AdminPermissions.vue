@@ -1,6 +1,5 @@
 <template>
   <div class="admin-section">
-    <!-- Header -->
     <div class="admin-section__header">
       <div>
         <h2 class="admin-section__title">Permissões</h2>
@@ -10,30 +9,25 @@
       </div>
     </div>
 
-    <!-- Loading -->
     <div v-if="loading" class="admin-state">
       <div class="spinner" aria-hidden="true" />
       <p>Carregando permissões…</p>
     </div>
 
-    <!-- Error -->
     <div v-else-if="error" class="admin-state admin-state--error">
       <BaseIcon name="error" aria-hidden="true" />
       <p>{{ error }}</p>
       <button class="retry-btn" @click="fetchPermissions">Tentar novamente</button>
     </div>
 
-    <!-- Matriz -->
     <div v-else class="permissions-grid">
       <div v-for="role in ROLES" :key="role" class="role-card" :class="{ 'is-editing': editingRole === role }">
-        <!-- Card header -->
         <div class="role-card__header">
           <div>
             <span class="role-card__title">{{ roleLabel(role) }}</span>
             <span class="role-card__badge">{{ role }}</span>
           </div>
 
-          <!-- Botão Editar / estado de edição -->
           <div class="role-card__actions">
             <template v-if="editingRole !== role">
               <button
@@ -53,7 +47,6 @@
           </div>
         </div>
 
-        <!-- Recursos × ações -->
         <div class="role-card__body">
           <div v-for="resource in RESOURCES" :key="resource" class="resource-row">
             <span class="resource-name">{{ resourceLabel(resource) }}</span>
@@ -86,7 +79,6 @@
       </div>
     </div>
 
-    <!-- Modal de confirmação -->
     <ConfirmModal
       v-model="confirm.open"
       title="Confirmar alteração?"
@@ -107,17 +99,28 @@ import ConfirmModal from '@/components/admin/ConfirmModal.vue'
 
 const API_BASE = import.meta.env.VITE_API_URL as string
 
+// Keep in sync with src/constants/index.ts on the backend
 type Role = 'admin' | 'editor' | 'viewer'
-type Resource = 'books' | 'users' | 'subgeneros' | 'permissions'
+type Resource = 'books' | 'users' | 'autores' | 'midias' | 'categorias' | 'subgeneros' | 'permissions'
 type Action = 'create' | 'read' | 'update' | 'delete'
 
 const ROLES: Role[] = ['admin', 'editor', 'viewer']
-const RESOURCES: Resource[] = ['books', 'users', 'subgeneros', 'permissions']
+const RESOURCES: Resource[] = ['books', 'users', 'autores', 'midias', 'categorias', 'subgeneros', 'permissions']
 const ACTIONS: Action[] = ['create', 'read', 'update', 'delete']
 
 const roleLabel = (r: string) => ({ admin: 'Administrador', editor: 'Editor', viewer: 'Membro' })[r] ?? r
+
 const resourceLabel = (r: string) =>
-  ({ books: 'Livros', users: 'Membros', subgeneros: 'Sub-gêneros', permissions: 'Permissões' })[r] ?? r
+  ({
+    books: 'Livros',
+    users: 'Membros',
+    autores: 'Autores',
+    midias: 'Mídias',
+    categorias: 'Categorias',
+    subgeneros: 'Sub-gêneros',
+    permissions: 'Permissões',
+  })[r] ?? r
+
 const actionLabel = (a: string) => ({ create: 'Criar', read: 'Ver', update: 'Editar', delete: 'Excluir' })[a] ?? a
 
 interface Permission {
@@ -131,14 +134,7 @@ const permissions = ref<Permission[]>([])
 const loading = ref(false)
 const error = ref('')
 
-// ── Estado de edição ──────────────────────────────────────────────
-/** Role sendo editada (null = nenhuma) */
 const editingRole = ref<Role | null>(null)
-
-/**
- * Cópia rasa das permissões da role em edição.
- * Map: resource → Set de actions selecionadas
- */
 const draft = ref<Map<Resource, Set<Action>>>(new Map())
 
 const hasPendingChanges = computed(() => {
@@ -147,7 +143,6 @@ const hasPendingChanges = computed(() => {
   for (const resource of RESOURCES) {
     const original =
       permissions.value.find((p) => p.role === editingRole.value && p.resource === resource)?.actions ?? []
-
     const draftActions = [...(draft.value.get(resource) ?? [])]
 
     if (original.length !== draftActions.length) return true
@@ -157,24 +152,21 @@ const hasPendingChanges = computed(() => {
   return false
 })
 
-// ── Helpers de leitura ────────────────────────────────────────────
-const hasAction = (role: Role, resource: Resource, action: Action) => {
-  return permissions.value.find((p) => p.role === role && p.resource === resource)?.actions.includes(action) ?? false
-}
+const hasAction = (role: Role, resource: Resource, action: Action) =>
+  permissions.value.find((p) => p.role === role && p.resource === resource)?.actions.includes(action) ?? false
 
 const hasActionDraft = (role: Role, resource: Resource, action: Action) => {
   if (editingRole.value !== role) return hasAction(role, resource, action)
   return draft.value.get(resource)?.has(action) ?? false
 }
 
+// Admin must always keep read on permissions
 const isLocked = (role: Role, resource: Resource, action: Action) =>
   role === 'admin' && resource === 'permissions' && action === 'read'
 
-// ── Controle de edição ────────────────────────────────────────────
 const startEditing = (role: Role) => {
   editingRole.value = role
 
-  // Clona estado atual para o draft
   const newDraft = new Map<Resource, Set<Action>>()
   for (const resource of RESOURCES) {
     const actions = permissions.value.find((p) => p.role === role && p.resource === resource)?.actions ?? []
@@ -195,11 +187,10 @@ const toggleDraft = (resource: Resource, action: Action) => {
   if (set.has(action)) set.delete(action)
   else set.add(action)
 
-  // Força reatividade (Set não é deeply reactive)
+  // Force reactivity (Set is not deeply reactive)
   draft.value = new Map(draft.value)
 }
 
-// ── Salvar ────────────────────────────────────────────────────────
 const confirm = reactive({ open: false, loading: false })
 
 const applyChanges = async () => {
@@ -209,7 +200,6 @@ const applyChanges = async () => {
   const role = editingRole.value
 
   try {
-    // Um PUT por resource que mudou
     const promises = RESOURCES.map(async (resource) => {
       const newActions = [...(draft.value.get(resource) ?? [])]
 
@@ -227,7 +217,6 @@ const applyChanges = async () => {
         throw new Error(msg)
       }
 
-      // Atualiza localmente
       const perm = permissions.value.find((p) => p.role === role && p.resource === resource)
       if (perm) perm.actions = newActions
     })
@@ -245,7 +234,6 @@ const applyChanges = async () => {
   }
 }
 
-// ── Fetch ─────────────────────────────────────────────────────────
 const fetchPermissions = async () => {
   loading.value = true
   error.value = ''
@@ -289,7 +277,6 @@ onMounted(fetchPermissions)
   }
 }
 
-// ── States ────────────────────────────────────────────────────────
 .admin-state {
   display: flex;
   flex-direction: column;
@@ -302,6 +289,7 @@ onMounted(fetchPermissions)
   &--error {
     color: var(--color-action-default);
   }
+
   svg {
     width: 40px;
     height: 40px;
@@ -316,6 +304,7 @@ onMounted(fetchPermissions)
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -332,6 +321,7 @@ onMounted(fetchPermissions)
   font-family: var(--font-family-body);
   font-size: 0.9rem;
   cursor: pointer;
+
   &:hover {
     opacity: 0.85;
   }
@@ -402,7 +392,6 @@ onMounted(fetchPermissions)
   }
 }
 
-// ── Card buttons ──────────────────────────────────────────────────
 .card-btn {
   height: 32px;
   padding: 0 12px;
@@ -454,10 +443,10 @@ onMounted(fetchPermissions)
   }
 }
 
-// ── Resource row ──────────────────────────────────────────────────
 .resource-row {
   padding: 0.75rem 1.25rem;
   border-bottom: 1px solid var(--color-border-default);
+
   &:last-child {
     border-bottom: none;
   }
@@ -479,7 +468,6 @@ onMounted(fetchPermissions)
   gap: 6px;
 }
 
-// ── Action checkbox ───────────────────────────────────────────────
 .action-check {
   display: inline-flex;
   align-items: center;
@@ -487,15 +475,15 @@ onMounted(fetchPermissions)
   padding: 4px 8px;
   border-radius: var(--border-radius-sm);
   user-select: none;
+  cursor: default;
   transition: background var(--motion-transition-default);
 
-  // Só mostra cursor pointer quando editável
-  cursor: default;
   &.is-editable {
     cursor: pointer;
-  }
-  &.is-editable:hover {
-    background: var(--color-background-subtle);
+
+    &:hover {
+      background: var(--color-background-subtle);
+    }
   }
 
   &.is-checked {
@@ -530,7 +518,6 @@ onMounted(fetchPermissions)
     color: #fff;
   }
 
-  // Checkbox desabilitado (não-editável)
   input:disabled ~ &__box {
     opacity: 0.5;
   }

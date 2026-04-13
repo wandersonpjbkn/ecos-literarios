@@ -1,6 +1,5 @@
 <template>
   <div class="admin-layout">
-    <!-- Sidebar fixa -->
     <aside class="admin-sidebar">
       <div class="admin-sidebar__header">
         <RouterLink :to="{ name: 'catalog-books' }" class="admin-sidebar__back">
@@ -38,6 +37,15 @@
           <BaseIcon name="reload" class="admin-sidebar__link-icon" />
           <span>Enriquecimento</span>
         </RouterLink>
+
+        <RouterLink
+          :to="{ name: 'admin-claims' }"
+          class="admin-sidebar__link"
+          :class="{ 'is-active': route.name === 'admin-claims' }"
+        >
+          <BaseIcon name="link" class="admin-sidebar__link-icon" />
+          <span>Vínculos</span>
+        </RouterLink>
       </nav>
 
       <div class="admin-sidebar__footer">
@@ -49,7 +57,6 @@
       </div>
     </aside>
 
-    <!-- Conteúdo principal -->
     <main class="admin-main">
       <RouterView />
     </main>
@@ -87,7 +94,7 @@ onMounted(async () => {
       memberCount.value = users.length
     }
   } catch {
-    // silencia — o badge é apenas cosmético
+    // Badge is cosmetic — failure is silent
   }
 })
 </script>
@@ -115,7 +122,6 @@ onMounted(async () => {
   min-height: calc(100dvh - 4rem);
 }
 
-// ── Sidebar ───────────────────────────────────────────────────────
 .admin-sidebar {
   display: flex;
   flex-direction: column;
@@ -257,20 +263,17 @@ onMounted(async () => {
   }
 }
 
-// ── Main ──────────────────────────────────────────────────────────
 .admin-main {
   overflow-y: auto;
   background: var(--color-background-default);
 
   :deep(.admin-section) {
     margin: 0 auto;
-
     max-width: 1200px;
     padding: 2rem;
   }
 }
 
-// ── Mobile ────────────────────────────────────────────────────────
 @media (max-width: 767px) {
   .admin-layout {
     grid-template-columns: 1fr;
@@ -292,7 +295,6 @@ onMounted(async () => {
     &__link {
       flex-shrink: 0;
     }
-
     &__footer {
       display: none;
     }

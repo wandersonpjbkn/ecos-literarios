@@ -7,15 +7,12 @@ const adminGuard = () => {
 }
 
 export const routes: RouteRecordRaw[] = [
-  // Tela de acesso negado — sem guard (precisa ser acessível)
   {
     path: '/admin/forbidden',
     name: 'admin-forbidden',
     component: () => import('@/views/admin/AdminForbidden.vue'),
     meta: { title: 'Sem permissão — Ecos Literários', pageClass: 'page-admin' },
   },
-
-  // Shell do painel admin com children
   {
     path: '/admin',
     component: () => import('@/views/admin/AdminLayout.vue'),
@@ -39,6 +36,12 @@ export const routes: RouteRecordRaw[] = [
         name: 'admin-enrichment',
         component: () => import('@/views/admin/AdminEnrichment.vue'),
         meta: { title: 'Enriquecimento — Painel Admin', pageClass: 'page-admin' },
+      },
+      {
+        path: 'vinculos',
+        name: 'admin-claims',
+        component: () => import('@/views/admin/AdminClaimHistory.vue'),
+        meta: { title: 'Vínculos — Painel Admin', pageClass: 'page-admin' },
       },
     ],
   },

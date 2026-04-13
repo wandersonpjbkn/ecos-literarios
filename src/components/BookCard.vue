@@ -6,10 +6,10 @@
         params: { id: book.id },
       }"
       class="book-card"
-      :class="`cat-${normalize(book.categoria)}`"
+      :class="`cat-${slugify(book.categoria)}`"
       :aria-label="`${book.titulo}, ${book.autor}`"
     >
-      <!-- Capa -->
+      <!-- Cover -->
       <div class="card-cover" :style="{ '--accent': categoryColor }">
         <img
           v-if="book.cover_url"
@@ -22,7 +22,7 @@
           <BaseIcon name="book" class="card-cover__fallback-icon" />
         </div>
 
-        <!-- Badge de match quando há filtro ativo -->
+        <!-- Active filter match badges -->
         <TransitionGroup v-if="matchTags.length" name="match-tag" tag="div" class="card-match-tags is-inline">
           <span v-for="tag in matchTags.slice(0, 2)" :key="tag" class="card-match-tag">
             {{ tag }}
@@ -41,14 +41,14 @@
         </div>
       </div>
 
-      <!-- Info básica -->
+      <!-- Basic info -->
       <div class="card-info">
         <h3 class="card-title">{{ book.titulo }}</h3>
         <p class="card-author">{{ book.autor }}</p>
       </div>
     </RouterLink>
 
-    <!-- Botão i — fora do RouterLink para não propagar o clique de navegação -->
+    <!-- Info button — outside RouterLink to prevent navigation on click -->
     <button
       class="card-info-btn"
       type="button"
@@ -62,7 +62,8 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { useCategoryColors } from '@/composables'
+
+import { useCategoryColors, useUtils } from '@/composables'
 import type { Book, Options } from '@/types'
 
 const props = defineProps<{
@@ -75,17 +76,11 @@ const emit = defineEmits<{
 }>()
 
 const colors = useCategoryColors()
+const { slugify } = useUtils()
+
 const categoryColor = computed(() => colors.categoryColor(props.book.categoria))
 
-const normalize = (value?: string) =>
-  (value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-
-// Tags dos filtros ativos que batem com este livro
+// Tags of active filters that match this book
 const matchTags = computed(() => {
   const f = props.activeFilters
   if (!f) return []
@@ -104,7 +99,6 @@ const matchTags = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-// ── Wrapper — necessário para posicionar o botão i fora do link ───
 .book-card-wrap {
   position: relative;
   display: flex;
@@ -112,7 +106,6 @@ const matchTags = computed(() => {
   min-height: 100%;
 }
 
-// ── Card principal (link) ─────────────────────────────────────────
 .book-card {
   display: flex;
   flex-direction: column;
@@ -146,11 +139,10 @@ const matchTags = computed(() => {
   }
 }
 
-// ── Capa ──────────────────────────────────────────────────────────
 .card-cover {
   position: relative;
   width: 100%;
-  aspect-ratio: 2 / 3; // proporção padrão de capa de livro
+  aspect-ratio: 2 / 3;
   overflow: hidden;
   flex-shrink: 0;
 
@@ -178,12 +170,11 @@ const matchTags = computed(() => {
   }
 }
 
-// ── Match tags sobre a capa ───────────────────────────────────────
 .card-match-tags {
   position: absolute;
   top: 0.5rem;
   left: 0.5rem;
-  right: 2.5rem; // margem para não colidir com o botão i
+  right: 2.5rem;
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
@@ -229,7 +220,6 @@ const matchTags = computed(() => {
   color: var(--badge-hq-background-color);
 }
 
-// ── Info básica ───────────────────────────────────────────────────
 .card-info {
   padding: 0.75rem;
   display: flex;
@@ -259,7 +249,6 @@ const matchTags = computed(() => {
   text-overflow: ellipsis;
 }
 
-// ── Botão i ───────────────────────────────────────────────────────
 .card-info-btn {
   $color: rgba(0, 0, 0, 0.55);
 
@@ -303,7 +292,6 @@ const matchTags = computed(() => {
   }
 }
 
-// ── Transições dos match tags ─────────────────────────────────────
 .match-tag-enter-active,
 .match-tag-leave-active {
   transition: all var(--motion-transition-default);

@@ -6,7 +6,7 @@ const API_BASE = import.meta.env.VITE_API_URL as string
 
 // ── Tipos da resposta da API ──────────────────────────────────────
 
-// Campos que chegam populados como objeto, ou como string no período de transição
+// Fields that arrive populated as object, or as string during transition period
 interface ApiPopulated {
   _id: string
   nome: string
@@ -27,14 +27,20 @@ interface ApiBook {
   subgeneros: (ApiPopulated | string)[]
 }
 
-export interface RegisterResponse {
-  matched_count?: number
-  updated_count?: number
-  message?: string
+// Matches GET /users/me/claim response shape exactly
+export interface MyClaimStatus {
+  claim_name: string | null
+  claimed_books: number
+  has_claim: boolean
+  warning?: string
 }
 
-export interface MyClaimStatus {
-  claimed_quem_nome: string | null
+// Matches POST /users/me/claim response shape exactly
+export interface RegisterResponse {
+  message?: string
+  claim_name?: string
+  matched_books?: number
+  updated_books?: number
 }
 
 export interface ClaimHistoryEntry {
@@ -53,7 +59,7 @@ export interface ClaimHistory {
 
 // ── Helpers ───────────────────────────────────────────────────────
 
-/** Extrai o nome de um campo populado ou retorna a string diretamente */
+/** Extracts nome from a populated field or returns the string directly */
 const extractNome = (field: ApiPopulated | string | undefined): string => {
   if (!field) return ''
   return typeof field === 'string' ? field : field.nome
@@ -232,9 +238,6 @@ export const getClaimHistory = async (): Promise<ClaimHistoryEntry[]> => {
   }
 
   const raw = (await res.json()) as ClaimHistory
-
-  console.log(typeof raw)
-  console.log(raw)
 
   return raw.history.map((entry) => ({
     ...entry,

@@ -1,101 +1,118 @@
 <template>
-  <section class="profile-page">
-    <header class="profile-header">
-      <h1>Meu perfil</h1>
-      <p>Gerenciar vínculo de menções</p>
-    </header>
-
-    <div class="rules-card">
-      <h2>Regras do vínculo</h2>
-      <ul>
-        <li>Você só pode ter <strong>um vínculo ativo por vez</strong>.</li>
-        <li>Você pode <strong>desvincular</strong> seu vínculo atual a qualquer momento.</li>
-        <li>Um nome já vinculado por outra conta <strong>não pode ser vinculado novamente</strong>.</li>
-        <li v-if="authStore.isAdmin">Como administrador, você também vê o histórico recente de alterações.</li>
-      </ul>
+  <div class="profile-section">
+    <!-- Header — mesmo padrão do AdminEnrichment -->
+    <div class="profile-section__header">
+      <div>
+        <h2 class="profile-section__title">Vínculos</h2>
+        <p class="profile-section__desc">
+          Associe seu usuário às menções do catálogo. Um vínculo ativo conecta seus livros indicados ao seu perfil.
+        </p>
+      </div>
     </div>
 
-    <div class="content-grid">
-      <article class="profile-card">
-        <h2>Vínculo atual</h2>
-
-        <p v-if="loadingStatus" class="muted">Carregando status…</p>
-        <p v-else-if="claimStatus?.claimed_quem_nome" class="status status--active">
-          Vinculado como: <strong>{{ claimStatus.claimed_quem_nome }}</strong>
+    <!-- Status cards -->
+    <div class="status-grid">
+      <article class="status-card">
+        <p class="status-card__label">Status</p>
+        <p class="status-card__value">
+          <template v-if="loadingStatus">—</template>
+          <template v-else-if="claimStatus?.has_claim">Vinculado</template>
+          <template v-else>Sem vínculo</template>
         </p>
-        <p v-else class="status">Nenhum vínculo ativo no momento.</p>
+      </article>
+
+      <article class="status-card">
+        <p class="status-card__label">Nome vinculado</p>
+        <p class="status-card__value">
+          <template v-if="loadingStatus">—</template>
+          <template v-else-if="claimStatus?.claim_name">{{ claimStatus.claim_name }}</template>
+          <template v-else>—</template>
+        </p>
+      </article>
+
+      <article class="status-card">
+        <p class="status-card__label">Livros vinculados</p>
+        <p class="status-card__value">
+          <template v-if="loadingStatus">—</template>
+          <template v-else>{{ claimStatus?.claimed_books ?? 0 }}</template>
+        </p>
+      </article>
+    </div>
+
+    <div v-if="loadingStatus" class="profile-state">
+      <div class="spinner" aria-hidden="true" />
+      <p>Carregando status…</p>
+    </div>
+
+    <template v-else>
+      <!-- Painel de ação -->
+      <section class="claim-panel">
+        <header class="claim-panel__header">
+          <h3>Gerenciar vínculo</h3>
+        </header>
+
+        <!-- Warning de claims múltiplos -->
+        <p v-if="claimStatus?.warning" class="feedback feedback--warning">
+          {{ claimStatus.warning }}
+        </p>
 
         <form class="claim-form" @submit.prevent="submitClaim">
-          <label for="quemNome">Nome em menções</label>
-          <input
-            id="quemNome"
-            v-model.trim="quemNome"
-            type="text"
-            placeholder="Ex.: Wanderson"
-            :disabled="isSubmitting || loadingStatus"
-            autocomplete="off"
-          />
+          <div class="field">
+            <label for="quemNome" class="field__label">Nome em menções</label>
+            <p class="field__hint">Digite exatamente como aparece nos registros do catálogo.</p>
+            <input
+              id="quemNome"
+              v-model.trim="quemNome"
+              type="text"
+              class="field__input"
+              placeholder="Ex.: Wanderson"
+              :disabled="isSubmitting || hasActiveClaim"
+              autocomplete="off"
+            />
+          </div>
 
-          <div class="actions">
-            <button type="submit" :disabled="isSubmitting || loadingStatus || !isValid || hasActiveClaim">
+          <div class="claim-actions">
+            <button type="submit" class="action-btn" :disabled="isSubmitting || !isValid || hasActiveClaim">
               <span v-if="isSubmitting">Vinculando…</span>
               <span v-else>Vincular nome</span>
             </button>
 
             <button
               type="button"
-              class="btn-danger"
-              :disabled="isUnclaiming || loadingStatus || !hasActiveClaim"
+              class="action-btn action-btn--danger"
+              :disabled="isUnclaiming || !hasActiveClaim"
               @click="unclaim"
             >
               <span v-if="isUnclaiming">Desvinculando…</span>
-              <span v-else>Desvincular vínculo atual</span>
+              <span v-else>Desvincular</span>
             </button>
           </div>
         </form>
 
         <p v-if="error" class="feedback feedback--error">{{ error }}</p>
         <p v-if="successMessage" class="feedback feedback--success">{{ successMessage }}</p>
-      </article>
+      </section>
 
-      <article v-if="authStore.isAdmin" class="profile-card">
-        <h2>Histórico (admin)</h2>
-        <p class="muted">Últimas alterações de vínculo registradas no sistema.</p>
-
-        <p v-if="loadingHistory" class="muted">Carregando histórico…</p>
-        <p v-else-if="historyError" class="feedback feedback--error">{{ historyError }}</p>
-
-        <ul v-else-if="history.length > 0" class="history-list">
-          <li v-for="item in history" :key="item.id" class="history-item">
-            <div>
-              <strong>{{ item.user_name }}</strong>
-              <span class="history-item__meta"> · {{ item.action_label }} </span>
-            </div>
-            <div class="history-item__detail">
-              <span>{{ item.quem_nome || '—' }}</span>
-              <span>{{ formatDateTime(item.created_at) }}</span>
-            </div>
-          </li>
+      <!-- Regras -->
+      <section class="rules-panel">
+        <header class="rules-panel__header">
+          <h3>Regras do vínculo</h3>
+        </header>
+        <ul class="rules-list">
+          <li>Você só pode ter <strong>um vínculo ativo por vez</strong>.</li>
+          <li>Você pode <strong>desvincular</strong> a qualquer momento e refazer com outro nome.</li>
+          <li>Um nome já vinculado por outra conta <strong>não pode ser reivindicado novamente</strong>.</li>
         </ul>
-
-        <p v-else class="muted">Sem alterações registradas.</p>
-      </article>
-    </div>
-  </section>
+      </section>
+    </template>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import {
-  claimRegister,
-  getClaimHistory,
-  getMyClaimStatus,
-  unclaimRegister,
-  type ClaimHistoryEntry,
-  type MyClaimStatus,
-} from '@/composables/useApi'
+import { claimRegister, getMyClaimStatus, unclaimRegister, type MyClaimStatus } from '@/composables/useApi'
 import { useAuthStore } from '@/stores'
 
 const router = useRouter()
@@ -114,20 +131,8 @@ const successMessage = ref('')
 
 const claimStatus = ref<MyClaimStatus | null>(null)
 
-const loadingHistory = ref(false)
-const historyError = ref('')
-const history = ref<ClaimHistoryEntry[]>([])
-
 const isValid = computed(() => quemNome.value.trim().length >= 2)
-const hasActiveClaim = computed(() => !!claimStatus.value?.claimed_quem_nome)
-
-const formatDateTime = (iso?: string) => {
-  if (!iso) return '—'
-  return new Date(iso).toLocaleString('pt-BR', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  })
-}
+const hasActiveClaim = computed(() => claimStatus.value?.has_claim === true)
 
 const loadStatus = async () => {
   loadingStatus.value = true
@@ -136,24 +141,9 @@ const loadStatus = async () => {
   try {
     claimStatus.value = await getMyClaimStatus()
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Não foi possível carregar seu claim atual.'
+    error.value = err instanceof Error ? err.message : 'Não foi possível carregar seu vínculo atual.'
   } finally {
     loadingStatus.value = false
-  }
-}
-
-const loadHistory = async () => {
-  if (!authStore.isAdmin) return
-
-  loadingHistory.value = true
-  historyError.value = ''
-
-  try {
-    history.value = await getClaimHistory()
-  } catch (err) {
-    historyError.value = err instanceof Error ? err.message : 'Não foi possível carregar o histórico.'
-  } finally {
-    loadingHistory.value = false
   }
 }
 
@@ -167,14 +157,13 @@ const submitClaim = async () => {
   try {
     const result = await claimRegister(quemNome.value)
 
-    if (typeof result.updated_count === 'number' && typeof result.matched_count === 'number') {
-      successMessage.value = `Pronto! ${result.updated_count} livro(s) vinculados de ${result.matched_count} menção(ões) encontradas.`
+    if (typeof result.updated_books === 'number' && typeof result.matched_books === 'number') {
+      successMessage.value = `Pronto! ${result.updated_books} livro(s) vinculados de ${result.matched_books} menção(ões) encontradas.`
     } else {
       successMessage.value = result.message ?? 'Vínculo realizado com sucesso.'
     }
 
     await loadStatus()
-    await loadHistory()
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Não foi possível concluir o vínculo.'
   } finally {
@@ -191,185 +180,278 @@ const unclaim = async () => {
 
   try {
     const result = await unclaimRegister()
-    successMessage.value = result.message ?? 'Claim removido com sucesso.'
-
+    successMessage.value = result.message ?? 'Vínculo removido com sucesso.'
     await loadStatus()
-    await loadHistory()
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Não foi possível desvincular o claim atual.'
+    error.value = err instanceof Error ? err.message : 'Não foi possível desvincular o vínculo atual.'
   } finally {
     isUnclaiming.value = false
   }
 }
 
-onMounted(async () => {
-  await loadStatus()
-  await loadHistory()
-})
+onMounted(loadStatus)
 </script>
 
 <style lang="scss" scoped>
-.profile-page {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 1.25rem 1rem 2rem;
-}
+// ── Section shell — delegated to ProfileLayout :deep(.profile-section) ──
+.profile-section {
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
 
-.profile-header {
-  margin-bottom: 1rem;
-
-  h1 {
-    margin: 0;
-    font-size: 1.45rem;
+  &__title {
+    margin: 0 0 0.25rem;
+    font-family: var(--font-family-display);
+    font-size: 1.4rem;
+    font-weight: 400;
     color: var(--color-text-default);
   }
 
-  p {
-    margin-top: 0.35rem;
+  &__desc {
+    margin: 0;
+    font-size: 0.9rem;
     color: var(--color-text-subtle);
+    max-width: 65ch;
+    line-height: 1.5;
   }
 }
 
-.rules-card,
-.profile-card {
-  background: var(--color-surface-default);
+// ── Status cards — mesmo padrão do AdminEnrichment ────────────────
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.status-card {
+  padding: 0.9rem;
   border: 1px solid var(--color-border-default);
   border-radius: var(--border-radius-default);
+  background: var(--color-surface-default);
+
+  &__label {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--color-text-subtle);
+  }
+
+  &__value {
+    margin-top: 0.25rem;
+    display: block;
+    font-size: 1.1rem;
+    color: var(--color-text-default);
+    font-weight: 600;
+  }
+}
+
+// ── Loading state ─────────────────────────────────────────────────
+.profile-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--color-text-subtle);
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid var(--color-border-default);
+  border-top-color: var(--color-action-default);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ── Panels — mesmo padrão do execution-panel do AdminEnrichment ───
+.claim-panel,
+.rules-panel {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-default);
+  background: var(--color-surface-default);
   padding: 1rem;
 }
 
-.rules-card {
+.claim-panel {
   margin-bottom: 1rem;
 
-  h2 {
-    margin: 0 0 0.5rem;
-    font-size: 1rem;
-  }
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
 
-  ul {
-    margin: 0;
-    padding-left: 1.1rem;
-    color: var(--color-text-subtle);
-    display: grid;
-    gap: 0.35rem;
-  }
-}
-
-.content-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-
-  @media (min-width: 980px) {
-    grid-template-columns: 1.1fr 0.9fr;
+    h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text-default);
+    }
   }
 }
 
-.profile-card {
-  h2 {
-    margin: 0;
-    font-size: 1rem;
+.rules-panel {
+  &__header {
+    margin-bottom: 0.75rem;
+
+    h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text-default);
+    }
   }
 }
 
-.status {
-  margin: 0.65rem 0;
+.rules-list {
+  margin: 0;
+  padding-left: 1.1rem;
   color: var(--color-text-subtle);
+  font-size: 0.9rem;
+  display: grid;
+  gap: 0.4rem;
+  line-height: 1.5;
+}
 
-  &--active {
+// ── Form ──────────────────────────────────────────────────────────
+.claim-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+
+  &__label {
+    font-size: 0.85rem;
+    font-weight: 500;
     color: var(--color-text-default);
   }
-}
 
-.claim-form {
-  margin-top: 0.7rem;
-  display: grid;
-  gap: 0.5rem;
-
-  label {
-    font-size: 0.85rem;
+  &__hint {
+    margin: 0;
+    font-size: 0.8rem;
     color: var(--color-text-subtle);
   }
 
-  input {
+  &__input {
     width: 100%;
-    border: 1px solid var(--color-border-default);
+    max-width: 400px;
+    border: 1.5px solid var(--color-border-default);
     border-radius: var(--border-radius-sm);
-    min-height: 2.5rem;
-    padding: 0.55rem 0.7rem;
+    min-height: 44px;
+    padding: 0 0.75rem;
     background: var(--color-surface-default);
     color: var(--color-text-default);
     font-family: var(--font-family-body);
-  }
-}
+    font-size: 1rem;
+    transition:
+      border-color var(--motion-transition-default),
+      box-shadow var(--motion-transition-default);
+    outline: none;
 
-.actions {
-  margin-top: 0.4rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-
-  button {
-    border: none;
-    border-radius: var(--border-radius-sm);
-    background: var(--color-action-default);
-    color: var(--color-surface-default);
-    min-height: 2.5rem;
-    padding: 0.6rem 0.95rem;
-    cursor: pointer;
+    &:focus {
+      border-color: var(--color-action-default);
+      box-shadow: 0 0 0 3px var(--color-action-background-subtle);
+    }
 
     &:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+      background: var(--color-background-subtle);
     }
   }
+}
 
-  .btn-danger {
-    background: #5c2b2b;
+.claim-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  border: none;
+  border-radius: var(--border-radius-sm);
+  min-height: 40px;
+  padding: 0.5rem 0.9rem;
+  font-family: var(--font-family-body);
+  font-size: 0.88rem;
+  cursor: pointer;
+  background: var(--color-action-default);
+  color: #fff;
+  transition: opacity var(--motion-transition-default);
+
+  &:hover:not(:disabled) {
+    opacity: 0.85;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--danger {
+    background: var(--color-background-subtle);
+    color: var(--color-text-default);
+    border: 1px solid var(--color-border-default);
+
+    &:hover:not(:disabled) {
+      background: #5c2b2b;
+      border-color: #5c2b2b;
+      color: #fff;
+      opacity: 1;
+    }
   }
 }
 
-.muted {
-  color: var(--color-text-subtle);
-}
-
+// ── Feedback ──────────────────────────────────────────────────────
 .feedback {
-  margin: 0.8rem 0 0;
-  font-size: 0.92rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.88rem;
 
   &--error {
     color: #c0392b;
   }
-
   &--success {
     color: #2e7d32;
   }
-}
 
-.history-list {
-  margin: 0.75rem 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 0.65rem;
-}
-
-.history-item {
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--border-radius-sm);
-  padding: 0.6rem 0.7rem;
-
-  &__meta,
-  &__detail {
+  &--warning {
     color: var(--color-text-subtle);
-    font-size: 0.88rem;
+    background: var(--color-background-subtle);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--border-radius-sm);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────
+@media (max-width: 767px) {
+  .status-grid {
+    grid-template-columns: 1fr 1fr;
   }
 
-  &__detail {
-    margin-top: 0.3rem;
-    display: flex;
-    justify-content: space-between;
-    gap: 0.5rem;
+  .status-grid .status-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .field__input {
+    max-width: 100%;
   }
 }
 </style>
