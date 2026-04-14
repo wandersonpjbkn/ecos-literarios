@@ -67,21 +67,69 @@
         />
       </div>
 
+      <!-- Items -->
       <TransitionGroup name="entity-item" tag="div" class="entity-items">
         <div v-for="item in filteredItems" :key="item._id" class="entity-row">
-          <div class="entity-row__info">
-            <span class="entity-row__name">{{ item.nome }}</span>
-            <span class="entity-row__slug">{{ item.slug }}</span>
-          </div>
-          <button
-            class="entity-row__delete"
-            type="button"
-            :aria-label="`Remover ${item.nome}`"
-            :disabled="deletingId === item._id"
-            @click="confirmDelete(item)"
-          >
-            <BaseIcon name="times" aria-hidden="true" />
-          </button>
+          <!-- Edit mode -->
+          <template v-if="editingId === item._id">
+            <form class="entity-row__edit-form" @submit.prevent="handleUpdate">
+              <input
+                ref="editInputRef"
+                v-model.trim="editingName"
+                type="text"
+                class="entity-row__edit-input"
+                :disabled="isUpdating"
+                maxlength="80"
+                autocomplete="off"
+                @keydown.escape="cancelEdit"
+              />
+              <button
+                type="submit"
+                class="entity-row__action entity-row__action--save"
+                :disabled="isUpdating || editingName.length < 2 || editingName === item.nome"
+                :aria-label="`Salvar ${editingName}`"
+              >
+                <BaseIcon name="check" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="entity-row__action entity-row__action--cancel"
+                :disabled="isUpdating"
+                aria-label="Cancelar edição"
+                @click="cancelEdit"
+              >
+                <BaseIcon name="times" aria-hidden="true" />
+              </button>
+            </form>
+          </template>
+
+          <!-- Display mode -->
+          <template v-else>
+            <div class="entity-row__info">
+              <span class="entity-row__name" @click="startEdit(item)">{{ item.nome }}</span>
+              <span class="entity-row__slug">{{ item.slug }}</span>
+            </div>
+            <div class="entity-row__actions">
+              <button
+                class="entity-row__action entity-row__action--edit"
+                type="button"
+                :aria-label="`Editar ${item.nome}`"
+                :disabled="!!editingId"
+                @click="startEdit(item)"
+              >
+                <BaseIcon name="pencil" aria-hidden="true" />
+              </button>
+              <button
+                class="entity-row__action entity-row__action--delete"
+                type="button"
+                :aria-label="`Remover ${item.nome}`"
+                :disabled="deletingId === item._id || !!editingId"
+                @click="confirmDelete(item)"
+              >
+                <BaseIcon name="trash" aria-hidden="true" />
+              </button>
+            </div>
+          </template>
         </div>
       </TransitionGroup>
 
@@ -105,13 +153,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, nextTick, onMounted, reactive } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, reactive } from 'vue'
 
 import { useEntityCrud, type SupportEntity } from '@/composables/useEntityCrud'
 import ConfirmModal from '@/components/admin/ConfirmModal.vue'
 
 const props = defineProps<{
-  /** API resource path segment (e.g. 'autores', 'midias') */
   resource: string
   title: string
   description?: string
@@ -120,8 +167,12 @@ const props = defineProps<{
 const crud = useEntityCrud({ resource: props.resource })
 
 const inputRef = ref<HTMLInputElement | null>(null)
+const editInputRef = ref<HTMLInputElement | null>(null)
 const isFormOpen = ref(false)
 const isCreating = ref(false)
+const isUpdating = ref(false)
+const editingId = ref<string | null>(null)
+const editingName = ref('')
 const deletingId = ref<string | null>(null)
 const newName = ref('')
 const searchQuery = ref('')
@@ -147,6 +198,31 @@ watch(isFormOpen, async (open) => {
   }
 })
 
+const onDocumentClick = (e: MouseEvent) => {
+  if (!editingId.value) return
+  const target = e.target as HTMLElement
+  if (target.closest('.entity-row__edit-form')) return
+  cancelEdit()
+}
+
+let clickOutsideTimer: ReturnType<typeof setTimeout> | null = null
+
+watch(editingId, (id) => {
+  document.removeEventListener('click', onDocumentClick)
+  if (clickOutsideTimer) clearTimeout(clickOutsideTimer)
+
+  if (id) {
+    clickOutsideTimer = setTimeout(() => {
+      document.addEventListener('click', onDocumentClick)
+    }, 0)
+  }
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocumentClick)
+  if (clickOutsideTimer) clearTimeout(clickOutsideTimer)
+})
+
 const showFeedback = (message: string, type: 'success' | 'error') => {
   feedback.value = message
   feedbackType.value = type
@@ -167,6 +243,34 @@ const handleCreate = async () => {
     showFeedback(e instanceof Error ? e.message : 'Erro ao criar item.', 'error')
   } finally {
     isCreating.value = false
+  }
+}
+
+const startEdit = async (item: SupportEntity) => {
+  editingId.value = item._id
+  editingName.value = item.nome
+  await nextTick()
+  const el = Array.isArray(editInputRef.value) ? editInputRef.value[0] : editInputRef.value
+  el?.focus()
+}
+
+const cancelEdit = () => {
+  editingId.value = null
+  editingName.value = ''
+}
+
+const handleUpdate = async () => {
+  if (!editingId.value || editingName.value.length < 2) return
+  isUpdating.value = true
+
+  try {
+    const updated = await crud.update(editingId.value, editingName.value)
+    showFeedback(`Renomeado para "${updated.nome}".`, 'success')
+    cancelEdit()
+  } catch (e) {
+    showFeedback(e instanceof Error ? e.message : 'Erro ao atualizar item.', 'error')
+  } finally {
+    isUpdating.value = false
   }
 }
 
@@ -419,8 +523,6 @@ onMounted(() => crud.fetchAll())
 
 .entity-items {
   position: relative;
-  overflow-y: auto;
-  max-height: 400px;
 }
 
 .entity-row {
@@ -444,11 +546,13 @@ onMounted(() => crud.fetchAll())
     flex-direction: column;
     gap: 1px;
     min-width: 0;
+    flex: 1;
   }
   &__name {
     font-size: 0.9rem;
     font-weight: 500;
     color: var(--color-text-default);
+    cursor: pointer;
   }
   &__slug {
     font-size: 0.72rem;
@@ -456,7 +560,14 @@ onMounted(() => crud.fetchAll())
     font-family: monospace;
   }
 
-  &__delete {
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  &__action {
     width: 32px;
     height: 32px;
     border: none;
@@ -472,12 +583,58 @@ onMounted(() => crud.fetchAll())
       background var(--motion-transition-default),
       color var(--motion-transition-default);
 
-    &:hover:not(:disabled) {
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    &--edit:hover:not(:disabled) {
+      background: var(--color-action-background-subtle);
+      color: var(--color-action-default);
+    }
+
+    &--delete:hover:not(:disabled) {
       background: rgba(192, 57, 43, 0.08);
       color: #c0392b;
     }
+
+    &--save {
+      color: #2e7d32;
+      &:hover:not(:disabled) {
+        background: rgba(46, 125, 50, 0.08);
+      }
+    }
+
+    &--cancel:hover:not(:disabled) {
+      background: var(--color-background-subtle);
+      color: var(--color-text-default);
+    }
+  }
+
+  &__edit-form {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__edit-input {
+    flex: 1;
+    min-height: 36px;
+    padding: 0 0.65rem;
+    border: 1.5px solid var(--color-action-default);
+    border-radius: var(--border-radius-sm);
+    background: var(--color-surface-default);
+    box-shadow: 0 0 0 3px var(--color-action-background-subtle);
+    font-family: var(--font-family-body);
+    font-size: 0.9rem;
+    color: var(--color-text-default);
+    outline: none;
+    min-width: 0;
+
     &:disabled {
-      opacity: 0.4;
+      opacity: 0.6;
       cursor: not-allowed;
     }
   }

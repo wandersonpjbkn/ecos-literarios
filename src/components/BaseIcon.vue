@@ -20,9 +20,11 @@ const props = defineProps<{
     | 'home'
     | 'link'
     | 'menu'
+    | 'pencil'
     | 'reload'
     | 'search'
     | 'times'
+    | 'trash'
     | 'user'
     // brands
     | 'amazon'

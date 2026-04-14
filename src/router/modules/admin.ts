@@ -17,8 +17,14 @@ export const routes: RouteRecordRaw[] = [
     path: '/admin',
     component: () => import('@/views/admin/AdminLayout.vue'),
     beforeEnter: adminGuard,
-    redirect: { name: 'admin-members' },
+    redirect: { name: 'admin-books' },
     children: [
+      {
+        path: 'livros',
+        name: 'admin-books',
+        component: () => import('@/views/admin/AdminBooks.vue'),
+        meta: { title: 'Livros — Painel Admin', pageClass: 'page-admin' },
+      },
       {
         path: 'membros',
         name: 'admin-members',

@@ -11,6 +11,16 @@
 
       <nav class="admin-sidebar__nav" aria-label="Navegação do painel">
         <RouterLink
+          :to="{ name: 'admin-books' }"
+          class="admin-sidebar__link"
+          :class="{ 'is-active': route.name === 'admin-books' }"
+        >
+          <BaseIcon name="book" class="admin-sidebar__link-icon" />
+          <span>Livros</span>
+          <span v-if="bookCount > 0" class="admin-sidebar__badge">{{ bookCount }}</span>
+        </RouterLink>
+
+        <RouterLink
           :to="{ name: 'admin-members' }"
           class="admin-sidebar__link"
           :class="{ 'is-active': route.name === 'admin-members' }"
@@ -34,7 +44,7 @@
           class="admin-sidebar__link"
           :class="{ 'is-active': route.name === 'admin-entities' }"
         >
-          <BaseIcon name="book" class="admin-sidebar__link-icon" />
+          <BaseIcon name="menu" class="admin-sidebar__link-icon" />
           <span>Dados</span>
         </RouterLink>
 
@@ -73,10 +83,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { useAuthStore } from '@/stores'
+import { useAuthStore, useBooksStore } from '@/stores'
 import { usePageMeta } from '@/composables'
 
 import UserAvatar from '@/components/UserAvatar.vue'
@@ -92,6 +102,7 @@ const route = useRoute()
 const authStore = useAuthStore()
 
 const memberCount = ref(0)
+const bookCount = computed(() => useBooksStore().size)
 
 onMounted(async () => {
   try {

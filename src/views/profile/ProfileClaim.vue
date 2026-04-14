@@ -1,6 +1,6 @@
 <template>
   <div class="profile-section">
-    <!-- Header — mesmo padrão do AdminEnrichment -->
+    <!-- Header -->
     <div class="profile-section__header">
       <div>
         <h2 class="profile-section__title">Vínculos</h2>
@@ -156,6 +156,10 @@ const submitClaim = async () => {
 
   try {
     const result = await claimRegister(quemNome.value)
+
+    if (result.name_synced && result.claim_name && authStore.user) {
+      authStore.user = { ...authStore.user, name: result.claim_name }
+    }
 
     if (typeof result.updated_books === 'number' && typeof result.matched_books === 'number') {
       successMessage.value = `Pronto! ${result.updated_books} livro(s) vinculados de ${result.matched_books} menção(ões) encontradas.`

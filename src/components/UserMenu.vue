@@ -41,7 +41,7 @@
 
         <RouterLink
           v-if="store.isAdmin"
-          :to="{ name: 'admin-members' }"
+          :to="{ name: 'admin-books' }"
           class="user-dropdown__item"
           role="menuitem"
           @click="isOpen = false"

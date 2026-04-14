@@ -41,6 +41,7 @@ export interface RegisterResponse {
   claim_name?: string
   matched_books?: number
   updated_books?: number
+  name_synced?: boolean
 }
 
 export interface ClaimHistoryEntry {

@@ -53,6 +53,25 @@ export function useEntityCrud({ resource }: EntityCrudOptions) {
     return created
   }
 
+  const update = async (id: string, nome: string): Promise<SupportEntity> => {
+    const res = await fetch(`${API_BASE}/${resource}/${id}`, {
+      method: 'PATCH',
+      headers: buildHeaders(),
+      body: JSON.stringify({ nome }),
+    })
+
+    if (!res.ok) {
+      const { error: msg } = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+      throw new Error(msg ?? 'Erro ao atualizar item.')
+    }
+
+    const updated: SupportEntity = await res.json()
+    items.value = items.value
+      .map((e) => (e._id === id ? updated : e))
+      .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+    return updated
+  }
+
   const remove = async (id: string): Promise<void> => {
     const res = await fetch(`${API_BASE}/${resource}/${id}`, {
       method: 'DELETE',
@@ -67,5 +86,5 @@ export function useEntityCrud({ resource }: EntityCrudOptions) {
     items.value = items.value.filter((e) => e._id !== id)
   }
 
-  return { items, loading, error, fetchAll, create, remove }
+  return { items, loading, error, fetchAll, create, update, remove }
 }
