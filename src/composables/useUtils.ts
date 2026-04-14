@@ -1,16 +1,19 @@
 import DOMPurify from 'dompurify'
 
-const normalizeText = (value: string): string =>
-  value
+const normalizeText = (value: string | undefined): string => {
+  if (!value) return ''
+  return value
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/\s+/g, '-')
     .replace(/-{2,}/g, '-')
     .trim()
+}
 
-const slugify = (value: string): string =>
-  value
+const slugify = (value: string): string => {
+  if (!value) return ''
+  return value
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '') // remove acentos
     .toLowerCase()
@@ -18,6 +21,7 @@ const slugify = (value: string): string =>
     .trim()
     .replace(/\s+/g, '-') // espaços → hífens
     .replace(/-{2,}/g, '-') // colapsa hífens duplos
+}
 
 const sanitizeText = (content: string): string => DOMPurify.sanitize(content)
 
