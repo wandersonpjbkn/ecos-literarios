@@ -21,7 +21,7 @@
         </div>
 
         <div class="header-actions">
-          <RouterLink v-if="storeAuth.isLoggedIn" :to="{ name: 'profile-claim' }" class="config-btn">
+          <RouterLink v-if="storeAuth.isLoggedIn" :to="{ name: 'profile-account' }" class="config-btn">
             <BaseIcon name="user" class="config-btn__icon" aria-hidden="true" />
           </RouterLink>
           <button

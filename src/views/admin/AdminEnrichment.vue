@@ -640,6 +640,7 @@ onMounted(fetchStatusAndHistory)
     padding: 0.7rem 0.8rem;
     display: grid;
     gap: 0.4rem;
+    background: var(--color-background-default);
     grid-template-columns: auto 1fr auto;
     align-items: center;
   }
@@ -683,7 +684,7 @@ onMounted(fetchStatusAndHistory)
 
   .results-list {
     margin: 0 0.8rem 0.8rem;
-    background: var(--color-background-subtle);
+    background: var(--color-surface-raised);
   }
 }
 

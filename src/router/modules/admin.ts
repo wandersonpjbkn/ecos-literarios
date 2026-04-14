@@ -32,6 +32,12 @@ export const routes: RouteRecordRaw[] = [
         meta: { title: 'Permissões — Painel Admin', pageClass: 'page-admin' },
       },
       {
+        path: 'dados',
+        name: 'admin-entities',
+        component: () => import('@/views/admin/AdminEntities.vue'),
+        meta: { title: 'Dados — Painel Admin', pageClass: 'page-admin' },
+      },
+      {
         path: 'enriquecimento',
         name: 'admin-enrichment',
         component: () => import('@/views/admin/AdminEnrichment.vue'),

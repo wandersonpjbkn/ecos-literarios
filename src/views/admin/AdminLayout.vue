@@ -30,6 +30,15 @@
         </RouterLink>
 
         <RouterLink
+          :to="{ name: 'admin-entities' }"
+          class="admin-sidebar__link"
+          :class="{ 'is-active': route.name === 'admin-entities' }"
+        >
+          <BaseIcon name="book" class="admin-sidebar__link-icon" />
+          <span>Dados</span>
+        </RouterLink>
+
+        <RouterLink
           :to="{ name: 'admin-enrichment' }"
           class="admin-sidebar__link"
           :class="{ 'is-active': route.name === 'admin-enrichment' }"
