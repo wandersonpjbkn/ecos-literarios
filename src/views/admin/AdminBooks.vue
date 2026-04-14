@@ -151,6 +151,10 @@ interface AdminBook {
   quem_nome: string
   porque: string
   isbn?: string
+  cover_url?: string
+  synopsis?: string
+  page_count?: number
+  published_year?: number
 }
 
 type SegmentFilter = 'all' | 'missing' | 'complete' | 'missing-isbn'
@@ -188,6 +192,10 @@ const hasMissingData = (book: AdminBook) => {
     isMissingField(midiaNome) ||
     isMissingField(book.porque) ||
     isMissingField(book.isbn) ||
+    isMissingField(book.cover_url) ||
+    isMissingField(book.synopsis) ||
+    !book.page_count ||
+    !book.published_year ||
     book.subgeneros.length === 0
   )
 }
