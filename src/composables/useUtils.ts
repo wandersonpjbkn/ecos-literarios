@@ -1,8 +1,8 @@
 import DOMPurify from 'dompurify'
 
-const normalizeText = (value: string | undefined): string => {
-  if (!value) return ''
-  return value
+const normalizeText = (value: unknown): string => {
+  if (typeof value !== 'string') return ''
+  return String(value)
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
@@ -11,9 +11,9 @@ const normalizeText = (value: string | undefined): string => {
     .trim()
 }
 
-const slugify = (value: string): string => {
-  if (!value) return ''
-  return value
+const slugify = (value: unknown): string => {
+  if (typeof value !== 'string') return ''
+  return String(value)
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '') // remove acentos
     .toLowerCase()
