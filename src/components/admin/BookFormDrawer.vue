@@ -26,113 +26,252 @@
         <!-- Body -->
         <div class="drawer-body">
           <form class="book-form" @submit.prevent="handleSubmit">
-            <!-- isbn -->
-            <div class="form-field">
-              <label for="bf-isbn" class="form-field__label">ISBN</label>
-              <input
-                id="bf-isbn"
-                v-model.trim="form.isbn"
-                type="text"
-                class="form-field__input form-field__input--narrow"
-                placeholder="978-…"
-                :disabled="isSaving"
-                autocomplete="off"
-                maxlength="17"
-              />
-            </div>
+            <section class="form-section">
+              <h3 class="form-section__title">Dados principais</h3>
+              <div class="form-grid">
+                <!-- titulo -->
+                <div class="form-field form-field--full">
+                  <label for="bf-titulo" class="form-field__label">Título *</label>
+                  <input
+                    id="bf-titulo"
+                    ref="firstInputRef"
+                    v-model.trim="form.titulo"
+                    type="text"
+                    class="form-field__input"
+                    :disabled="isSaving"
+                    autocomplete="off"
+                  />
+                </div>
 
-            <!-- titulo -->
-            <div class="form-field">
-              <label for="bf-titulo" class="form-field__label">Título *</label>
-              <input
-                id="bf-titulo"
-                ref="firstInputRef"
-                v-model.trim="form.titulo"
-                type="text"
-                class="form-field__input"
-                :disabled="isSaving"
-                autocomplete="off"
-              />
-            </div>
+                <!-- isbn -->
+                <div class="form-field">
+                  <label for="bf-isbn" class="form-field__label">ISBN</label>
+                  <input
+                    id="bf-isbn"
+                    v-model.trim="form.isbn"
+                    type="text"
+                    class="form-field__input"
+                    placeholder="978-…"
+                    :disabled="isSaving"
+                    autocomplete="off"
+                    maxlength="17"
+                  />
+                </div>
 
-            <!-- autor -->
-            <div class="form-field">
-              <label class="form-field__label">Autor *</label>
-              <MultiSelect
-                label="Selecionar autor"
-                :options="autorOptions"
-                :selected="form.autor"
-                :multiple="false"
-                :searchable="true"
-                @toggle="(v) => (form.autor = v)"
-              />
-            </div>
+                <!-- ano -->
+                <div class="form-field">
+                  <label for="bf-year" class="form-field__label">Ano de publicação</label>
+                  <input
+                    id="bf-year"
+                    v-model.trim="form.published_year"
+                    type="number"
+                    class="form-field__input"
+                    :disabled="isSaving"
+                    autocomplete="off"
+                    min="0"
+                    step="1"
+                  />
+                </div>
 
-            <!-- midia -->
-            <div class="form-field">
-              <label class="form-field__label">Mídia *</label>
-              <MultiSelect
-                label="Selecionar mídia"
-                :options="midiaOptions"
-                :selected="form.midia"
-                :multiple="false"
-                :searchable="false"
-                @toggle="(v) => (form.midia = v)"
-              />
-            </div>
+                <!-- paginas -->
+                <div class="form-field">
+                  <label for="bf-pages" class="form-field__label">Qtd. de páginas</label>
+                  <input
+                    id="bf-pages"
+                    v-model.trim="form.page_count"
+                    type="number"
+                    class="form-field__input"
+                    :disabled="isSaving"
+                    autocomplete="off"
+                    min="0"
+                    step="1"
+                  />
+                </div>
 
-            <!-- categoria -->
-            <div class="form-field">
-              <label class="form-field__label">Categoria *</label>
-              <MultiSelect
-                label="Selecionar categoria"
-                :options="categoriaOptions"
-                :selected="form.categoria"
-                :multiple="false"
-                :searchable="false"
-                @toggle="(v) => (form.categoria = v)"
-              />
-            </div>
+                <!-- mencionado -->
+                <div class="form-field">
+                  <label for="bf-quem" class="form-field__label">Mencionado por *</label>
+                  <input
+                    id="bf-quem"
+                    v-model.trim="form.quem_nome"
+                    type="text"
+                    class="form-field__input"
+                    placeholder="Nome de quem indicou"
+                    :disabled="isSaving"
+                    autocomplete="off"
+                  />
+                </div>
+              </div>
+            </section>
 
-            <!-- subgeneros -->
-            <div class="form-field">
-              <label class="form-field__label">Sub-gêneros</label>
-              <MultiSelect
-                label="Selecionar sub-gêneros"
-                :options="subgeneroOptions"
-                :selected="form.subgeneros"
-                :multiple="true"
-                :searchable="true"
-                @toggle="handleSubgeneroToggle"
-                @clear="form.subgeneros = []"
-              />
-            </div>
+            <section class="form-section">
+              <h3 class="form-section__title">Classificação</h3>
+              <div class="form-grid">
+                <!-- autor -->
+                <div class="form-field">
+                  <label class="form-field__label">Autor *</label>
+                  <MultiSelect
+                    label="Selecionar autor"
+                    :options="autorOptions"
+                    :selected="form.autor"
+                    :multiple="false"
+                    :searchable="true"
+                    @toggle="(v) => (form.autor = v)"
+                  />
+                </div>
 
-            <!-- quem_nome -->
-            <div class="form-field">
-              <label for="bf-quem" class="form-field__label">Mencionado por *</label>
-              <input
-                id="bf-quem"
-                v-model.trim="form.quem_nome"
-                type="text"
-                class="form-field__input"
-                placeholder="Nome de quem indicou"
-                :disabled="isSaving"
-                autocomplete="off"
-              />
-            </div>
+                <!-- midia -->
+                <div class="form-field">
+                  <label class="form-field__label">Mídia *</label>
+                  <MultiSelect
+                    label="Selecionar mídia"
+                    :options="midiaOptions"
+                    :selected="form.midia"
+                    :multiple="false"
+                    :searchable="false"
+                    @toggle="(v) => (form.midia = v)"
+                  />
+                </div>
 
-            <!-- porque -->
-            <div class="form-field">
-              <label for="bf-porque" class="form-field__label">Por que foi indicado</label>
-              <textarea
-                id="bf-porque"
-                v-model.trim="form.porque"
-                class="form-field__textarea"
-                rows="3"
-                :disabled="isSaving"
-              />
-            </div>
+                <!-- categoria -->
+                <div class="form-field">
+                  <label class="form-field__label">Categoria *</label>
+                  <MultiSelect
+                    label="Selecionar categoria"
+                    :options="categoriaOptions"
+                    :selected="form.categoria"
+                    :multiple="false"
+                    :searchable="false"
+                    @toggle="(v) => (form.categoria = v)"
+                  />
+                </div>
+
+                <!-- subgeneros -->
+                <div class="form-field">
+                  <label class="form-field__label">Sub-gêneros</label>
+                  <MultiSelect
+                    label="Selecionar sub-gêneros"
+                    :options="subgeneroOptions"
+                    :selected="form.subgeneros"
+                    :multiple="true"
+                    :searchable="true"
+                    @toggle="handleSubgeneroToggle"
+                    @clear="form.subgeneros = []"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section class="form-section">
+              <h3 class="form-section__title">Enriquecimento</h3>
+              <div class="enrichment-actions">
+                <button
+                  v-if="isEditMode"
+                  type="button"
+                  class="drawer-btn drawer-btn--secondary"
+                  :disabled="isSaving || enrichmentLoading"
+                  @click="fetchEnrichmentPreview"
+                >
+                  {{ enrichmentLoading ? 'Buscando dados…' : 'Sugerir enriquecimento' }}
+                </button>
+                <p v-else class="enrichment-hint">
+                  Salve o livro para habilitar sugestões automáticas de enriquecimento.
+                </p>
+              </div>
+
+              <p v-if="enrichmentError" class="drawer-feedback drawer-feedback--error">
+                {{ enrichmentError }}
+              </p>
+
+              <div v-if="enrichmentPreview" class="enrichment-preview">
+                <div class="enrichment-preview__header">
+                  <strong>Prévia disponível ({{ enrichmentPreview.sourceLabel }})</strong>
+                  <p>Selecione abaixo quais campos deseja aplicar.</p>
+                </div>
+
+                <label
+                  v-for="item in enrichmentPreview.items"
+                  :key="item.field"
+                  class="enrichment-option"
+                  :class="{ 'is-disabled': !item.hasValue }"
+                >
+                  <input
+                    v-model="selectedEnrichmentFields"
+                    type="checkbox"
+                    :value="item.field"
+                    :disabled="!item.hasValue || enrichmentApplying || isSaving"
+                  />
+                  <span class="enrichment-option__meta">
+                    <strong>{{ item.label }}</strong>
+                    <small>{{ item.preview || 'Sem valor retornado' }}</small>
+                  </span>
+                </label>
+
+                <button
+                  type="button"
+                  class="drawer-btn drawer-btn--primary"
+                  :disabled="selectedEnrichmentFields.length === 0 || enrichmentApplying || isSaving"
+                  @click="applySelectedEnrichment"
+                >
+                  {{ enrichmentApplying ? 'Aplicando…' : 'Aplicar seleção no livro' }}
+                </button>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-field form-field--full">
+                  <label for="bf-cover" class="form-field__label">URL da capa</label>
+                  <input
+                    id="bf-cover"
+                    v-model.trim="form.cover_url"
+                    type="url"
+                    class="form-field__input"
+                    placeholder="https://…"
+                    :disabled="isSaving"
+                    autocomplete="off"
+                  />
+                </div>
+
+                <div class="form-field form-field--full">
+                  <label for="bf-google-id" class="form-field__label">Google Books ID</label>
+                  <input
+                    id="bf-google-id"
+                    v-model.trim="form.google_books_id"
+                    type="text"
+                    class="form-field__input"
+                    :disabled="isSaving"
+                    autocomplete="off"
+                  />
+                </div>
+
+                <div class="form-field form-field--full">
+                  <label for="bf-synopsis" class="form-field__label">Sinopse</label>
+                  <textarea
+                    id="bf-synopsis"
+                    v-model.trim="form.synopsis"
+                    class="form-field__textarea"
+                    rows="4"
+                    :disabled="isSaving"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section class="form-section">
+              <h3 class="form-section__title">Contexto</h3>
+              <div class="form-grid">
+                <!-- porque -->
+                <div class="form-field form-field--full">
+                  <label for="bf-porque" class="form-field__label">Por que foi indicado</label>
+                  <textarea
+                    id="bf-porque"
+                    v-model.trim="form.porque"
+                    class="form-field__textarea"
+                    rows="3"
+                    :disabled="isSaving"
+                  />
+                </div>
+              </div>
+            </section>
           </form>
         </div>
 
@@ -179,6 +318,27 @@ interface BookPayload {
   quem_nome: string
   porque: string
   isbn?: string
+  cover_url?: string
+  synopsis?: string
+  google_books_id?: string | number
+  page_count?: number
+  published_year?: number
+}
+
+type EnrichmentApplyField = 'description' | 'coverUrl' | 'publisher' | 'isbn' | 'pageCount' | 'publishedYear'
+
+interface EnrichmentPreviewResponse {
+  source: 'google_books' | 'open_library'
+  preview: {
+    description?: string
+    coverUrl?: string
+    publisher?: string
+    isbn?: string
+    pageCount?: number
+    publishedYear?: number
+    externalId?: string
+    strategy?: string
+  }
 }
 
 const props = defineProps<{
@@ -196,6 +356,14 @@ const firstInputRef = ref<HTMLInputElement | null>(null)
 const isSaving = ref(false)
 const error = ref('')
 const success = ref('')
+const enrichmentLoading = ref(false)
+const enrichmentApplying = ref(false)
+const enrichmentError = ref('')
+const selectedEnrichmentFields = ref<EnrichmentApplyField[]>([])
+const enrichmentPreview = ref<{
+  sourceLabel: string
+  items: Array<{ field: EnrichmentApplyField; label: string; preview: string; hasValue: boolean }>
+} | null>(null)
 
 const form = reactive({
   titulo: '',
@@ -206,6 +374,11 @@ const form = reactive({
   quem_nome: '',
   porque: '',
   isbn: '',
+  cover_url: '',
+  synopsis: '',
+  google_books_id: '',
+  page_count: '',
+  published_year: '',
 })
 
 const isEditMode = computed(() => !!props.book)
@@ -248,6 +421,9 @@ watch(
 
     error.value = ''
     success.value = ''
+    enrichmentError.value = ''
+    enrichmentPreview.value = null
+    selectedEnrichmentFields.value = []
 
     if (props.book) {
       form.titulo = props.book.titulo
@@ -258,6 +434,11 @@ watch(
       form.quem_nome = props.book.quem_nome
       form.porque = props.book.porque ?? ''
       form.isbn = props.book.isbn ?? ''
+      form.cover_url = props.book.cover_url ?? ''
+      form.synopsis = props.book.synopsis ?? ''
+      form.google_books_id = props.book.google_books_id ? String(props.book.google_books_id) : ''
+      form.page_count = props.book.page_count ? String(props.book.page_count) : ''
+      form.published_year = props.book.published_year ? String(props.book.published_year) : ''
     } else {
       form.titulo = ''
       form.autor = ''
@@ -267,6 +448,11 @@ watch(
       form.quem_nome = ''
       form.porque = ''
       form.isbn = ''
+      form.cover_url = ''
+      form.synopsis = ''
+      form.google_books_id = ''
+      form.page_count = ''
+      form.published_year = ''
     }
 
     document.body.style.overflow = 'hidden'
@@ -297,6 +483,14 @@ const handleSubmit = async () => {
   }
 
   if (form.isbn) payload.isbn = form.isbn
+  if (form.cover_url) payload.cover_url = form.cover_url
+  if (form.synopsis) payload.synopsis = form.synopsis
+  if (form.google_books_id) payload.google_books_id = form.google_books_id
+
+  const pageCount = Number(form.page_count)
+  const publishedYear = Number(form.published_year)
+  if (Number.isFinite(pageCount) && pageCount > 0) payload.page_count = pageCount
+  if (Number.isFinite(publishedYear) && publishedYear > 0) payload.published_year = publishedYear
 
   try {
     const url = isEditMode.value ? `${API_BASE}/books/${props.book!._id}` : `${API_BASE}/books`
@@ -325,6 +519,80 @@ const handleSubmit = async () => {
   }
 }
 
+const fetchEnrichmentPreview = async () => {
+  if (!props.book?._id) return
+  enrichmentLoading.value = true
+  enrichmentError.value = ''
+
+  try {
+    const res = await fetch(`${API_BASE}/books/${props.book._id}/enrich`, {
+      method: 'POST',
+      headers: buildHeaders(),
+    })
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+      throw new Error(body.error ?? `HTTP ${res.status}`)
+    }
+
+    const payload = (await res.json()) as EnrichmentPreviewResponse
+
+    const sourceLabel = payload.source === 'google_books' ? 'Google Books' : 'Open Library'
+    const items: Array<{ field: EnrichmentApplyField; label: string; preview: string; hasValue: boolean }> = [
+      { field: 'description', label: 'Sinopse', preview: payload.preview.description ?? '', hasValue: !!payload.preview.description },
+      { field: 'coverUrl', label: 'URL da capa', preview: payload.preview.coverUrl ?? '', hasValue: !!payload.preview.coverUrl },
+      { field: 'publisher', label: 'Editora', preview: payload.preview.publisher ?? '', hasValue: !!payload.preview.publisher },
+      { field: 'isbn', label: 'ISBN', preview: payload.preview.isbn ?? '', hasValue: !!payload.preview.isbn },
+      {
+        field: 'pageCount',
+        label: 'Qtd. páginas',
+        preview: payload.preview.pageCount ? String(payload.preview.pageCount) : '',
+        hasValue: typeof payload.preview.pageCount === 'number' && payload.preview.pageCount > 0,
+      },
+      {
+        field: 'publishedYear',
+        label: 'Ano publicação',
+        preview: payload.preview.publishedYear ? String(payload.preview.publishedYear) : '',
+        hasValue: typeof payload.preview.publishedYear === 'number' && payload.preview.publishedYear > 0,
+      },
+    ]
+
+    enrichmentPreview.value = { sourceLabel, items }
+    selectedEnrichmentFields.value = items.filter((item) => item.hasValue).map((item) => item.field)
+  } catch (e) {
+    enrichmentError.value = e instanceof Error ? e.message : 'Erro ao buscar preview de enriquecimento.'
+  } finally {
+    enrichmentLoading.value = false
+  }
+}
+
+const applySelectedEnrichment = async () => {
+  if (!props.book?._id || selectedEnrichmentFields.value.length === 0) return
+  enrichmentApplying.value = true
+  enrichmentError.value = ''
+
+  try {
+    const res = await fetch(`${API_BASE}/books/${props.book._id}/enrich/apply`, {
+      method: 'POST',
+      headers: buildHeaders(),
+      body: JSON.stringify({ fields: selectedEnrichmentFields.value }),
+    })
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+      throw new Error(body.error ?? `HTTP ${res.status}`)
+    }
+
+    success.value = 'Enriquecimento aplicado ao livro.'
+    emit('saved')
+    await fetchEnrichmentPreview()
+  } catch (e) {
+    enrichmentError.value = e instanceof Error ? e.message : 'Erro ao aplicar enriquecimento.'
+  } finally {
+    enrichmentApplying.value = false
+  }
+}
+
 onMounted(() => {
   autores.fetchAll()
   midias.fetchAll()
@@ -348,7 +616,7 @@ onMounted(() => {
   z-index: 510;
   display: flex;
   flex-direction: column;
-  width: min(480px, 92dvw);
+  width: min(980px, 96dvw);
   height: 100dvh;
   background: var(--color-surface-default);
   box-shadow: -8px 0 32px rgba(0, 0, 0, 0.16);
@@ -400,6 +668,91 @@ onMounted(() => {
 .book-form {
   display: flex;
   flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-section {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-default);
+  padding: 0.9rem;
+  background: var(--color-surface-raised);
+
+  &__title {
+    margin: 0 0 0.75rem;
+    font-size: 0.86rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-subtle);
+  }
+}
+
+.enrichment-actions {
+  margin-bottom: 0.75rem;
+}
+
+.enrichment-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-text-subtle);
+}
+
+.enrichment-preview {
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-sm);
+  padding: 0.7rem;
+  background: var(--color-surface-default);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+
+  &__header {
+    p {
+      margin: 0.25rem 0 0;
+      font-size: 0.8rem;
+      color: var(--color-text-subtle);
+    }
+  }
+}
+
+.enrichment-option {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-sm);
+  background: var(--color-surface-raised);
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  strong {
+    font-size: 0.82rem;
+    color: var(--color-text-default);
+  }
+
+  small {
+    font-size: 0.74rem;
+    color: var(--color-text-subtle);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &.is-disabled {
+    opacity: 0.55;
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -444,15 +797,15 @@ onMounted(() => {
     min-height: 40px;
   }
 
-  &__input--narrow {
-    max-width: 220px;
-  }
-
   &__textarea {
     padding: 0.6rem 0.75rem;
     resize: vertical;
     min-height: 80px;
     line-height: 1.5;
+  }
+
+  &--full {
+    grid-column: 1 / -1;
   }
 }
 
@@ -541,5 +894,11 @@ onMounted(() => {
 .drawer-right-enter-from,
 .drawer-right-leave-to {
   transform: translateX(100%);
+}
+
+@media (max-width: 960px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

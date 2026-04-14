@@ -61,14 +61,14 @@
 
         <template v-else>
           <div v-if="summary" class="summary-grid">
-            <article class="summary-card summary-card--enriched">
-              <p>Enriquecidos</p>
-              <strong>{{ summary.enriched }}</strong>
+            <article class="summary-card summary-card--applied">
+              <p>Aplicados</p>
+              <strong>{{ summary.applied }}</strong>
             </article>
 
-            <article class="summary-card summary-card--not-found">
-              <p>Não encontrados</p>
-              <strong>{{ summary.not_found }}</strong>
+            <article class="summary-card summary-card--skipped">
+              <p>Ignorados</p>
+              <strong>{{ summary.skipped }}</strong>
             </article>
 
             <article class="summary-card summary-card--failed">
@@ -122,10 +122,10 @@
 
             <div class="history-item__stats">
               <span
-                >enriched: <strong>{{ run.enriched }}</strong></span
+                >applied: <strong>{{ run.applied }}</strong></span
               >
               <span
-                >not_found: <strong>{{ run.skipped }}</strong></span
+                >skipped: <strong>{{ run.skipped }}</strong></span
               >
               <span
                 >failed: <strong>{{ run.failed }}</strong></span
@@ -144,7 +144,7 @@
               <div v-for="item in run.results" :key="`${run.id}-${item.book_id}`" class="result-row">
                 <span class="result-row__title">{{ item.titulo }}</span>
                 <span class="result-row__status" :class="`is-${item.status}`">{{ statusLabel(item.status) }}</span>
-                <span class="result-row__detail">{{ item.strategy ?? item.error ?? '—' }}</span>
+                <span class="result-row__detail">{{ item.strategy ?? item.reason ?? item.error ?? '—' }}</span>
               </div>
             </div>
           </details>
@@ -161,7 +161,7 @@ import { useAuthStore } from '@/stores'
 
 const API_BASE = import.meta.env.VITE_API_URL as string
 
-type ResultStatus = 'enriched' | 'not_found' | 'failed'
+type ResultStatus = 'applied' | 'skipped' | 'failed'
 
 interface EnrichmentResult {
   id: string
@@ -172,8 +172,8 @@ interface EnrichmentResult {
 
 interface EnrichmentSummary {
   total: number
-  enriched: number
-  not_found: number
+  applied: number
+  skipped: number
   failed: number
 }
 
@@ -181,8 +181,11 @@ interface EnrichmentHistoryItem {
   book_id: string
   titulo: string
   status: ResultStatus
+  source?: 'google_books' | 'open_library'
+  reason?: 'manual_edit' | 'not_found' | 'missing_author'
   strategy?: string
   error?: string
+  cover_url?: string
 }
 
 interface EnrichmentRun {
@@ -192,7 +195,7 @@ interface EnrichmentRun {
   force: boolean
   initiated_by_email: string
   total: number
-  enriched: number
+  applied: number
   skipped: number
   failed: number
   coverage_pct_after: number
@@ -236,8 +239,8 @@ const formatDateTime = (iso: string) => {
 
 const statusLabel = (value: ResultStatus) => {
   const map: Record<ResultStatus, string> = {
-    enriched: 'enriched',
-    not_found: 'not_found',
+    applied: 'applied',
+    skipped: 'skipped',
     failed: 'failed',
   }
   return map[value]
@@ -249,7 +252,7 @@ const authHeaders = () => ({
 })
 
 const parseResultStatus = (raw: unknown): ResultStatus => {
-  if (raw === 'enriched' || raw === 'not_found' || raw === 'failed') return raw
+  if (raw === 'applied' || raw === 'skipped' || raw === 'failed') return raw
   return 'failed'
 }
 
@@ -266,8 +269,8 @@ const normalizeRunResult = (raw: unknown, idx: number): EnrichmentResult => {
 
 const normalizeSummary = (list: EnrichmentResult[], raw: Record<string, unknown>): EnrichmentSummary => ({
   total: Number(raw.total ?? list.length),
-  enriched: Number(raw.enriched ?? list.filter((r) => r.status === 'enriched').length),
-  not_found: Number(raw.skipped ?? list.filter((r) => r.status === 'not_found').length),
+  applied: Number(raw.enriched ?? list.filter((r) => r.status === 'applied').length),
+  skipped: Number(raw.skipped ?? list.filter((r) => r.status === 'skipped').length),
   failed: Number(raw.failed ?? list.filter((r) => r.status === 'failed').length),
 })
 
@@ -307,7 +310,7 @@ const fetchHistory = async () => {
     force: Boolean(run.force),
     initiated_by_email: String(run.initiated_by_email ?? '-'),
     total: Number(run.total ?? 0),
-    enriched: Number(run.enriched ?? 0),
+    applied: Number(run.enriched ?? 0),
     skipped: Number(run.skipped ?? 0),
     failed: Number(run.failed ?? 0),
     coverage_pct_after: Number(run.coverage_pct_after ?? 0),
@@ -317,8 +320,14 @@ const fetchHistory = async () => {
         book_id: String(row.book_id ?? row.id ?? ''),
         titulo: String(row.titulo ?? row.title ?? 'Livro'),
         status: parseResultStatus(row.status),
+        source: row.source === 'google_books' || row.source === 'open_library' ? row.source : undefined,
+        reason:
+          row.reason === 'manual_edit' || row.reason === 'not_found' || row.reason === 'missing_author'
+            ? row.reason
+            : undefined,
         strategy: typeof row.strategy === 'string' ? row.strategy : '',
         error: typeof row.error === 'string' ? row.error : '',
+        cover_url: typeof row.cover_url === 'string' ? row.cover_url : '',
       }
     }),
   }))
@@ -552,11 +561,11 @@ onMounted(fetchStatusAndHistory)
   margin-bottom: 1rem;
 }
 
-.summary-card--enriched {
+.summary-card--applied {
   border-color: color-mix(in srgb, var(--color-success-default, #2e7d32) 55%, var(--color-border-default));
 }
 
-.summary-card--not-found {
+.summary-card--skipped {
   border-color: color-mix(in srgb, var(--color-warning-default, #ed6c02) 55%, var(--color-border-default));
 }
 
@@ -611,11 +620,11 @@ onMounted(fetchStatusAndHistory)
     font-weight: 600;
     text-transform: lowercase;
 
-    &.is-enriched {
+    &.is-applied {
       color: var(--color-success-default, #2e7d32);
     }
 
-    &.is-not_found {
+    &.is-skipped {
       color: var(--color-warning-default, #ed6c02);
     }
 
