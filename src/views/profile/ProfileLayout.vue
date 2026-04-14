@@ -1,6 +1,5 @@
 <template>
   <div class="profile-layout">
-    <!-- Sidebar fixa -->
     <aside class="profile-sidebar">
       <div class="profile-sidebar__header">
         <RouterLink :to="{ name: 'catalog-books' }" class="profile-sidebar__back">
@@ -10,7 +9,16 @@
         <h1 class="profile-sidebar__title">Meu perfil</h1>
       </div>
 
-      <nav class="profile-sidebar__nav" aria-label="Navegação do painel">
+      <nav class="profile-sidebar__nav" aria-label="Navegação do perfil">
+        <RouterLink
+          :to="{ name: 'profile-account' }"
+          class="profile-sidebar__link"
+          :class="{ 'is-active': route.name === 'profile-account' }"
+        >
+          <BaseIcon name="user" class="profile-sidebar__link-icon" aria-hidden="true" />
+          <span>Conta</span>
+        </RouterLink>
+
         <RouterLink
           :to="{ name: 'profile-claim' }"
           class="profile-sidebar__link"
@@ -25,12 +33,11 @@
         <UserAvatar :alt="authStore.user!.name" class="profile-sidebar__avatar" />
         <div class="profile-sidebar__user">
           <span class="profile-sidebar__user-name">{{ authStore.user!.name }}</span>
-          <span class="profile-sidebar__user-role">Perfil</span>
+          <span class="profile-sidebar__user-role">{{ roleLabel }}</span>
         </div>
       </div>
     </aside>
 
-    <!-- Conteúdo principal -->
     <main class="profile-main">
       <RouterView />
     </main>
@@ -38,7 +45,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useAuthStore } from '@/stores'
@@ -47,29 +54,20 @@ import { usePageMeta } from '@/composables'
 import UserAvatar from '@/components/UserAvatar.vue'
 
 usePageMeta({
-  title: 'Painel Admin',
-  description: 'Painel de administração do Ecos Literários',
+  title: 'Meu perfil',
+  description: 'Gerencie seu vínculo de menções e informações de conta no Ecos Literários',
 })
-
-const API_BASE = import.meta.env.VITE_API_URL as string
 
 const route = useRoute()
 const authStore = useAuthStore()
 
-const memberCount = ref(0)
-
-onMounted(async () => {
-  try {
-    const res = await fetch(`${API_BASE}/users`, {
-      headers: { Authorization: `Bearer ${authStore.token}` },
-    })
-    if (res.ok) {
-      const users = await res.json()
-      memberCount.value = users.length
-    }
-  } catch {
-    // silencia — o badge é apenas cosmético
+const roleLabel = computed(() => {
+  const map: Record<string, string> = {
+    admin: 'Administrador',
+    editor: 'Editor',
+    viewer: 'Membro',
   }
+  return map[authStore.user?.role ?? 'viewer'] ?? 'Membro'
 })
 </script>
 
@@ -96,7 +94,6 @@ onMounted(async () => {
   min-height: calc(100dvh - 4rem);
 }
 
-// ── Sidebar ───────────────────────────────────────────────────────
 .profile-sidebar {
   display: flex;
   flex-direction: column;
@@ -180,26 +177,6 @@ onMounted(async () => {
     flex-shrink: 0;
   }
 
-  &__badge {
-    margin-left: auto;
-    min-width: 22px;
-    height: 22px;
-    padding: 0 6px;
-    border-radius: 999px;
-    background: var(--color-background-subtle);
-    color: var(--color-text-subtle);
-    font-size: 0.72rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    .is-active & {
-      background: var(--color-action-default);
-      color: #fff;
-    }
-  }
-
   &__footer {
     display: flex;
     align-items: center;
@@ -238,20 +215,17 @@ onMounted(async () => {
   }
 }
 
-// ── Main ──────────────────────────────────────────────────────────
 .profile-main {
   overflow-y: auto;
   background: var(--color-background-default);
 
   :deep(.profile-section) {
     margin: 0 auto;
-
     max-width: 1200px;
     padding: 2rem;
   }
 }
 
-// ── Mobile ────────────────────────────────────────────────────────
 @media (max-width: 767px) {
   .profile-layout {
     grid-template-columns: 1fr;
@@ -273,7 +247,6 @@ onMounted(async () => {
     &__link {
       flex-shrink: 0;
     }
-
     &__footer {
       display: none;
     }

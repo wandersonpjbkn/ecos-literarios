@@ -93,7 +93,7 @@ const getSupabaseToken = (): string | null => {
   }
 }
 
-const buildHeaders = (): HeadersInit => {
+export const buildHeaders = (): HeadersInit => {
   const headers: HeadersInit = { 'Content-Type': 'application/json' }
   const token = getSupabaseToken()
   if (token) headers['Authorization'] = `Bearer ${token}`

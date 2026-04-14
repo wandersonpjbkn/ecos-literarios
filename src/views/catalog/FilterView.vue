@@ -4,23 +4,21 @@
     <PageStatus :loading="useBooksStore().loading" :error="useBooksStore().error" loading-text="Carregando catálogo…" />
 
     <template v-if="!useBooksStore().loading && !useBooksStore().error">
-      <!-- Hero intro -->
-      <section class="filter-intro accent" :style="{ '--accent': introAccent }">
-        <div class="intro-shell">
-          <RailCard :accent="introAccent" size="sm">
-            <div class="intro-main">
-              <div class="intro-meta">
-                <span class="intro-type-label">{{ config.label }}</span>
-              </div>
-              <h1 class="intro-title">{{ canonicalValue }}</h1>
-              <p class="intro-kicker">
-                <template v-if="activeFilterCount > 0">
-                  <strong>{{ filtered.length }}</strong> de {{ baseFiltered.length }} resultados
-                </template>
-                <template v-else> {{ baseFiltered.length }} resultados nesta seleção </template>
-              </p>
-            </div>
-          </RailCard>
+      <!-- ── Hero full-width ─────────────────────────────────────── -->
+      <section class="hero" :style="{ '--accent': introAccent }">
+        <div class="hero__inner">
+          <span class="hero__type-label">{{ config.label }}</span>
+          <h1 class="hero__title">{{ canonicalValue }}</h1>
+          <p class="hero__kicker">
+            <template v-if="activeFilterCount > 0">
+              <strong>{{ filtered.length }}</strong> de {{ baseFiltered.length }} resultado{{
+                baseFiltered.length !== 1 ? 's' : ''
+              }}
+            </template>
+            <template v-else>
+              {{ baseFiltered.length }} resultado{{ baseFiltered.length !== 1 ? 's' : '' }} nesta seleção
+            </template>
+          </p>
         </div>
       </section>
 
@@ -151,12 +149,18 @@ import SearchBar from '@/components/SearchBar.vue'
 import FilterPanel from '@/components/FilterPanel.vue'
 import MultiSelect from '@/components/MultiSelect.vue'
 import PageStatus from '@/components/PageStatus.vue'
-import RailCard from '@/components/RailCard.vue'
 import BooksGrid from '@/components/BooksGrid.vue'
 import SectionHeading from '@/components/SectionHeading.vue'
 import BookDetailDrawer from '@/components/BookDetailDrawer.vue'
 
 import type { Book, BookSortOrder, Options, FilterType, ExploreKey, CategoryType } from '@/types'
+
+const ROUTE_FILTER_MAP: Record<string, FilterType> = {
+  'catalog-midia': 'midia',
+  'catalog-category': 'categoria',
+  'catalog-author': 'autor',
+  'catalog-mention': 'mencao',
+}
 
 // ── Config ────────────────────────────────────────────────────────
 const filterConfigs: Record<FilterType, { label: string; bookField: keyof Book; desc: (v: string) => string }> = {
@@ -173,12 +177,12 @@ const filterConfigs: Record<FilterType, { label: string; bookField: keyof Book; 
 const route = useRoute()
 const colors = useCategoryColors()
 
-const filterType = computed(() => route.name as FilterType)
+const filterType = computed(() => ROUTE_FILTER_MAP[route.name as string] ?? 'categoria')
 const filterValue = computed(() => decodeURIComponent(route.params?.slug as string))
-const config = computed(() => filterConfigs[filterType.value] ?? filterConfigs.categoria)
+const config = computed(() => filterConfigs[filterType.value])
 const fixedKey = computed<ExploreKey>(() => (filterType.value === 'mencao' ? 'quem' : filterType.value))
 
-// ── Valor canônico ────────────────────────────────────────────────
+// ── Canonical value ───────────────────────────────────────────────
 const canonicalValue = computed(() => {
   const field = config.value.bookField
   const target = useUtils().slugify(filterValue.value)
@@ -195,7 +199,7 @@ const introAccent = computed(() =>
 
 onMounted(() => useApi().fetchBooks())
 
-// ── Filtros secundários ───────────────────────────────────────────
+// ── Secondary filters ─────────────────────────────────────────────
 const search = ref('')
 const selectedMidia = ref<string[]>([])
 const selectedCategoria = ref<string[]>([])
@@ -210,14 +214,14 @@ watch(filterType, () => {
   selectedQuem.value = []
 })
 
-// ── Base filtrada (comparação normalizada) ────────────────────────
+// ── Base filtered (normalized comparison) ─────────────────────────
 const baseFiltered = computed(() => {
   const field = config.value.bookField
   const target = useUtils().slugify(filterValue.value)
   return useBooksStore().books.filter((b) => useUtils().slugify(String(b[field])) === target)
 })
 
-// ── Opções dos filtros secundários ────────────────────────────────
+// ── Secondary filter options ──────────────────────────────────────
 const optionsMidia = computed(() =>
   fixedKey.value === 'midia' ? [] : [...new Set(baseFiltered.value.map((b) => b.midia).filter(Boolean))].sort(),
 )
@@ -246,7 +250,7 @@ const panelSelected = computed(
   }),
 )
 
-// ── Filtro aplicado ───────────────────────────────────────────────
+// ── Applied filters ───────────────────────────────────────────────
 const filtered = computed(() => {
   let list = baseFiltered.value
 
@@ -351,7 +355,7 @@ const exploreGroups = computed(() => [
   },
 ])
 
-// ── Detalhe ────────────────────────────────────────────────────
+// ── Detail drawer ─────────────────────────────────────────────────
 const detailBook = ref<Book | null>(null)
 const openDetail = (book: Book) => {
   detailBook.value = book
@@ -372,6 +376,66 @@ usePageMeta(
 </script>
 
 <style lang="scss" scoped>
+// ── Hero full-width ───────────────────────────────────────────────
+.hero {
+  background-color: color-mix(in srgb, var(--accent) 45%, #000 55%);
+  padding: 2.5rem 0;
+
+  @media (max-width: 767px) {
+    padding: 1.5rem 0;
+  }
+
+  &__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    @media (max-width: 767px) {
+      padding: 0 1rem;
+    }
+  }
+
+  &__type-label {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    min-height: 24px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  &__title {
+    margin: 0;
+    font-family: var(--font-family-display);
+    font-size: clamp(1.75rem, 4vw, 2.8rem);
+    font-weight: 500;
+    line-height: 1.1;
+    color: #fff;
+    text-transform: capitalize;
+  }
+
+  &__kicker {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.65);
+
+    strong {
+      color: #fff;
+      font-weight: 600;
+    }
+  }
+}
+
 .filter-intro {
   background-color: var(--accent);
   padding: 24px;

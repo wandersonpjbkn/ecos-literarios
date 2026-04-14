@@ -5,22 +5,25 @@
   <div class="app-wrapper">
     <header class="site-header">
       <nav class="header-inner">
-        <RouterLink :to="{ name: 'catalog-books' }" class="brand">
-          <span class="brand-icon">📚</span>
-        </RouterLink>
-
         <div class="header-content">
-          <RouterLink
-            v-if="storeAuth.isLoggedIn"
-            :to="{ name: 'profile-claim' }"
-            class="config-btn"
-            :class="{ 'is-active': route.name === 'profile-claim' }"
-          >
-            <BaseIcon name="user" class="config-btn__icon" aria-hidden="true" />
+          <RouterLink :to="{ name: 'catalog-books' }" class="config-btn">
+            <BaseIcon name="home" class="config-btn__icon" aria-hidden="true" />
           </RouterLink>
+          <button
+            class="config-btn"
+            type="button"
+            :aria-expanded="categorySidebar?.isOpen"
+            aria-label="Categorias"
+            @click="toggleCategories"
+          >
+            <BaseIcon name="menu" class="config-btn__icon" aria-hidden="true" />
+          </button>
         </div>
 
         <div class="header-actions">
+          <RouterLink v-if="storeAuth.isLoggedIn" :to="{ name: 'profile-claim' }" class="config-btn">
+            <BaseIcon name="user" class="config-btn__icon" aria-hidden="true" />
+          </RouterLink>
           <button
             class="config-btn"
             type="button"
@@ -73,6 +76,29 @@
 
     <aside id="sidebar" />
 
+    <!-- Categories navigation sidebar -->
+    <SideBar ref="categorySidebar" title="Categorias" :enter="isMobile ? 'right' : 'left'">
+      <template #body>
+        <nav class="category-nav" aria-label="Navegação por categoria">
+          <RouterLink
+            v-for="cat in categoryLinks"
+            :key="cat.slug"
+            :to="{ name: 'catalog-category', params: { slug: cat.slug } }"
+            class="category-nav__item"
+            :class="{ 'is-active': isCategoryActive(cat.slug) }"
+            @click="categorySidebar?.close()"
+          >
+            <span class="category-nav__dot" :style="{ background: cat.color }" />
+            <span class="category-nav__label">{{ cat.name }}</span>
+            <span class="category-nav__count">{{ cat.count }}</span>
+          </RouterLink>
+
+          <p v-if="categoryLinks.length === 0" class="category-nav__empty">Carregando categorias…</p>
+        </nav>
+      </template>
+    </SideBar>
+
+    <!-- Preferences sidebar -->
     <SideBar ref="menuSidebar" title="Preferências" :enter="isMobile ? 'right' : 'left'">
       <template #body>
         <div class="menu-painel">
@@ -104,15 +130,18 @@
 </template>
 
 <script lang="ts" setup>
-import { defineAsyncComponent, ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
+import { defineAsyncComponent, ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import { Head } from '@unhead/vue/components'
 import { useMediaQuery } from '@vueuse/core'
 
-import { useApi, useTheme, useUtils, useAuth } from '@/composables'
+import { useApi, useTheme, useUtils, useAuth, useCategoryColors } from '@/composables'
+import { useBooksStore } from '@/stores'
 import UserMenu from '@/components/UserMenu.vue'
 import BaseIcon from '@/components/BaseIcon.vue'
+
+import type { CategoryType } from '@/types'
 
 const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
 const MultiSelect = defineAsyncComponent(() => import('@/components/MultiSelect.vue'))
@@ -121,6 +150,8 @@ const SideBar = defineAsyncComponent(() => import('@/components/SideBar.vue'))
 const route = useRoute()
 const { themes, activeTheme, select } = useTheme()
 const { store: storeAuth, restoreSession, watchSession } = useAuth()
+const colors = useCategoryColors()
+const { slugify } = useUtils()
 
 const isMobile = useMediaQuery('(max-width: 767px)')
 
@@ -131,6 +162,7 @@ useHead({
 
 const content = ref<HTMLElement | null>(null)
 const menuSidebar = ref<InstanceType<typeof SideBar> | null>(null)
+const categorySidebar = ref<InstanceType<typeof SideBar> | null>(null)
 
 const themesOptions = themes.map((t) => ({
   value: t.value,
@@ -138,6 +170,32 @@ const themesOptions = themes.map((t) => ({
 }))
 
 const toggleMenu = () => menuSidebar.value?.toggle()
+const toggleCategories = () => categorySidebar.value?.toggle()
+
+// ── Category links derived from loaded books ──────────────────────
+const categoryLinks = computed(() => {
+  const books = useBooksStore().books
+  const countMap = new Map<string, number>()
+
+  for (const book of books) {
+    if (!book.categoria) continue
+    countMap.set(book.categoria, (countMap.get(book.categoria) ?? 0) + 1)
+  }
+
+  return [...countMap.entries()]
+    .sort(([a], [b]) => a.localeCompare(b, 'pt-BR'))
+    .map(([name, count]) => ({
+      name,
+      slug: slugify(name),
+      color: colors.categoryColor(name as CategoryType),
+      count,
+    }))
+})
+
+/** Checks if the current route matches a given category slug */
+const isCategoryActive = (slug: string): boolean => {
+  return route.name === 'catalog-category' && route.params.slug === slug
+}
 
 const forceRefresh = () => {
   useApi().fetchBooks(true)
@@ -240,11 +298,11 @@ watch(route, async () => {
 
   &-inner {
     height: 100%;
-    padding: 2rem 1.25rem;
-    gap: 4rem;
+    padding: 5.25rem 1.25rem;
   }
 
-  &-content {
+  &-content,
+  &-actions {
     gap: 2rem;
   }
 
@@ -328,6 +386,76 @@ watch(route, async () => {
 
     width: $size;
     height: $size;
+  }
+}
+
+// ── Category navigation (SideBar body) ────────────────────────────
+.category-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: var(--border-radius-default);
+    text-decoration: none;
+    font-size: 0.9rem;
+    color: var(--color-text-default);
+    transition:
+      background var(--motion-transition-default),
+      color var(--motion-transition-default);
+
+    &:hover {
+      background: var(--color-background-subtle);
+    }
+
+    &.is-active {
+      background: var(--color-action-background-subtle);
+      color: var(--color-action-default);
+      font-weight: 500;
+    }
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    flex: 1;
+    text-transform: capitalize;
+  }
+
+  &__count {
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--color-background-subtle);
+    color: var(--color-text-subtle);
+    font-size: 0.72rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .is-active & {
+      background: var(--color-action-default);
+      color: #fff;
+    }
+  }
+
+  &__empty {
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: var(--color-text-subtle);
+    text-align: center;
   }
 }
 

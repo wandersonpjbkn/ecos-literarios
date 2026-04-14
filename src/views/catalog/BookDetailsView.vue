@@ -11,6 +11,7 @@
     </div>
 
     <template v-if="!useBooksStore().loading && book">
+      <!-- Breadcrumb -->
       <nav class="top-bar">
         <div class="top-bar__inner">
           <RouterLink :to="{ name: 'catalog-books' }" class="top-bar__back">
@@ -22,23 +23,24 @@
         </div>
       </nav>
 
-      <section class="hero" :style="{ '--accent': categoryColor }">
-        <div class="hero__inner">
+      <!-- ── Hero ───────────────────────────────────────────────── -->
+      <section class="hero" :style="heroVars">
+        <!-- Painel esquerdo: bg da capa + overlay + capa flutuante dentro -->
+        <div class="hero__left" aria-hidden="true">
           <div class="hero__cover-wrap">
-            <div v-if="book.cover_url" class="hero__cover">
-              <img :src="book.cover_url" :alt="`Capa de ${book.titulo}`" class="hero__cover-img" />
-            </div>
-            <div v-else class="hero__cover-fallback">
-              <div class="book-css">
-                <div class="book-css__spine" />
-                <div class="book-css__face">
-                  <span class="book-css__title">{{ book.titulo }}</span>
-                  <span class="book-css__author">{{ book.autor }}</span>
-                </div>
+            <img v-if="book.cover_url" :src="book.cover_url" :alt="`Capa de ${book.titulo}`" class="hero__cover-img" />
+            <div v-else class="book-css">
+              <div class="book-css__spine" />
+              <div class="book-css__face">
+                <span class="book-css__title">{{ book.titulo }}</span>
+                <span class="book-css__author">{{ book.autor }}</span>
               </div>
             </div>
           </div>
+        </div>
 
+        <!-- Painel direito: cor da categoria + metadados -->
+        <div class="hero__right">
           <div class="hero__meta">
             <div class="hero__badges">
               <span class="midia-badge" :class="mediaBadgeClass">{{ book.midia }}</span>
@@ -52,17 +54,20 @@
             <p class="hero__author">{{ book.autor }}</p>
 
             <div v-if="book.published_year || book.page_count" class="hero__stats">
-              <span v-if="book.published_year" class="hero__stat">{{ book.published_year }}</span>
-              <span v-if="book.published_year && book.page_count" class="hero__stat-sep" aria-hidden="true">·</span>
-              <span v-if="book.page_count" class="hero__stat">{{ book.page_count }} páginas</span>
+              <span v-if="book.published_year">{{ book.published_year }}</span>
+              <span v-if="book.published_year && book.page_count" aria-hidden="true">·</span>
+              <span v-if="book.page_count">{{ book.page_count }} páginas</span>
             </div>
 
             <div v-if="book.subgenerosArr?.length" class="hero__tags">
               <span v-for="sg in book.subgenerosArr" :key="sg" class="hero__tag">{{ sg }}</span>
             </div>
 
+            <!-- margin-top: auto → gruda na base do painel -->
             <div v-if="book.quem" class="hero__mention">
-              <div class="hero__mention-avatar" aria-hidden="true">{{ book.quem.charAt(0).toUpperCase() }}</div>
+              <div class="hero__mention-avatar" aria-hidden="true">
+                {{ book.quem.charAt(0).toUpperCase() }}
+              </div>
               <span
                 >Mencionado por <strong>{{ book.quem }}</strong></span
               >
@@ -71,6 +76,7 @@
         </div>
       </section>
 
+      <!-- ── Conteúdo ───────────────────────────────────────────── -->
       <div class="content">
         <div class="content__inner">
           <div class="content__main">
@@ -83,7 +89,9 @@
               <h2 class="content-section__title">Por que foi indicado</h2>
               <div class="porque-card" :style="{ '--accent': categoryColor }">
                 <div v-if="book.quem" class="porque-card__header">
-                  <div class="porque-card__avatar" aria-hidden="true">{{ book.quem.charAt(0).toUpperCase() }}</div>
+                  <div class="porque-card__avatar" aria-hidden="true">
+                    {{ book.quem.charAt(0).toUpperCase() }}
+                  </div>
                   <span class="porque-card__name">{{ book.quem }}</span>
                 </div>
                 <blockquote class="porque-card__quote" :class="{ 'is-collapsed': !reasonExpanded && isLongReason }">
@@ -141,12 +149,7 @@
               <template v-for="(item, index) in explore" :key="index">
                 <RouterLink
                   v-if="item.show"
-                  :to="{
-                    name: item.name,
-                    params: {
-                      slug: item.slug,
-                    },
-                  }"
+                  :to="{ name: item.name, params: { slug: item.slug } }"
                   class="explore-item"
                 >
                   <span class="explore-item__label">{{ item.label }}</span>
@@ -159,6 +162,7 @@
         </div>
       </div>
 
+      <!-- ── Relacionados ───────────────────────────────────────── -->
       <section v-if="related.length" class="related">
         <div class="related__inner">
           <div class="related__header">
@@ -166,12 +170,7 @@
               Outros em <em>{{ formatCategoria(book.categoria) }}</em>
             </h2>
             <RouterLink
-              :to="{
-                name: 'catalog-category',
-                params: {
-                  slug: useUtils().slugify(book.categoria),
-                },
-              }"
+              :to="{ name: 'catalog-category', params: { slug: useUtils().slugify(book.categoria) } }"
               class="related__see-all"
             >
               Ver todos <BaseIcon name="arrow-right" />
@@ -181,10 +180,7 @@
             <RouterLink
               v-for="r in related"
               :key="r.id"
-              :to="{
-                name: 'catalog-book-details',
-                params: { id: r.id },
-              }"
+              :to="{ name: 'catalog-book-details', params: { id: r.id } }"
               class="related-card"
             >
               <div class="related-card__spine" :style="{ background: getCategoryColor(r.categoria) }" />
@@ -233,6 +229,7 @@ const related = computed(() => {
     .books.filter((b) => b.id !== book.value?.id && b.categoria === book.value?.categoria)
     .slice(0, 4)
 })
+
 const explore = computed(() => {
   if (!book.value) return []
   return [
@@ -270,7 +267,23 @@ const explore = computed(() => {
 const categoryColor = computed(() =>
   book.value ? colors.categoryColor(book.value.categoria) : 'var(--color-action-default)',
 )
+
 const mediaBadgeClass = computed(() => (book.value ? colors.mediaBadgeClass(book.value.midia) : ''))
+
+/**
+ * CSS vars passed to the hero:
+ * --hero-cover-url: cover image for the left panel background
+ * --hero-accent: category color for the right panel and book-css fallback
+ */
+const heroVars = computed(() => {
+  const vars: Record<string, string> = {
+    '--hero-accent': categoryColor.value,
+  }
+  if (book.value?.cover_url) {
+    vars['--hero-cover-url'] = `url('${book.value.cover_url}')`
+  }
+  return vars
+})
 
 const formatCategoria = (v?: string) => (v ? v.replace(/-/g, ' ') : '')
 const getCategoryColor = (v?: CategoryType) => colors.categoryColor(v!)
@@ -295,6 +308,7 @@ usePageMeta(
 </script>
 
 <style lang="scss" scoped>
+// ── Breadcrumb ────────────────────────────────────────────────────
 .top-bar {
   position: sticky;
   top: 0;
@@ -323,6 +337,7 @@ usePageMeta(
     text-decoration: none;
     flex-shrink: 0;
     transition: color var(--motion-transition-default);
+
     svg {
       width: 16px;
       height: 16px;
@@ -346,83 +361,93 @@ usePageMeta(
   }
 }
 
+// ── Hero bipartido ────────────────────────────────────────────────
 .hero {
-  background: color-mix(in srgb, var(--accent) 45%, #000 55%);
-
-  &__inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2.5rem 1.5rem;
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 2rem;
-    align-items: start;
-
-    @media (max-width: 767px) {
-      grid-template-columns: 1fr;
-      padding: 1.5rem 1rem;
-    }
-  }
-}
-
-.hero__cover-wrap {
-  @media (max-width: 767px) {
-    display: flex;
-    justify-content: center;
-  }
-}
-
-.hero__cover {
-  width: 200px;
-  aspect-ratio: 2 / 3;
-  border-radius: var(--border-radius-default);
+  display: grid;
+  grid-template-columns: 42% 1fr;
+  height: 400px;
   overflow: hidden;
+
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: 220px 1fr;
+    height: auto;
+  }
+}
+
+// ── Painel esquerdo ───────────────────────────────────────────────
+.hero__left {
+  position: relative;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: var(--hero-cover-url, none);
+  background-size: cover;
+  background-position: center;
+  background-color: color-mix(in srgb, var(--hero-accent) 40%, #000 60%);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 
-  @media (max-width: 767px) {
-    width: 140px;
-  }
-
-  &-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 1;
   }
 }
 
-.hero__cover-fallback {
-  width: 200px;
+// Capa flutuante — fica dentro do painel esquerdo, sobre o overlay
+.hero__cover-wrap {
+  position: relative;
+  z-index: 2;
+
+  // Sombra cinematográfica
+  filter: drop-shadow(0 8px 32px rgba(0, 0, 0, 0.55));
+}
+
+.hero__cover-img {
+  display: block;
+  width: 180px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: var(--border-radius-default);
+
   @media (max-width: 767px) {
-    width: 140px;
+    width: 110px;
   }
 }
 
+// Fallback: book-css colorido pela categoria
 .book-css {
   display: grid;
-  grid-template-columns: 18px 1fr;
-  width: 100%;
+  grid-template-columns: 14px 1fr;
+  width: 160px;
   aspect-ratio: 2 / 3;
   border-radius: var(--border-radius-default);
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+  @media (max-width: 767px) {
+    width: 110px;
+  }
 
   &__spine {
-    background: color-mix(in srgb, var(--accent) 60%, #000 40%);
+    background: color-mix(in srgb, var(--hero-accent) 60%, #000 40%);
   }
 
   &__face {
-    background: var(--accent);
+    background: var(--hero-accent);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 1rem;
-    gap: 0.5rem;
+    padding: 0.875rem;
+    gap: 0.4rem;
   }
 
   &__title {
     font-family: var(--font-family-display);
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.95);
     line-height: 1.3;
@@ -433,19 +458,33 @@ usePageMeta(
   }
 
   &__author {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: rgba(255, 255, 255, 0.65);
     line-height: 1.3;
   }
 }
 
+// ── Painel direito ────────────────────────────────────────────────
+.hero__right {
+  background-color: color-mix(in srgb, var(--hero-accent) 45%, #000 55%);
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+}
+
 .hero__meta {
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
-  min-width: 0;
+  gap: 0.75rem;
+  padding: 4rem 2rem 4rem 2.5rem;
+  width: 100%;
+
+  @media (max-width: 767px) {
+    padding: 1.25rem 1rem;
+  }
 }
 
+// ── Elementos dos metadados ───────────────────────────────────────
 .hero__badges {
   display: flex;
   align-items: center;
@@ -456,7 +495,7 @@ usePageMeta(
 .hero__title {
   margin: 0;
   font-family: var(--font-family-display);
-  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-size: clamp(1.4rem, 3vw, 2.1rem);
   font-weight: 500;
   line-height: 1.15;
   color: #fff;
@@ -473,10 +512,7 @@ usePageMeta(
   align-items: center;
   gap: 8px;
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.65);
-}
-.hero__stat-sep {
-  opacity: 0.5;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .hero__tags {
@@ -491,18 +527,20 @@ usePageMeta(
   padding: 3px 10px;
   border-radius: 999px;
   font-size: 0.75rem;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
+// Gruda na base do painel via margin-top: auto
 .hero__mention {
+  margin-top: auto;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.65);
-  margin-top: 0.25rem;
+
   strong {
     color: rgba(255, 255, 255, 0.92);
     font-weight: 500;
@@ -510,19 +548,20 @@ usePageMeta(
 }
 
 .hero__mention-avatar {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  background: var(--color-action-default);
+  background: rgba(255, 255, 255, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: #fff;
   flex-shrink: 0;
 }
 
+// ── Badges ────────────────────────────────────────────────────────
 .midia-badge {
   display: inline-flex;
   align-items: center;
@@ -534,6 +573,7 @@ usePageMeta(
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
+
 .badge-livro {
   background: var(--badge-livro-background-color);
   color: var(--badge-livro-text-color);
@@ -554,12 +594,14 @@ usePageMeta(
   min-height: 24px;
   padding: 3px 10px;
   border-radius: 999px;
-  background: var(--color-background-subtle);
-  color: var(--color-text-subtle);
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.82);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: capitalize;
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
+
 .categoria-dot {
   width: 7px;
   height: 7px;
@@ -567,9 +609,11 @@ usePageMeta(
   flex-shrink: 0;
 }
 
+// ── Conteúdo ──────────────────────────────────────────────────────
 .content {
   background: var(--color-background-default);
   padding: 2.5rem 0;
+
   @media (max-width: 767px) {
     padding: 1.5rem 0;
   }
@@ -582,10 +626,12 @@ usePageMeta(
     grid-template-columns: 1fr 260px;
     gap: 3rem;
     align-items: start;
+
     @media (max-width: 900px) {
       grid-template-columns: 1fr;
       gap: 2rem;
     }
+
     @media (max-width: 767px) {
       padding: 0 1rem;
     }
@@ -603,6 +649,7 @@ usePageMeta(
     gap: 1rem;
     position: sticky;
     top: 72px;
+
     @media (max-width: 900px) {
       position: static;
     }
@@ -632,6 +679,7 @@ usePageMeta(
   }
 }
 
+// ── Porque card ───────────────────────────────────────────────────
 .porque-card {
   background: var(--color-surface-default);
   border: 1px solid var(--color-border-default);
@@ -697,6 +745,7 @@ usePageMeta(
     cursor: pointer;
     align-self: flex-start;
     transition: opacity var(--motion-transition-default);
+
     &:hover {
       opacity: 0.75;
     }
@@ -706,12 +755,14 @@ usePageMeta(
     width: 14px;
     height: 14px;
     transition: transform var(--motion-transition-default);
+
     &.is-open {
       transform: rotate(180deg);
     }
   }
 }
 
+// ── Buscar fora ───────────────────────────────────────────────────
 .ext-btns {
   display: flex;
   gap: 10px;
@@ -737,10 +788,12 @@ usePageMeta(
     background var(--motion-transition-default),
     color var(--motion-transition-default),
     border-color var(--motion-transition-default);
+
   svg {
     width: 18px;
     height: 18px;
   }
+
   &:focus-visible {
     outline: 2px solid var(--color-border-focus);
     outline-offset: 3px;
@@ -793,6 +846,7 @@ usePageMeta(
   }
 }
 
+// ── Explorar sidebar ──────────────────────────────────────────────
 .explore-list {
   display: flex;
   flex-direction: column;
@@ -818,6 +872,7 @@ usePageMeta(
 
   &:hover {
     background: var(--color-background-subtle);
+
     .explore-item__arrow {
       transform: translateX(3px) translateY(-50%);
       color: var(--color-action-default);
@@ -863,6 +918,7 @@ usePageMeta(
   }
 }
 
+// ── Relacionados ──────────────────────────────────────────────────
 .related {
   background: var(--color-surface-default);
   border-top: 1px solid var(--color-border-default);
@@ -872,6 +928,7 @@ usePageMeta(
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 1.5rem;
+
     @media (max-width: 767px) {
       padding: 0 1rem;
     }
@@ -891,6 +948,7 @@ usePageMeta(
     font-size: 1rem;
     font-weight: 500;
     color: var(--color-text-default);
+
     em {
       font-style: normal;
       color: var(--color-action-default);
@@ -907,6 +965,7 @@ usePageMeta(
     text-decoration: none;
     flex-shrink: 0;
     transition: opacity var(--motion-transition-default);
+
     svg {
       width: 12px;
       height: 12px;
@@ -920,6 +979,7 @@ usePageMeta(
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 10px;
+
     @media (max-width: 767px) {
       grid-template-columns: 1fr;
     }
@@ -943,6 +1003,7 @@ usePageMeta(
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
     border-color: rgba(var(--color-action-default-rgb), 0.2);
+
     .related-card__arrow {
       transform: translateX(3px);
       color: var(--color-action-default);
@@ -974,12 +1035,14 @@ usePageMeta(
     letter-spacing: 0.05em;
     color: var(--color-text-disabled);
   }
+
   &__title {
     font-size: 0.9rem;
     font-weight: 500;
     color: var(--color-text-default);
     line-height: 1.3;
   }
+
   &__author {
     font-size: 0.8rem;
     color: var(--color-text-subtle);
@@ -997,6 +1060,7 @@ usePageMeta(
   }
 }
 
+// ── Estado vazio ──────────────────────────────────────────────────
 .state-screen {
   display: flex;
   flex-direction: column;
@@ -1022,6 +1086,7 @@ usePageMeta(
   transition:
     background var(--motion-transition-default),
     color var(--motion-transition-default);
+
   &:hover {
     background: var(--color-action-default);
     color: #fff;
