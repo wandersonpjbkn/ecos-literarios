@@ -164,6 +164,59 @@
 
             <section class="form-section">
               <h3 class="form-section__title">Enriquecimento</h3>
+              <div class="enrichment-actions">
+                <button
+                  v-if="isEditMode"
+                  type="button"
+                  class="drawer-btn drawer-btn--secondary"
+                  :disabled="isSaving || enrichmentLoading"
+                  @click="fetchEnrichmentPreview"
+                >
+                  {{ enrichmentLoading ? 'Buscando dados…' : 'Sugerir enriquecimento' }}
+                </button>
+                <p v-else class="enrichment-hint">
+                  Salve o livro para habilitar sugestões automáticas de enriquecimento.
+                </p>
+              </div>
+
+              <p v-if="enrichmentError" class="drawer-feedback drawer-feedback--error">
+                {{ enrichmentError }}
+              </p>
+
+              <div v-if="enrichmentPreview" class="enrichment-preview">
+                <div class="enrichment-preview__header">
+                  <strong>Prévia disponível ({{ enrichmentPreview.sourceLabel }})</strong>
+                  <p>Selecione abaixo quais campos deseja aplicar.</p>
+                </div>
+
+                <label
+                  v-for="item in enrichmentPreview.items"
+                  :key="item.field"
+                  class="enrichment-option"
+                  :class="{ 'is-disabled': !item.hasValue }"
+                >
+                  <input
+                    v-model="selectedEnrichmentFields"
+                    type="checkbox"
+                    :value="item.field"
+                    :disabled="!item.hasValue || enrichmentApplying || isSaving"
+                  />
+                  <span class="enrichment-option__meta">
+                    <strong>{{ item.label }}</strong>
+                    <small>{{ item.preview || 'Sem valor retornado' }}</small>
+                  </span>
+                </label>
+
+                <button
+                  type="button"
+                  class="drawer-btn drawer-btn--primary"
+                  :disabled="selectedEnrichmentFields.length === 0 || enrichmentApplying || isSaving"
+                  @click="applySelectedEnrichment"
+                >
+                  {{ enrichmentApplying ? 'Aplicando…' : 'Aplicar seleção no livro' }}
+                </button>
+              </div>
+
               <div class="form-grid">
                 <div class="form-field form-field--full">
                   <label for="bf-cover" class="form-field__label">URL da capa</label>
@@ -272,6 +325,22 @@ interface BookPayload {
   published_year?: number
 }
 
+type EnrichmentApplyField = 'description' | 'coverUrl' | 'publisher' | 'isbn' | 'pageCount' | 'publishedYear'
+
+interface EnrichmentPreviewResponse {
+  source: 'google_books' | 'open_library'
+  preview: {
+    description?: string
+    coverUrl?: string
+    publisher?: string
+    isbn?: string
+    pageCount?: number
+    publishedYear?: number
+    externalId?: string
+    strategy?: string
+  }
+}
+
 const props = defineProps<{
   book: BookPayload | null
   isOpen: boolean
@@ -287,6 +356,14 @@ const firstInputRef = ref<HTMLInputElement | null>(null)
 const isSaving = ref(false)
 const error = ref('')
 const success = ref('')
+const enrichmentLoading = ref(false)
+const enrichmentApplying = ref(false)
+const enrichmentError = ref('')
+const selectedEnrichmentFields = ref<EnrichmentApplyField[]>([])
+const enrichmentPreview = ref<{
+  sourceLabel: string
+  items: Array<{ field: EnrichmentApplyField; label: string; preview: string; hasValue: boolean }>
+} | null>(null)
 
 const form = reactive({
   titulo: '',
@@ -344,6 +421,9 @@ watch(
 
     error.value = ''
     success.value = ''
+    enrichmentError.value = ''
+    enrichmentPreview.value = null
+    selectedEnrichmentFields.value = []
 
     if (props.book) {
       form.titulo = props.book.titulo
@@ -439,6 +519,80 @@ const handleSubmit = async () => {
   }
 }
 
+const fetchEnrichmentPreview = async () => {
+  if (!props.book?._id) return
+  enrichmentLoading.value = true
+  enrichmentError.value = ''
+
+  try {
+    const res = await fetch(`${API_BASE}/books/${props.book._id}/enrich`, {
+      method: 'POST',
+      headers: buildHeaders(),
+    })
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+      throw new Error(body.error ?? `HTTP ${res.status}`)
+    }
+
+    const payload = (await res.json()) as EnrichmentPreviewResponse
+
+    const sourceLabel = payload.source === 'google_books' ? 'Google Books' : 'Open Library'
+    const items: Array<{ field: EnrichmentApplyField; label: string; preview: string; hasValue: boolean }> = [
+      { field: 'description', label: 'Sinopse', preview: payload.preview.description ?? '', hasValue: !!payload.preview.description },
+      { field: 'coverUrl', label: 'URL da capa', preview: payload.preview.coverUrl ?? '', hasValue: !!payload.preview.coverUrl },
+      { field: 'publisher', label: 'Editora', preview: payload.preview.publisher ?? '', hasValue: !!payload.preview.publisher },
+      { field: 'isbn', label: 'ISBN', preview: payload.preview.isbn ?? '', hasValue: !!payload.preview.isbn },
+      {
+        field: 'pageCount',
+        label: 'Qtd. páginas',
+        preview: payload.preview.pageCount ? String(payload.preview.pageCount) : '',
+        hasValue: typeof payload.preview.pageCount === 'number' && payload.preview.pageCount > 0,
+      },
+      {
+        field: 'publishedYear',
+        label: 'Ano publicação',
+        preview: payload.preview.publishedYear ? String(payload.preview.publishedYear) : '',
+        hasValue: typeof payload.preview.publishedYear === 'number' && payload.preview.publishedYear > 0,
+      },
+    ]
+
+    enrichmentPreview.value = { sourceLabel, items }
+    selectedEnrichmentFields.value = items.filter((item) => item.hasValue).map((item) => item.field)
+  } catch (e) {
+    enrichmentError.value = e instanceof Error ? e.message : 'Erro ao buscar preview de enriquecimento.'
+  } finally {
+    enrichmentLoading.value = false
+  }
+}
+
+const applySelectedEnrichment = async () => {
+  if (!props.book?._id || selectedEnrichmentFields.value.length === 0) return
+  enrichmentApplying.value = true
+  enrichmentError.value = ''
+
+  try {
+    const res = await fetch(`${API_BASE}/books/${props.book._id}/enrich/apply`, {
+      method: 'POST',
+      headers: buildHeaders(),
+      body: JSON.stringify({ fields: selectedEnrichmentFields.value }),
+    })
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+      throw new Error(body.error ?? `HTTP ${res.status}`)
+    }
+
+    success.value = 'Enriquecimento aplicado ao livro.'
+    emit('saved')
+    await fetchEnrichmentPreview()
+  } catch (e) {
+    enrichmentError.value = e instanceof Error ? e.message : 'Erro ao aplicar enriquecimento.'
+  } finally {
+    enrichmentApplying.value = false
+  }
+}
+
 onMounted(() => {
   autores.fetchAll()
   midias.fetchAll()
@@ -529,6 +683,70 @@ onMounted(() => {
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--color-text-subtle);
+  }
+}
+
+.enrichment-actions {
+  margin-bottom: 0.75rem;
+}
+
+.enrichment-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-text-subtle);
+}
+
+.enrichment-preview {
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-sm);
+  padding: 0.7rem;
+  background: var(--color-surface-default);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+
+  &__header {
+    p {
+      margin: 0.25rem 0 0;
+      font-size: 0.8rem;
+      color: var(--color-text-subtle);
+    }
+  }
+}
+
+.enrichment-option {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-sm);
+  background: var(--color-surface-raised);
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  strong {
+    font-size: 0.82rem;
+    color: var(--color-text-default);
+  }
+
+  small {
+    font-size: 0.74rem;
+    color: var(--color-text-subtle);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &.is-disabled {
+    opacity: 0.55;
   }
 }
 
