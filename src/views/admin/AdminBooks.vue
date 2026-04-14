@@ -10,17 +10,36 @@
       <button class="action-btn" @click="openCreate">+ Novo livro</button>
     </div>
 
-    <!-- Search -->
-    <div class="books-search">
-      <BaseIcon name="search" class="books-search__icon" />
-      <input
-        v-model="searchQuery"
-        type="text"
-        class="books-search__input"
-        placeholder="Buscar por título ou autor…"
-        autocomplete="off"
-      />
-      <span v-if="searchQuery" class="books-search__count"> {{ filteredBooks.length }} de {{ books.length }} </span>
+    <div class="book-segmentation">
+      <!-- Filters -->
+      <div class="books-filters">
+        <MultiSelect
+          label="Segmento"
+          :multiple="false"
+          :searchable="false"
+          :options="[
+            { value: 'all', label: 'Todos' },
+            { value: 'missing', label: 'Dados incompletos' },
+            { value: 'complete', label: 'Dados completos' },
+            { value: 'missing-isbn', label: 'ISBN ausente' },
+          ]"
+          :selected="segmentFilter"
+          @toggle="(v) => (segmentFilter = v as SegmentFilter)"
+        />
+      </div>
+
+      <!-- Search -->
+      <div class="books-search">
+        <BaseIcon name="search" class="books-search__icon" />
+        <input
+          v-model="searchQuery"
+          type="text"
+          class="books-search__input"
+          placeholder="Buscar por título ou autor…"
+          autocomplete="off"
+        />
+        <span v-if="searchQuery" class="books-search__count"> {{ filteredBooks.length }} de {{ books.length }} </span>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -115,6 +134,7 @@
 import { ref, computed, reactive, watch, onMounted } from 'vue'
 
 import { buildHeaders } from '@/composables/useApi'
+import MultiSelect from '@/components/MultiSelect.vue'
 import BookFormDrawer from '@/components/admin/BookFormDrawer.vue'
 import ConfirmModal from '@/components/admin/ConfirmModal.vue'
 
@@ -133,10 +153,13 @@ interface AdminBook {
   isbn?: string
 }
 
+type SegmentFilter = 'all' | 'missing' | 'complete' | 'missing-isbn'
+
 const books = ref<AdminBook[]>([])
 const loading = ref(false)
 const error = ref('')
 const searchQuery = ref('')
+const segmentFilter = ref<SegmentFilter>('all')
 const currentPage = ref(1)
 
 const isDrawerOpen = ref(false)
@@ -151,10 +174,36 @@ const deleteModal = reactive({
 
 const resolveName = (field: string | { nome: string }): string => (typeof field === 'string' ? field : field.nome)
 
+const isMissingField = (value?: string | null) => !value || !value.trim()
+
+const hasMissingData = (book: AdminBook) => {
+  const autorNome = resolveName(book.autor)
+  const categoriaNome = resolveName(book.categoria)
+  const midiaNome = resolveName(book.midia)
+
+  return (
+    isMissingField(book.titulo) ||
+    isMissingField(autorNome) ||
+    isMissingField(categoriaNome) ||
+    isMissingField(midiaNome) ||
+    isMissingField(book.porque) ||
+    isMissingField(book.isbn) ||
+    book.subgeneros.length === 0
+  )
+}
+
 const filteredBooks = computed(() => {
-  if (!searchQuery.value.trim()) return books.value
+  const base = books.value.filter((book) => {
+    if (segmentFilter.value === 'missing') return hasMissingData(book)
+    if (segmentFilter.value === 'complete') return !hasMissingData(book)
+    if (segmentFilter.value === 'missing-isbn') return isMissingField(book.isbn)
+    return true
+  })
+
+  if (!searchQuery.value.trim()) return base
+
   const q = searchQuery.value.toLowerCase()
-  return books.value.filter((b) => b.titulo.toLowerCase().includes(q) || resolveName(b.autor).toLowerCase().includes(q))
+  return base.filter((b) => b.titulo.toLowerCase().includes(q) || resolveName(b.autor).toLowerCase().includes(q))
 })
 
 const totalPages = computed(() => Math.ceil(filteredBooks.value.length / PAGE_SIZE))
@@ -237,7 +286,7 @@ const handleDelete = async () => {
 }
 
 // Reset pagination on search change
-watch(searchQuery, resetPage)
+watch([searchQuery, segmentFilter], resetPage)
 
 onMounted(fetchBooks)
 </script>
@@ -289,7 +338,17 @@ onMounted(fetchBooks)
 }
 
 // ── Search ────────────────────────────────────────────────────────
+.book-segmentation {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.books-filters {
+  flex: 25%;
+}
 .books-search {
+  flex: 75%;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -298,7 +357,6 @@ onMounted(fetchBooks)
   border: 1.5px solid var(--color-border-default);
   border-radius: var(--border-radius-default);
   background: var(--color-surface-default);
-  margin-bottom: 1rem;
   transition: border-color var(--motion-transition-default);
 
   &:focus-within {
