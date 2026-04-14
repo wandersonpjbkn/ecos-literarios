@@ -122,7 +122,7 @@ if (!authStore.isLoggedIn) {
   router.replace('/login')
 }
 
-const quemNome = ref(authStore.user?.name ?? '')
+const quemNome = ref('')
 const isSubmitting = ref(false)
 const isUnclaiming = ref(false)
 const loadingStatus = ref(false)

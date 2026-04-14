@@ -1,7 +1,7 @@
 import CategoriesColors from '@/data/categoryColors.json'
 
 export interface Book {
-  id: string | number // string (_id do MongoDB) ou number (legado CSV)
+  id: string
   titulo: string
   autor: string
   categoria: keyof typeof CategoriesColors
@@ -10,7 +10,6 @@ export interface Book {
   porque: string
   subgenerosArr: string[]
 
-  // Campos novos — opcionais para manter compatibilidade durante a transição
   cover_url?: string
   synopsis?: string
   google_books_id?: string
@@ -27,7 +26,7 @@ export interface Options {
 }
 
 export interface Suggestion {
-  id: number | string
+  id: string
   titulo: string
   autor: string
 }

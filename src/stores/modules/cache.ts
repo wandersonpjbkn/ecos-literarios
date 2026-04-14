@@ -11,12 +11,8 @@ export const useCacheStore = defineStore(
     const ttl = 7 * 24 * 60 * 60 * 1000 // 7d
 
     const isCacheValid = computed(() => {
-      const now = Date.now()
-
       if (!cache.value || ts.value === 0) return false
-      if (ts.value > now) return false
-
-      return now - ts.value < ttl
+      return Date.now() - ts.value < ttl
     })
 
     const clear = () => {

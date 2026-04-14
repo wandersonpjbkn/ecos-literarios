@@ -5,8 +5,6 @@ import type { Book } from '@/types'
 const API_BASE = import.meta.env.VITE_API_URL as string
 
 // ── Tipos da resposta da API ──────────────────────────────────────
-
-// Fields that arrive populated as object, or as string during transition period
 interface ApiPopulated {
   _id: string
   nome: string
@@ -60,7 +58,6 @@ export interface ClaimHistory {
 
 // ── Helpers ───────────────────────────────────────────────────────
 
-/** Extracts nome from a populated field or returns the string directly */
 const extractNome = (field: ApiPopulated | string | undefined): string => {
   if (!field) return ''
   return typeof field === 'string' ? field : field.nome
@@ -74,7 +71,7 @@ const normalizeBook = (raw: ApiBook): Book => ({
   autor: extractNome(raw.autor),
   midia: extractNome(raw.midia),
   categoria: extractNome(raw.categoria) as Book['categoria'],
-  quem: raw.quem_user_id?.name ?? raw.quem_nome,
+  quem: raw.quem_nome,
   porque: raw.porque ?? '',
   cover_url: raw.cover_url,
   synopsis: raw.synopsis,

@@ -21,6 +21,7 @@ const props = defineProps<{
     | 'link'
     | 'menu'
     | 'pencil'
+    | 'plus'
     | 'reload'
     | 'search'
     | 'times'

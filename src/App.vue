@@ -6,7 +6,7 @@
     <header class="site-header">
       <nav class="header-inner">
         <div class="header-content">
-          <RouterLink :to="{ name: 'catalog-books' }" class="config-btn">
+          <RouterLink :to="{ name: 'catalog-books' }" class="config-btn" aria-label="Catálogo">
             <BaseIcon name="home" class="config-btn__icon" aria-hidden="true" />
           </RouterLink>
           <button
@@ -18,12 +18,26 @@
           >
             <BaseIcon name="menu" class="config-btn__icon" aria-hidden="true" />
           </button>
+          <RouterLink
+            v-if="storeAuth.isEditor"
+            :to="{ name: 'admin-books' }"
+            class="config-btn"
+            aria-label="Cadastrar livro"
+          >
+            <BaseIcon name="plus" class="config-btn__icon" aria-hidden="true" />
+          </RouterLink>
         </div>
 
         <div class="header-actions">
-          <RouterLink v-if="storeAuth.isLoggedIn" :to="{ name: 'profile-account' }" class="config-btn">
+          <RouterLink
+            v-if="storeAuth.isLoggedIn"
+            :to="{ name: 'profile-account' }"
+            class="config-btn"
+            aria-label="Meu perfil"
+          >
             <BaseIcon name="user" class="config-btn__icon" aria-hidden="true" />
           </RouterLink>
+
           <button
             class="config-btn"
             type="button"
@@ -141,8 +155,6 @@ import { useBooksStore } from '@/stores'
 import UserMenu from '@/components/UserMenu.vue'
 import BaseIcon from '@/components/BaseIcon.vue'
 
-import type { CategoryType } from '@/types'
-
 const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
 const MultiSelect = defineAsyncComponent(() => import('@/components/MultiSelect.vue'))
 const SideBar = defineAsyncComponent(() => import('@/components/SideBar.vue'))
@@ -187,15 +199,12 @@ const categoryLinks = computed(() => {
     .map(([name, count]) => ({
       name,
       slug: slugify(name),
-      color: colors.categoryColor(name as CategoryType),
+      color: colors.categoryColor(name),
       count,
     }))
 })
 
-/** Checks if the current route matches a given category slug */
-const isCategoryActive = (slug: string): boolean => {
-  return route.name === 'catalog-category' && route.params.slug === slug
-}
+const isCategoryActive = (slug: string): boolean => route.name === 'catalog-category' && route.params.slug === slug
 
 const forceRefresh = () => {
   useApi().fetchBooks(true)
@@ -264,8 +273,6 @@ watch(route, async () => {
     height: 4rem;
     background-color: var(--color-surface-default);
     border-bottom: 1px solid var(--color-border-default);
-
-    transform: width var(--motion-transition-default);
 
     &--content {
       position: relative;
@@ -356,36 +363,35 @@ watch(route, async () => {
 
 // ── Botão de configurações ────────────────────────────────────────
 .config-btn {
-  $size: 2.5rem;
+  --icon-size: 65%;
+  --btn-size: 2.5rem;
 
   display: flex;
   align-items: center;
   justify-content: center;
-  width: $size;
-  height: $size;
+  width: var(--btn-size);
+  height: var(--btn-size);
   padding: 0;
-  background: var(--color-action-default);
+  background: rgba($color: #fff, $alpha: 0);
   border: none;
   border-radius: var(--border-radius-sm);
   cursor: pointer;
-  transition: opacity var(--motion-transition-default);
+  transition: background-color var(--motion-transition-default);
   color: var(--color-surface-default);
-
-  &.is-expand {
-    :deep(svg) {
-      transform: rotate(-90deg);
-    }
-  }
+  text-decoration: none;
 
   &:hover {
-    opacity: 0.75;
+    background-color: rgba($color: #fff, $alpha: 0.15);
   }
 
   &__icon {
-    $size: 50%;
+    width: var(--icon-size);
+    height: var(--icon-size);
+  }
 
-    width: $size;
-    height: $size;
+  @media (max-width: 767px) {
+    --icon-size: 50%;
+    background: var(--color-action-default);
   }
 }
 
