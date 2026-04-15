@@ -294,10 +294,24 @@ onMounted(async () => {
   }
 }
 
+@media (max-width: 1023px) {
+  .admin-layout {
+    grid-template-columns: 220px 1fr;
+  }
+
+  .admin-main :deep(.admin-section) {
+    padding: 1.5rem;
+  }
+}
+
 @media (max-width: 767px) {
   .admin-layout {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
+  }
+
+  .admin-main :deep(.admin-section) {
+    padding: 1rem;
   }
 
   .admin-sidebar {
@@ -306,15 +320,34 @@ onMounted(async () => {
     border-right: none;
     border-bottom: 1px solid var(--color-border-default);
 
+    &__header {
+      padding: 1rem 1rem 0.75rem;
+    }
+
+    &__back {
+      margin-bottom: 0.5rem;
+    }
+
     &__nav {
       flex-direction: row;
       padding: 0.5rem 0.75rem;
       overflow-x: auto;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
     }
 
     &__link {
       flex-shrink: 0;
+      min-height: 40px;
     }
+
+    &__badge {
+      margin-left: 4px;
+    }
+
     &__footer {
       display: none;
     }

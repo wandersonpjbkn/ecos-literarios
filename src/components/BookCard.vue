@@ -290,6 +290,16 @@ const matchTags = computed(() => {
     width: $size;
     height: $size;
   }
+
+  @media (max-width: 767px) {
+    padding: 4px;
+
+    svg {
+      $size: 1rem;
+      width: $size;
+      height: $size;
+    }
+  }
 }
 
 .match-tag-enter-active,

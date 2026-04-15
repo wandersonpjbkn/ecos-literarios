@@ -314,6 +314,7 @@ const closeDetail = () => {
   margin-bottom: 2rem;
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .multi-select {

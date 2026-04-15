@@ -205,6 +205,12 @@ onMounted(loadStatus)
     justify-content: space-between;
     gap: 1rem;
     margin-bottom: 1.5rem;
+
+    @media (max-width: 767px) {
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
   }
 
   &__title {
@@ -213,6 +219,10 @@ onMounted(loadStatus)
     font-size: 1.4rem;
     font-weight: 400;
     color: var(--color-text-default);
+
+    @media (max-width: 767px) {
+      font-size: 1.2rem;
+    }
   }
 
   &__desc {
@@ -221,6 +231,10 @@ onMounted(loadStatus)
     color: var(--color-text-subtle);
     max-width: 65ch;
     line-height: 1.5;
+
+    @media (max-width: 767px) {
+      font-size: 0.85rem;
+    }
   }
 }
 
@@ -250,6 +264,11 @@ onMounted(loadStatus)
     font-size: 1.1rem;
     color: var(--color-text-default);
     font-weight: 600;
+    word-break: break-word;
+
+    @media (max-width: 767px) {
+      font-size: 0.95rem;
+    }
   }
 }
 
@@ -456,6 +475,19 @@ onMounted(loadStatus)
 
   .field__input {
     max-width: 100%;
+  }
+
+  .claim-actions {
+    .action-btn {
+      flex: 1 1 calc(50% - 0.25rem);
+      min-height: 44px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .claim-actions .action-btn {
+    flex-basis: 100%;
   }
 }
 </style>

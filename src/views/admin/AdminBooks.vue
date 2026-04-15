@@ -592,12 +592,36 @@ onMounted(fetchBooks)
 
 @media (max-width: 767px) {
   .admin-section {
-    padding: 1rem;
-
     &__header {
       flex-direction: column;
       align-items: stretch;
     }
+
+    &__title {
+      font-size: 1.2rem;
+    }
+
+    &__desc {
+      font-size: 0.85rem;
+    }
+  }
+
+  .action-btn {
+    min-height: 44px;
+    align-self: flex-start;
+  }
+
+  .book-segmentation {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+
+  .books-filters,
+  .books-search {
+    flex: 1 1 auto;
+    width: 100%;
   }
 
   .books-row {
@@ -610,6 +634,20 @@ onMounted(fetchBooks)
     &__field {
       display: none;
     }
+
+    &__title {
+      white-space: normal;
+      word-break: break-word;
+    }
+  }
+
+  .row-action {
+    width: 36px;
+    height: 36px;
+  }
+
+  .books-pagination {
+    gap: 0.75rem;
   }
 }
 </style>

@@ -180,6 +180,12 @@ const submit = async () => {
     justify-content: space-between;
     gap: 1rem;
     margin-bottom: 1.5rem;
+
+    @media (max-width: 767px) {
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
   }
 
   &__title {
@@ -188,6 +194,10 @@ const submit = async () => {
     font-size: 1.4rem;
     font-weight: 400;
     color: var(--color-text-default);
+
+    @media (max-width: 767px) {
+      font-size: 1.2rem;
+    }
   }
 
   &__desc {
@@ -196,6 +206,10 @@ const submit = async () => {
     color: var(--color-text-subtle);
     max-width: 65ch;
     line-height: 1.5;
+
+    @media (max-width: 767px) {
+      font-size: 0.85rem;
+    }
   }
 }
 
@@ -236,6 +250,12 @@ const submit = async () => {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+
+    @media (max-width: 767px) {
+      font-size: 0.95rem;
+      word-break: break-word;
+      white-space: normal;
+    }
   }
 }
 
@@ -348,6 +368,13 @@ const submit = async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+
+  @media (max-width: 480px) {
+    .action-btn {
+      flex: 1 1 100%;
+      min-height: 44px;
+    }
+  }
 }
 
 .action-btn {
@@ -426,6 +453,19 @@ const submit = async () => {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    min-width: 0;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+
+    &__value {
+      text-align: left;
+      white-space: normal;
+      word-break: break-word;
+    }
   }
 }
 

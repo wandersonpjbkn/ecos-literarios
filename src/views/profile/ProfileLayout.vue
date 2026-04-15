@@ -226,10 +226,24 @@ const roleLabel = computed(() => {
   }
 }
 
+@media (max-width: 1023px) {
+  .profile-layout {
+    grid-template-columns: 220px 1fr;
+  }
+
+  .profile-main :deep(.profile-section) {
+    padding: 1.5rem;
+  }
+}
+
 @media (max-width: 767px) {
   .profile-layout {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
+  }
+
+  .profile-main :deep(.profile-section) {
+    padding: 1rem;
   }
 
   .profile-sidebar {
@@ -238,14 +252,28 @@ const roleLabel = computed(() => {
     border-right: none;
     border-bottom: 1px solid var(--color-border-default);
 
+    &__header {
+      padding: 1rem 1rem 0.75rem;
+    }
+
+    &__back {
+      margin-bottom: 0.5rem;
+    }
+
     &__nav {
       flex-direction: row;
       padding: 0.5rem 0.75rem;
       overflow-x: auto;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
     }
 
     &__link {
       flex-shrink: 0;
+      min-height: 40px;
     }
     &__footer {
       display: none;

@@ -158,6 +158,33 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
   }
 }
 
+@media (max-width: 480px) {
+  .active-filters {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .af-title {
+    font-size: 0.78rem;
+    width: 100%;
+  }
+
+  .af-tag {
+    font-size: 0.82rem;
+    min-height: 32px;
+
+    &-group,
+    &-value {
+      padding: 0.35rem 0.6rem;
+    }
+  }
+
+  .af-clear-all {
+    width: 100%;
+    text-align: center;
+  }
+}
+
 /* Transitions */
 .af-bar-enter-active,
 .af-bar-leave-active {

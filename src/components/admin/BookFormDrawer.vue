@@ -896,9 +896,41 @@ onMounted(() => {
   transform: translateX(100%);
 }
 
-@media (max-width: 960px) {
+@media (max-width: 720px) {
   .form-grid {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .book-form-drawer {
+    width: 100%;
+  }
+
+  .drawer-header {
+    padding: 0.85rem 1rem;
+  }
+
+  .drawer-body {
+    padding: 1rem;
+  }
+
+  .form-section {
+    padding: 0.85rem;
+  }
+
+  .drawer-footer {
+    padding: 0.85rem 1rem;
+
+    &__actions {
+      flex-direction: column-reverse;
+
+      .drawer-btn {
+        width: 100%;
+        min-height: 44px;
+      }
+    }
   }
 }
 </style>

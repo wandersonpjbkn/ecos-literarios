@@ -300,25 +300,79 @@ const loadHistory = async () => {
 
 @media (max-width: 767px) {
   .admin-section {
-    padding: 1rem;
-
     &__header {
       flex-direction: column;
       align-items: stretch;
+      margin-bottom: 1rem;
+    }
+
+    &__title {
+      font-size: 1.2rem;
+    }
+
+    &__desc {
+      font-size: 0.85rem;
     }
   }
 
+  .load-btn {
+    min-height: 44px;
+    align-self: flex-start;
+  }
+
+  .history-list {
+    overflow-x: visible;
+  }
+
   .history-row {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem 0.75rem;
+    padding: 0.75rem 0.9rem;
 
     &--header {
       display: none;
     }
 
+    &__email {
+      grid-column: 1 / -1;
+      font-weight: 600;
+      white-space: normal;
+      word-break: break-all;
+    }
+
+    &__action {
+      grid-column: 1;
+    }
+
+    &__name {
+      grid-column: 2;
+      text-align: right;
+      word-break: break-word;
+    }
+
     &__books,
     &__date {
-      grid-column: 2;
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+
+      &::before {
+        color: var(--color-text-subtle);
+        font-weight: 500;
+      }
+    }
+
+    &__books::before {
+      content: 'Livros afetados:';
+    }
+
+    &__date::before {
+      content: 'Data:';
+    }
+
+    &__books {
+      text-align: left;
     }
   }
 }

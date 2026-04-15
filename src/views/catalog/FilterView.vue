@@ -507,6 +507,11 @@ usePageMeta(
   max-width: 1200px;
   flex-direction: column;
   gap: 2rem;
+
+  @media (max-width: 767px) {
+    padding: 24px 1rem 48px;
+    gap: 1.5rem;
+  }
 }
 
 .results-section,
@@ -649,6 +654,17 @@ usePageMeta(
   }
   .filters-sorted {
     width: 100%;
+  }
+  .explore-card {
+    padding: 0.85rem;
+  }
+  .explore-card__chips {
+    gap: 0.5rem;
+  }
+  .explore-chip {
+    min-height: 32px;
+    padding: 0 10px;
+    font-size: 0.85rem;
   }
 }
 </style>
