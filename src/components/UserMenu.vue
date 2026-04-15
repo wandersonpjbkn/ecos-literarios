@@ -1,8 +1,8 @@
 <template>
   <div ref="wrapRef" class="user-btn-wrap">
     <!-- guest -->
-    <RouterLink v-if="!store.isLoggedIn" :to="{ name: 'auth-login' }" class="user-btn user-btn--guest">
-      <BaseIcon name="user" class="user-btn__icon" aria-hidden="true" />
+    <RouterLink v-if="!store.isLoggedIn" :to="{ name: 'auth-login' }" class="user-btn">
+      <BaseIcon name="user" aria-hidden="true" />
     </RouterLink>
 
     <!-- logged in -->
@@ -13,7 +13,7 @@
       aria-haspopup="true"
       @click="isOpen = !isOpen"
     >
-      <UserAvatar class="user-btn--avatar" :alt="store.user!.name" />
+      <UserAvatar :alt="store.user!.name" />
     </button>
 
     <!-- Dropdown do usuário logado -->
@@ -96,59 +96,45 @@ const handleLogout = async () => {
 
 // ── Botão base ────────────────────────────────────────────────────
 .user-btn {
-  $size: 2.5rem;
+  --icon-size: 65%;
+  --btn-size: 2.5rem;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  width: $size;
-  height: $size;
-  background: var(--color-action-default);
+  width: var(--btn-size);
+  height: var(--btn-size);
+  // background: var(--color-action-default);
+  background: none;
   border: none;
   border-radius: var(--border-radius-sm);
   cursor: pointer;
   text-decoration: none;
-  transition:
-    background var(--motion-transition-default),
-    opacity var(--motion-transition-default);
+  transition: background-color var(--motion-transition-default);
+  color: var(--color-action-default);
 
   &:hover {
-    opacity: 0.85;
+    background-color: rgba(#000, 0.05);
   }
 
-  &--guest {
-    font-size: 0.8rem;
-    font-weight: 400;
-    color: var(--color-surface-default);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+  :deep(.base-icon) {
+    width: var(--icon-size);
+    height: var(--icon-size);
   }
 
-  &--auth {
-    border-color: transparent;
-  }
-
-  &--avatar {
-    width: $size;
-    height: $size;
-  }
-
-  &__icon {
-    $size: 50%;
-
-    width: $size;
-    height: $size;
-
-    color: var(--color-surface-default);
-  }
-
-  &__label {
-    color: var(--color-surface-default);
+  :deep(.avatar) {
+    width: var(--btn-size);
+    height: var(--btn-size);
   }
 
   &.is-logged {
     border: none !important;
+  }
+
+  @media (max-width: 767px) {
+    --icon-size: 60%;
+    --btn-size: 2rem;
   }
 }
 

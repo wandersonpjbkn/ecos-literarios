@@ -61,15 +61,18 @@ const avatarStyle = computed(() => {
   flex-shrink: 0;
   user-select: none;
 
-  // Tamanho padrão — pode ser overridden via class ou style
   width: 2rem;
   height: 2rem;
 }
 
 .avatar-initials {
-  font-size: 0.7rem;
+  font-size: 0.85rem;
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.02em;
+
+  @media (max-width: 767px) {
+    font-size: 0.7rem;
+  }
 }
 </style>

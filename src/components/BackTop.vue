@@ -58,8 +58,8 @@ const backTop = () => {
   @media (max-width: 767px) {
     $size-mobile: 44px;
 
-    right: 2rem;
-    bottom: 2rem;
+    right: 1rem;
+    bottom: 4rem;
 
     width: $size-mobile;
     height: $size-mobile;

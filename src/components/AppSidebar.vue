@@ -85,12 +85,10 @@ const { isEditor, isLoggedIn } = storeToRefs(useAuthStore())
   }
 
   @media (max-width: 767px) {
-    // display: none;
-
     &--inner {
       width: 100%;
       height: fit-content;
-      padding: 1rem;
+      padding: 0.5rem 1rem;
 
       flex-direction: row;
       gap: 1rem;

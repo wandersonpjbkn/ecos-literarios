@@ -308,6 +308,7 @@ onMounted(async () => {
   .admin-layout {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
+    min-height: calc(100dvh - 6rem);
   }
 
   .admin-main :deep(.admin-section) {

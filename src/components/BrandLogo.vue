@@ -59,5 +59,15 @@ const isTablet = useMediaQuery(useBreakpoints.isTablet)
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
+
+  @media (max-width: 767px) {
+    &-name {
+      font-size: 1rem;
+    }
+
+    &-sub {
+      font-size: 0.6rem;
+    }
+  }
 }
 </style>

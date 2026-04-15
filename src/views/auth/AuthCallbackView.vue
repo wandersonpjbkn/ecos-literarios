@@ -47,6 +47,10 @@ onMounted(async () => {
   justify-content: center;
   min-height: calc(100dvh - 4rem);
   background: var(--color-background-default);
+
+  @media (max-width: 767px) {
+    min-height: calc(100dvh - 6rem);
+  }
 }
 
 .callback-card {

@@ -5,17 +5,25 @@
   </Transition>
 
   <!-- Drawer -->
-  <Transition :name="isTablet ? 'drawer-bottom' : 'drawer-right'">
+  <Transition :name="isDesktop ? 'drawer-bottom' : 'drawer-right'">
     <aside
       v-if="isOpen && book"
       ref="drawerRef"
       class="book-drawer"
-      :class="{ 'is-mobile': isTablet }"
+      :class="{ 'is-mobile': isDesktop }"
+      :style="dragStyle"
       role="complementary"
       :aria-label="`Detalhes de ${book.titulo}`"
     >
-      <!-- Handle para swipe no mobile -->
-      <div v-if="isTablet" class="drawer-handle" aria-hidden="true" />
+      <!-- Handle — drag-to-dismiss on mobile -->
+      <div
+        v-if="isDesktop"
+        class="drawer-handle"
+        aria-hidden="true"
+        @touchstart.passive="onDragStart"
+        @touchmove.passive="onDragMove"
+        @touchend.passive="onDragEnd"
+      />
 
       <!-- Header -->
       <div class="drawer-header">
@@ -69,7 +77,7 @@
           </span>
         </div>
 
-        <!-- Sinopse (quando disponível via Google Books) -->
+        <!-- Sinopse -->
         <div v-if="book.synopsis" class="drawer-section">
           <span class="drawer-section__label">Sinopse</span>
           <p class="drawer-synopsis">{{ book.synopsis }}</p>
@@ -78,14 +86,7 @@
 
       <!-- Footer -->
       <div class="drawer-footer">
-        <RouterLink
-          :to="{
-            name: 'catalog-book-details',
-            params: { id: book.id },
-          }"
-          class="drawer-cta"
-          @click="close"
-        >
+        <RouterLink :to="{ name: 'catalog-book-details', params: { id: book.id } }" class="drawer-cta" @click="close">
           Ver página completa
           <BaseIcon name="arrow-right" aria-hidden="true" />
         </RouterLink>
@@ -95,7 +96,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useMediaQuery, onClickOutside } from '@vueuse/core'
 import type { Book } from '@/types'
 
@@ -109,19 +110,66 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const isTablet = useMediaQuery(useBreakpoints.isTablet)
+const isDesktop = useMediaQuery(useBreakpoints.isDesktop)
 
 const drawerRef = ref<HTMLElement | null>(null)
 const isOpen = ref(false)
-
 const colors = useCategoryColors()
-
 const categoryColor = ref('var(--color-action-default)')
 const mediaBadgeClass = ref('')
+
+// ── Drag-to-dismiss ───────────────────────────────────────────────
+
+const DISMISS_THRESHOLD_PX = 150
+const DISMISS_THRESHOLD_RATIO = 0.35
+
+let dragStartY = 0
+const isDragging = ref(false)
+const dragOffset = ref(0) // px dragged downward (never negative)
+
+const dragStyle = computed(() => {
+  if (!isDesktop.value || dragOffset.value <= 0) return {}
+  return { transform: `translateY(${dragOffset.value}px)`, transition: 'none' }
+})
+
+const onDragStart = (e: TouchEvent) => {
+  dragStartY = e.touches[0]!.clientY
+  isDragging.value = true
+  dragOffset.value = 0
+}
+
+const onDragMove = (e: TouchEvent) => {
+  if (!isDragging.value) return
+  const delta = e.touches[0]!.clientY - dragStartY
+  dragOffset.value = Math.max(0, delta) // clamp — no upward overscroll
+}
+
+const onDragEnd = () => {
+  if (!isDragging.value) return
+  isDragging.value = false
+
+  const drawerHeight = drawerRef.value?.offsetHeight ?? 0
+  const pastThreshold =
+    dragOffset.value >= DISMISS_THRESHOLD_PX ||
+    (drawerHeight > 0 && dragOffset.value / drawerHeight >= DISMISS_THRESHOLD_RATIO)
+
+  if (pastThreshold) {
+    close()
+  } else {
+    dragOffset.value = 0 // trigger CSS snap-back via transition
+  }
+}
+
+const resetDrag = () => {
+  isDragging.value = false
+  dragOffset.value = 0
+  dragStartY = 0
+}
 
 watch(
   () => props.book,
   (book) => {
+    resetDrag()
     if (book) {
       categoryColor.value = colors.categoryColor(book.categoria)
       mediaBadgeClass.value = colors.mediaBadgeClass(book.midia)
@@ -136,6 +184,7 @@ watch(
 const close = () => {
   isOpen.value = false
   document.body.style.overflow = ''
+  resetDrag()
   emit('close')
 }
 
@@ -170,7 +219,6 @@ const formatCategoria = (v?: string) => (v ? v.replace(/-/g, ' ') : '')
   height: 100dvh;
   box-shadow: -8px 0 32px rgba(0, 0, 0, 0.14);
 
-  // Mobile: bottom sheet
   &.is-mobile {
     top: auto;
     bottom: 0;
@@ -181,17 +229,29 @@ const formatCategoria = (v?: string) => (v ? v.replace(/-/g, ' ') : '')
     max-height: 92dvh;
     border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
     box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.14);
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
   }
 }
 
-// ── Handle (mobile) ───────────────────────────────────────────────
+// ── Handle ────────────────────────────────────────────────────────
 .drawer-handle {
   width: 36px;
   height: 4px;
   border-radius: 2px;
   background: var(--color-border-strong);
-  margin: 12px auto 0;
+  margin: 0 auto;
   flex-shrink: 0;
+
+  padding: 14px 32px;
+  box-sizing: content-box;
+  background-clip: content-box;
+
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 // ── Header ────────────────────────────────────────────────────────
@@ -393,7 +453,7 @@ const formatCategoria = (v?: string) => (v ? v.replace(/-/g, ' ') : '')
   }
 }
 
-// ── Badges (reutilizados do BookCard) ─────────────────────────────
+// ── Badges ────────────────────────────────────────────────────────
 .midia-badge {
   display: inline-flex;
   align-items: center;
@@ -450,7 +510,6 @@ const formatCategoria = (v?: string) => (v ? v.replace(/-/g, ' ') : '')
   opacity: 0;
 }
 
-// Desktop — desliza da direita
 .drawer-right-enter-active,
 .drawer-right-leave-active {
   transition: transform 0.25s ease;
@@ -460,7 +519,6 @@ const formatCategoria = (v?: string) => (v ? v.replace(/-/g, ' ') : '')
   transform: translateX(100%);
 }
 
-// Mobile — sobe do rodapé
 .drawer-bottom-enter-active,
 .drawer-bottom-leave-active {
   transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);

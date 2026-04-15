@@ -184,7 +184,7 @@ watch(route, async () => {
   }
 
   @media (max-width: 767px) {
-    grid-template-rows: 4rem 1fr auto;
+    grid-template-rows: 3rem 1fr auto;
     grid-template-columns: 1fr;
 
     :deep(.app-sidebar) {

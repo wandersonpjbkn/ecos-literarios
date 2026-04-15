@@ -32,5 +32,13 @@ import UserMenu from '@/components/UserMenu.vue'
     align-items: center;
     justify-content: space-between;
   }
+
+  @media (max-width: 767px) {
+    height: 3rem;
+
+    &--inner {
+      padding: 0.5rem 1rem;
+    }
+  }
 }
 </style>

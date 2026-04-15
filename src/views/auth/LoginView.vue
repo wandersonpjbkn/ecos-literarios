@@ -114,6 +114,10 @@ const startCooldown = () => {
   min-height: calc(100dvh - 4rem);
   padding: 2rem 1rem;
   background: var(--color-background-default);
+
+  @media (max-width: 767px) {
+    min-height: calc(100dvh - 6rem);
+  }
 }
 
 .login-card {

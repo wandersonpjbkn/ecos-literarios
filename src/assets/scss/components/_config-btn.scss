@@ -2,7 +2,7 @@
   --icon-size: 65%;
   --btn-size: 2.5rem;
 
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: var(--btn-size);
@@ -27,5 +27,6 @@
 
   @media (max-width: 767px) {
     --icon-size: 50%;
+    --btn-size: 2rem;
   }
 }

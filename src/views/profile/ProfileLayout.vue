@@ -229,6 +229,7 @@ const roleLabel = computed(() => {
 @media (max-width: 1023px) {
   .profile-layout {
     grid-template-columns: 220px 1fr;
+    min-height: calc(100dvh - 6rem);
   }
 
   .profile-main :deep(.profile-section) {
