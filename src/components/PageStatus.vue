@@ -1,9 +1,8 @@
 <template>
   <!-- Loading -->
-  <div v-if="loading" class="state-screen" role="status" :aria-label="loadingText">
-    <div class="spinner" aria-hidden="true" />
-    <p>{{ loadingText }}</p>
-  </div>
+  <BaseSpinner v-if="loading" class="state-screen" role="status" :aria-label="loadingText">
+    {{ loadingText }}
+  </BaseSpinner>
 
   <!-- Error -->
   <div v-else-if="error" class="state-screen state-error" role="alert">
@@ -59,21 +58,6 @@ const friendlyError = computed(() => {
 
   &.state-error {
     color: var(--color-action-default);
-  }
-}
-
-.spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid var(--color-border-default);
-  border-top-color: var(--color-action-default);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
   }
 }
 

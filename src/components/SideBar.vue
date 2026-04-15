@@ -8,7 +8,6 @@ const props = withDefaults(
   defineProps<{
     title: string
     enter?: string
-    breakpoint?: boolean
   }>(),
   {
     enter: 'right',
@@ -68,7 +67,7 @@ const toggle = () => {
 onClickOutside(painelRef, () => {
   setTimeout(() => {
     if (isOpen.value) close()
-  }, 350)
+  }, 250)
 })
 
 watch(isTablet, (mobile) => {

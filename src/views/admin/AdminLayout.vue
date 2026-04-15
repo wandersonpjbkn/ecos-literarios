@@ -121,15 +121,14 @@ onMounted(async () => {
 
 <style lang="scss">
 .page-admin {
-  .site-main {
+  .app-main {
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
     overflow: hidden;
-    height: 100dvh;
   }
 
-  .site-user--content {
+  .app-header--inner {
     max-width: none;
   }
 }

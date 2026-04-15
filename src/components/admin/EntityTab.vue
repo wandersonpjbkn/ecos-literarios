@@ -38,10 +38,7 @@
     </Transition>
 
     <!-- Loading -->
-    <div v-if="crud.loading.value" class="entity-state">
-      <div class="spinner" aria-hidden="true" />
-      <p>Carregando…</p>
-    </div>
+    <BaseSpinner v-if="crud.loading.value" class="entity-state">Carregando…</BaseSpinner>
 
     <!-- Error -->
     <div v-else-if="crud.error.value" class="entity-state entity-state--error">
@@ -475,21 +472,6 @@ onMounted(() => crud.fetchAll())
   text-align: center;
   font-size: 0.9rem;
   color: var(--color-text-subtle);
-}
-
-.spinner {
-  width: 28px;
-  height: 28px;
-  border: 3px solid var(--color-border-default);
-  border-top-color: var(--color-action-default);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .entity-search {

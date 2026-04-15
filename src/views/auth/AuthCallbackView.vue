@@ -1,10 +1,9 @@
 <template>
   <div class="callback-page">
     <div class="callback-card">
-      <template v-if="status === 'loading'">
-        <div class="spinner" aria-hidden="true" />
+      <BaseSpinner v-if="status === 'loading'">
         <p class="callback-msg">Verificando acesso…</p>
-      </template>
+      </BaseSpinner>
 
       <template v-else-if="status === 'error'">
         <BaseIcon name="error" class="callback-error-icon" aria-hidden="true" />
@@ -60,21 +59,6 @@ onMounted(async () => {
   gap: 1rem;
   text-align: center;
   padding: 2rem;
-}
-
-.spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid var(--color-border-default);
-  border-top-color: var(--color-action-default);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .callback-msg {

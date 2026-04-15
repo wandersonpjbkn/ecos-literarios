@@ -49,10 +49,9 @@
           </label>
         </header>
 
-        <div v-if="isRunning" class="admin-state">
-          <div class="spinner" aria-hidden="true" />
+        <BaseSpinner v-if="isRunning" class="admin-state">
           <p>Executando lote… {{ estimatedProcessed }} / {{ estimatedTotal }} processados (estimado)</p>
-        </div>
+        </BaseSpinner>
 
         <div v-else-if="runError" class="admin-state admin-state--error">
           <BaseIcon name="error" aria-hidden="true" />
@@ -538,21 +537,6 @@ onMounted(fetchStatusAndHistory)
 
   &--error {
     color: var(--color-action-default);
-  }
-}
-
-.spinner {
-  width: 34px;
-  height: 34px;
-  border: 3px solid var(--color-border-default);
-  border-top-color: var(--color-action-default);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
   }
 }
 

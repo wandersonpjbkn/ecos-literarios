@@ -9,10 +9,9 @@
       </div>
     </div>
 
-    <div v-if="loading" class="admin-state">
-      <div class="spinner" aria-hidden="true" />
+    <BaseSpinner v-if="loading" class="admin-state">
       <p>Carregando permissões…</p>
-    </div>
+    </BaseSpinner>
 
     <div v-else-if="error" class="admin-state admin-state--error">
       <BaseIcon name="error" aria-hidden="true" />
@@ -293,21 +292,6 @@ onMounted(fetchPermissions)
   svg {
     width: 40px;
     height: 40px;
-  }
-}
-
-.spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid var(--color-border-default);
-  border-top-color: var(--color-action-default);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
   }
 }
 

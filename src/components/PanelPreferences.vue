@@ -1,0 +1,103 @@
+<template>
+  <SideBar ref="instance" title="Preferências" :enter="isTablet ? 'right' : 'left:5rem'">
+    <template #body>
+      <div class="menu-painel">
+        <div class="menu-painel-card">
+          <p>Tema</p>
+          <MultiSelect
+            label="Tema"
+            :multiple="false"
+            :searchable="false"
+            :options="themesOptions"
+            :selected="activeTheme"
+            @toggle="(value) => select(value)"
+          />
+        </div>
+
+        <div class="menu-painel-card">
+          <p>Cache</p>
+          <button class="btn" type="button" @click="forceRefresh">
+            Recarregar
+            <BaseIcon name="reload" class="icon" />
+          </button>
+        </div>
+      </div>
+    </template>
+  </SideBar>
+</template>
+
+<script lang="ts" setup>
+import { ref, defineAsyncComponent } from 'vue'
+import { useRoute } from 'vue-router'
+import { useMediaQuery } from '@vueuse/core'
+
+import { useApi, useTheme, useUtils, useBreakpoints } from '@/composables'
+
+const SideBar = defineAsyncComponent(() => import('@/components/SideBar.vue'))
+const MultiSelect = defineAsyncComponent(() => import('@/components/MultiSelect.vue'))
+
+const route = useRoute()
+const { themes, activeTheme, select } = useTheme()
+
+const isTablet = useMediaQuery(useBreakpoints.isTablet)
+
+const instance = ref<InstanceType<typeof SideBar> | null>(null)
+
+const themesOptions = themes.map((t) => ({
+  value: t.value,
+  label: `${t.emoji} ${t.label}`,
+}))
+
+const forceRefresh = () => {
+  useApi().fetchBooks(true)
+  instance.value?.close()
+  useUtils().sendGtmEvent({
+    event: 'force_refresh',
+    force_refresh_origin: route.fullPath,
+  })
+}
+
+defineExpose({ instance })
+</script>
+
+<style lang="scss" scoped>
+.menu-painel {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  row-gap: 2rem;
+
+  &-card {
+    p {
+      margin-bottom: 0.15rem;
+      font-size: 1rem;
+      color: var(--color-text-default);
+    }
+  }
+
+  .btn {
+    display: flex;
+    min-height: 44px;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius-sm);
+    background: var(--color-background-subtle);
+    border: 1px solid var(--color-border-default);
+    font-family: var(--font-family-body);
+    font-size: 1rem;
+    color: var(--color-text-default);
+    align-items: center;
+    justify-content: center;
+    transition: opacity var(--motion-transition-default);
+    cursor: pointer;
+    grid-column-start: 2;
+
+    &:hover {
+      background: var(--color-background-default);
+    }
+
+    .icon {
+      margin-left: 0.5rem;
+    }
+  }
+}
+</style>

@@ -8,6 +8,7 @@ import router from '@/router'
 
 import App from '@/App.vue'
 import BaseIcon from '@/components/BaseIcon.vue'
+import BaseSpinner from '@/components/BaseSpinner.vue'
 
 import '@/assets/scss/main.scss'
 
@@ -31,6 +32,6 @@ app.use(gtm, {
 })
 
 // global components
-app.component('BaseIcon', BaseIcon)
+app.component('BaseIcon', BaseIcon).component('BaseSpinner', BaseSpinner)
 
 app.mount('#app')

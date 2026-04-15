@@ -22,10 +22,9 @@
     </div>
 
     <!-- Loading -->
-    <div v-else-if="loading" class="admin-state">
-      <div class="spinner" aria-hidden="true" />
+    <BaseSpinner v-else-if="loading" class="admin-state">
       <p>Buscando histórico…</p>
-    </div>
+    </BaseSpinner>
 
     <!-- Error -->
     <div v-else-if="error" class="admin-state admin-state--error">
@@ -197,21 +196,6 @@ const loadHistory = async () => {
   &--idle {
     border: 1px dashed var(--color-border-default);
     border-radius: var(--border-radius-default);
-  }
-}
-
-.spinner {
-  width: 34px;
-  height: 34px;
-  border: 3px solid var(--color-border-default);
-  border-top-color: var(--color-action-default);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
   }
 }
 

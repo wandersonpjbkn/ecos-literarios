@@ -5,19 +5,19 @@
   </Transition>
 
   <!-- Drawer -->
-  <Transition :name="isDesktop ? 'drawer-bottom' : 'drawer-right'">
+  <Transition :name="isBelowDesktop ? 'drawer-bottom' : 'drawer-right'">
     <aside
       v-if="isOpen && book"
       ref="drawerRef"
       class="book-drawer"
-      :class="{ 'is-mobile': isDesktop }"
+      :class="{ 'is-mobile': isBelowDesktop }"
       :style="dragStyle"
       role="complementary"
       :aria-label="`Detalhes de ${book.titulo}`"
     >
       <!-- Handle — drag-to-dismiss on mobile -->
       <div
-        v-if="isDesktop"
+        v-if="isBelowDesktop"
         class="drawer-handle"
         aria-hidden="true"
         @touchstart.passive="onDragStart"
@@ -110,7 +110,7 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const isDesktop = useMediaQuery(useBreakpoints.isDesktop)
+const isBelowDesktop = useMediaQuery(useBreakpoints.isBelowDesktop)
 
 const drawerRef = ref<HTMLElement | null>(null)
 const isOpen = ref(false)
@@ -128,7 +128,7 @@ const isDragging = ref(false)
 const dragOffset = ref(0) // px dragged downward (never negative)
 
 const dragStyle = computed(() => {
-  if (!isDesktop.value || dragOffset.value <= 0) return {}
+  if (!isBelowDesktop.value || dragOffset.value <= 0) return {}
   return { transform: `translateY(${dragOffset.value}px)`, transition: 'none' }
 })
 

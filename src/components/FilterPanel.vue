@@ -84,7 +84,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 
 import type { Options } from '@/types'
 
@@ -103,7 +103,7 @@ const props = withDefaults(
 )
 const emit = defineEmits(['toggle', 'clear'])
 
-const isOpen = ref(true)
+const isOpen = ref(props.opened)
 
 const activeTags = computed(() => {
   const tags = []
@@ -124,10 +124,6 @@ const activeTags = computed(() => {
 const removeTag = ({ key, value }: { key: string; value: string }) => {
   emit('toggle', key, value)
 }
-
-onMounted(() => {
-  isOpen.value = props.opened
-})
 </script>
 
 <style lang="scss" scoped>

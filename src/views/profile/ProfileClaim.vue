@@ -39,10 +39,9 @@
       </article>
     </div>
 
-    <div v-if="loadingStatus" class="profile-state">
-      <div class="spinner" aria-hidden="true" />
+    <BaseSpinner v-if="loadingStatus" class="profile-state">
       <p>Carregando status…</p>
-    </div>
+    </BaseSpinner>
 
     <template v-else>
       <!-- Painel de ação -->
@@ -281,21 +280,6 @@ onMounted(loadStatus)
   padding: 48px 24px;
   text-align: center;
   color: var(--color-text-subtle);
-}
-
-.spinner {
-  width: 34px;
-  height: 34px;
-  border: 3px solid var(--color-border-default);
-  border-top-color: var(--color-action-default);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 // ── Panels — mesmo padrão do execution-panel do AdminEnrichment ───
