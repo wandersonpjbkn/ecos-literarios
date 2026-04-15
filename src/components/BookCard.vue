@@ -31,14 +31,6 @@
             +{{ matchTags.length - 2 }}
           </span>
         </TransitionGroup>
-        <div v-else class="card-match-tags">
-          <span :class="['card-match-tag', colors.mediaBadgeClass(book.midia)]">
-            {{ book.midia }}
-          </span>
-          <span class="card-match-tag">
-            {{ book.categoria }}
-          </span>
-        </div>
       </div>
 
       <!-- Basic info -->
@@ -172,7 +164,7 @@ const matchTags = computed(() => {
 
 .card-match-tags {
   position: absolute;
-  top: 0.5rem;
+  top: 0.75rem;
   left: 0.5rem;
   right: 2.5rem;
   display: flex;
@@ -180,8 +172,8 @@ const matchTags = computed(() => {
   gap: 4px;
   pointer-events: none;
 
-  &.is-inline {
-    flex-direction: column;
+  @media (max-width: 767px) {
+    top: 0.65rem;
   }
 }
 
@@ -205,19 +197,6 @@ const matchTags = computed(() => {
   &--more {
     background: rgba(0, 0, 0, 0.4);
   }
-}
-
-.badge-livro {
-  background-color: var(--badge-livro-text-color);
-  color: var(--badge-livro-background-color);
-}
-.badge-manga {
-  background-color: var(--badge-manga-text-color);
-  color: var(--badge-manga-background-color);
-}
-.badge-hq {
-  background-color: var(--badge-hq-text-color);
-  color: var(--badge-hq-background-color);
 }
 
 .card-info {
@@ -250,7 +229,7 @@ const matchTags = computed(() => {
 }
 
 .card-info-btn {
-  $color: rgba(0, 0, 0, 0.55);
+  $color: rgba(0, 0, 0, 0.35);
 
   position: absolute;
   top: 0.5rem;
@@ -263,19 +242,16 @@ const matchTags = computed(() => {
   width: fit-content;
   height: fit-content;
   padding: 0;
-  border: 2px solid #{$color};
+  border: none;
   border-radius: 50%;
-  background: #{$color};
+  background-color: #{$color};
   color: #fff;
   cursor: pointer;
   backdrop-filter: blur(4px);
-  transition:
-    border-color var(--motion-transition-default),
-    transform var(--motion-transition-default);
+  transition: transform var(--motion-transition-default);
   overflow: hidden;
 
   &:hover {
-    border-color: rgba(0, 0, 0, 0.75);
     transform: scale(1.1);
   }
 
@@ -285,10 +261,13 @@ const matchTags = computed(() => {
   }
 
   svg {
-    background-color: inherit;
-    $size: 1.15rem;
+    $size: 1.75rem;
+
     width: $size;
     height: $size;
+    background-color: rgba(#000, 0);
+    border-radius: 50%;
+    overflow: hidden;
   }
 
   @media (max-width: 767px) {

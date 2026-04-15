@@ -5,17 +5,17 @@
   </Transition>
 
   <!-- Drawer -->
-  <Transition :name="isMobile ? 'drawer-bottom' : 'drawer-right'">
+  <Transition :name="isTablet ? 'drawer-bottom' : 'drawer-right'">
     <aside
       v-if="isOpen && book"
       ref="drawerRef"
       class="book-drawer"
-      :class="{ 'is-mobile': isMobile }"
+      :class="{ 'is-mobile': isTablet }"
       role="complementary"
       :aria-label="`Detalhes de ${book.titulo}`"
     >
       <!-- Handle para swipe no mobile -->
-      <div v-if="isMobile" class="drawer-handle" aria-hidden="true" />
+      <div v-if="isTablet" class="drawer-handle" aria-hidden="true" />
 
       <!-- Header -->
       <div class="drawer-header">
@@ -99,7 +99,7 @@ import { ref, watch } from 'vue'
 import { useMediaQuery, onClickOutside } from '@vueuse/core'
 import type { Book } from '@/types'
 
-import { useCategoryColors } from '@/composables'
+import { useCategoryColors, useBreakpoints } from '@/composables'
 
 const props = defineProps<{
   book: Book | null
@@ -109,7 +109,8 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const isMobile = useMediaQuery('(max-width: 767px)')
+const isTablet = useMediaQuery(useBreakpoints.isTablet)
+
 const drawerRef = ref<HTMLElement | null>(null)
 const isOpen = ref(false)
 
