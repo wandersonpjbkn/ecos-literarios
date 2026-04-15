@@ -682,9 +682,37 @@ onMounted(() => crud.fetchAll())
     flex-direction: column;
     align-items: stretch;
     gap: 0.5rem;
+    padding: 0.85rem 1rem;
   }
+
+  .entity-tab__add-btn {
+    min-height: 44px;
+  }
+
   .entity-form {
     flex-direction: column;
+    padding: 0.75rem 1rem;
+
+    &__submit {
+      min-height: 44px;
+    }
+  }
+
+  .entity-search {
+    padding: 0.5rem 1rem;
+  }
+
+  .entity-row {
+    padding: 0.75rem 1rem;
+
+    &__name {
+      word-break: break-word;
+    }
+
+    &__action {
+      width: 36px;
+      height: 36px;
+    }
   }
 }
 </style>

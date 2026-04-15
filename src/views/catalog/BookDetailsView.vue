@@ -325,6 +325,11 @@ usePageMeta(
     align-items: center;
     gap: 10px;
     min-width: 0;
+
+    @media (max-width: 767px) {
+      padding: 0 1rem;
+      gap: 6px;
+    }
   }
 
   &__back {

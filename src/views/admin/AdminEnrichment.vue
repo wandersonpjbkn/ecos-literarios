@@ -714,19 +714,53 @@ onMounted(fetchStatusAndHistory)
   }
 }
 
+@media (max-width: 767px) {
+  .admin-section {
+    &__title {
+      font-size: 1.2rem;
+    }
+
+    &__desc {
+      font-size: 0.85rem;
+    }
+  }
+
+  .status-card,
+  .summary-card {
+    p {
+      font-size: 0.72rem;
+    }
+
+    strong,
+    .status-card__value {
+      font-size: 0.95rem;
+      word-break: break-word;
+    }
+  }
+}
+
 @media (max-width: 640px) {
   .admin-section {
-    padding: 1rem;
-
     &__header {
       flex-direction: column;
       align-items: stretch;
+      margin-bottom: 1rem;
     }
+  }
+
+  .run-btn {
+    min-height: 44px;
+    align-self: flex-start;
   }
 
   .status-grid,
   .summary-grid {
     grid-template-columns: 1fr;
+  }
+
+  .execution-panel,
+  .history-panel {
+    padding: 0.85rem;
   }
 
   .execution-panel__header,
@@ -736,9 +770,33 @@ onMounted(fetchStatusAndHistory)
     gap: 0.75rem;
   }
 
-  .result-row,
+  .ghost-btn {
+    min-height: 44px;
+    width: 100%;
+  }
+
+  .result-row {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+
+    &--header {
+      display: none;
+    }
+
+    &__title,
+    &__detail {
+      white-space: normal;
+      word-break: break-word;
+    }
+  }
+
   .history-item summary {
     grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .history-item__badge {
+    justify-self: flex-start;
   }
 }
 </style>

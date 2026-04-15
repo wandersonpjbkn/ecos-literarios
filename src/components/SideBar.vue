@@ -2,23 +2,45 @@
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { useMediaQuery, onClickOutside } from '@vueuse/core'
 
+import { useBreakpoints } from '@/composables'
+
 const props = withDefaults(
   defineProps<{
     title: string
-    enter?: 'left' | 'right'
+    enter?: string
+    breakpoint?: boolean
   }>(),
   {
     enter: 'right',
   },
 )
 
-const isMobile = useMediaQuery('(max-width: 767px)')
+const isTablet = useMediaQuery(useBreakpoints.isTablet)
+
+const expectedPositions = ['left', 'right']
+const validCSS = /^-?(?:0|(?:\d*\.?\d+)(px|rem|em|vw|dvw|%))$/
 
 const isOpen = ref(false)
 const painelRef = ref<HTMLElement | null>(null)
 
-// Transition name must match the CSS class prefix exactly (double dash)
-const panelClass = computed(() => `mobile-filters-panel--${props.enter}`)
+const enterDirection = computed(() => {
+  const [position] = props.enter.split(':')
+
+  if (!position) return 'right'
+  if (!expectedPositions.includes(position)) return 'right'
+
+  return position
+})
+const enterInitial = computed(() => {
+  const [, initial] = props.enter.split(':')
+
+  if (!initial) return '0'
+  if (!validCSS.test(initial)) return '0'
+
+  return initial
+})
+
+const panelClass = computed(() => `mobile-filters-panel--${enterDirection.value}`)
 
 const lockBody = () => {
   document.body.style.overflow = 'hidden'
@@ -49,7 +71,7 @@ onClickOutside(painelRef, () => {
   }, 350)
 })
 
-watch(isMobile, (mobile) => {
+watch(isTablet, (mobile) => {
   if (!mobile) close()
 })
 
@@ -69,7 +91,13 @@ defineExpose({ isOpen, open, close, toggle })
 
     <!-- panel -->
     <Transition :name="panelClass">
-      <aside v-if="isOpen" ref="painelRef" :class="['mobile-filters-sidebar', enter]" :aria-label="title">
+      <aside
+        v-if="isOpen"
+        ref="painelRef"
+        :class="['mobile-filters-sidebar', enterDirection]"
+        :style="{ '--initial': enterInitial }"
+        :aria-label="title"
+      >
         <!-- header -->
         <div class="mobile-filters-header">
           <slot name="header" :open="open" :close="close" :toggle="toggle" :is-open="isOpen">
@@ -117,10 +145,10 @@ defineExpose({ isOpen, open, close, toggle })
     flex-direction: column;
 
     &.left {
-      left: 5rem;
+      left: var(--initial);
     }
     &.right {
-      right: 0;
+      right: var(--initial);
     }
   }
 

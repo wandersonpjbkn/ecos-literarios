@@ -370,16 +370,56 @@ onMounted(fetchUsers)
 
 @media (max-width: 767px) {
   .admin-section {
-    padding: 1rem;
+    &__header {
+      margin-bottom: 1rem;
+    }
+
+    &__title {
+      font-size: 1.2rem;
+    }
+
+    &__desc {
+      font-size: 0.85rem;
+    }
   }
 
   .member-row {
-    grid-template-columns: 2rem 1fr auto;
+    grid-template-columns: 2rem 1fr;
     grid-template-rows: auto auto;
+    gap: 0.5rem 0.75rem;
+    padding: 0.75rem 0.9rem;
+
+    .member-avatar {
+      grid-row: 1 / 3;
+    }
+
+    .member-info {
+      grid-column: 2;
+    }
 
     .member-meta {
       display: none;
     }
+
+    .member-role {
+      grid-column: 2;
+      width: 100%;
+    }
+  }
+
+  .member-name {
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+  }
+
+  .member-email {
+    font-size: 0.78rem;
+    word-break: break-all;
+  }
+
+  .role-select {
+    width: 100%;
+    min-height: 40px;
   }
 }
 </style>

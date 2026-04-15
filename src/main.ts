@@ -1,4 +1,4 @@
-import { createApp, defineAsyncComponent } from 'vue'
+import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { createHead } from '@unhead/vue/client'
 import persisteStorage from 'pinia-plugin-persistedstate'
@@ -7,6 +7,7 @@ import gtm from '@gtm-support/vue-gtm'
 import router from '@/router'
 
 import App from '@/App.vue'
+import BaseIcon from '@/components/BaseIcon.vue'
 
 import '@/assets/scss/main.scss'
 
@@ -29,9 +30,7 @@ app.use(gtm, {
   trackOnNextTick: false,
 })
 
-app.component(
-  'BaseIcon',
-  defineAsyncComponent(() => import('@/components/BaseIcon.vue')),
-)
+// global components
+app.component('BaseIcon', BaseIcon)
 
 app.mount('#app')

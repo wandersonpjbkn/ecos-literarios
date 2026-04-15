@@ -530,7 +530,40 @@ onMounted(fetchPermissions)
 
 @media (max-width: 767px) {
   .admin-section {
-    padding: 1rem;
+    &__header {
+      margin-bottom: 1rem;
+    }
+
+    &__title {
+      font-size: 1.2rem;
+    }
+
+    &__desc {
+      font-size: 0.85rem;
+    }
+  }
+
+  .role-card {
+    &__header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+    }
+
+    &__actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+
+  .card-btn {
+    height: 36px;
+    flex: 1;
+  }
+
+  .resource-row {
+    padding: 0.75rem 1rem;
   }
 }
 </style>

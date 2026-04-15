@@ -1,0 +1,31 @@
+.btn {
+  --icon-size: 65%;
+  --btn-size: 2.5rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--btn-size);
+  height: var(--btn-size);
+  padding: 0;
+  background: rgba(#fff, 0);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: background-color var(--motion-transition-default);
+  color: var(--color-surface-default);
+  text-decoration: none;
+
+  &:hover {
+    background-color: rgba(#fff, 0.15);
+  }
+
+  :deep(.base-icon) {
+    width: var(--icon-size);
+    height: var(--icon-size);
+  }
+
+  @media (max-width: 767px) {
+    --icon-size: 50%;
+  }
+}

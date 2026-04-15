@@ -155,8 +155,8 @@ const handleLogout = async () => {
 // ── Dropdown ──────────────────────────────────────────────────────
 .user-dropdown {
   position: absolute;
-  top: calc(100% - 0.5rem);
-  right: 1rem;
+  top: calc(100% + 0.7rem);
+  right: 0;
   z-index: 200;
 
   min-width: 200px;

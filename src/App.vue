@@ -3,84 +3,19 @@
     <bodyAttrs :class="[useRoute().meta.pageClass, `page-${useRoute().name as string}`]" />
   </Head>
   <div class="app-wrapper">
-    <header class="site-header">
-      <nav class="header-inner">
-        <div class="header-content">
-          <RouterLink :to="{ name: 'catalog-books' }" class="config-btn" aria-label="Catálogo">
-            <BaseIcon name="home" class="config-btn__icon" aria-hidden="true" />
-          </RouterLink>
-          <button
-            class="config-btn"
-            type="button"
-            :aria-expanded="categorySidebar?.isOpen"
-            aria-label="Categorias"
-            @click="toggleCategories"
-          >
-            <BaseIcon name="menu" class="config-btn__icon" aria-hidden="true" />
-          </button>
-          <RouterLink
-            v-if="storeAuth.isEditor"
-            :to="{ name: 'admin-books' }"
-            class="config-btn"
-            aria-label="Cadastrar livro"
-          >
-            <BaseIcon name="plus" class="config-btn__icon" aria-hidden="true" />
-          </RouterLink>
-        </div>
+    <!-- sidebar -->
+    <AppSidebar
+      :category-is-open="categorySidebar?.isOpen"
+      :menu-is-open="menuSidebar?.isOpen"
+      @toggle-categories="toggleCategories"
+      @toggle-menu="toggleMenu"
+    />
 
-        <div class="header-actions">
-          <RouterLink
-            v-if="storeAuth.isLoggedIn"
-            :to="{ name: 'profile-account' }"
-            class="config-btn"
-            aria-label="Meu perfil"
-          >
-            <BaseIcon name="user" class="config-btn__icon" aria-hidden="true" />
-          </RouterLink>
+    <!-- header -->
+    <AppHeader :menu-is-open="menuSidebar?.isOpen" @toggle-menu="toggleMenu" />
 
-          <button
-            class="config-btn"
-            type="button"
-            :aria-expanded="menuSidebar?.isOpen"
-            aria-label="Configurações"
-            @click="toggleMenu"
-          >
-            <BaseIcon name="filter" class="config-btn__icon" aria-hidden="true" />
-          </button>
-        </div>
-      </nav>
-    </header>
-
-    <main ref="content" class="site-main">
-      <!-- user -->
-      <div class="site-user">
-        <div class="site-user--content">
-          <RouterLink :to="{ name: 'catalog-books' }" class="brand">
-            <span class="brand-icon">📚</span>
-            <div class="brand-text">
-              <span class="brand-name">Ecos Literários</span>
-              <span class="brand-sub">
-                {{ isMobile ? 'Catálogo do clube' : 'Catálogo de livros do clube' }}
-              </span>
-            </div>
-          </RouterLink>
-          <div class="site-user--actions">
-            <UserMenu />
-            <button
-              v-if="isMobile"
-              class="config-btn"
-              type="button"
-              :aria-expanded="menuSidebar?.isOpen"
-              aria-label="Configurações"
-              @click="toggleMenu"
-            >
-              <BaseIcon name="filter" class="config-btn__icon" aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- content -->
+    <!-- content -->
+    <main ref="content" class="app-main">
       <RouterView v-slot="{ Component }">
         <Transition name="fade" mode="out-in">
           <component :is="Component" />
@@ -91,7 +26,7 @@
     <aside id="sidebar" />
 
     <!-- Categories navigation sidebar -->
-    <SideBar ref="categorySidebar" title="Categorias" :enter="isMobile ? 'right' : 'left'">
+    <SideBar ref="categorySidebar" title="Categorias" :enter="`left:${isTablet ? '0' : '5rem'}`" :breakpoint="isTablet">
       <template #body>
         <nav class="category-nav" aria-label="Navegação por categoria">
           <RouterLink
@@ -113,7 +48,7 @@
     </SideBar>
 
     <!-- Preferences sidebar -->
-    <SideBar ref="menuSidebar" title="Preferências" :enter="isMobile ? 'right' : 'left'">
+    <SideBar ref="menuSidebar" title="Preferências" :enter="isTablet ? 'right' : 'left:5rem'">
       <template #body>
         <div class="menu-painel">
           <div class="menu-painel-card">
@@ -132,7 +67,7 @@
             <p>Cache</p>
             <button class="btn" type="button" @click="forceRefresh">
               Recarregar
-              <BaseIcon name="reload" class="icon ml-2" />
+              <BaseIcon name="reload" class="icon" />
             </button>
           </div>
         </div>
@@ -150,22 +85,22 @@ import { useHead } from '@unhead/vue'
 import { Head } from '@unhead/vue/components'
 import { useMediaQuery } from '@vueuse/core'
 
-import { useApi, useTheme, useUtils, useAuth, useCategoryColors } from '@/composables'
+import { useApi, useTheme, useUtils, useAuth, useCategoryColors, useBreakpoints } from '@/composables'
 import { useBooksStore } from '@/stores'
-import UserMenu from '@/components/UserMenu.vue'
-import BaseIcon from '@/components/BaseIcon.vue'
+import AppHeader from '@/components/AppHeader.vue'
 
-const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
+const AppSidebar = defineAsyncComponent(() => import('@/components/AppSidebar.vue'))
 const MultiSelect = defineAsyncComponent(() => import('@/components/MultiSelect.vue'))
 const SideBar = defineAsyncComponent(() => import('@/components/SideBar.vue'))
+const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
 
 const route = useRoute()
 const { themes, activeTheme, select } = useTheme()
-const { store: storeAuth, restoreSession, watchSession } = useAuth()
+const { restoreSession, watchSession } = useAuth()
 const colors = useCategoryColors()
 const { slugify } = useUtils()
 
-const isMobile = useMediaQuery('(max-width: 767px)')
+const isTablet = useMediaQuery(useBreakpoints.isTablet)
 
 useHead({
   htmlAttrs: { lang: 'pt-BR' },
@@ -184,7 +119,6 @@ const themesOptions = themes.map((t) => ({
 const toggleMenu = () => menuSidebar.value?.toggle()
 const toggleCategories = () => categorySidebar.value?.toggle()
 
-// ── Category links derived from loaded books ──────────────────────
 const categoryLinks = computed(() => {
   const books = useBooksStore().books
   const countMap = new Map<string, number>()
@@ -233,166 +167,40 @@ watch(route, async () => {
 </script>
 
 <style lang="scss" scoped>
-.ml-2 {
-  margin-left: 0.5rem;
-}
-
 .app-wrapper {
   display: grid;
   height: 100dvh;
 
-  grid-template-rows: 1fr;
+  grid-template-rows: 4rem 1fr;
   grid-template-columns: auto 1fr;
   overflow: hidden;
 
+  :deep(.app-sidebar) {
+    grid-row: 1 / 3;
+  }
+
+  :deep(.app-header) {
+    grid-column: 2 / 3;
+  }
+
   @media (max-width: 767px) {
+    grid-template-rows: 4rem 1fr auto;
     grid-template-columns: 1fr;
-  }
-}
 
-.site {
-  &-header {
-    position: relative;
-    z-index: 60;
-
-    width: fit-content;
-    background: var(--color-header-bg, var(--color-text-default));
-    border-bottom: 1px solid rgba(var(--color-surface-default-rgb), 0.08);
-
-    @media (max-width: 767px) {
-      display: none;
-    }
-  }
-
-  &-main {
-    width: auto;
-    overflow-y: auto;
-  }
-
-  &-user {
-    height: 4rem;
-    background-color: var(--color-surface-default);
-    border-bottom: 1px solid var(--color-border-default);
-
-    &--content {
-      position: relative;
-      margin: 0 auto;
-
-      display: flex;
-      max-width: 1200px;
-      padding: 0.75rem;
-
-      align-items: center;
-      justify-content: space-between;
+    :deep(.app-sidebar) {
+      grid-row: 3 / 4;
     }
 
-    &--actions {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    :deep(.app-header) {
+      grid-row: 1 / 2;
+      grid-column: 1 / 2;
     }
   }
 }
 
-.header {
-  &-inner,
-  &-content,
-  &-actions {
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-  }
-
-  &-inner {
-    height: 100%;
-    padding: 5.25rem 1.25rem;
-  }
-
-  &-content,
-  &-actions {
-    gap: 2rem;
-  }
-
-  &-actions {
-    margin-top: auto;
-  }
-}
-
-// ── Brand ─────────────────────────────────────────────────────────
-.brand {
-  display: flex;
-  color: var(--color-action-text-subtle);
-  align-items: center;
-  gap: 12px;
-  transition: opacity var(--motion-transition-default);
-
-  &:hover {
-    opacity: 0.85;
-  }
-
-  &-icon {
-    font-size: 1.25rem;
-    line-height: 1;
-  }
-
-  &-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.2;
-  }
-
-  &-name {
-    font: {
-      family: var(--font-family-display);
-      size: 1.1rem;
-      weight: 500;
-    }
-    color: var(--color-action-default);
-  }
-
-  &-sub {
-    font: {
-      size: 0.7rem;
-      weight: 500;
-    }
-    color: var(--color-text-subtle);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-}
-
-// ── Botão de configurações ────────────────────────────────────────
-.config-btn {
-  --icon-size: 65%;
-  --btn-size: 2.5rem;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--btn-size);
-  height: var(--btn-size);
-  padding: 0;
-  background: rgba($color: #fff, $alpha: 0);
-  border: none;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  transition: background-color var(--motion-transition-default);
-  color: var(--color-surface-default);
-  text-decoration: none;
-
-  &:hover {
-    background-color: rgba($color: #fff, $alpha: 0.15);
-  }
-
-  &__icon {
-    width: var(--icon-size);
-    height: var(--icon-size);
-  }
-
-  @media (max-width: 767px) {
-    --icon-size: 50%;
-    background: var(--color-action-default);
-  }
+.app-main {
+  width: auto;
+  overflow-y: auto;
 }
 
 // ── Category navigation (SideBar body) ────────────────────────────
@@ -498,6 +306,10 @@ watch(route, async () => {
 
     &:hover {
       background: var(--color-background-default);
+    }
+
+    .icon {
+      margin-left: 0.5rem;
     }
   }
 }

@@ -201,6 +201,31 @@ const titleId = computed(() => `modal-title-${Math.random().toString(36).slice(2
   }
 }
 
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 0.75rem;
+  }
+
+  .modal-header {
+    padding: 1rem 1.1rem 0;
+  }
+
+  .modal-body {
+    padding: 0.65rem 1.1rem 1rem;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+    padding: 0.85rem 1.1rem;
+  }
+
+  .modal-btn {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
 // Transition
 .modal-enter-active,
 .modal-leave-active {

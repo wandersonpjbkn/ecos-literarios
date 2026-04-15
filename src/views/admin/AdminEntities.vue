@@ -157,15 +157,33 @@ const currentTab = computed(() => tabs.find((t) => t.key === activeTab.value))
 
 @media (max-width: 767px) {
   .admin-section {
-    padding: 1rem;
+    &__header {
+      margin-bottom: 1rem;
+    }
+
+    &__title {
+      font-size: 1.2rem;
+    }
+
+    &__desc {
+      font-size: 0.85rem;
+    }
   }
 
   .entity-tabs {
     overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
 
     &__btn {
+      flex: 0 0 auto;
       flex-shrink: 0;
       white-space: nowrap;
+      min-height: 40px;
+      padding: 8px 14px;
     }
   }
 }

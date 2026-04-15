@@ -212,6 +212,13 @@ onClickOutside(wrapRef, () => close())
   &.is-active {
     background: var(--color-background-subtle);
   }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 10px 12px;
+  }
 }
 
 .sug {

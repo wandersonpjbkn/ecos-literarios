@@ -1,5 +1,5 @@
 <template>
-  <component :is="dynamicIcon" v-if="dynamicIcon" v-bind="$attrs" />
+  <component :is="dynamicIcon" v-if="dynamicIcon" class="base-icon" v-bind="$attrs" />
 </template>
 
 <script lang="ts" setup>
@@ -35,7 +35,6 @@ const props = defineProps<{
 
 const dynamicIcon = computed(() => {
   if (!props.name) return null
-
   return defineAsyncComponent(() => import(`@/assets/icons/${props.name}.svg`))
 })
 </script>

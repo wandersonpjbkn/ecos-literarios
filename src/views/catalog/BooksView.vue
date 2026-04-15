@@ -25,7 +25,7 @@
         <div class="search-main">
           <SearchBar v-model="search" :suggestions="searchSuggestions" @select="onSelectSuggestion" />
           <button
-            v-if="isMobile"
+            v-if="isTablet"
             class="show-all-btn mobile"
             type="button"
             aria-label="Abrir filtros"
@@ -37,7 +37,7 @@
       </div>
 
       <!-- Desktop filters -->
-      <div v-if="!isMobile" class="filter-bar">
+      <div v-if="!isTablet" class="filter-bar">
         <!-- sort -->
         <MultiSelect
           class="filter-bar-sorted"
@@ -174,7 +174,7 @@ import { ref, onMounted, defineAsyncComponent } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
 import { useBooksStore } from '@/stores'
-import { useApi, useFilters, useBookSort, usePageMeta } from '@/composables'
+import { useApi, useFilters, useBookSort, usePageMeta, useBreakpoints } from '@/composables'
 
 import SearchBar from '@/components/SearchBar.vue'
 import MultiSelect from '@/components/MultiSelect.vue'
@@ -212,7 +212,7 @@ onMounted(() => useApi().fetchBooks())
 
 const filtersSidebar = ref<InstanceType<typeof SideBar> | null>(null)
 
-const isMobile = useMediaQuery('(max-width: 767px)')
+const isTablet = useMediaQuery(useBreakpoints.isTablet)
 
 const handleToggle = (key: string, value: string) => {
   const map = {
@@ -314,6 +314,7 @@ const closeDetail = () => {
   margin-bottom: 2rem;
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .multi-select {
