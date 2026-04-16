@@ -23,7 +23,13 @@
       <!-- Search + count -->
       <div class="search-row">
         <div class="search-main">
-          <SearchBar v-model="search" :suggestions="searchSuggestions" @select="onSelectSuggestion" />
+          <SearchBar
+            v-model="search"
+            :suggestions="searchSuggestions"
+            :total="useBooksStore().size"
+            :filtered="filtered.length"
+            @select="onSelectSuggestion"
+          />
           <button
             v-if="isTablet"
             class="show-all-btn mobile"
@@ -183,7 +189,7 @@ import PageStatus from '@/components/PageStatus.vue'
 import BooksGrid from '@/components/BooksGrid.vue'
 import BookDetailDrawer from '@/components/BookDetailDrawer.vue'
 
-import type { Book, BookSortOrder } from '@/types'
+import type { Book, BookSortOrder, Suggestion } from '@/types'
 
 usePageMeta({
   title: 'Catálogo de Livros',
@@ -239,8 +245,8 @@ const clearKey = (key: string) => {
 
 const handleRemove = (key: string, value: string) => handleToggle(key, value)
 
-const onSelectSuggestion = (book: Book) => {
-  search.value = book.titulo
+const onSelectSuggestion = (suggestion: Suggestion) => {
+  search.value = suggestion.main
 }
 
 const openMobileFilters = () => {

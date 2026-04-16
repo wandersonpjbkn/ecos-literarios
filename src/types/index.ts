@@ -28,8 +28,8 @@ export interface Options {
 
 export interface Suggestion {
   id: string
-  titulo: string
-  autor: string
+  main: string
+  sub: string
 }
 
 export type FilterType = 'midia' | 'categoria' | 'autor' | 'mencao'

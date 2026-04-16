@@ -26,17 +26,14 @@
       </div>
 
       <!-- Search -->
-      <div class="books-search">
-        <BaseIcon name="search" class="books-search__icon" />
-        <input
-          v-model="searchQuery"
-          type="text"
-          class="books-search__input"
-          placeholder="Buscar por título ou autor…"
-          autocomplete="off"
-        />
-        <span v-if="searchQuery" class="books-search__count"> {{ filteredBooks.length }} de {{ books.length }} </span>
-      </div>
+      <SearchBar
+        v-model="searchQuery"
+        class="books-search"
+        :suggestions="searchSuggestions"
+        :total="books.length"
+        :filtered="filteredBooks.length"
+        @select="onSelectSuggestion"
+      />
     </div>
 
     <!-- Loading -->
@@ -123,10 +120,13 @@ import { ref, computed, reactive, watch, onMounted } from 'vue'
 
 import { buildHeaders } from '@/composables/useApi'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
+import SearchBar from '@/components/SearchBar.vue'
 import MultiSelect from '@/components/MultiSelect.vue'
 import PaginationNav from '@/components/PaginationNav.vue'
 import BookFormDrawer from '@/components/admin/BookFormDrawer.vue'
 import ConfirmModal from '@/components/admin/ConfirmModal.vue'
+
+import type { Suggestion } from '@/types'
 
 const API_BASE = import.meta.env.VITE_API_URL as string
 
@@ -224,6 +224,28 @@ const fetchBooks = async () => {
   }
 }
 
+// ── Autocomplete ──────────────────────────────────────────────────
+const searchSuggestions = computed(() => {
+  if (!searchQuery.value.trim() || searchQuery.value.length < 2) return []
+
+  const q = searchQuery.value.toLowerCase()
+
+  return filteredBooks.value
+    .filter((b) => b.titulo?.toLowerCase().includes(q))
+    .map((b) => {
+      return {
+        id: b._id,
+        main: b.titulo,
+        sub: typeof b.autor === 'string' ? b.autor : b.autor?.nome,
+      }
+    })
+    .slice(0, 8)
+})
+
+const onSelectSuggestion = (suggestion: Suggestion) => {
+  searchQuery.value = suggestion.main
+}
+
 // ── Drawer ────────────────────────────────────────────────────────
 const openCreate = () => {
   editingBook.value = null
@@ -312,50 +334,6 @@ onMounted(fetchBooks)
 }
 .books-filters {
   flex: 25%;
-}
-.books-search {
-  flex: 75%;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 0.75rem;
-  min-height: 44px;
-  border: 1.5px solid var(--color-border-default);
-  border-radius: var(--border-radius-default);
-  background: var(--color-surface-default);
-  transition: border-color var(--motion-transition-default);
-
-  &:focus-within {
-    border-color: var(--color-action-default);
-    box-shadow: 0 0 0 3px var(--color-action-background-subtle);
-  }
-
-  &__icon {
-    width: 16px;
-    height: 16px;
-    color: var(--color-text-subtle);
-    flex-shrink: 0;
-  }
-
-  &__input {
-    flex: 1;
-    border: none;
-    outline: none;
-    background: none;
-    font-family: var(--font-family-body);
-    font-size: 0.9rem;
-    color: var(--color-text-default);
-    min-height: 40px;
-    &::placeholder {
-      color: var(--color-text-subtle);
-    }
-  }
-
-  &__count {
-    font-size: 0.78rem;
-    color: var(--color-text-subtle);
-    flex-shrink: 0;
-  }
 }
 
 // ── States ────────────────────────────────────────────────────────

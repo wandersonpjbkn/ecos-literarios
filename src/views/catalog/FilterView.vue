@@ -33,7 +33,13 @@
           />
 
           <div class="search-row">
-            <SearchBar v-model="search" :suggestions="searchSuggestions" @select="onSelectSuggestion" />
+            <SearchBar
+              v-model="search"
+              :suggestions="searchSuggestions"
+              :total="baseFiltered.length"
+              :filtered="filtered.length"
+              @select="onSelectSuggestion"
+            />
           </div>
         </section>
 
@@ -153,7 +159,7 @@ import BooksGrid from '@/components/BooksGrid.vue'
 import SectionHeading from '@/components/SectionHeading.vue'
 import BookDetailDrawer from '@/components/BookDetailDrawer.vue'
 
-import type { Book, BookSortOrder, Options, FilterType, ExploreKey, CategoryType } from '@/types'
+import type { Book, BookSortOrder, Options, FilterType, ExploreKey, CategoryType, Suggestion } from '@/types'
 
 const ROUTE_FILTER_MAP: Record<string, FilterType> = {
   'catalog-midia': 'midia',
@@ -303,15 +309,17 @@ const clearSecondary = () => {
 // ── Autocomplete ──────────────────────────────────────────────────
 const searchSuggestions = computed(() => {
   if (!search.value.trim() || search.value.length < 2) return []
+
   const q = search.value.toLowerCase()
+
   return baseFiltered.value
     .filter((b) => b.titulo?.toLowerCase().includes(q))
-    .map((b) => ({ id: b.id, titulo: b.titulo, autor: b.autor }))
+    .map((b) => ({ id: b.id, main: b.titulo, sub: b.autor }))
     .slice(0, 8)
 })
 
-const onSelectSuggestion = (book: Book) => {
-  search.value = book.titulo
+const onSelectSuggestion = (suggestion: Suggestion) => {
+  search.value = suggestion.main
 }
 
 // ── Explore ───────────────────────────────────────────────────────

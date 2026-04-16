@@ -1,12 +1,16 @@
 <template>
   <div ref="wrapRef" class="search-wrap">
     <div class="search-box" :class="{ 'is-focused': focused }">
-      <BaseIcon name="search" class="search-icon" />
+      <button v-if="model" class="clear-search" aria-label="Limpar" @click="cleanAll">
+        <BaseIcon name="times" />
+      </button>
+      <BaseIcon v-else name="search" class="search-icon" />
+
       <input
         ref="inputRef"
         type="text"
         :value="model"
-        placeholder="Buscar por título ou autor…"
+        :placeholder="placeholder"
         autocomplete="off"
         spellcheck="false"
         class="search-input"
@@ -18,9 +22,11 @@
         @keydown.escape="close"
         @keydown.tab="close"
       />
-      <button v-if="model" class="clear-search" aria-label="Limpar" @click="cleanAll">
-        <BaseIcon name="times" />
-      </button>
+
+      <span v-if="model" class="search__count">
+        <strong>{{ filtered }}</strong
+        ><span> de {{ total }}</span>
+      </span>
     </div>
 
     <!-- Autocomplete dropdown -->
@@ -35,8 +41,8 @@
           :aria-selected="i === activeIdx"
           @mousedown.prevent="selectSuggestion(s)"
         >
-          <span class="sug-titulo" v-html="useUtils().sanitizeText(highlight(s.titulo))" />
-          <span class="sug-autor">{{ s.autor }}</span>
+          <span class="sug-main" v-html="useUtils().sanitizeText(highlight(s.main))" />
+          <span class="sug-sub">{{ s.sub }}</span>
         </li>
       </ul>
     </Transition>
@@ -53,9 +59,18 @@ import type { Suggestion } from '@/types'
 
 const model = defineModel<string>()
 
-const props = defineProps<{
-  suggestions: Suggestion[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    total: number
+    suggestions: Suggestion[]
+    filtered?: number
+    placeholder?: string
+  }>(),
+  {
+    filtered: undefined,
+    placeholder: 'Buscar por título ou autor…',
+  },
+)
 const emit = defineEmits(['update:modelValue', 'select'])
 
 const wrapRef = ref<HTMLDivElement | null>(null)
@@ -84,7 +99,7 @@ const selectCurrent = () => {
 }
 
 const selectSuggestion = (s: Suggestion) => {
-  emit('update:modelValue', s.titulo)
+  emit('update:modelValue', s.main)
   emit('select', s)
   close()
 }
@@ -158,6 +173,16 @@ onClickOutside(wrapRef, () => close())
       color: var(--color-text-subtle);
     }
   }
+
+  &__count {
+    font-size: 0.78rem;
+    color: var(--color-text-subtle);
+    flex-shrink: 0;
+
+    strong {
+      color: var(--color-action-default);
+    }
+  }
 }
 
 .clear-search {
@@ -177,6 +202,13 @@ onClickOutside(wrapRef, () => close())
 
   &:hover {
     color: var(--color-text-default);
+  }
+
+  svg {
+    $size: 1rem;
+
+    width: $size;
+    height: $size;
   }
 }
 
@@ -222,7 +254,7 @@ onClickOutside(wrapRef, () => close())
 }
 
 .sug {
-  &-titulo {
+  &-main {
     font-size: 1rem;
     color: var(--color-text-default);
     font-weight: 500;
@@ -234,7 +266,7 @@ onClickOutside(wrapRef, () => close())
     }
   }
 
-  &-autor {
+  &-sub {
     font-size: 0.875rem;
     color: var(--color-text-subtle);
     flex-shrink: 0;

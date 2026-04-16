@@ -93,7 +93,7 @@ export function useFilters() {
 
     return useBooksStore()
       .books.filter((b) => b.titulo?.toLowerCase().includes(q))
-      .map((b) => ({ id: b.id, titulo: b.titulo, autor: b.autor }))
+      .map((b) => ({ id: b.id, main: b.titulo, sub: b.autor }))
       .slice(0, 8)
   })
 
