@@ -66,73 +66,78 @@
 
       <!-- Items -->
       <TransitionGroup name="entity-item" tag="div" class="entity-items">
-        <div v-for="item in filteredItems" :key="item._id" class="entity-row">
-          <!-- Edit mode -->
-          <template v-if="editingId === item._id">
-            <form class="entity-row__edit-form" @submit.prevent="handleUpdate">
-              <input
-                ref="editInputRef"
-                v-model.trim="editingName"
-                type="text"
-                class="entity-row__edit-input"
-                :disabled="isUpdating"
-                maxlength="80"
-                autocomplete="off"
-                @keydown.escape="cancelEdit"
-              />
-              <button
-                type="submit"
-                class="entity-row__action entity-row__action--save"
-                :disabled="isUpdating || editingName.length < 2 || editingName === item.nome"
-                :aria-label="`Salvar ${editingName}`"
-              >
-                <BaseIcon name="check" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                class="entity-row__action entity-row__action--cancel"
-                :disabled="isUpdating"
-                aria-label="Cancelar edição"
-                @click="cancelEdit"
-              >
-                <BaseIcon name="times" aria-hidden="true" />
-              </button>
-            </form>
-          </template>
+        <div class="entity-row--content">
+          <div v-for="item in paginatedEntities" :key="item._id" class="entity-row">
+            <!-- Edit mode -->
+            <template v-if="editingId === item._id">
+              <form class="entity-row__edit-form" @submit.prevent="handleUpdate">
+                <input
+                  ref="editInputRef"
+                  v-model.trim="editingName"
+                  type="text"
+                  class="entity-row__edit-input"
+                  :disabled="isUpdating"
+                  maxlength="80"
+                  autocomplete="off"
+                  @keydown.escape="cancelEdit"
+                />
+                <button
+                  type="submit"
+                  class="entity-row__action entity-row__action--save"
+                  :disabled="isUpdating || editingName.length < 2 || editingName === item.nome"
+                  :aria-label="`Salvar ${editingName}`"
+                >
+                  <BaseIcon name="check" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  class="entity-row__action entity-row__action--cancel"
+                  :disabled="isUpdating"
+                  aria-label="Cancelar edição"
+                  @click="cancelEdit"
+                >
+                  <BaseIcon name="times" aria-hidden="true" />
+                </button>
+              </form>
+            </template>
 
-          <!-- Display mode -->
-          <template v-else>
-            <div class="entity-row__info">
-              <span class="entity-row__name" @click="startEdit(item)">{{ item.nome }}</span>
-              <span class="entity-row__slug">{{ item.slug }}</span>
-            </div>
-            <div class="entity-row__actions">
-              <button
-                class="entity-row__action entity-row__action--edit"
-                type="button"
-                :aria-label="`Editar ${item.nome}`"
-                :disabled="!!editingId"
-                @click="startEdit(item)"
-              >
-                <BaseIcon name="pencil" aria-hidden="true" />
-              </button>
-              <button
-                class="entity-row__action entity-row__action--delete"
-                type="button"
-                :aria-label="`Remover ${item.nome}`"
-                :disabled="deletingId === item._id || !!editingId"
-                @click="confirmDelete(item)"
-              >
-                <BaseIcon name="trash" aria-hidden="true" />
-              </button>
-            </div>
-          </template>
+            <!-- Display mode -->
+            <template v-else>
+              <div class="entity-row__info">
+                <span class="entity-row__name" @click="startEdit(item)">{{ item.nome }}</span>
+                <span class="entity-row__slug">{{ item.slug }}</span>
+              </div>
+              <div class="entity-row__actions">
+                <button
+                  class="entity-row__action entity-row__action--edit"
+                  type="button"
+                  :aria-label="`Editar ${item.nome}`"
+                  :disabled="!!editingId"
+                  @click="startEdit(item)"
+                >
+                  <BaseIcon name="pencil" aria-hidden="true" />
+                </button>
+                <button
+                  class="entity-row__action entity-row__action--delete"
+                  type="button"
+                  :aria-label="`Remover ${item.nome}`"
+                  :disabled="deletingId === item._id || !!editingId"
+                  @click="confirmDelete(item)"
+                >
+                  <BaseIcon name="trash" aria-hidden="true" />
+                </button>
+              </div>
+            </template>
+          </div>
         </div>
       </TransitionGroup>
 
       <p v-if="filteredItems.length === 0 && searchQuery" class="entity-empty">
         Nenhum resultado para "{{ searchQuery }}".
       </p>
+
+      <!-- Pagination -->
+      <PaginationNav ref="paginationNav" :items="filteredItems" />
     </template>
 
     <!-- Delete confirmation -->
@@ -154,6 +159,7 @@ import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, reactive } 
 
 import { useEntityCrud, type SupportEntity } from '@/composables/useEntityCrud'
 import ConfirmModal from '@/components/admin/ConfirmModal.vue'
+import PaginationNav from '@/components/PaginationNav.vue'
 
 const props = defineProps<{
   resource: string
@@ -165,6 +171,7 @@ const crud = useEntityCrud({ resource: props.resource })
 
 const inputRef = ref<HTMLInputElement | null>(null)
 const editInputRef = ref<HTMLInputElement | null>(null)
+const paginationNav = ref<InstanceType<typeof PaginationNav> | null>(null)
 const isFormOpen = ref(false)
 const isCreating = ref(false)
 const isUpdating = ref(false)
@@ -186,6 +193,10 @@ const filteredItems = computed(() => {
   if (!searchQuery.value.trim()) return crud.items.value
   const q = searchQuery.value.toLowerCase()
   return crud.items.value.filter((item) => item.nome.toLowerCase().includes(q))
+})
+
+const paginatedEntities = computed(() => {
+  return (paginationNav.value?.paginatedItems ?? []) as SupportEntity[]
 })
 
 watch(isFormOpen, async (open) => {
@@ -515,6 +526,11 @@ onMounted(() => crud.fetchAll())
   padding: 0.65rem 1.25rem;
   border-bottom: 1px solid var(--color-border-default);
   transition: background var(--motion-transition-default);
+
+  &--content {
+    overflow-y: auto;
+    max-height: 400px;
+  }
 
   &:last-child {
     border-bottom: none;

@@ -11,12 +11,12 @@
 
       <nav class="profile-sidebar__nav" aria-label="Navegação do perfil">
         <RouterLink
-          :to="{ name: 'profile-account' }"
+          :to="{ name: 'profile-books' }"
           class="profile-sidebar__link"
-          :class="{ 'is-active': route.name === 'profile-account' }"
+          :class="{ 'is-active': route.name === 'profile-books' }"
         >
-          <BaseIcon name="user" class="profile-sidebar__link-icon" aria-hidden="true" />
-          <span>Conta</span>
+          <BaseIcon name="book" class="profile-sidebar__link-icon" aria-hidden="true" />
+          <span>Meus livros</span>
         </RouterLink>
 
         <RouterLink
@@ -26,6 +26,15 @@
         >
           <BaseIcon name="link" class="profile-sidebar__link-icon" aria-hidden="true" />
           <span>Vínculos</span>
+        </RouterLink>
+
+        <RouterLink
+          :to="{ name: 'profile-account' }"
+          class="profile-sidebar__link"
+          :class="{ 'is-active': route.name === 'profile-account' }"
+        >
+          <BaseIcon name="user" class="profile-sidebar__link-icon" aria-hidden="true" />
+          <span>Conta</span>
         </RouterLink>
       </nav>
 

@@ -1,6 +1,11 @@
 import type { RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores'
 
+const editorGuard = () => {
+  const auth = useAuthStore()
+  if (!auth.isEditor) return { name: 'admin-forbidden' }
+}
+
 const adminGuard = () => {
   const auth = useAuthStore()
   if (!auth.isAdmin) return { name: 'admin-forbidden' }
@@ -16,7 +21,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/admin',
     component: () => import('@/views/admin/AdminLayout.vue'),
-    beforeEnter: adminGuard,
+    beforeEnter: editorGuard,
     redirect: { name: 'admin-books' },
     children: [
       {
@@ -28,12 +33,14 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'membros',
         name: 'admin-members',
+        beforeEnter: adminGuard,
         component: () => import('@/views/admin/AdminMembers.vue'),
         meta: { title: 'Membros — Painel Admin', pageClass: 'page-admin' },
       },
       {
         path: 'permissoes',
         name: 'admin-permissions',
+        beforeEnter: adminGuard,
         component: () => import('@/views/admin/AdminPermissions.vue'),
         meta: { title: 'Permissões — Painel Admin', pageClass: 'page-admin' },
       },
@@ -46,12 +53,14 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'enriquecimento',
         name: 'admin-enrichment',
+        beforeEnter: adminGuard,
         component: () => import('@/views/admin/AdminEnrichment.vue'),
         meta: { title: 'Enriquecimento — Painel Admin', pageClass: 'page-admin' },
       },
       {
         path: 'vinculos',
         name: 'admin-claims',
+        beforeEnter: adminGuard,
         component: () => import('@/views/admin/AdminClaimHistory.vue'),
         meta: { title: 'Vínculos — Painel Admin', pageClass: 'page-admin' },
       },

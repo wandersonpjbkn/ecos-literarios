@@ -18,7 +18,12 @@
       </button>
 
       <!-- add -->
-      <RouterLink v-if="isEditor" :to="{ name: 'admin-books' }" class="btn" aria-label="Cadastrar livro">
+      <RouterLink
+        v-if="isLoggedIn"
+        :to="{ name: isEditor ? 'admin-books' : 'profile-books' }"
+        class="btn"
+        aria-label="Cadastrar livro"
+      >
         <BaseIcon name="plus" aria-hidden="true" />
       </RouterLink>
 
@@ -76,7 +81,7 @@ const { isEditor, isLoggedIn } = storeToRefs(useAuthStore())
     display: flex;
     width: fit-content;
     height: 100%;
-    padding: 5.25rem 1.25rem;
+    padding: 5.25rem 1rem;
 
     align-items: center;
     justify-content: space-around;

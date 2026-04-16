@@ -1,20 +1,32 @@
 <template>
-  <div v-bind="$attrs">
-    <div class="spinner" aria-hidden="true" />
+  <div v-bind="$attrs" class="base-spinner" role="status" aria-label="Carregando…">
+    <div class="base-spinner--icon" aria-hidden="true" />
     <slot><p>Carregando…</p></slot>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.spinner {
-  $size: 2.25;
+.base-spinner {
+  display: flex;
+  padding: 60px 24px;
 
-  width: $size;
-  height: $size;
-  border: 3px solid var(--color-border-default);
-  border-top-color: var(--color-action-default);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  text-align: center;
+  color: var(--color-text-subtle);
+
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  &--icon {
+    $size: 2.25rem;
+
+    width: $size;
+    height: $size;
+    border: 3px solid var(--color-border-default);
+    border-top-color: var(--color-action-default);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
 }
 
 @keyframes spin {

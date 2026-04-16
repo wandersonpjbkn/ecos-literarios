@@ -1,19 +1,14 @@
 <template>
   <div class="admin-section">
-    <div class="admin-section__header">
-      <div>
-        <h2 class="admin-section__title">Histórico de vínculos</h2>
-        <p class="admin-section__desc">
-          Registro de todos os vínculos e desvinculamentos realizados pelos membros. Carregue sob demanda para auditar
-          alterações.
-        </p>
-      </div>
-
-      <button class="load-btn" :disabled="loading" @click="loadHistory">
-        <span v-if="loading">Carregando…</span>
-        <span v-else>{{ history.length ? 'Recarregar' : 'Carregar histórico' }}</span>
-      </button>
-    </div>
+    <SectionHeader title="Histórico de vínculos">
+      <span>Registro de todos os vínculos realizados pelos membros. Carregue sob demanda para auditar alterações.</span>
+      <template #actions>
+        <button class="load-btn" :disabled="loading" @click="loadHistory">
+          <span v-if="loading">Carregando…</span>
+          <span v-else>{{ history.length ? 'Recarregar' : 'Carregar histórico' }}</span>
+        </button>
+      </template>
+    </SectionHeader>
 
     <!-- Idle — ainda não carregou -->
     <div v-if="!loaded && !loading" class="admin-state admin-state--idle">
@@ -64,6 +59,7 @@
 import { ref } from 'vue'
 
 import { useAuthStore } from '@/stores'
+import SectionHeader from '@/components/admin/SectionHeader.vue'
 
 const API_BASE = import.meta.env.VITE_API_URL as string
 
@@ -121,32 +117,6 @@ const loadHistory = async () => {
 </script>
 
 <style lang="scss" scoped>
-.admin-section {
-  &__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  &__title {
-    margin: 0 0 0.25rem;
-    font-family: var(--font-family-display);
-    font-size: 1.4rem;
-    font-weight: 400;
-    color: var(--color-text-default);
-  }
-
-  &__desc {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--color-text-subtle);
-    max-width: 65ch;
-    line-height: 1.5;
-  }
-}
-
 .load-btn {
   border: none;
   border-radius: var(--border-radius-sm);
@@ -283,22 +253,6 @@ const loadHistory = async () => {
 }
 
 @media (max-width: 767px) {
-  .admin-section {
-    &__header {
-      flex-direction: column;
-      align-items: stretch;
-      margin-bottom: 1rem;
-    }
-
-    &__title {
-      font-size: 1.2rem;
-    }
-
-    &__desc {
-      font-size: 0.85rem;
-    }
-  }
-
   .load-btn {
     min-height: 44px;
     align-self: flex-start;

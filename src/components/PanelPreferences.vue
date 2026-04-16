@@ -1,5 +1,5 @@
 <template>
-  <SideBar ref="instance" title="Preferências" :enter="isTablet ? 'right' : 'left:5rem'">
+  <SideBar ref="instance" title="Preferências" :enter="isTablet ? 'right' : 'left:4.5rem'">
     <template #body>
       <div class="menu-painel">
         <div class="menu-painel-card">

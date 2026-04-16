@@ -1,14 +1,9 @@
 <template>
   <div class="profile-section">
     <!-- Header -->
-    <div class="profile-section__header">
-      <div>
-        <h2 class="profile-section__title">Vínculos</h2>
-        <p class="profile-section__desc">
-          Associe seu usuário às menções do catálogo. Um vínculo ativo conecta seus livros indicados ao seu perfil.
-        </p>
-      </div>
-    </div>
+    <SectionHeader title="Vínculos">
+      Associe seu usuário às menções do catálogo. Um vínculo ativo conecta seus livros indicados ao seu perfil.
+    </SectionHeader>
 
     <!-- Status cards -->
     <div class="status-grid">
@@ -56,22 +51,21 @@
         </p>
 
         <form class="claim-form" @submit.prevent="submitClaim">
-          <div class="field">
-            <label for="quemNome" class="field__label">Nome em menções</label>
-            <p class="field__hint">Digite exatamente como aparece nos registros do catálogo.</p>
-            <input
-              id="quemNome"
-              v-model.trim="quemNome"
-              type="text"
-              class="field__input"
-              placeholder="Ex.: Wanderson"
-              :disabled="isSubmitting || hasActiveClaim"
-              autocomplete="off"
+          <div v-if="!hasActiveClaim" class="field">
+            <label class="field__label">Nome em menções</label>
+            <p class="field__hint">Selecione o nome que aparece nos livros que você indicou.</p>
+            <MultiSelect
+              label="Selecionar nome…"
+              :options="availableNames"
+              :selected="quemNome"
+              :multiple="false"
+              :searchable="true"
+              @toggle="(v) => (quemNome = v)"
             />
           </div>
 
           <div class="claim-actions">
-            <button type="submit" class="action-btn" :disabled="isSubmitting || !isValid || hasActiveClaim">
+            <button v-if="!hasActiveClaim" type="submit" class="action-btn" :disabled="isSubmitting || !isValid">
               <span v-if="isSubmitting">Vinculando…</span>
               <span v-else>Vincular nome</span>
             </button>
@@ -111,11 +105,15 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { useAuthStore, useBooksStore } from '@/stores'
+import { useApi } from '@/composables'
 import { claimRegister, getMyClaimStatus, unclaimRegister, type MyClaimStatus } from '@/composables/useApi'
-import { useAuthStore } from '@/stores'
+import MultiSelect from '@/components/MultiSelect.vue'
+import SectionHeader from '@/components/admin/SectionHeader.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const booksStore = useBooksStore()
 
 if (!authStore.isLoggedIn) {
   router.replace('/login')
@@ -130,8 +128,16 @@ const successMessage = ref('')
 
 const claimStatus = ref<MyClaimStatus | null>(null)
 
-const isValid = computed(() => quemNome.value.trim().length >= 2)
+const isValid = computed(() => quemNome.value.length >= 2)
 const hasActiveClaim = computed(() => claimStatus.value?.has_claim === true)
+
+const availableNames = computed(() => {
+  const unclaimed = booksStore.books
+    .filter((b) => !b.quem_user_id)
+    .map((b) => b.quem)
+    .filter(Boolean)
+  return [...new Set(unclaimed)].sort()
+})
 
 const loadStatus = async () => {
   loadingStatus.value = true
@@ -166,6 +172,7 @@ const submitClaim = async () => {
       successMessage.value = result.message ?? 'Vínculo realizado com sucesso.'
     }
 
+    quemNome.value = ''
     await loadStatus()
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Não foi possível concluir o vínculo.'
@@ -192,52 +199,14 @@ const unclaim = async () => {
   }
 }
 
-onMounted(loadStatus)
+onMounted(async () => {
+  await loadStatus()
+  if (booksStore.books.length === 0) useApi().fetchBooks()
+})
 </script>
 
 <style lang="scss" scoped>
-// ── Section shell — delegated to ProfileLayout :deep(.profile-section) ──
-.profile-section {
-  &__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-
-    @media (max-width: 767px) {
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-  }
-
-  &__title {
-    margin: 0 0 0.25rem;
-    font-family: var(--font-family-display);
-    font-size: 1.4rem;
-    font-weight: 400;
-    color: var(--color-text-default);
-
-    @media (max-width: 767px) {
-      font-size: 1.2rem;
-    }
-  }
-
-  &__desc {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--color-text-subtle);
-    max-width: 65ch;
-    line-height: 1.5;
-
-    @media (max-width: 767px) {
-      font-size: 0.85rem;
-    }
-  }
-}
-
-// ── Status cards — mesmo padrão do AdminEnrichment ────────────────
+// ── Status cards ──────────────────────────────────────────────────
 .status-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -282,7 +251,7 @@ onMounted(loadStatus)
   color: var(--color-text-subtle);
 }
 
-// ── Panels — mesmo padrão do execution-panel do AdminEnrichment ───
+// ── Panels ────────────────────────────────────────────────────────
 .claim-panel,
 .rules-panel {
   border: 1px solid var(--color-border-default);
@@ -352,34 +321,6 @@ onMounted(loadStatus)
     margin: 0;
     font-size: 0.8rem;
     color: var(--color-text-subtle);
-  }
-
-  &__input {
-    width: 100%;
-    max-width: 400px;
-    border: 1.5px solid var(--color-border-default);
-    border-radius: var(--border-radius-sm);
-    min-height: 44px;
-    padding: 0 0.75rem;
-    background: var(--color-surface-default);
-    color: var(--color-text-default);
-    font-family: var(--font-family-body);
-    font-size: 1rem;
-    transition:
-      border-color var(--motion-transition-default),
-      box-shadow var(--motion-transition-default);
-    outline: none;
-
-    &:focus {
-      border-color: var(--color-action-default);
-      box-shadow: 0 0 0 3px var(--color-action-background-subtle);
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      background: var(--color-background-subtle);
-    }
   }
 }
 
@@ -455,10 +396,6 @@ onMounted(loadStatus)
 
   .status-grid .status-card:last-child {
     grid-column: 1 / -1;
-  }
-
-  .field__input {
-    max-width: 100%;
   }
 
   .claim-actions {

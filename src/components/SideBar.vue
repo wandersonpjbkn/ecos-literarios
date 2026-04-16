@@ -149,6 +149,10 @@ defineExpose({ isOpen, open, close, toggle })
     &.right {
       right: var(--initial);
     }
+
+    @media (max-width: 767px) {
+      height: calc(100dvh - 3rem);
+    }
   }
 
   &-header {

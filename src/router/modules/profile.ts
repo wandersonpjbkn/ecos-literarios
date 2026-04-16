@@ -11,8 +11,14 @@ export const routes: RouteRecordRaw[] = [
     path: '/perfil',
     component: () => import('@/views/profile/ProfileLayout.vue'),
     beforeEnter: authGuard,
-    redirect: { name: 'profile-account' },
+    redirect: { name: 'profile-books' },
     children: [
+      {
+        path: 'livros',
+        name: 'profile-books',
+        component: () => import('@/views/profile/ProfileBooks.vue'),
+        meta: { title: 'Meus livros — Ecos Literários', pageClass: 'page-profile' },
+      },
       {
         path: 'conta',
         name: 'profile-account',

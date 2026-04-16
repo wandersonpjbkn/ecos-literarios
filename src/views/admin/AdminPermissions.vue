@@ -1,15 +1,10 @@
 <template>
   <div class="admin-section">
-    <div class="admin-section__header">
-      <div>
-        <h2 class="admin-section__title">Permissões</h2>
-        <p class="admin-section__desc">
-          Clique em "Editar" para alterar as permissões de um role. As mudanças só são salvas ao confirmar.
-        </p>
-      </div>
-    </div>
+    <SectionHeader title="Permissões">
+      Clique em "Editar" para alterar as permissões de um role. As mudanças só são salvas ao confirmar.
+    </SectionHeader>
 
-    <BaseSpinner v-if="loading" class="admin-state">
+    <BaseSpinner v-if="loading">
       <p>Carregando permissões…</p>
     </BaseSpinner>
 
@@ -94,6 +89,7 @@
 import { ref, computed, onMounted, reactive } from 'vue'
 
 import { useAuthStore } from '@/stores'
+import SectionHeader from '@/components/admin/SectionHeader.vue'
 import ConfirmModal from '@/components/admin/ConfirmModal.vue'
 
 const API_BASE = import.meta.env.VITE_API_URL as string
@@ -255,27 +251,6 @@ onMounted(fetchPermissions)
 </script>
 
 <style lang="scss" scoped>
-.admin-section {
-  &__header {
-    margin-bottom: 2rem;
-  }
-
-  &__title {
-    margin: 0 0 0.25rem;
-    font-family: var(--font-family-display);
-    font-size: 1.4rem;
-    font-weight: 400;
-    color: var(--color-text-default);
-  }
-
-  &__desc {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--color-text-subtle);
-    line-height: 1.5;
-  }
-}
-
 .admin-state {
   display: flex;
   flex-direction: column;
@@ -513,20 +488,6 @@ onMounted(fetchPermissions)
 }
 
 @media (max-width: 767px) {
-  .admin-section {
-    &__header {
-      margin-bottom: 1rem;
-    }
-
-    &__title {
-      font-size: 1.2rem;
-    }
-
-    &__desc {
-      font-size: 0.85rem;
-    }
-  }
-
   .role-card {
     &__header {
       flex-direction: column;

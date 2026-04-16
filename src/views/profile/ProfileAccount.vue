@@ -1,11 +1,6 @@
 <template>
   <div class="profile-section">
-    <div class="profile-section__header">
-      <div>
-        <h2 class="profile-section__title">Conta</h2>
-        <p class="profile-section__desc">Gerencie as informações do seu perfil exibidas no clube.</p>
-      </div>
-    </div>
+    <SectionHeader title="Conta"> Gerencie as informações do seu perfil exibidas no clube. </SectionHeader>
 
     <!-- Status cards -->
     <div class="status-grid">
@@ -102,6 +97,7 @@ import { useRouter } from 'vue-router'
 
 import { useAuthStore } from '@/stores'
 import { buildHeaders } from '@/composables/useApi'
+import SectionHeader from '@/components/admin/SectionHeader.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -172,47 +168,6 @@ const submit = async () => {
 </script>
 
 <style lang="scss" scoped>
-// Herdado do ProfileLayout :deep(.profile-section)
-.profile-section {
-  &__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-
-    @media (max-width: 767px) {
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-  }
-
-  &__title {
-    margin: 0 0 0.25rem;
-    font-family: var(--font-family-display);
-    font-size: 1.4rem;
-    font-weight: 400;
-    color: var(--color-text-default);
-
-    @media (max-width: 767px) {
-      font-size: 1.2rem;
-    }
-  }
-
-  &__desc {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--color-text-subtle);
-    max-width: 65ch;
-    line-height: 1.5;
-
-    @media (max-width: 767px) {
-      font-size: 0.85rem;
-    }
-  }
-}
-
 // ── Status cards ──────────────────────────────────────────────────
 .status-grid {
   display: grid;

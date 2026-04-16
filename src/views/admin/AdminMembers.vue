@@ -1,15 +1,9 @@
 <template>
   <div class="admin-section">
-    <!-- Header -->
-    <div class="admin-section__header">
-      <div>
-        <h2 class="admin-section__title">Membros</h2>
-        <p class="admin-section__desc">Gerencie os membros do clube e suas permissões de acesso.</p>
-      </div>
-    </div>
+    <SectionHeader title="Membros"> Gerencie os membros do clube e suas permissões de acesso. </SectionHeader>
 
     <!-- Loading -->
-    <BaseSpinner v-if="loading" class="admin-state">
+    <BaseSpinner v-if="loading">
       <p>Carregando membros…</p>
     </BaseSpinner>
 
@@ -78,6 +72,7 @@
 import { ref, onMounted, reactive } from 'vue'
 
 import { useAuthStore } from '@/stores'
+import SectionHeader from '@/components/admin/SectionHeader.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import ConfirmModal from '@/components/admin/ConfirmModal.vue'
 
@@ -184,30 +179,6 @@ onMounted(fetchUsers)
 </script>
 
 <style lang="scss" scoped>
-.admin-section {
-  &__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  &__title {
-    margin: 0 0 0.25rem;
-    font-family: var(--font-family-display);
-    font-size: 1.4rem;
-    font-weight: 400;
-    color: var(--color-text-default);
-  }
-
-  &__desc {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--color-text-subtle);
-  }
-}
-
 // ── States ────────────────────────────────────────────────────────
 .admin-state {
   display: flex;
@@ -353,20 +324,6 @@ onMounted(fetchUsers)
 }
 
 @media (max-width: 767px) {
-  .admin-section {
-    &__header {
-      margin-bottom: 1rem;
-    }
-
-    &__title {
-      font-size: 1.2rem;
-    }
-
-    &__desc {
-      font-size: 0.85rem;
-    }
-  }
-
   .member-row {
     grid-template-columns: 2rem 1fr;
     grid-template-rows: auto auto;

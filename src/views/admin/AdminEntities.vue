@@ -1,13 +1,8 @@
 <template>
   <div class="admin-section">
-    <div class="admin-section__header">
-      <div>
-        <h2 class="admin-section__title">Dados do catálogo</h2>
-        <p class="admin-section__desc">
-          Gerencie autores, mídias, categorias e sub-gêneros disponíveis para os livros do catálogo.
-        </p>
-      </div>
-    </div>
+    <SectionHeader title="Segmentação do catálogo">
+      Gerencie autores, mídias, categorias e sub-gêneros disponíveis para os livros do catálogo.
+    </SectionHeader>
 
     <!-- Tab navigation -->
     <div class="entity-tabs" role="tablist" aria-label="Tipos de entidade">
@@ -40,6 +35,7 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 
+import SectionHeader from '@/components/admin/SectionHeader.vue'
 import EntityTab from '@/components/admin/EntityTab.vue'
 
 interface TabConfig {
@@ -81,32 +77,6 @@ const currentTab = computed(() => tabs.find((t) => t.key === activeTab.value))
 </script>
 
 <style lang="scss" scoped>
-.admin-section {
-  &__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  &__title {
-    margin: 0 0 0.25rem;
-    font-family: var(--font-family-display);
-    font-size: 1.4rem;
-    font-weight: 400;
-    color: var(--color-text-default);
-  }
-
-  &__desc {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--color-text-subtle);
-    max-width: 65ch;
-    line-height: 1.5;
-  }
-}
-
 // ── Tab bar ───────────────────────────────────────────────────────
 .entity-tabs {
   display: flex;
@@ -156,20 +126,6 @@ const currentTab = computed(() => tabs.find((t) => t.key === activeTab.value))
 }
 
 @media (max-width: 767px) {
-  .admin-section {
-    &__header {
-      margin-bottom: 1rem;
-    }
-
-    &__title {
-      font-size: 1.2rem;
-    }
-
-    &__desc {
-      font-size: 0.85rem;
-    }
-  }
-
   .entity-tabs {
     overflow-x: auto;
     scrollbar-width: none;

@@ -1,18 +1,14 @@
 <template>
   <div class="admin-section">
-    <div class="admin-section__header">
-      <div>
-        <h2 class="admin-section__title">Enriquecimento de capas</h2>
-        <p class="admin-section__desc">
-          Rode o batch de enriquecimento e acompanhe status atual, resultado da execução e histórico recente.
-        </p>
-      </div>
-
-      <button class="run-btn" :disabled="isRunning || loadingStatus" @click="runEnrichment">
-        <span v-if="isRunning">Executando…</span>
-        <span v-else>Executar enriquecimento</span>
-      </button>
-    </div>
+    <SectionHeader title="Enriquecimento do catálogo">
+      <span>Rode o batch de enriquecimento e acompanhe status atual, resultado da execução e histórico recente.</span>
+      <template #actions>
+        <button class="run-btn" :disabled="isRunning || loadingStatus" @click="runEnrichment">
+          <span v-if="isRunning">Executando…</span>
+          <span v-else>Executar enriquecimento</span>
+        </button>
+      </template>
+    </SectionHeader>
 
     <div class="status-grid">
       <article class="status-card">
@@ -154,9 +150,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import { useAuthStore } from '@/stores'
+import SectionHeader from '@/components/admin/SectionHeader.vue'
 
 const API_BASE = import.meta.env.VITE_API_URL as string
 
@@ -398,36 +395,9 @@ const runEnrichment = async () => {
     isRunning.value = false
   }
 }
-
-onMounted(fetchStatusAndHistory)
 </script>
 
 <style lang="scss" scoped>
-.admin-section {
-  &__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  &__title {
-    margin: 0 0 0.25rem;
-    font-family: var(--font-family-display);
-    font-size: 1.4rem;
-    font-weight: 400;
-    color: var(--color-text-default);
-  }
-
-  &__desc {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--color-text-subtle);
-    max-width: 65ch;
-  }
-}
-
 .run-btn,
 .ghost-btn {
   border: none;
@@ -699,16 +669,6 @@ onMounted(fetchStatusAndHistory)
 }
 
 @media (max-width: 767px) {
-  .admin-section {
-    &__title {
-      font-size: 1.2rem;
-    }
-
-    &__desc {
-      font-size: 0.85rem;
-    }
-  }
-
   .status-card,
   .summary-card {
     p {
@@ -724,14 +684,6 @@ onMounted(fetchStatusAndHistory)
 }
 
 @media (max-width: 640px) {
-  .admin-section {
-    &__header {
-      flex-direction: column;
-      align-items: stretch;
-      margin-bottom: 1rem;
-    }
-  }
-
   .run-btn {
     min-height: 44px;
     align-self: flex-start;

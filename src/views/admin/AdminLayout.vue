@@ -10,6 +10,7 @@
       </div>
 
       <nav class="admin-sidebar__nav" aria-label="Navegação do painel">
+        <!-- books -->
         <RouterLink
           :to="{ name: 'admin-books' }"
           class="admin-sidebar__link"
@@ -20,7 +21,30 @@
           <span v-if="bookCount > 0" class="admin-sidebar__badge">{{ bookCount }}</span>
         </RouterLink>
 
+        <!-- entities -->
         <RouterLink
+          :to="{ name: 'admin-entities' }"
+          class="admin-sidebar__link"
+          :class="{ 'is-active': route.name === 'admin-entities' }"
+        >
+          <BaseIcon name="menu" class="admin-sidebar__link-icon" />
+          <span>Segmentações</span>
+        </RouterLink>
+
+        <!-- enrichment -->
+        <RouterLink
+          v-if="authStore.isAdmin"
+          :to="{ name: 'admin-enrichment' }"
+          class="admin-sidebar__link"
+          :class="{ 'is-active': route.name === 'admin-enrichment' }"
+        >
+          <BaseIcon name="reload" class="admin-sidebar__link-icon" />
+          <span>Enriquecimento</span>
+        </RouterLink>
+
+        <!-- members -->
+        <RouterLink
+          v-if="authStore.isAdmin"
           :to="{ name: 'admin-members' }"
           class="admin-sidebar__link"
           :class="{ 'is-active': route.name === 'admin-members' }"
@@ -30,34 +54,9 @@
           <span v-if="memberCount > 0" class="admin-sidebar__badge">{{ memberCount }}</span>
         </RouterLink>
 
+        <!-- claims -->
         <RouterLink
-          :to="{ name: 'admin-permissions' }"
-          class="admin-sidebar__link"
-          :class="{ 'is-active': route.name === 'admin-permissions' }"
-        >
-          <BaseIcon name="filter" class="admin-sidebar__link-icon" />
-          <span>Permissões</span>
-        </RouterLink>
-
-        <RouterLink
-          :to="{ name: 'admin-entities' }"
-          class="admin-sidebar__link"
-          :class="{ 'is-active': route.name === 'admin-entities' }"
-        >
-          <BaseIcon name="menu" class="admin-sidebar__link-icon" />
-          <span>Dados</span>
-        </RouterLink>
-
-        <RouterLink
-          :to="{ name: 'admin-enrichment' }"
-          class="admin-sidebar__link"
-          :class="{ 'is-active': route.name === 'admin-enrichment' }"
-        >
-          <BaseIcon name="reload" class="admin-sidebar__link-icon" />
-          <span>Enriquecimento</span>
-        </RouterLink>
-
-        <RouterLink
+          v-if="authStore.isAdmin"
           :to="{ name: 'admin-claims' }"
           class="admin-sidebar__link"
           :class="{ 'is-active': route.name === 'admin-claims' }"
@@ -65,13 +64,24 @@
           <BaseIcon name="link" class="admin-sidebar__link-icon" />
           <span>Vínculos</span>
         </RouterLink>
+
+        <!-- permissions -->
+        <RouterLink
+          v-if="authStore.isAdmin"
+          :to="{ name: 'admin-permissions' }"
+          class="admin-sidebar__link"
+          :class="{ 'is-active': route.name === 'admin-permissions' }"
+        >
+          <BaseIcon name="filter" class="admin-sidebar__link-icon" />
+          <span>Permissões</span>
+        </RouterLink>
       </nav>
 
       <div class="admin-sidebar__footer">
         <UserAvatar :alt="authStore.user!.name" class="admin-sidebar__avatar" />
         <div class="admin-sidebar__user">
           <span class="admin-sidebar__user-name">{{ authStore.user!.name }}</span>
-          <span class="admin-sidebar__user-role">Administrador</span>
+          <span class="admin-sidebar__user-role">{{ roleLabel }}</span>
         </div>
       </div>
     </aside>
@@ -104,7 +114,13 @@ const authStore = useAuthStore()
 const memberCount = ref(0)
 const bookCount = computed(() => useBooksStore().size)
 
+const roleLabel = computed(() => {
+  const map: Record<string, string> = { admin: 'Administrador', editor: 'Editor', viewer: 'Membro' }
+  return map[authStore.user?.role ?? 'viewer'] ?? 'Membro'
+})
+
 onMounted(async () => {
+  if (!authStore.isAdmin) return
   try {
     const res = await fetch(`${API_BASE}/users`, {
       headers: { Authorization: `Bearer ${authStore.token}` },

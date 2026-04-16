@@ -1,14 +1,11 @@
 <template>
   <div class="admin-section">
-    <div class="admin-section__header">
-      <div>
-        <h2 class="admin-section__title">Livros</h2>
-        <p class="admin-section__desc">
-          Gerencie os livros do catálogo. Crie, edite ou remova títulos e suas informações.
-        </p>
-      </div>
-      <button class="action-btn" @click="openCreate">+ Novo livro</button>
-    </div>
+    <SectionHeader title="Livros">
+      <span>Gerencie os livros do catálogo. Crie, edite ou remova títulos e suas informações.</span>
+      <template #actions>
+        <button class="action-btn" @click="openCreate">+ Novo livro</button>
+      </template>
+    </SectionHeader>
 
     <div class="book-segmentation">
       <!-- Filters -->
@@ -43,7 +40,7 @@
     </div>
 
     <!-- Loading -->
-    <BaseSpinner v-if="loading" class="admin-state">
+    <BaseSpinner v-if="loading">
       <p>Carregando livros…</p>
     </BaseSpinner>
 
@@ -101,15 +98,7 @@
       </p>
 
       <!-- Pagination -->
-      <div v-if="totalPages > 1" class="books-pagination">
-        <button class="page-btn" :disabled="currentPage <= 1" @click="currentPage--">
-          <BaseIcon name="arrow-left" />
-        </button>
-        <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
-        <button class="page-btn" :disabled="currentPage >= totalPages" @click="currentPage++">
-          <BaseIcon name="arrow-right" />
-        </button>
-      </div>
+      <PaginationNav ref="paginationNav" :items="filteredBooks" />
     </div>
 
     <!-- Book form drawer -->
@@ -133,12 +122,13 @@
 import { ref, computed, reactive, watch, onMounted } from 'vue'
 
 import { buildHeaders } from '@/composables/useApi'
+import SectionHeader from '@/components/admin/SectionHeader.vue'
 import MultiSelect from '@/components/MultiSelect.vue'
+import PaginationNav from '@/components/PaginationNav.vue'
 import BookFormDrawer from '@/components/admin/BookFormDrawer.vue'
 import ConfirmModal from '@/components/admin/ConfirmModal.vue'
 
 const API_BASE = import.meta.env.VITE_API_URL as string
-const PAGE_SIZE = 20
 
 interface AdminBook {
   _id: string
@@ -158,12 +148,13 @@ interface AdminBook {
 
 type SegmentFilter = 'all' | 'missing' | 'complete' | 'missing-isbn'
 
+const paginationNav = ref<InstanceType<typeof PaginationNav> | null>(null)
+
 const books = ref<AdminBook[]>([])
 const loading = ref(false)
 const error = ref('')
 const searchQuery = ref('')
 const segmentFilter = ref<SegmentFilter>('all')
-const currentPage = ref(1)
 
 const isDrawerOpen = ref(false)
 const editingBook = ref<AdminBook | null>(null)
@@ -213,17 +204,9 @@ const filteredBooks = computed(() => {
   return base.filter((b) => b.titulo.toLowerCase().includes(q) || resolveName(b.autor).toLowerCase().includes(q))
 })
 
-const totalPages = computed(() => Math.ceil(filteredBooks.value.length / PAGE_SIZE))
-
 const paginatedBooks = computed(() => {
-  const start = (currentPage.value - 1) * PAGE_SIZE
-  return filteredBooks.value.slice(start, start + PAGE_SIZE)
+  return (paginationNav.value?.paginatedItems ?? []) as AdminBook[]
 })
-
-// Reset page when search changes
-const resetPage = () => {
-  currentPage.value = 1
-}
 
 const fetchBooks = async () => {
   loading.value = true
@@ -293,38 +276,14 @@ const handleDelete = async () => {
 }
 
 // Reset pagination on search change
-watch([searchQuery, segmentFilter], resetPage)
+watch([searchQuery, segmentFilter], () => {
+  paginationNav.value?.resetPage()
+})
 
 onMounted(fetchBooks)
 </script>
 
 <style lang="scss" scoped>
-.admin-section {
-  &__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  &__title {
-    margin: 0 0 0.25rem;
-    font-family: var(--font-family-display);
-    font-size: 1.4rem;
-    font-weight: 400;
-    color: var(--color-text-default);
-  }
-
-  &__desc {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--color-text-subtle);
-    max-width: 65ch;
-    line-height: 1.5;
-  }
-}
-
 .action-btn {
   border: none;
   border-radius: var(--border-radius-sm);
@@ -532,64 +491,7 @@ onMounted(fetchBooks)
   }
 }
 
-// ── Pagination ────────────────────────────────────────────────────
-.books-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  border-top: 1px solid var(--color-border-default);
-}
-
-.page-btn {
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--border-radius-sm);
-  background: var(--color-surface-default);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--color-text-default);
-  transition: background var(--motion-transition-default);
-
-  &:hover:not(:disabled) {
-    background: var(--color-background-subtle);
-  }
-  &:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
-
-  svg {
-    width: 14px;
-    height: 14px;
-  }
-}
-
-.page-info {
-  font-size: 0.82rem;
-  color: var(--color-text-subtle);
-}
-
 @media (max-width: 767px) {
-  .admin-section {
-    &__header {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    &__title {
-      font-size: 1.2rem;
-    }
-
-    &__desc {
-      font-size: 0.85rem;
-    }
-  }
-
   .action-btn {
     min-height: 44px;
     align-self: flex-start;
@@ -628,10 +530,6 @@ onMounted(fetchBooks)
   .row-action {
     width: 36px;
     height: 36px;
-  }
-
-  .books-pagination {
-    gap: 0.75rem;
   }
 }
 </style>

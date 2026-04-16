@@ -9,6 +9,7 @@ export interface Book {
   quem: string
   porque: string
   subgenerosArr: string[]
+  quem_user_id?: string
 
   cover_url?: string
   synopsis?: string

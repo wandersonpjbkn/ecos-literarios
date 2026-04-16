@@ -29,12 +29,7 @@
 
         <div class="user-dropdown__divider" />
 
-        <RouterLink
-          :to="{ name: 'profile-account' }"
-          class="user-dropdown__item"
-          role="menuitem"
-          @click="isOpen = false"
-        >
+        <RouterLink :to="{ name: 'profile-books' }" class="user-dropdown__item" role="menuitem" @click="isOpen = false">
           <BaseIcon name="user" aria-hidden="true" />
           <span>Meu perfil</span>
         </RouterLink>

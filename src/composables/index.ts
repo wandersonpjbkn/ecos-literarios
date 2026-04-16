@@ -8,6 +8,7 @@ import { useAuth } from '@/composables/useAuth'
 import { useTheme } from '@/composables/useTheme'
 import { useUtils } from '@/composables/useUtils'
 import { useBreakpoints } from '@/composables/useBreakpoints'
+import { useBookEnrichment } from '@/composables/useBookEnrichment'
 
 export {
   useBookSort,
@@ -20,4 +21,5 @@ export {
   useTheme,
   useUtils,
   useBreakpoints,
+  useBookEnrichment,
 }

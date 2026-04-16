@@ -1,5 +1,5 @@
 <template>
-  <SideBar ref="instance" title="Categorias" :enter="`left:${isTablet ? '0' : '5rem'}`">
+  <SideBar ref="instance" title="Categorias" :enter="`left:${isTablet ? '0' : '4.5rem'}`">
     <template #body>
       <nav class="panel-category" aria-label="Navegação por categoria">
         <RouterLink

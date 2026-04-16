@@ -1,5 +1,5 @@
 <template>
-  <!-- Overlay -->
+  <!-- overlay -->
   <Teleport to="body">
     <Transition name="overlay">
       <div v-if="isOpen" class="drawer-overlay" aria-hidden="true" @click="close" />
@@ -13,7 +13,7 @@
         role="dialog"
         :aria-label="isEditMode ? `Editar ${form.titulo}` : 'Novo livro'"
       >
-        <!-- Header -->
+        <!-- header -->
         <div class="drawer-header">
           <h2 class="drawer-header__title">
             {{ isEditMode ? 'Editar livro' : 'Novo livro' }}
@@ -23,13 +23,14 @@
           </button>
         </div>
 
-        <!-- Body -->
+        <!-- body -->
         <div class="drawer-body">
           <form class="book-form" @submit.prevent="handleSubmit">
+            <!-- basic data -->
             <section class="form-section">
               <h3 class="form-section__title">Dados principais</h3>
               <div class="form-grid">
-                <!-- titulo -->
+                <!-- title -->
                 <div class="form-field form-field--full">
                   <label for="bf-titulo" class="form-field__label">Título *</label>
                   <input
@@ -43,8 +44,8 @@
                   />
                 </div>
 
-                <!-- isbn -->
-                <div class="form-field">
+                <!-- isbn — admin only -->
+                <div v-if="!isMemberScope" class="form-field">
                   <label for="bf-isbn" class="form-field__label">ISBN</label>
                   <input
                     id="bf-isbn"
@@ -58,8 +59,8 @@
                   />
                 </div>
 
-                <!-- ano -->
-                <div class="form-field">
+                <!-- ano — admin only -->
+                <div v-if="!isMemberScope" class="form-field">
                   <label for="bf-year" class="form-field__label">Ano de publicação</label>
                   <input
                     id="bf-year"
@@ -73,8 +74,8 @@
                   />
                 </div>
 
-                <!-- paginas -->
-                <div class="form-field">
+                <!-- páginas — admin only -->
+                <div v-if="!isMemberScope" class="form-field">
                   <label for="bf-pages" class="form-field__label">Qtd. de páginas</label>
                   <input
                     id="bf-pages"
@@ -88,8 +89,8 @@
                   />
                 </div>
 
-                <!-- mencionado -->
-                <div class="form-field">
+                <!-- mencionado — admin only -->
+                <div v-if="!isMemberScope" class="form-field">
                   <label for="bf-quem" class="form-field__label">Mencionado por *</label>
                   <input
                     id="bf-quem"
@@ -104,6 +105,7 @@
               </div>
             </section>
 
+            <!-- ── Classificação ────────────────────────────────── -->
             <section class="form-section">
               <h3 class="form-section__title">Classificação</h3>
               <div class="form-grid">
@@ -146,7 +148,7 @@
                   />
                 </div>
 
-                <!-- subgeneros -->
+                <!-- subgêneros -->
                 <div class="form-field">
                   <label class="form-field__label">Sub-gêneros</label>
                   <MultiSelect
@@ -162,104 +164,10 @@
               </div>
             </section>
 
-            <section class="form-section">
-              <h3 class="form-section__title">Enriquecimento</h3>
-              <div class="enrichment-actions">
-                <button
-                  v-if="isEditMode"
-                  type="button"
-                  class="drawer-btn drawer-btn--secondary"
-                  :disabled="isSaving || enrichmentLoading"
-                  @click="fetchEnrichmentPreview"
-                >
-                  {{ enrichmentLoading ? 'Buscando dados…' : 'Sugerir enriquecimento' }}
-                </button>
-                <p v-else class="enrichment-hint">
-                  Salve o livro para habilitar sugestões automáticas de enriquecimento.
-                </p>
-              </div>
-
-              <p v-if="enrichmentError" class="drawer-feedback drawer-feedback--error">
-                {{ enrichmentError }}
-              </p>
-
-              <div v-if="enrichmentPreview" class="enrichment-preview">
-                <div class="enrichment-preview__header">
-                  <strong>Prévia disponível ({{ enrichmentPreview.sourceLabel }})</strong>
-                  <p>Selecione abaixo quais campos deseja aplicar.</p>
-                </div>
-
-                <label
-                  v-for="item in enrichmentPreview.items"
-                  :key="item.field"
-                  class="enrichment-option"
-                  :class="{ 'is-disabled': !item.hasValue }"
-                >
-                  <input
-                    v-model="selectedEnrichmentFields"
-                    type="checkbox"
-                    :value="item.field"
-                    :disabled="!item.hasValue || enrichmentApplying || isSaving"
-                  />
-                  <span class="enrichment-option__meta">
-                    <strong>{{ item.label }}</strong>
-                    <small>{{ item.preview || 'Sem valor retornado' }}</small>
-                  </span>
-                </label>
-
-                <button
-                  type="button"
-                  class="drawer-btn drawer-btn--primary"
-                  :disabled="selectedEnrichmentFields.length === 0 || enrichmentApplying || isSaving"
-                  @click="applySelectedEnrichment"
-                >
-                  {{ enrichmentApplying ? 'Aplicando…' : 'Aplicar seleção no livro' }}
-                </button>
-              </div>
-
-              <div class="form-grid">
-                <div class="form-field form-field--full">
-                  <label for="bf-cover" class="form-field__label">URL da capa</label>
-                  <input
-                    id="bf-cover"
-                    v-model.trim="form.cover_url"
-                    type="url"
-                    class="form-field__input"
-                    placeholder="https://…"
-                    :disabled="isSaving"
-                    autocomplete="off"
-                  />
-                </div>
-
-                <div class="form-field form-field--full">
-                  <label for="bf-google-id" class="form-field__label">Google Books ID</label>
-                  <input
-                    id="bf-google-id"
-                    v-model.trim="form.google_books_id"
-                    type="text"
-                    class="form-field__input"
-                    :disabled="isSaving"
-                    autocomplete="off"
-                  />
-                </div>
-
-                <div class="form-field form-field--full">
-                  <label for="bf-synopsis" class="form-field__label">Sinopse</label>
-                  <textarea
-                    id="bf-synopsis"
-                    v-model.trim="form.synopsis"
-                    class="form-field__textarea"
-                    rows="4"
-                    :disabled="isSaving"
-                  />
-                </div>
-              </div>
-            </section>
-
+            <!-- ── Contexto ──────────────────────────────────────── -->
             <section class="form-section">
               <h3 class="form-section__title">Contexto</h3>
               <div class="form-grid">
-                <!-- porque -->
                 <div class="form-field form-field--full">
                   <label for="bf-porque" class="form-field__label">Por que foi indicado</label>
                   <textarea
@@ -272,21 +180,83 @@
                 </div>
               </div>
             </section>
+
+            <!-- ── Sinopse / Enriquecimento ──────────────────────── -->
+            <section class="form-section">
+              <h3 class="form-section__title">{{ isMemberScope ? 'Sinopse' : 'Enriquecimento' }}</h3>
+
+              <!-- Enrichment actions — admin only -->
+              <template v-if="!isMemberScope">
+                <p>
+                  Enriquecer as informações do livro - como capa, sinopse, nº páginas, etc. - com dados do
+                  <a href="https://books.google.com/" target="_blank" rel="noopener noreferrer">Google Books</a> ou
+                  <a href="https://openlibrary.org" target="_blank" rel="noopener noreferrer">Open Library</a>
+                </p>
+
+                <BookEnrichmentPanel
+                  :book-id="book?._id ?? null"
+                  :disabled="isSaving"
+                  @applied="handleEnrichmentApplied"
+                />
+              </template>
+
+              <div class="form-grid enrichment-fields">
+                <!-- cover_url — admin only -->
+                <div v-if="!isMemberScope" class="form-field form-field--full">
+                  <label for="bf-cover" class="form-field__label">URL da capa</label>
+                  <input
+                    id="bf-cover"
+                    v-model.trim="form.cover_url"
+                    type="url"
+                    class="form-field__input"
+                    placeholder="https://…"
+                    :disabled="isSaving"
+                    autocomplete="off"
+                  />
+                </div>
+
+                <!-- google_books_id — admin only -->
+                <div v-if="!isMemberScope" class="form-field form-field--full">
+                  <label for="bf-google-id" class="form-field__label">Google Books ID</label>
+                  <input
+                    id="bf-google-id"
+                    v-model.trim="form.google_books_id"
+                    type="text"
+                    class="form-field__input"
+                    :disabled="isSaving"
+                    autocomplete="off"
+                  />
+                </div>
+
+                <!-- synopsis — visible for both scopes -->
+                <div class="form-field form-field--full">
+                  <label for="bf-synopsis" class="form-field__label">
+                    Sinopse{{ isMemberScope ? ' (opcional)' : '' }}
+                  </label>
+                  <textarea
+                    id="bf-synopsis"
+                    v-model.trim="form.synopsis"
+                    class="form-field__textarea"
+                    rows="4"
+                    :disabled="isSaving"
+                  />
+                </div>
+              </div>
+            </section>
           </form>
         </div>
 
-        <!-- Footer -->
         <div class="drawer-footer">
-          <p v-if="error" class="drawer-feedback drawer-feedback--error">{{ error }}</p>
-          <p v-if="success" class="drawer-feedback drawer-feedback--success">{{ success }}</p>
+          <p v-if="error" class="panel-feedback panel-feedback--error">{{ error }}</p>
+          <p v-if="success" class="panel-feedback panel-feedback--success">{{ success }}</p>
 
           <div class="drawer-footer__actions">
-            <button type="button" class="drawer-btn drawer-btn--secondary" :disabled="isSaving" @click="close">
+            <button type="button" class="panel-btn panel-btn--secondary" :disabled="isSaving" @click="close">
               Cancelar
             </button>
             <button
               type="button"
-              class="drawer-btn drawer-btn--primary"
+              class="panel-btn panel-btn--primary"
               :disabled="isSaving || !isValid"
               @click="handleSubmit"
             >
@@ -305,6 +275,7 @@ import { ref, reactive, computed, watch, nextTick, onMounted } from 'vue'
 import { buildHeaders } from '@/composables/useApi'
 import { useEntityCrud } from '@/composables/useEntityCrud'
 import MultiSelect from '@/components/MultiSelect.vue'
+import BookEnrichmentPanel from '@/components/admin/BookEnrichmentPanel.vue'
 
 const API_BASE = import.meta.env.VITE_API_URL as string
 
@@ -325,25 +296,10 @@ interface BookPayload {
   published_year?: number
 }
 
-type EnrichmentApplyField = 'description' | 'coverUrl' | 'publisher' | 'isbn' | 'pageCount' | 'publishedYear'
-
-interface EnrichmentPreviewResponse {
-  source: 'google_books' | 'open_library'
-  preview: {
-    description?: string
-    coverUrl?: string
-    publisher?: string
-    isbn?: string
-    pageCount?: number
-    publishedYear?: number
-    externalId?: string
-    strategy?: string
-  }
-}
-
 const props = defineProps<{
   book: BookPayload | null
   isOpen: boolean
+  scope?: 'admin' | 'member'
 }>()
 
 const emit = defineEmits<{
@@ -356,14 +312,6 @@ const firstInputRef = ref<HTMLInputElement | null>(null)
 const isSaving = ref(false)
 const error = ref('')
 const success = ref('')
-const enrichmentLoading = ref(false)
-const enrichmentApplying = ref(false)
-const enrichmentError = ref('')
-const selectedEnrichmentFields = ref<EnrichmentApplyField[]>([])
-const enrichmentPreview = ref<{
-  sourceLabel: string
-  items: Array<{ field: EnrichmentApplyField; label: string; preview: string; hasValue: boolean }>
-} | null>(null)
 
 const form = reactive({
   titulo: '',
@@ -381,6 +329,7 @@ const form = reactive({
   published_year: '',
 })
 
+const isMemberScope = computed(() => props.scope === 'member')
 const isEditMode = computed(() => !!props.book)
 
 const isValid = computed(
@@ -389,7 +338,7 @@ const isValid = computed(
     form.autor.length > 0 &&
     form.midia.length > 0 &&
     form.categoria.length > 0 &&
-    form.quem_nome.length >= 1,
+    (isMemberScope.value || form.quem_nome.length >= 1),
 )
 
 // ── Support entity options ────────────────────────────────────────
@@ -411,8 +360,40 @@ const handleSubgeneroToggle = (value: string) => {
   else form.subgeneros.splice(idx, 1)
 }
 
-// ── Populate form when book prop changes ──────────────────────────
+// ── Form population ───────────────────────────────────────────────
 const extractId = (field: string | { _id: string }): string => (typeof field === 'string' ? field : field._id)
+
+const resetForm = (): void => {
+  form.titulo = ''
+  form.autor = ''
+  form.midia = ''
+  form.categoria = ''
+  form.subgeneros = []
+  form.quem_nome = ''
+  form.porque = ''
+  form.isbn = ''
+  form.cover_url = ''
+  form.synopsis = ''
+  form.google_books_id = ''
+  form.page_count = ''
+  form.published_year = ''
+}
+
+const populateForm = (book: BookPayload): void => {
+  form.titulo = book.titulo
+  form.autor = extractId(book.autor)
+  form.midia = extractId(book.midia)
+  form.categoria = extractId(book.categoria)
+  form.subgeneros = book.subgeneros.map(extractId)
+  form.quem_nome = book.quem_nome
+  form.porque = book.porque ?? ''
+  form.isbn = book.isbn ?? ''
+  form.cover_url = book.cover_url ?? ''
+  form.synopsis = book.synopsis ?? ''
+  form.google_books_id = book.google_books_id ? String(book.google_books_id) : ''
+  form.page_count = book.page_count ? String(book.page_count) : ''
+  form.published_year = book.published_year ? String(book.published_year) : ''
+}
 
 watch(
   () => props.isOpen,
@@ -421,39 +402,9 @@ watch(
 
     error.value = ''
     success.value = ''
-    enrichmentError.value = ''
-    enrichmentPreview.value = null
-    selectedEnrichmentFields.value = []
 
-    if (props.book) {
-      form.titulo = props.book.titulo
-      form.autor = extractId(props.book.autor)
-      form.midia = extractId(props.book.midia)
-      form.categoria = extractId(props.book.categoria)
-      form.subgeneros = props.book.subgeneros.map(extractId)
-      form.quem_nome = props.book.quem_nome
-      form.porque = props.book.porque ?? ''
-      form.isbn = props.book.isbn ?? ''
-      form.cover_url = props.book.cover_url ?? ''
-      form.synopsis = props.book.synopsis ?? ''
-      form.google_books_id = props.book.google_books_id ? String(props.book.google_books_id) : ''
-      form.page_count = props.book.page_count ? String(props.book.page_count) : ''
-      form.published_year = props.book.published_year ? String(props.book.published_year) : ''
-    } else {
-      form.titulo = ''
-      form.autor = ''
-      form.midia = ''
-      form.categoria = ''
-      form.subgeneros = []
-      form.quem_nome = ''
-      form.porque = ''
-      form.isbn = ''
-      form.cover_url = ''
-      form.synopsis = ''
-      form.google_books_id = ''
-      form.page_count = ''
-      form.published_year = ''
-    }
+    if (props.book) populateForm(props.book)
+    else resetForm()
 
     document.body.style.overflow = 'hidden'
     await nextTick()
@@ -461,42 +412,61 @@ watch(
   },
 )
 
-const close = () => {
+const close = (): void => {
   document.body.style.overflow = ''
   emit('close')
 }
 
+// ── Submit ────────────────────────────────────────────────────────
 const handleSubmit = async () => {
   if (!isValid.value) return
+  if (isMemberScope.value && !props.book) return
+
   isSaving.value = true
   error.value = ''
   success.value = ''
 
-  const payload: Record<string, unknown> = {
-    titulo: form.titulo,
-    autor: form.autor,
-    midia: form.midia,
-    categoria: form.categoria,
-    subgeneros: form.subgeneros,
-    quem_nome: form.quem_nome,
-    porque: form.porque,
-  }
-
-  if (form.isbn) payload.isbn = form.isbn
-  if (form.cover_url) payload.cover_url = form.cover_url
-  if (form.synopsis) payload.synopsis = form.synopsis
-  if (form.google_books_id) payload.google_books_id = form.google_books_id
-
-  const pageCount = Number(form.page_count)
-  const publishedYear = Number(form.published_year)
-  if (Number.isFinite(pageCount) && pageCount > 0) payload.page_count = pageCount
-  if (Number.isFinite(publishedYear) && publishedYear > 0) payload.published_year = publishedYear
-
   try {
-    const url = isEditMode.value ? `${API_BASE}/books/${props.book!._id}` : `${API_BASE}/books`
+    let url: string
+    let method: string
+    let payload: Record<string, unknown>
+
+    if (isMemberScope.value) {
+      url = `${API_BASE}/users/me/books/${props.book!._id}`
+      method = 'PATCH'
+      payload = {
+        titulo: form.titulo,
+        autor: form.autor,
+        midia: form.midia,
+        categoria: form.categoria,
+        subgeneros: form.subgeneros,
+        porque: form.porque,
+      }
+      if (form.synopsis) payload.synopsis = form.synopsis
+    } else {
+      url = isEditMode.value ? `${API_BASE}/books/${props.book!._id}` : `${API_BASE}/books`
+      method = isEditMode.value ? 'PATCH' : 'POST'
+      payload = {
+        titulo: form.titulo,
+        autor: form.autor,
+        midia: form.midia,
+        categoria: form.categoria,
+        subgeneros: form.subgeneros,
+        quem_nome: form.quem_nome,
+        porque: form.porque,
+      }
+      if (form.isbn) payload.isbn = form.isbn
+      if (form.cover_url) payload.cover_url = form.cover_url
+      if (form.synopsis) payload.synopsis = form.synopsis
+      if (form.google_books_id) payload.google_books_id = form.google_books_id
+      const pageCount = Number(form.page_count)
+      const publishedYear = Number(form.published_year)
+      if (Number.isFinite(pageCount) && pageCount > 0) payload.page_count = pageCount
+      if (Number.isFinite(publishedYear) && publishedYear > 0) payload.published_year = publishedYear
+    }
 
     const res = await fetch(url, {
-      method: isEditMode.value ? 'PATCH' : 'POST',
+      method,
       headers: buildHeaders(),
       body: JSON.stringify(payload),
     })
@@ -519,78 +489,9 @@ const handleSubmit = async () => {
   }
 }
 
-const fetchEnrichmentPreview = async () => {
-  if (!props.book?._id) return
-  enrichmentLoading.value = true
-  enrichmentError.value = ''
-
-  try {
-    const res = await fetch(`${API_BASE}/books/${props.book._id}/enrich`, {
-      method: 'POST',
-      headers: buildHeaders(),
-    })
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-      throw new Error(body.error ?? `HTTP ${res.status}`)
-    }
-
-    const payload = (await res.json()) as EnrichmentPreviewResponse
-
-    const sourceLabel = payload.source === 'google_books' ? 'Google Books' : 'Open Library'
-    const items: Array<{ field: EnrichmentApplyField; label: string; preview: string; hasValue: boolean }> = [
-      { field: 'description', label: 'Sinopse', preview: payload.preview.description ?? '', hasValue: !!payload.preview.description },
-      { field: 'coverUrl', label: 'URL da capa', preview: payload.preview.coverUrl ?? '', hasValue: !!payload.preview.coverUrl },
-      { field: 'publisher', label: 'Editora', preview: payload.preview.publisher ?? '', hasValue: !!payload.preview.publisher },
-      { field: 'isbn', label: 'ISBN', preview: payload.preview.isbn ?? '', hasValue: !!payload.preview.isbn },
-      {
-        field: 'pageCount',
-        label: 'Qtd. páginas',
-        preview: payload.preview.pageCount ? String(payload.preview.pageCount) : '',
-        hasValue: typeof payload.preview.pageCount === 'number' && payload.preview.pageCount > 0,
-      },
-      {
-        field: 'publishedYear',
-        label: 'Ano publicação',
-        preview: payload.preview.publishedYear ? String(payload.preview.publishedYear) : '',
-        hasValue: typeof payload.preview.publishedYear === 'number' && payload.preview.publishedYear > 0,
-      },
-    ]
-
-    enrichmentPreview.value = { sourceLabel, items }
-    selectedEnrichmentFields.value = items.filter((item) => item.hasValue).map((item) => item.field)
-  } catch (e) {
-    enrichmentError.value = e instanceof Error ? e.message : 'Erro ao buscar preview de enriquecimento.'
-  } finally {
-    enrichmentLoading.value = false
-  }
-}
-
-const applySelectedEnrichment = async () => {
-  if (!props.book?._id || selectedEnrichmentFields.value.length === 0) return
-  enrichmentApplying.value = true
-  enrichmentError.value = ''
-
-  try {
-    const res = await fetch(`${API_BASE}/books/${props.book._id}/enrich/apply`, {
-      method: 'POST',
-      headers: buildHeaders(),
-      body: JSON.stringify({ fields: selectedEnrichmentFields.value }),
-    })
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-      throw new Error(body.error ?? `HTTP ${res.status}`)
-    }
-
-    success.value = 'Enriquecimento aplicado ao livro.'
-    emit('saved')
-    await fetchEnrichmentPreview()
-  } catch (e) {
-    enrichmentError.value = e instanceof Error ? e.message : 'Erro ao aplicar enriquecimento.'
-  } finally {
-    enrichmentApplying.value = false
-  }
+const handleEnrichmentApplied = (): void => {
+  success.value = 'Enriquecimento aplicado ao livro.'
+  emit('saved')
 }
 
 onMounted(() => {
@@ -602,6 +503,8 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/assets/scss/components/admin-shared';
+
 .drawer-overlay {
   position: fixed;
   inset: 0;
@@ -686,68 +589,8 @@ onMounted(() => {
   }
 }
 
-.enrichment-actions {
-  margin-bottom: 0.75rem;
-}
-
-.enrichment-hint {
-  margin: 0;
-  font-size: 0.82rem;
-  color: var(--color-text-subtle);
-}
-
-.enrichment-preview {
-  margin-bottom: 1rem;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--border-radius-sm);
-  padding: 0.7rem;
-  background: var(--color-surface-default);
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-
-  &__header {
-    p {
-      margin: 0.25rem 0 0;
-      font-size: 0.8rem;
-      color: var(--color-text-subtle);
-    }
-  }
-}
-
-.enrichment-option {
-  display: flex;
-  gap: 0.55rem;
-  align-items: flex-start;
-  padding: 0.45rem 0.5rem;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--border-radius-sm);
-  background: var(--color-surface-raised);
-
-  &__meta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    min-width: 0;
-  }
-
-  strong {
-    font-size: 0.82rem;
-    color: var(--color-text-default);
-  }
-
-  small {
-    font-size: 0.74rem;
-    color: var(--color-text-subtle);
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  &.is-disabled {
-    opacity: 0.55;
-  }
+.enrichment-fields {
+  margin-top: 0.75rem;
 }
 
 .form-grid {
@@ -824,60 +667,7 @@ onMounted(() => {
   }
 }
 
-.drawer-feedback {
-  margin: 0;
-  font-size: 0.82rem;
-  padding: 0.4rem 0.65rem;
-  border-radius: var(--border-radius-sm);
-
-  &--error {
-    color: #c0392b;
-    background: rgba(192, 57, 43, 0.06);
-  }
-
-  &--success {
-    color: #2e7d32;
-    background: rgba(46, 125, 50, 0.06);
-  }
-}
-
-.drawer-btn {
-  min-height: 40px;
-  padding: 0 1rem;
-  border: none;
-  border-radius: var(--border-radius-sm);
-  font-family: var(--font-family-body);
-  font-size: 0.88rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity var(--motion-transition-default);
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  &--primary {
-    background: var(--color-action-default);
-    color: #fff;
-
-    &:hover:not(:disabled) {
-      opacity: 0.85;
-    }
-  }
-
-  &--secondary {
-    background: var(--color-background-subtle);
-    color: var(--color-text-default);
-    border: 1px solid var(--color-border-default);
-
-    &:hover:not(:disabled) {
-      background: var(--color-background-default);
-    }
-  }
-}
-
-// ── Transitions ───────────────────────────────────────────────────
+// ── Transitions ────────────────────────────────────────────────────
 .overlay-enter-active,
 .overlay-leave-active {
   transition: opacity 0.22s ease;
@@ -926,7 +716,7 @@ onMounted(() => {
     &__actions {
       flex-direction: column-reverse;
 
-      .drawer-btn {
+      .panel-btn {
         width: 100%;
         min-height: 44px;
       }

@@ -1,6 +1,6 @@
 <template>
   <!-- Loading -->
-  <BaseSpinner v-if="loading" class="state-screen" role="status" :aria-label="loadingText">
+  <BaseSpinner v-if="loading" :aria-label="loadingText">
     {{ loadingText }}
   </BaseSpinner>
 

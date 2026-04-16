@@ -18,7 +18,7 @@ interface ApiBook {
   midia: ApiPopulated | string
   categoria: ApiPopulated | string
   quem_nome: string
-  quem_user_id?: { name: string; avatar_url?: string }
+  quem_user_id?: { _id: string; name: string; avatar_url?: string }
   porque: string
   cover_url?: string
   synopsis?: string
@@ -72,6 +72,7 @@ const normalizeBook = (raw: ApiBook): Book => ({
   midia: extractNome(raw.midia),
   categoria: extractNome(raw.categoria) as Book['categoria'],
   quem: raw.quem_nome,
+  quem_user_id: raw.quem_user_id?._id,
   porque: raw.porque ?? '',
   cover_url: raw.cover_url,
   synopsis: raw.synopsis,
