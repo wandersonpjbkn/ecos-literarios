@@ -35,6 +35,9 @@
 
     <!-- back to top -->
     <BackTop :target="content" />
+
+    <!-- update notification -->
+    <UpdateNotification />
   </div>
 </template>
 
@@ -46,6 +49,7 @@ import { Head } from '@unhead/vue/components'
 
 import { useAuth } from '@/composables'
 import AppHeader from '@/components/AppHeader.vue'
+import UpdateNotification from '@/components/UpdateNotification.vue'
 
 const AppSidebar = defineAsyncComponent(() => import('@/components/AppSidebar.vue'))
 const PanelCategories = defineAsyncComponent(() => import('@/components/PanelCategories.vue'))

@@ -25,26 +25,6 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/api\//, /^https?:\/\//],
 
         runtimeCaching: [
-          // ── Google Sheets CSV ──────────────────────────────────────────────
-          // NetworkFirst: tenta buscar dados frescos, cai para cache SW se offline.
-          // Junto com o cache Pinia (localStorage, TTL), o catálogo fica
-          // disponível offline mesmo depois que o TTL do Pinia expira.
-          {
-            urlPattern: /^https:\/\/docs\.google\.com\/spreadsheets\//,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'sheets-data',
-              networkTimeoutSeconds: 10,
-              expiration: {
-                maxEntries: 5,
-                maxAgeSeconds: 60 * 60 * 24 * 3, // 3d
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-
           // ── Google Fonts — CSS ─────────────────────────────────────────────
           // StaleWhileRevalidate: serve do cache imediatamente, atualiza em background.
           {
