@@ -19,7 +19,7 @@ import { useMediaQuery } from '@vueuse/core'
 
 import { useBreakpoints } from '@/composables'
 
-const isVisible = ref(true)
+const isVisible = ref(false)
 
 const isMobile = useMediaQuery(useBreakpoints.isMobile)
 
