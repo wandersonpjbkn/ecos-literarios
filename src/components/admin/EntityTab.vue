@@ -157,9 +157,10 @@
 <script lang="ts" setup>
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, reactive } from 'vue'
 
-import { useEntityCrud, type SupportEntity } from '@/composables/useEntityCrud'
+import { useEntityCrud } from '@/composables/useEntityCrud'
 import ConfirmModal from '@/components/admin/ConfirmModal.vue'
 import PaginationNav from '@/components/PaginationNav.vue'
+import type { SupportEntity } from '@/types'
 
 const props = defineProps<{
   resource: string
