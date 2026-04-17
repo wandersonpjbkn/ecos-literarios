@@ -25,6 +25,7 @@ export const useBooksStore = defineStore(
   {
     persist: {
       storage: localStorage,
+      pick: ['books'],
     },
   },
 )

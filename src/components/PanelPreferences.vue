@@ -2,7 +2,7 @@
   <SideBar ref="instance" title="Preferências" :enter="isTablet ? 'right' : 'left:4.5rem'">
     <template #body>
       <div class="menu-painel">
-        <div class="menu-painel-card">
+        <div class="menu-painel__card">
           <p>Tema</p>
           <MultiSelect
             label="Tema"
@@ -14,12 +14,19 @@
           />
         </div>
 
-        <div class="menu-painel-card">
+        <div class="menu-painel__card">
           <p>Cache</p>
-          <button class="btn" type="button" @click="forceRefresh">
-            Recarregar
-            <BaseIcon name="reload" class="icon" />
-          </button>
+
+          <div class="menu-painel__buttons">
+            <button class="btn" type="button" @click="forceRefresh">
+              Recarregar catálogo
+              <BaseIcon name="reload" />
+            </button>
+            <button class="btn" type="button" @click="forceReset">
+              Resetar cache
+              <BaseIcon name="trash" />
+            </button>
+          </div>
         </div>
       </div>
     </template>
@@ -57,6 +64,11 @@ const forceRefresh = () => {
   })
 }
 
+const forceReset = () => {
+  localStorage.clear()
+  forceRefresh()
+}
+
 defineExpose({ instance })
 </script>
 
@@ -66,7 +78,7 @@ defineExpose({ instance })
   grid-template-rows: 1fr 1fr;
   row-gap: 2rem;
 
-  &-card {
+  &__card {
     p {
       margin-bottom: 0.15rem;
       font-size: 1rem;
@@ -74,29 +86,36 @@ defineExpose({ instance })
     }
   }
 
-  .btn {
-    display: flex;
-    min-height: 44px;
-    border: none;
-    padding: 10px 20px;
-    border-radius: var(--border-radius-sm);
-    background: var(--color-background-subtle);
-    border: 1px solid var(--color-border-default);
-    font-family: var(--font-family-body);
-    font-size: 1rem;
-    color: var(--color-text-default);
-    align-items: center;
-    justify-content: center;
-    transition: opacity var(--motion-transition-default);
-    cursor: pointer;
-    grid-column-start: 2;
+  &__buttons {
+    display: grid;
+    gap: 1rem;
 
-    &:hover {
-      background: var(--color-background-default);
-    }
+    .btn {
+      display: flex;
+      width: fit-content;
+      height: 44px;
+      padding: 10px 20px;
+      border-radius: var(--border-radius-sm);
+      background: var(--color-background-subtle);
+      border: 1px solid var(--color-border-default);
 
-    .icon {
-      margin-left: 0.5rem;
+      font-family: var(--font-family-body);
+      font-size: 1rem;
+      color: var(--color-text-default);
+
+      align-items: center;
+      justify-content: center;
+      transition: opacity var(--motion-transition-default);
+      cursor: pointer;
+      flex-shrink: 0;
+
+      &:hover {
+        background: var(--color-background-default);
+      }
+
+      :deep(.base-icon) {
+        margin-left: 0.5rem;
+      }
     }
   }
 }

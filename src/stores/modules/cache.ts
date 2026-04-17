@@ -35,6 +35,7 @@ export const useCacheStore = defineStore(
   {
     persist: {
       storage: localStorage,
+      pick: ['cache', 'ts'],
     },
   },
 )
