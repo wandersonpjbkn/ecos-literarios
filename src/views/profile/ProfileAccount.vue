@@ -98,6 +98,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores'
 import { buildHeaders } from '@/composables/useApi'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
+import { API_BASE } from '@/data/config'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -105,8 +106,6 @@ const authStore = useAuthStore()
 if (!authStore.isLoggedIn) {
   router.replace('/login')
 }
-
-const API_BASE = import.meta.env.VITE_API_URL as string
 
 const name = ref(authStore.user?.name ?? '')
 const isSubmitting = ref(false)

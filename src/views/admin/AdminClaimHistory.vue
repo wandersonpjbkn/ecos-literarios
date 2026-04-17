@@ -60,26 +60,15 @@ import { ref } from 'vue'
 
 import { useAuthStore } from '@/stores'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
-
-const API_BASE = import.meta.env.VITE_API_URL as string
-
-interface ClaimHistoryEntry {
-  id: string
-  user_id: string
-  user_email: string
-  action: 'claim' | 'unclaim'
-  claim_name?: string
-  previous_claim_names?: string[]
-  affected_books: number
-  performed_at: string
-}
+import type { AdminClaimHistoryEntry } from '@/types'
+import { API_BASE } from '@/data/config'
 
 const authStore = useAuthStore()
 
 const loading = ref(false)
 const loaded = ref(false)
 const error = ref('')
-const history = ref<ClaimHistoryEntry[]>([])
+const history = ref<AdminClaimHistoryEntry[]>([])
 
 const formatDateTime = (iso: string) =>
   new Date(iso).toLocaleString('pt-BR', {
@@ -104,7 +93,7 @@ const loadHistory = async () => {
       throw new Error(payload.error ?? `HTTP ${res.status}`)
     }
 
-    const payload = (await res.json()) as { total: number; history: ClaimHistoryEntry[] }
+    const payload = (await res.json()) as { total: number; history: AdminClaimHistoryEntry[] }
     history.value = payload.history
     loaded.value = true
   } catch (e) {

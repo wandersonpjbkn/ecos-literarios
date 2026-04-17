@@ -117,27 +117,8 @@ import SectionHeader from '@/components/admin/SectionHeader.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import PaginationNav from '@/components/PaginationNav.vue'
 import BookFormDrawer from '@/components/admin/BookFormDrawer.vue'
-import type { Book, Suggestion } from '@/types'
-
-const API_BASE = import.meta.env.VITE_API_URL as string
-
-// Mirrors BookPayload from BookFormDrawer — needed to type the edit state.
-interface BookForEdit {
-  _id: string
-  titulo: string
-  autor: string | { _id: string; nome: string }
-  midia: string | { _id: string; nome: string }
-  categoria: string | { _id: string; nome: string }
-  subgeneros: Array<string | { _id: string; nome: string }>
-  quem_nome: string
-  porque: string
-  synopsis?: string
-  isbn?: string
-  cover_url?: string
-  google_books_id?: string | number
-  page_count?: number
-  published_year?: number
-}
+import type { Book, Suggestion, BookForEdit } from '@/types'
+import { API_BASE } from '@/data/config'
 
 const authStore = useAuthStore()
 const booksStore = useBooksStore()

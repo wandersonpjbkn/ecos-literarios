@@ -1,16 +1,16 @@
-import { computed, watch } from 'vue'
+import { computed, watch, type ModelRef } from 'vue'
 import { storeToRefs } from 'pinia'
 
 import { useBooksGridStore } from '@/stores'
 import type { Book } from '@/types'
 
-export function useBooksGrid(source: Book[]) {
+export function useBooksGrid(books: ModelRef<Book[]>) {
   const store = useBooksGridStore()
-
   const { visibleCount, isLoading } = storeToRefs(store)
 
-  const visibleBooks = computed(() => source.slice(0, visibleCount.value))
-  const hasMore = computed(() => visibleCount.value < source.length)
+  const source = computed(() => books.value)
+  const visibleBooks = computed(() => source.value.slice(0, visibleCount.value))
+  const hasMore = computed(() => visibleCount.value < source.value.length)
 
   const loadMore = () => {
     if (!hasMore.value || isLoading.value) return
@@ -21,12 +21,7 @@ export function useBooksGrid(source: Book[]) {
     })
   }
 
-  watch(
-    () => source,
-    () => {
-      store.reset()
-    },
-  )
+  watch(source, store.reset)
 
   return {
     visibleBooks,

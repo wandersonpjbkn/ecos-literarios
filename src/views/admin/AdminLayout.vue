@@ -98,15 +98,13 @@ import { useRoute } from 'vue-router'
 
 import { useAuthStore, useBooksStore } from '@/stores'
 import { usePageMeta } from '@/composables'
-
 import UserAvatar from '@/components/UserAvatar.vue'
+import { API_BASE } from '@/data/config'
 
 usePageMeta({
   title: 'Painel Admin',
   description: 'Painel de administração do Ecos Literários',
 })
-
-const API_BASE = import.meta.env.VITE_API_URL as string
 
 const route = useRoute()
 const authStore = useAuthStore()

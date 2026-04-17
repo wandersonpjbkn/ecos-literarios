@@ -1,14 +1,7 @@
 import { useSeoMeta, useHead } from '@unhead/vue'
 import { toValue } from 'vue'
 import { useRoute } from 'vue-router'
-
-interface PageMetaOptions {
-  title: string
-  description?: string
-  type?: 'website' | 'article'
-}
-
-type MaybeRefOrGetter<T> = T | (() => T) | import('vue').Ref<T>
+import type { PageMetaOptions, MaybeRefOrGetter } from '@/types'
 
 export function usePageMeta(options: MaybeRefOrGetter<PageMetaOptions>) {
   const route = useRoute()

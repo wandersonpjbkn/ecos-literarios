@@ -125,28 +125,8 @@ import MultiSelect from '@/components/MultiSelect.vue'
 import PaginationNav from '@/components/PaginationNav.vue'
 import BookFormDrawer from '@/components/admin/BookFormDrawer.vue'
 import ConfirmModal from '@/components/admin/ConfirmModal.vue'
-
-import type { Suggestion } from '@/types'
-
-const API_BASE = import.meta.env.VITE_API_URL as string
-
-interface AdminBook {
-  _id: string
-  titulo: string
-  autor: string | { _id: string; nome: string }
-  midia: string | { _id: string; nome: string }
-  categoria: string | { _id: string; nome: string }
-  subgeneros: Array<string | { _id: string; nome: string }>
-  quem_nome: string
-  porque: string
-  isbn?: string
-  cover_url?: string
-  synopsis?: string
-  page_count?: number
-  published_year?: number
-}
-
-type SegmentFilter = 'all' | 'missing' | 'complete' | 'missing-isbn'
+import type { Suggestion, SegmentFilter, AdminBook } from '@/types'
+import { API_BASE } from '@/data/config'
 
 const paginationNav = ref<InstanceType<typeof PaginationNav> | null>(null)
 

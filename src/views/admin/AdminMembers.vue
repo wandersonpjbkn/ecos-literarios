@@ -75,17 +75,8 @@ import { useAuthStore } from '@/stores'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import ConfirmModal from '@/components/admin/ConfirmModal.vue'
-
-const API_BASE = import.meta.env.VITE_API_URL as string
-
-interface ApiUser {
-  _id: string
-  name: string
-  email: string
-  role: 'admin' | 'editor' | 'viewer'
-  created_at: string
-  last_seen_at: string
-}
+import type { ApiUser } from '@/types'
+import { API_BASE } from '@/data/config'
 
 const authStore = useAuthStore()
 const users = ref<ApiUser[]>([])

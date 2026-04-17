@@ -37,13 +37,7 @@ import { ref, computed } from 'vue'
 
 import SectionHeader from '@/components/admin/SectionHeader.vue'
 import EntityTab from '@/components/admin/EntityTab.vue'
-
-interface TabConfig {
-  key: string
-  label: string
-  resource: string
-  description: string
-}
+import type { TabConfig } from '@/types'
 
 const tabs: TabConfig[] = [
   {

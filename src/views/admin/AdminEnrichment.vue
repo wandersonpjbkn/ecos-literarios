@@ -154,49 +154,8 @@ import { computed, ref } from 'vue'
 
 import { useAuthStore } from '@/stores'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
-
-const API_BASE = import.meta.env.VITE_API_URL as string
-
-type ResultStatus = 'applied' | 'skipped' | 'failed'
-
-interface EnrichmentResult {
-  id: string
-  title: string
-  status: ResultStatus
-  detail?: string
-}
-
-interface EnrichmentSummary {
-  total: number
-  applied: number
-  skipped: number
-  failed: number
-}
-
-interface EnrichmentHistoryItem {
-  book_id: string
-  titulo: string
-  status: ResultStatus
-  source?: 'google_books' | 'open_library'
-  reason?: 'manual_edit' | 'not_found' | 'missing_author'
-  strategy?: string
-  error?: string
-  cover_url?: string
-}
-
-interface EnrichmentRun {
-  id: string
-  started_at: string
-  finished_at: string
-  force: boolean
-  initiated_by_email: string
-  total: number
-  applied: number
-  skipped: number
-  failed: number
-  coverage_pct_after: number
-  results: EnrichmentHistoryItem[]
-}
+import type { ResultStatus, EnrichmentResult, EnrichmentSummary, EnrichmentRun } from '@/types'
+import { API_BASE } from '@/data/config'
 
 const authStore = useAuthStore()
 

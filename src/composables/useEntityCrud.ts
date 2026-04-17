@@ -1,19 +1,7 @@
 import { ref } from 'vue'
 import { buildHeaders } from '@/composables/useApi'
-
-const API_BASE = import.meta.env.VITE_API_URL as string
-
-export interface SupportEntity {
-  _id: string
-  nome: string
-  slug: string
-  created_at?: string
-}
-
-interface EntityCrudOptions {
-  /** URL path segment: 'autores', 'midias', 'categorias', 'subgeneros' */
-  resource: string
-}
+import type { SupportEntity, EntityCrudOptions } from '@/types'
+import { API_BASE } from '@/data/config'
 
 /** Reusable CRUD state for flat support entities (nome + slug). */
 export function useEntityCrud({ resource }: EntityCrudOptions) {

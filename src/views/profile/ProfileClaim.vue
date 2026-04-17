@@ -107,9 +107,10 @@ import { useRouter } from 'vue-router'
 
 import { useAuthStore, useBooksStore } from '@/stores'
 import { useApi } from '@/composables'
-import { claimRegister, getMyClaimStatus, unclaimRegister, type MyClaimStatus } from '@/composables/useApi'
+import { claimRegister, getMyClaimStatus, unclaimRegister } from '@/composables/useApi'
 import MultiSelect from '@/components/MultiSelect.vue'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
+import type { MyClaimStatus } from '@/types'
 
 const router = useRouter()
 const authStore = useAuthStore()

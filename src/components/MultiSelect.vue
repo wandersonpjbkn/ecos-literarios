@@ -84,19 +84,12 @@
 import { computed, ref, watch } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 
-type OptionValue = string
-
-type Option =
-  | string
-  | {
-      label: string
-      value: string
-    }
+import type { OptionMultiSelect } from '@/types'
 
 const props = withDefaults(
   defineProps<{
     label: string
-    options: Option[]
+    options: OptionMultiSelect[]
     selected: string | string[]
     multiple?: boolean
     searchable?: boolean
@@ -146,7 +139,7 @@ const selectedOption = computed(() => {
   return normalizedOptions.value.find((opt) => opt.value === props.selected) ?? null
 })
 
-const isSelected = (value: OptionValue): boolean => {
+const isSelected = (value: string): boolean => {
   if (multiple.value) {
     return Array.isArray(props.selected) && props.selected.includes(value)
   }

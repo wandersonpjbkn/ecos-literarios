@@ -41,9 +41,10 @@ import BookCard from '@/components/BookCard.vue'
 import { useBooksGrid } from '@/composables'
 import type { Book, Options } from '@/types'
 
-const props = withDefaults(
+const books = defineModel<Book[]>({ required: true })
+
+withDefaults(
   defineProps<{
-    books: Book[]
     emptyMessage?: string
     activeFilters?: Options
   }>(),
@@ -58,7 +59,7 @@ const emit = defineEmits<{
   detail: [book: Book]
 }>()
 
-const { visibleBooks, hasMore, isLoading, pageSize, loadMore } = useBooksGrid(props.books)
+const { visibleBooks, hasMore, isLoading, pageSize, loadMore } = useBooksGrid(books)
 
 const sentinelRef = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null

@@ -159,7 +159,7 @@
       <!-- Grid -->
       <div class="grid-area">
         <BooksGrid
-          :books="sortedBooks"
+          v-model="sortedBooks"
           :active-filters="{
             midia: selectedMidia,
             categoria: selectedCategoria,

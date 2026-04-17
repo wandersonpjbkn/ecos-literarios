@@ -276,25 +276,8 @@ import { buildHeaders } from '@/composables/useApi'
 import { useEntityCrud } from '@/composables/useEntityCrud'
 import MultiSelect from '@/components/MultiSelect.vue'
 import BookEnrichmentPanel from '@/components/admin/BookEnrichmentPanel.vue'
-
-const API_BASE = import.meta.env.VITE_API_URL as string
-
-interface BookPayload {
-  _id: string
-  titulo: string
-  autor: string | { _id: string; nome: string }
-  midia: string | { _id: string; nome: string }
-  categoria: string | { _id: string; nome: string }
-  subgeneros: Array<string | { _id: string; nome: string }>
-  quem_nome: string
-  porque: string
-  isbn?: string
-  cover_url?: string
-  synopsis?: string
-  google_books_id?: string | number
-  page_count?: number
-  published_year?: number
-}
+import type { BookPayload } from '@/types'
+import { API_BASE } from '@/data/config'
 
 const props = defineProps<{
   book: BookPayload | null

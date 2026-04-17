@@ -1,33 +1,7 @@
 import { ref } from 'vue'
 import { buildHeaders } from '@/composables/useApi'
-
-const API_BASE = import.meta.env.VITE_API_URL as string
-
-export type EnrichmentField = 'description' | 'coverUrl' | 'publisher' | 'isbn' | 'pageCount' | 'publishedYear'
-
-export interface EnrichmentItem {
-  field: EnrichmentField
-  label: string
-  preview: string
-  hasValue: boolean
-}
-
-export interface EnrichmentPreview {
-  sourceLabel: string
-  items: EnrichmentItem[]
-}
-
-interface EnrichmentApiResponse {
-  source: 'google_books' | 'open_library'
-  preview: {
-    description?: string
-    coverUrl?: string
-    publisher?: string
-    isbn?: string
-    pageCount?: number
-    publishedYear?: number
-  }
-}
+import type { EnrichmentField, EnrichmentItem, EnrichmentPreview, EnrichmentApiResponse } from '@/types'
+import { API_BASE } from '@/data/config'
 
 const FIELD_META: ReadonlyArray<{ field: EnrichmentField; label: string }> = [
   { field: 'description', label: 'Sinopse' },

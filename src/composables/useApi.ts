@@ -1,62 +1,14 @@
 import { useBooksStore, useCacheStore } from '@/stores'
-
-import type { Book } from '@/types'
-
-const API_BASE = import.meta.env.VITE_API_URL as string
-
-// ── Tipos da resposta da API ──────────────────────────────────────
-interface ApiPopulated {
-  _id: string
-  nome: string
-  slug: string
-}
-
-interface ApiBook {
-  _id: string
-  titulo: string
-  autor: ApiPopulated | string
-  midia: ApiPopulated | string
-  categoria: ApiPopulated | string
-  quem_nome: string
-  quem_user_id?: { _id: string; name: string; avatar_url?: string }
-  porque: string
-  cover_url?: string
-  synopsis?: string
-  published_year?: number
-  page_count?: number
-  subgeneros: (ApiPopulated | string)[]
-}
-
-// Matches GET /users/me/claim response shape exactly
-export interface MyClaimStatus {
-  claim_name: string | null
-  claimed_books: number
-  has_claim: boolean
-  warning?: string
-}
-
-// Matches POST /users/me/claim response shape exactly
-export interface RegisterResponse {
-  message?: string
-  claim_name?: string
-  matched_books?: number
-  updated_books?: number
-  name_synced?: boolean
-}
-
-export interface ClaimHistoryEntry {
-  id: string
-  user_name: string
-  quem_nome: string | null
-  action: string
-  action_label: string
-  created_at?: string
-}
-
-export interface ClaimHistory {
-  total: number
-  history: ClaimHistoryEntry[]
-}
+import type {
+  Book,
+  ApiBook,
+  ApiPopulated,
+  MyClaimStatus,
+  RegisterResponse,
+  ClaimHistoryEntry,
+  ClaimHistory,
+} from '@/types'
+import { API_BASE } from '@/data/config'
 
 // ── Helpers ───────────────────────────────────────────────────────
 
@@ -109,12 +61,16 @@ export function useApi() {
   const fetchBooks = async (forceRefresh = false) => {
     if (!forceRefresh && useCacheStore().isCacheValid) {
       useBooksStore().books = useCacheStore().cache!
+      useBooksStore().loading = false
+      useBooksStore().error = null
       if (import.meta.env.DEV) console.log('📦 Usando dados do cache')
       return
     }
 
     if (!API_BASE) {
       useBooksStore().error = 'VITE_API_URL não configurada.'
+      useBooksStore().loading = false
+      useBooksStore().error = null
       return
     }
 

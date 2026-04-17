@@ -91,13 +91,8 @@ import { ref, computed, onMounted, reactive } from 'vue'
 import { useAuthStore } from '@/stores'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
 import ConfirmModal from '@/components/admin/ConfirmModal.vue'
-
-const API_BASE = import.meta.env.VITE_API_URL as string
-
-// Keep in sync with src/constants/index.ts on the backend
-type Role = 'admin' | 'editor' | 'viewer'
-type Resource = 'books' | 'users' | 'autores' | 'midias' | 'categorias' | 'subgeneros' | 'permissions'
-type Action = 'create' | 'read' | 'update' | 'delete'
+import type { Role, Resource, Action, Permission } from '@/types'
+import { API_BASE } from '@/data/config'
 
 const ROLES: Role[] = ['admin', 'editor', 'viewer']
 const RESOURCES: Resource[] = ['books', 'users', 'autores', 'midias', 'categorias', 'subgeneros', 'permissions']
@@ -117,12 +112,6 @@ const resourceLabel = (r: string) =>
   })[r] ?? r
 
 const actionLabel = (a: string) => ({ create: 'Criar', read: 'Ver', update: 'Editar', delete: 'Excluir' })[a] ?? a
-
-interface Permission {
-  role: Role
-  resource: Resource
-  actions: Action[]
-}
 
 const authStore = useAuthStore()
 const permissions = ref<Permission[]>([])
