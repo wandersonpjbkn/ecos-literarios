@@ -27,7 +27,7 @@
     </Transition>
 
     <Transition name="loader">
-      <p v-if="!hasMore && books.length > PAGE_SIZE" class="end-label">
+      <p v-if="!hasMore && books.length > pageSize" class="end-label">
         -- <i>FIM DA LISTA</i>: {{ books.length }} títulos encontrados --
       </p>
     </Transition>
@@ -35,12 +35,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import { ref, watch, onBeforeUnmount } from 'vue'
 
 import BookCard from '@/components/BookCard.vue'
+import { useBooksGrid } from '@/composables'
 import type { Book, Options } from '@/types'
-
-const PAGE_SIZE = 24
 
 const props = withDefaults(
   defineProps<{
@@ -59,29 +58,10 @@ const emit = defineEmits<{
   detail: [book: Book]
 }>()
 
-const visibleCount = ref(PAGE_SIZE)
-const visibleBooks = computed(() => props.books.slice(0, visibleCount.value))
-const hasMore = computed(() => visibleCount.value < props.books.length)
-const isLoading = ref(false)
-
-watch(
-  () => props.books,
-  () => {
-    visibleCount.value = PAGE_SIZE
-  },
-)
+const { visibleBooks, hasMore, isLoading, pageSize, loadMore } = useBooksGrid(props.books)
 
 const sentinelRef = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
-
-const loadMore = () => {
-  if (!hasMore.value || isLoading.value) return
-  isLoading.value = true
-  requestAnimationFrame(() => {
-    visibleCount.value += PAGE_SIZE
-    isLoading.value = false
-  })
-}
 
 const connectObserver = (el: HTMLElement) => {
   observer = new IntersectionObserver(

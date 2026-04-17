@@ -9,6 +9,7 @@ import { useTheme } from '@/composables/useTheme'
 import { useUtils } from '@/composables/useUtils'
 import { useBreakpoints } from '@/composables/useBreakpoints'
 import { useBookEnrichment } from '@/composables/useBookEnrichment'
+import { useBooksGrid } from '@/composables/useBooksGrid'
 
 export {
   useBookSort,
@@ -22,4 +23,5 @@ export {
   useUtils,
   useBreakpoints,
   useBookEnrichment,
+  useBooksGrid,
 }

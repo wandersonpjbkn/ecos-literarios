@@ -1,46 +1,44 @@
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 
-import { useBooksStore } from '@/stores'
+import { useBooksStore, useFiltersStore } from '@/stores'
 
 export function useFilters() {
-  const search = ref('')
-  const selectedMidia = ref<string[]>([])
-  const selectedCategoria = ref<string[]>([])
-  const selectedSubgeneros = ref<string[]>([])
-  const selectedQuem = ref<string[]>([])
+  const filtersStore = useFiltersStore()
 
-  // ── Opções derivadas dos dados ────────────────
-  const optionsMidia = computed(() => {
-    return [
+  const { search, selectedMidia, selectedCategoria, selectedSubgeneros, selectedQuem } = storeToRefs(filtersStore)
+
+  // ── Opções derivadas dos dados ────────────────────────────────
+  const optionsMidia = computed(() =>
+    [
       ...new Set(
         useBooksStore()
           .books.map((b) => b.midia)
           .filter(Boolean),
       ),
-    ].sort()
-  })
-  const optionsCategoria = computed(() => {
-    return [
+    ].sort(),
+  )
+  const optionsCategoria = computed(() =>
+    [
       ...new Set(
         useBooksStore()
           .books.map((b) => b.categoria)
           .filter(Boolean),
       ),
-    ].sort()
-  })
-  const optionsSubgeneros = computed(() => {
-    const all = useBooksStore().books.flatMap((b) => b.subgenerosArr || [])
-    return [...new Set(all)].sort()
-  })
-  const optionsQuem = computed(() => {
-    return [
+    ].sort(),
+  )
+  const optionsSubgeneros = computed(() =>
+    [...new Set(useBooksStore().books.flatMap((b) => b.subgenerosArr || []))].sort(),
+  )
+  const optionsQuem = computed(() =>
+    [
       ...new Set(
         useBooksStore()
           .books.map((b) => b.quem)
           .filter(Boolean),
       ),
-    ].sort()
-  })
+    ].sort(),
+  )
 
   // ── Filtro aplicado ───────────────────────────
   const filtered = computed(() => {
@@ -60,7 +58,7 @@ export function useFilters() {
     }
 
     if (selectedSubgeneros.value.length) {
-      list = list.filter((b) => selectedSubgeneros.value.some((sg) => b.subgenerosArr?.includes(sg)))
+      list = list.filter((b) => selectedSubgeneros.value.some((sg: string) => b.subgenerosArr?.includes(sg)))
     }
 
     if (selectedQuem.value.length) list = list.filter((b) => selectedQuem.value.includes(b.quem))
@@ -77,15 +75,6 @@ export function useFilters() {
       selectedQuem.value.length,
   )
 
-  function clearAll() {
-    search.value = ''
-    selectedMidia.value = []
-    selectedCategoria.value = []
-    selectedSubgeneros.value = []
-    selectedQuem.value = []
-  }
-
-  // Autocomplete para busca
   const searchSuggestions = computed(() => {
     if (!search.value.trim() || search.value.length < 2) return []
 
@@ -109,7 +98,7 @@ export function useFilters() {
     optionsQuem,
     filtered,
     activeFilterCount,
-    clearAll,
+    clearAll: filtersStore.clearAll,
     searchSuggestions,
   }
 }

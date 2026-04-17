@@ -43,7 +43,7 @@
 
 <script lang="ts" setup>
 import { defineAsyncComponent, ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import { Head } from '@unhead/vue/components'
 
@@ -57,6 +57,7 @@ const PanelPreferences = defineAsyncComponent(() => import('@/components/PanelPr
 const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
 
 const route = useRoute()
+const router = useRouter()
 const { restoreSession, watchSession } = useAuth()
 
 useHead({
@@ -71,6 +72,27 @@ const categorySidebar = ref<InstanceType<typeof PanelCategories> | null>(null)
 const togglePreferences = () => preferencesSidebar.value?.instance?.toggle()
 const toggleCategories = () => categorySidebar.value?.instance?.toggle()
 
+const scrollPositions = new Map<string, number>()
+
+router.beforeEach((_, from) => {
+  if (content.value) {
+    scrollPositions.set(from.fullPath, content.value.scrollTop)
+  }
+})
+
+watch(route, async (to) => {
+  await nextTick()
+  setTimeout(() => {
+    if (!content.value) return
+    const saved = scrollPositions.get(to.fullPath)
+    if (saved !== undefined) {
+      content.value.scrollTo({ top: saved, behavior: 'instant' })
+    } else {
+      content.value.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, 350)
+})
+
 let stopWatchSession: (() => void) | null = null
 
 onMounted(() => {
@@ -79,13 +101,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => stopWatchSession?.())
-
-watch(route, async () => {
-  await nextTick()
-  setTimeout(() => {
-    if (content.value) content.value.scrollTo({ top: 0, behavior: 'smooth' })
-  }, 350)
-})
 </script>
 
 <style lang="scss" scoped>

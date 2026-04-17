@@ -22,6 +22,8 @@ interface ApiBook {
   porque: string
   cover_url?: string
   synopsis?: string
+  published_year?: number
+  page_count?: number
   subgeneros: (ApiPopulated | string)[]
 }
 
@@ -76,6 +78,8 @@ const normalizeBook = (raw: ApiBook): Book => ({
   porque: raw.porque ?? '',
   cover_url: raw.cover_url,
   synopsis: raw.synopsis,
+  published_year: raw.published_year,
+  page_count: raw.page_count,
   subgenerosArr: raw.subgeneros.map((s) => (typeof s === 'string' ? s : s.nome.toLowerCase())),
 })
 
