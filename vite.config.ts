@@ -16,17 +16,8 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: true,
         cleanupOutdatedCaches: true,
-
-        // Garante que o roteamento SPA funcione offline (qualquer /livro/42, /categoria/...)
         navigateFallback: '/index.html',
-
-        // Padrões de URL para excluir do navigateFallback
-        // (evita interceptar o CSV do Sheets, que tem domínio externo)
-        navigateFallbackDenylist: [/^\/api\//, /^https?:\/\//],
-
         runtimeCaching: [
-          // ── Google Fonts — CSS ─────────────────────────────────────────────
-          // StaleWhileRevalidate: serve do cache imediatamente, atualiza em background.
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\//,
             handler: 'StaleWhileRevalidate',
@@ -38,9 +29,6 @@ export default defineConfig({
               },
             },
           },
-
-          // ── Google Fonts — arquivos de fonte (.woff2) ──────────────────────
-          // CacheFirst: fontes não mudam, servir do cache é sempre correto.
           {
             urlPattern: /^https:\/\/fonts\.gstatic\.com\//,
             handler: 'CacheFirst',
