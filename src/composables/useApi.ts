@@ -135,12 +135,11 @@ export function useApi() {
       if (!navigator.onLine && useBooksStore().books.length > 0) {
         if (import.meta.env.DEV) console.warn('[useApi] Offline, usando dados persistidos do Pinia')
         useBooksStore().error = null
-        return
+      } else {
+        const raw = e instanceof Error ? e.message : String(e)
+        useBooksStore().error = raw || 'Erro ao carregar dados'
+        if (import.meta.env.DEV) console.error('[useApi]', e)
       }
-
-      const raw = e instanceof Error ? e.message : String(e)
-      useBooksStore().error = raw || 'Erro ao carregar dados'
-      if (import.meta.env.DEV) console.error('[useApi]', e)
     } finally {
       useBooksStore().loading = false
     }
