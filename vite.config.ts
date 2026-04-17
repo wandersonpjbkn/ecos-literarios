@@ -57,9 +57,6 @@ export default defineConfig({
           },
         ],
       },
-      devOptions: {
-        enabled: true,
-      },
       manifest: {
         name: 'Ecos Catálogo',
         short_name: 'Ecos Catálogo',
