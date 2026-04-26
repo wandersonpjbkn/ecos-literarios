@@ -3,6 +3,34 @@
     <div class="login-card">
       <!-- Formulário -->
       <div v-if="step === 'form'" class="login-form">
+        <div class="social-buttons">
+          <button
+            type="button"
+            class="social-btn"
+            :disabled="loading || socialLoading !== null"
+            @click="loginWith('google')"
+          >
+            <GoogleIcon class="social-btn-icon" aria-hidden="true" />
+            <span v-if="socialLoading !== 'google'">Continuar com Google</span>
+            <span v-else class="loading-dots"><span /><span /><span /></span>
+          </button>
+
+          <button
+            type="button"
+            class="social-btn"
+            :disabled="loading || socialLoading !== null"
+            @click="loginWith('azure')"
+          >
+            <MicrosoftIcon class="social-btn-icon" aria-hidden="true" />
+            <span v-if="socialLoading !== 'azure'">Continuar com Microsoft</span>
+            <span v-else class="loading-dots"><span /><span /><span /></span>
+          </button>
+        </div>
+
+        <div class="divider">
+          <span class="divider-text">ou</span>
+        </div>
+
         <div class="field">
           <label for="email" class="field-label">Email</label>
           <input
@@ -14,13 +42,17 @@
             :class="{ 'is-error': errorMsg }"
             placeholder="seu@email.com"
             autocomplete="email"
-            :disabled="loading"
+            :disabled="loading || socialLoading !== null"
             @keydown.enter="submit"
           />
           <span v-if="errorMsg" class="field-error">{{ errorMsg }}</span>
         </div>
 
-        <button class="submit-btn" :disabled="loading || !email.trim()" @click="submit">
+        <button
+          class="submit-btn"
+          :disabled="loading || socialLoading !== null || !email.trim()"
+          @click="submit"
+        >
           <span v-if="!loading">Enviar link de acesso</span>
           <span v-else class="loading-dots"> <span /><span /><span /> </span>
         </button>
@@ -53,16 +85,19 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { useAuth } from '@/composables/useAuth'
+import { useAuth, type OAuthProvider } from '@/composables/useAuth'
 import { useAuthStore } from '@/stores'
+import GoogleIcon from '@/assets/icons/google.svg'
+import MicrosoftIcon from '@/assets/icons/microsoft.svg'
 
-const { sendMagicLink } = useAuth()
+const { sendMagicLink, signInWithProvider } = useAuth()
 const authStore = useAuthStore()
 const router = useRouter()
 
 const inputRef = ref<HTMLInputElement | null>(null)
 const email = ref('')
 const loading = ref(false)
+const socialLoading = ref<OAuthProvider | null>(null)
 const errorMsg = ref('')
 const step = ref<'form' | 'sent'>('form')
 const resendCooldown = ref(0)
@@ -72,6 +107,20 @@ onMounted(() => {
   if (authStore.isLoggedIn) router.replace('/')
   inputRef.value?.focus()
 })
+
+const loginWith = async (provider: OAuthProvider) => {
+  errorMsg.value = ''
+  socialLoading.value = provider
+
+  try {
+    await signInWithProvider(provider)
+    // signInWithOAuth redireciona; o estado de loading permanece até a navegação.
+  } catch (err) {
+    socialLoading.value = null
+    errorMsg.value =
+      err instanceof Error ? err.message : 'Não foi possível iniciar o login. Tente novamente.'
+  }
+}
 
 const submit = async () => {
   errorMsg.value = ''
@@ -133,6 +182,74 @@ const startCooldown = () => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+// ── Social login ──────────────────────────────────────────────────
+.social-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  height: 48px;
+  padding: 0 14px;
+  background: var(--color-surface-default);
+  border: 1.5px solid var(--color-border-default);
+  border-radius: var(--border-radius-default);
+  color: var(--color-text-default);
+  font-family: var(--font-family-body);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color var(--motion-transition-default),
+    background var(--motion-transition-default);
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-action-default);
+    background: var(--color-action-background-subtle);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.social-btn-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.25rem 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    height: 1px;
+    background: var(--color-border-default);
+  }
+}
+
+.divider-text {
+  position: relative;
+  padding: 0 0.75rem;
+  background: var(--color-background-default);
+  font-size: 0.8rem;
+  color: var(--color-text-subtle);
+  text-transform: lowercase;
 }
 
 .field {

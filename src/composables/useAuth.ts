@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type Provider } from '@supabase/supabase-js'
 
 import { useAuthStore } from '@/stores'
 import { verifyAuth } from '@/composables/useApi'
@@ -8,14 +8,36 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY as string,
 )
 
+export type OAuthProvider = 'google' | 'azure'
+
+const PROVIDER_SCOPES: Record<OAuthProvider, string> = {
+  google: 'email profile openid',
+  azure: 'email openid profile',
+}
+
 export function useAuth() {
   const store = useAuthStore()
+
+  const redirectTo = (): string =>
+    `${import.meta.env.VITE_SITE_URL ?? window.location.origin}/auth/callback`
 
   const sendMagicLink = async (email: string): Promise<void> => {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${import.meta.env.VITE_SITE_URL ?? window.location.origin}/auth/callback`,
+        emailRedirectTo: redirectTo(),
+      },
+    })
+
+    if (error) throw new Error(error.message)
+  }
+
+  const signInWithProvider = async (provider: OAuthProvider): Promise<void> => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: provider as Provider,
+      options: {
+        redirectTo: redirectTo(),
+        scopes: PROVIDER_SCOPES[provider],
       },
     })
 
@@ -117,6 +139,7 @@ export function useAuth() {
   return {
     store,
     sendMagicLink,
+    signInWithProvider,
     handleCallback,
     logout,
     restoreSession,
