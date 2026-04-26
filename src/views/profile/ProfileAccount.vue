@@ -15,7 +15,7 @@
       </article>
 
       <article class="status-card">
-        <p class="status-card__label">Papel</p>
+        <p class="status-card__label">Nível de permissão</p>
         <p class="status-card__value">{{ roleLabel }}</p>
       </article>
     </div>
@@ -76,7 +76,7 @@
           <span class="readonly-item__value">{{ authStore.user?.email ?? '—' }}</span>
         </div>
         <div class="readonly-item">
-          <span class="readonly-item__label">Papel</span>
+          <span class="readonly-item__label">Nível de permissão</span>
           <span class="readonly-item__value">{{ roleLabel }}</span>
         </div>
         <div class="readonly-item">
@@ -85,7 +85,7 @@
         </div>
       </div>
       <p class="readonly-note">
-        Email e papel não podem ser alterados por aqui. Contate um administrador se necessário.
+        Email e nível de permissão não podem ser alterados por aqui. Contate um administrador se necessário.
       </p>
     </section>
   </div>
