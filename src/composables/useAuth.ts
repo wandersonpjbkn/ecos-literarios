@@ -1,12 +1,54 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type EmailOtpType } from '@supabase/supabase-js'
 
 import { useAuthStore } from '@/stores'
 import { verifyAuth } from '@/composables/useApi'
+import type { UserRole } from '@/types'
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL as string,
   import.meta.env.VITE_SUPABASE_ANON_KEY as string,
 )
+
+// ── Session resolution from URL ───────────────────────────────────
+
+/**
+ * Resolves a Supabase session from URL parameters set by an email
+ * confirmation or magic link. Handles the three formats produced by
+ * Supabase Auth, in priority order:
+ *   1. PKCE flow        — `?code=...`
+ *   2. Token hash flow  — `?token_hash=...&type=...`
+ *   3. Implicit flow    — `#access_token=...` (auto-parsed at client init)
+ *
+ * Returns the access token of the established session, or throws if no
+ * valid credentials are present.
+ */
+const resolveSessionFromUrl = async (): Promise<string> => {
+  const url = new URL(window.location.href)
+
+  // 1. PKCE: exchange the auth code for a session.
+  const code = url.searchParams.get('code')
+  if (code) {
+    const { data } = await supabase.auth.exchangeCodeForSession(code)
+    if (data.session) return data.session.access_token
+  }
+
+  // 2. Token hash: verify the OTP token hash explicitly.
+  const tokenHash = url.searchParams.get('token_hash')
+  const type = url.searchParams.get('type') as EmailOtpType | null
+  if (tokenHash && type) {
+    const { data } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type })
+    if (data.session) return data.session.access_token
+  }
+
+  // 3. Implicit / pre-existing: client already parsed the hash, or a
+  //    persisted session is still active (e.g. user reloaded the page).
+  const { data } = await supabase.auth.getSession()
+  if (data.session) return data.session.access_token
+
+  throw new Error('Link de acesso inválido ou expirado.')
+}
+
+// ── Composable ────────────────────────────────────────────────────
 
 export function useAuth() {
   const store = useAuthStore()
@@ -23,37 +65,8 @@ export function useAuth() {
   }
 
   const handleCallback = async (): Promise<void> => {
-    const { data, error } = await supabase.auth.getSession()
-
-    if (!error && data.session) {
-      await syncWithApi(data.session.access_token)
-      return
-    }
-
-    await new Promise<void>((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        unsubscribe()
-        reject(new Error('Tempo esgotado. O link pode ter expirado.'))
-      }, 10_000)
-
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event !== 'SIGNED_IN' || !session) return
-
-        clearTimeout(timeout)
-        unsubscribe()
-
-        try {
-          await syncWithApi(session.access_token)
-          resolve()
-        } catch (err) {
-          reject(err)
-        }
-      })
-
-      const unsubscribe = () => subscription.unsubscribe()
-    })
+    const accessToken = await resolveSessionFromUrl()
+    await syncWithApi(accessToken)
   }
 
   const syncWithApi = async (accessToken: string): Promise<void> => {
@@ -64,7 +77,7 @@ export function useAuth() {
         _id: apiUser._id,
         email: apiUser.email,
         name: apiUser.name,
-        role: apiUser.role as import('@/types').UserRole,
+        role: apiUser.role as UserRole,
       },
       accessToken,
     )
