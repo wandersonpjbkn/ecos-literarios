@@ -66,15 +66,6 @@ export function useFilters() {
     return list
   })
 
-  const activeFilterCount = computed(
-    () =>
-      (search.value.trim() ? 1 : 0) +
-      selectedMidia.value.length +
-      selectedCategoria.value.length +
-      selectedSubgeneros.value.length +
-      selectedQuem.value.length,
-  )
-
   const searchSuggestions = computed(() => {
     if (!search.value.trim() || search.value.length < 2) return []
 
@@ -97,7 +88,6 @@ export function useFilters() {
     optionsSubgeneros,
     optionsQuem,
     filtered,
-    activeFilterCount,
     clearAll: filtersStore.clearAll,
     searchSuggestions,
   }

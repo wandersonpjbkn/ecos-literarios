@@ -88,7 +88,8 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, reactive } from 'vue'
 
-import { useAuthStore } from '@/stores'
+import { useErrorReporter } from '@/composables'
+import { buildHeaders } from '@/composables/useApi'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
 import ConfirmModal from '@/components/admin/ConfirmModal.vue'
 import type { Role, Resource, Action, Permission } from '@/types'
@@ -113,7 +114,6 @@ const resourceLabel = (r: string) =>
 
 const actionLabel = (a: string) => ({ create: 'Criar', read: 'Ver', update: 'Editar', delete: 'Excluir' })[a] ?? a
 
-const authStore = useAuthStore()
 const permissions = ref<Permission[]>([])
 const loading = ref(false)
 const error = ref('')
@@ -189,10 +189,7 @@ const applyChanges = async () => {
 
       const res = await fetch(`${API_BASE}/permissions/${role}/${resource}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authStore.token}`,
-        },
+        headers: buildHeaders(),
         body: JSON.stringify({ actions: newActions }),
       })
 
@@ -211,6 +208,7 @@ const applyChanges = async () => {
     editingRole.value = null
     draft.value = new Map()
   } catch (e) {
+    useErrorReporter().captureException(e, { context: 'applyChanges', role: editingRole.value })
     error.value = e instanceof Error ? e.message : 'Erro ao salvar permissões.'
     confirm.open = false
   } finally {
@@ -224,7 +222,7 @@ const fetchPermissions = async () => {
 
   try {
     const res = await fetch(`${API_BASE}/permissions`, {
-      headers: { Authorization: `Bearer ${authStore.token}` },
+      headers: buildHeaders(),
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     permissions.value = await res.json()

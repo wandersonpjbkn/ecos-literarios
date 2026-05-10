@@ -15,11 +15,6 @@ export const useCacheStore = defineStore(
       return Date.now() - ts.value < ttl
     })
 
-    const clear = () => {
-      cache.value = null
-      ts.value = 0
-    }
-
     return {
       // state
       cache,
@@ -27,9 +22,6 @@ export const useCacheStore = defineStore(
 
       // getters
       isCacheValid,
-
-      // actions
-      clear,
     }
   },
   {

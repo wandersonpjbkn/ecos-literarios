@@ -72,6 +72,8 @@
 import { ref, onMounted, reactive } from 'vue'
 
 import { useAuthStore } from '@/stores'
+import { useErrorReporter } from '@/composables'
+import { buildHeaders } from '@/composables/useApi'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import ConfirmModal from '@/components/admin/ConfirmModal.vue'
@@ -107,7 +109,7 @@ const fetchUsers = async () => {
 
   try {
     const res = await fetch(`${API_BASE}/users`, {
-      headers: { Authorization: `Bearer ${authStore.token}` },
+      headers: buildHeaders(),
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     users.value = await res.json()
@@ -137,10 +139,7 @@ const applyRoleChange = async () => {
   try {
     const res = await fetch(`${API_BASE}/users/${confirm.userId}/role`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${authStore.token}`,
-      },
+      headers: buildHeaders(),
       body: JSON.stringify({ role: confirm.newRole }),
     })
 
@@ -156,6 +155,7 @@ const applyRoleChange = async () => {
     confirm.open = false
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Erro ao alterar permissão.'
+    useErrorReporter().captureException(e, { context: 'applyRoleChange', userId: confirm.userId })
     confirm.open = false
   } finally {
     confirm.loading = false

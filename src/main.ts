@@ -5,6 +5,7 @@ import persisteStorage from 'pinia-plugin-persistedstate'
 import gtm from '@gtm-support/vue-gtm'
 
 import router from '@/router'
+import { setupSentry } from '@/plugins/sentry'
 
 import App from '@/App.vue'
 import BaseIcon from '@/components/BaseIcon.vue'
@@ -29,6 +30,13 @@ app.use(gtm, {
   loadScript: true,
   vueRouter: router,
   trackOnNextTick: false,
+})
+
+setupSentry({
+  app,
+  router,
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  release: __APP_VERSION__,
 })
 
 // global components

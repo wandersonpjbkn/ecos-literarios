@@ -118,6 +118,7 @@
 <script lang="ts" setup>
 import { ref, computed, reactive, watch, onMounted } from 'vue'
 
+import { useErrorReporter } from '@/composables'
 import { buildHeaders } from '@/composables/useApi'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
 import SearchBar from '@/components/SearchBar.vue'
@@ -198,6 +199,7 @@ const fetchBooks = async () => {
     books.value = await res.json()
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Erro ao carregar livros.'
+    useErrorReporter().captureException(e, { context: 'fetchBooks' })
     console.error('[AdminBooks]', e)
   } finally {
     loading.value = false
@@ -271,6 +273,7 @@ const handleDelete = async () => {
     deleteModal.open = false
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Erro ao remover livro.'
+    useErrorReporter().captureException(e, { context: 'handleDelete' })
     deleteModal.open = false
   } finally {
     isDeleting.value = false

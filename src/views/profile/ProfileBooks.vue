@@ -111,7 +111,7 @@
 import { ref, computed, onMounted } from 'vue'
 
 import { useAuthStore, useBooksStore } from '@/stores'
-import { useApi } from '@/composables'
+import { useApi, useErrorReporter } from '@/composables'
 import { buildHeaders } from '@/composables/useApi'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
 import SearchBar from '@/components/SearchBar.vue'
@@ -162,8 +162,9 @@ const openEdit = async (book: Book) => {
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     editingBook.value = (await res.json()) as BookForEdit
     isDrawerOpen.value = true
-  } catch {
+  } catch (err) {
     fetchError.value = 'Não foi possível carregar os detalhes do livro. Tente novamente.'
+    useErrorReporter().captureException(err, { context: 'openEdit' })
   } finally {
     editingLoadingId.value = null
   }

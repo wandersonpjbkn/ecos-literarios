@@ -1,4 +1,6 @@
 import { ref } from 'vue'
+
+import { useErrorReporter } from '@/composables'
 import { buildHeaders } from '@/composables/useApi'
 import type { SupportEntity, EntityCrudOptions } from '@/types'
 import { API_BASE } from '@/data/config'
@@ -19,6 +21,7 @@ export function useEntityCrud({ resource }: EntityCrudOptions) {
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Erro ao carregar itens.'
       if (import.meta.env.DEV) console.error(`[useEntityCrud][${resource}]`, e)
+      useErrorReporter().captureException(e, { context: 'fetchItems' })
     } finally {
       loading.value = false
     }

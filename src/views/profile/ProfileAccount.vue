@@ -96,6 +96,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useAuthStore } from '@/stores'
+import { useErrorReporter } from '@/composables'
 import { buildHeaders } from '@/composables/useApi'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
 import { API_BASE } from '@/data/config'
@@ -160,6 +161,7 @@ const submit = async () => {
     successMessage.value = 'Nome atualizado com sucesso.'
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Erro ao salvar alterações.'
+    useErrorReporter().captureException(err, { context: 'submit' })
   } finally {
     isSubmitting.value = false
   }

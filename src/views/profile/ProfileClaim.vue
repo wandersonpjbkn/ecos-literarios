@@ -106,7 +106,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useAuthStore, useBooksStore } from '@/stores'
-import { useApi } from '@/composables'
+import { useApi, useErrorReporter } from '@/composables'
 import { claimRegister, getMyClaimStatus, unclaimRegister } from '@/composables/useApi'
 import MultiSelect from '@/components/MultiSelect.vue'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
@@ -148,6 +148,7 @@ const loadStatus = async () => {
     claimStatus.value = await getMyClaimStatus()
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Não foi possível carregar seu vínculo atual.'
+    useErrorReporter().captureException(err, { context: 'loadStatus' })
   } finally {
     loadingStatus.value = false
   }
@@ -177,6 +178,7 @@ const submitClaim = async () => {
     await loadStatus()
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Não foi possível concluir o vínculo.'
+    useErrorReporter().captureException(err, { context: 'submitClaim', quemNome: quemNome.value })
   } finally {
     isSubmitting.value = false
   }
@@ -195,6 +197,7 @@ const unclaim = async () => {
     await loadStatus()
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Não foi possível desvincular o vínculo atual.'
+    useErrorReporter().captureException(err, { context: 'unclaim' })
   } finally {
     isUnclaiming.value = false
   }

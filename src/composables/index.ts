@@ -10,6 +10,7 @@ import { useUtils } from '@/composables/useUtils'
 import { useBreakpoints } from '@/composables/useBreakpoints'
 import { useBookEnrichment } from '@/composables/useBookEnrichment'
 import { useBooksGrid } from '@/composables/useBooksGrid'
+import { useErrorReporter } from '@/composables/useErrorReporter'
 
 export {
   useBookSort,
@@ -24,4 +25,5 @@ export {
   useBreakpoints,
   useBookEnrichment,
   useBooksGrid,
+  useErrorReporter,
 }

@@ -157,7 +157,7 @@
 <script lang="ts" setup>
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, reactive } from 'vue'
 
-import { useEntityCrud } from '@/composables/useEntityCrud'
+import { useEntityCrud, useErrorReporter } from '@/composables'
 import ConfirmModal from '@/components/admin/ConfirmModal.vue'
 import PaginationNav from '@/components/PaginationNav.vue'
 import type { SupportEntity } from '@/types'
@@ -250,6 +250,7 @@ const handleCreate = async () => {
     showFeedback(`"${created.nome}" criado com sucesso.`, 'success')
   } catch (e) {
     showFeedback(e instanceof Error ? e.message : 'Erro ao criar item.', 'error')
+    useErrorReporter().captureException(e, { context: 'createItem' })
   } finally {
     isCreating.value = false
   }
@@ -278,6 +279,7 @@ const handleUpdate = async () => {
     cancelEdit()
   } catch (e) {
     showFeedback(e instanceof Error ? e.message : 'Erro ao atualizar item.', 'error')
+    useErrorReporter().captureException(e, { context: 'updateItem' })
   } finally {
     isUpdating.value = false
   }
@@ -300,6 +302,7 @@ const handleDelete = async () => {
   } catch (e) {
     deleteModal.open = false
     showFeedback(e instanceof Error ? e.message : 'Erro ao remover item.', 'error')
+    useErrorReporter().captureException(e, { context: 'deleteItem' })
   } finally {
     deletingId.value = null
   }

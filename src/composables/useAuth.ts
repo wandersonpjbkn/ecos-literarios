@@ -1,6 +1,7 @@
 import { createClient, type EmailOtpType } from '@supabase/supabase-js'
 
 import { useAuthStore } from '@/stores'
+import { useErrorReporter } from '@/composables'
 import { verifyAuth } from '@/composables/useApi'
 import type { UserRole } from '@/types'
 
@@ -81,11 +82,14 @@ export function useAuth() {
       },
       accessToken,
     )
+
+    useErrorReporter().setUser(store.user)
   }
 
   const logout = async (): Promise<void> => {
     await supabase.auth.signOut()
     store.clearSession()
+    useErrorReporter().setUser(null)
   }
 
   const restoreSession = async (): Promise<void> => {
@@ -104,7 +108,10 @@ export function useAuth() {
     if (!store.user && session.access_token) {
       try {
         await syncWithApi(session.access_token)
-      } catch {
+      } catch (error) {
+        useErrorReporter().captureException(error, {
+          context: 'restoreSession.syncWithApi',
+        })
         store.clearSession()
       }
     }
@@ -121,6 +128,7 @@ export function useAuth() {
 
       if (event === 'SIGNED_OUT') {
         store.clearSession()
+        useErrorReporter().setUser(null)
       }
     })
 
@@ -136,5 +144,3 @@ export function useAuth() {
     watchSession,
   }
 }
-
-export { supabase }

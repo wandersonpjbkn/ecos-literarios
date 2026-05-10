@@ -1,13 +1,6 @@
+import { useErrorReporter } from '@/composables'
 import { useBooksStore, useCacheStore } from '@/stores'
-import type {
-  Book,
-  ApiBook,
-  ApiPopulated,
-  MyClaimStatus,
-  RegisterResponse,
-  ClaimHistoryEntry,
-  ClaimHistory,
-} from '@/types'
+import type { Book, ApiBook, ApiPopulated, MyClaimStatus, RegisterResponse } from '@/types'
 import { API_BASE } from '@/data/config'
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -99,6 +92,8 @@ export function useApi() {
         const raw = e instanceof Error ? e.message : String(e)
         useBooksStore().error = raw || 'Erro ao carregar dados'
         if (import.meta.env.DEV) console.error('[useApi]', e)
+
+        useErrorReporter().captureException(e, { context: 'fetchBooks' })
       }
     } finally {
       useBooksStore().loading = false
@@ -109,21 +104,6 @@ export function useApi() {
 }
 
 // ── Ações autenticadas ────────────────────────────────────────────
-
-export const updateBook = async (id: string, fields: Partial<Pick<Book, 'titulo' | 'porque'>>): Promise<Book> => {
-  const res = await fetch(`${API_BASE}/books/${id}`, {
-    method: 'PATCH',
-    headers: buildHeaders(),
-    body: JSON.stringify(fields),
-  })
-
-  if (!res.ok) {
-    const { error } = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-    throw new Error(error)
-  }
-
-  return normalizeBook(await res.json())
-}
 
 export const verifyAuth = async (token: string) => {
   const res = await fetch(`${API_BASE}/auth/verify`, {
@@ -186,23 +166,4 @@ export const unclaimRegister = async (): Promise<{ message?: string }> => {
   }
 
   return res.json() as Promise<{ message?: string }>
-}
-
-export const getClaimHistory = async (): Promise<ClaimHistoryEntry[]> => {
-  const res = await fetch(`${API_BASE}/admin/users/claims/history`, {
-    method: 'GET',
-    headers: buildHeaders(),
-  })
-
-  if (!res.ok) {
-    const { error } = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-    throw new Error(error ?? 'Não foi possível carregar o histórico de vínculos.')
-  }
-
-  const raw = (await res.json()) as ClaimHistory
-
-  return raw.history.map((entry) => ({
-    ...entry,
-    action_label: entry.action === 'unclaim' ? 'Desvinculou' : 'Vinculou',
-  }))
 }

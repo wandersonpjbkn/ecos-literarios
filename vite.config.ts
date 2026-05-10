@@ -1,13 +1,20 @@
 import { fileURLToPath, URL } from 'node:url'
+import { readFileSync } from 'node:fs'
 
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import vue from '@vitejs/plugin-vue'
 import svgLoader from 'vite-svg-loader'
 import vueDevTools from 'vite-plugin-vue-devtools'
+import { sentryVitePlugin } from '@sentry/vite-plugin'
+
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'))
 
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
   plugins: [
     vue(),
     VitePWA({
@@ -83,6 +90,12 @@ export default defineConfig({
     }),
     svgLoader(),
     vueDevTools(),
+    sentryVitePlugin({
+      org: 'wi-studio',
+      project: 'ecos-frontend',
+      authToken: process.env.VITE_SENTRY_AUTH_TOKEN,
+      disable: process.env.NODE_ENV !== 'production',
+    }),
   ],
   resolve: {
     alias: {

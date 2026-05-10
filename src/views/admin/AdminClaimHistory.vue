@@ -58,12 +58,11 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 
-import { useAuthStore } from '@/stores'
+import { useErrorReporter } from '@/composables'
+import { buildHeaders } from '@/composables/useApi'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
 import type { AdminClaimHistoryEntry } from '@/types'
 import { API_BASE } from '@/data/config'
-
-const authStore = useAuthStore()
 
 const loading = ref(false)
 const loaded = ref(false)
@@ -82,10 +81,7 @@ const loadHistory = async () => {
 
   try {
     const res = await fetch(`${API_BASE}/admin/users/claims/history?limit=50`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${authStore.token}`,
-      },
+      headers: buildHeaders(),
     })
 
     if (!res.ok) {
@@ -98,6 +94,7 @@ const loadHistory = async () => {
     loaded.value = true
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Não foi possível carregar o histórico.'
+    useErrorReporter().captureException(e, { context: 'loadHistory' })
     console.error('[AdminClaimHistory]', e)
   } finally {
     loading.value = false

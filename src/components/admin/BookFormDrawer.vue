@@ -272,8 +272,8 @@
 <script lang="ts" setup>
 import { ref, reactive, computed, watch, nextTick, onMounted } from 'vue'
 
+import { useEntityCrud, useErrorReporter } from '@/composables'
 import { buildHeaders } from '@/composables/useApi'
-import { useEntityCrud } from '@/composables/useEntityCrud'
 import MultiSelect from '@/components/MultiSelect.vue'
 import BookEnrichmentPanel from '@/components/admin/BookEnrichmentPanel.vue'
 import type { BookPayload } from '@/types'
@@ -467,6 +467,7 @@ const handleSubmit = async () => {
     }
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Erro ao salvar.'
+    useErrorReporter().captureException(e, { context: 'handleSubmit' })
   } finally {
     isSaving.value = false
   }

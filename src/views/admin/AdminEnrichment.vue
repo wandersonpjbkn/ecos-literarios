@@ -152,12 +152,11 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 
-import { useAuthStore } from '@/stores'
+import { useErrorReporter } from '@/composables'
+import { buildHeaders } from '@/composables/useApi'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
 import type { ResultStatus, EnrichmentResult, EnrichmentSummary, EnrichmentRun } from '@/types'
 import { API_BASE } from '@/data/config'
-
-const authStore = useAuthStore()
 
 const loadingStatus = ref(false)
 const isRunning = ref(false)
@@ -201,11 +200,6 @@ const statusLabel = (value: ResultStatus) => {
   return map[value]
 }
 
-const authHeaders = () => ({
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${authStore.token}`,
-})
-
 const parseResultStatus = (raw: unknown): ResultStatus => {
   if (raw === 'applied' || raw === 'skipped' || raw === 'failed') return raw
   return 'failed'
@@ -230,7 +224,7 @@ const normalizeSummary = (list: EnrichmentResult[], raw: Record<string, unknown>
 })
 
 const fetchStatus = async () => {
-  const res = await fetch(`${API_BASE}/admin/books/enrich/status`, { headers: authHeaders() })
+  const res = await fetch(`${API_BASE}/admin/books/enrich/status`, { headers: buildHeaders() })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
   const payload = (await res.json()) as {
@@ -251,7 +245,7 @@ const fetchStatus = async () => {
 }
 
 const fetchHistory = async () => {
-  const res = await fetch(`${API_BASE}/admin/books/enrich/history?limit=8`, { headers: authHeaders() })
+  const res = await fetch(`${API_BASE}/admin/books/enrich/history?limit=8`, { headers: buildHeaders() })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
   const payload = (await res.json()) as {
@@ -296,6 +290,7 @@ const fetchStatusAndHistory = async () => {
   try {
     await Promise.all([fetchStatus(), fetchHistory()])
   } catch (e) {
+    useErrorReporter().captureException(e, { context: 'fetchStatusAndHistory' })
     historyError.value = 'Não foi possível carregar status/histórico de enriquecimento.'
     console.error('[AdminEnrichment][status/history]', e)
   } finally {
@@ -330,7 +325,7 @@ const runEnrichment = async () => {
   try {
     const res = await fetch(`${API_BASE}/admin/books/enrich`, {
       method: 'POST',
-      headers: authHeaders(),
+      headers: buildHeaders(),
       body: JSON.stringify({ force: force.value }),
     })
 
@@ -348,6 +343,7 @@ const runEnrichment = async () => {
     await fetchStatusAndHistory()
   } catch (e) {
     runError.value = e instanceof Error ? e.message : 'Erro ao executar enriquecimento.'
+    useErrorReporter().captureException(e, { context: 'runEnrichment' })
     console.error('[AdminEnrichment][run]', e)
   } finally {
     stopEstimation()

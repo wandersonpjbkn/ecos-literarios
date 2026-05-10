@@ -139,20 +139,6 @@ export interface RegisterResponse {
   name_synced?: boolean
 }
 
-export interface ClaimHistoryEntry {
-  id: string
-  user_name: string
-  quem_nome: string | null
-  action: string
-  action_label: string
-  created_at?: string
-}
-
-export interface ClaimHistory {
-  total: number
-  history: ClaimHistoryEntry[]
-}
-
 // Enrichment
 
 export type EnrichmentField = 'description' | 'coverUrl' | 'publisher' | 'isbn' | 'pageCount' | 'publishedYear'

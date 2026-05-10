@@ -1,4 +1,6 @@
 import { ref } from 'vue'
+
+import { useErrorReporter } from '@/composables'
 import { buildHeaders } from '@/composables/useApi'
 import type { EnrichmentField, EnrichmentItem, EnrichmentPreview, EnrichmentApiResponse } from '@/types'
 import { API_BASE } from '@/data/config'
@@ -81,6 +83,8 @@ export function useBookEnrichment(bookId: () => string | undefined) {
       selectedFields.value = items.filter((i) => i.hasValue).map((i) => i.field)
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Erro ao buscar preview de enriquecimento.'
+      if (import.meta.env.DEV) console.error('[useBookEnrichment] fetchPreview', e)
+      useErrorReporter().captureException(e, { context: 'fetchEnrichmentPreview' })
     } finally {
       isLoading.value = false
     }
@@ -105,6 +109,8 @@ export function useBookEnrichment(bookId: () => string | undefined) {
       return true
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Erro ao aplicar enriquecimento.'
+      if (import.meta.env.DEV) console.error('[useBookEnrichment] applySelected', e)
+      useErrorReporter().captureException(e, { context: 'applyEnrichment' })
       return false
     } finally {
       isApplying.value = false
