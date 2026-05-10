@@ -134,7 +134,11 @@ export const verifyAuth = async (token: string) => {
     },
   })
 
-  if (!res.ok) throw new Error('Falha na verificação do token.')
+  if (!res.ok) {
+    // Surface the backend error so callers (and DevTools) get the real cause.
+    const { error } = await res.json().catch(() => ({ error: `HTTP ${res.status} ${res.statusText}` }))
+    throw new Error(error ?? 'Falha na verificação do token.')
+  }
 
   return res.json() as Promise<{
     user: { _id: string; email: string; name: string; role: string }
