@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Catálogo — tablet</title>
+<style>x-dc{display:block}helmet{display:none}</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body { margin: 0; font-family: 'Figtree', system-ui, sans-serif; background: #FBFCFD; color: #141A1F; }
+a { color: #3A63B8; text-decoration: none; }
+a:hover { color: #2B5192; }
+</style>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body { margin: 0; font-family: 'Figtree', system-ui, sans-serif; background: #FBFCFD; color: #141A1F; }
+a { color: #3A63B8; text-decoration: none; }
+a:hover { color: #2B5192; }
+</style>
+</helmet>
+
+<div style="width: 834px; height: 1180px; box-sizing: border-box; display: flex; flex-direction: column; background: #FBFCFD; overflow: hidden;">
+
+  <!-- Cabeçalho com busca -->
+  <div style="background: #FFFFFF; border-bottom: 1px solid #E7EBEF; padding: 14px 28px; display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
+    <span style="font-size: 18px; font-weight: 700; letter-spacing: -0.02em; color: #3A63B8; flex-shrink: 0;">Ecos</span>
+    <div style="display: flex; align-items: center; gap: 11px; background: #FFFFFF; border: 1px solid #D3DAE0; border-radius: 999px; padding: 0 18px; min-height: 48px; flex-grow: 1;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#5F6B77" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.6-3.6"></path></svg>
+      <input type="text" placeholder="Buscar um livro, um autor ou uma pessoa" style="flex-grow: 1; min-width: 0; font-family: inherit; font-size: 16px; color: #141A1F; background: transparent; border: 0; outline: none; padding: 13px 0;">
+    </div>
+    <button type="button" style="font-family: inherit; font-size: 15px; font-weight: 600; color: #FFFFFF; background: #3A63B8; border: 0; border-radius: 999px; padding: 13px 20px; min-height: 48px; cursor: pointer; flex-shrink: 0;">Adicionar</button>
+  </div>
+
+  <!-- Conteúdo -->
+  <div style="flex-grow: 1; padding: 26px 28px 0; display: flex; flex-direction: column; gap: 18px; overflow: hidden;">
+
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <h1 style="margin: 0; font-size: 36px; font-weight: 700; line-height: 1.08; letter-spacing: -0.025em; color: #141A1F;">Catálogo</h1>
+      <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #47525C;">87 livros que o clube já citou no grupo.</p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <span style="font-size: 15px; font-weight: 600; color: #141A1F;">Quem mencionou</span>
+      <div style="display: flex; align-items: center; gap: 7px; overflow: hidden;">
+        <sc-for list="{{pessoas}}" as="p" hint-placeholder-count="7">
+          <button type="button" style="font-family: inherit; display: inline-flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 500; color: #47525C; background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 999px; padding: 5px 13px 5px 5px; min-height: 44px; cursor: pointer; flex-shrink: 0;">
+            <span style="width: 28px; height: 28px; border-radius: 999px; background: #F4F6F8; border: 1px solid #E7EBEF; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #5F6B77;">{{p.i}}</span>
+            {{p.n}}
+          </button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+      <button type="button" style="font-family: inherit; font-size: 15px; font-weight: 600; color: #FFFFFF; background: #3A63B8; border: 0; border-radius: 999px; padding: 10px 18px; min-height: 44px; cursor: pointer; flex-shrink: 0;">Todos</button>
+      <button type="button" style="font-family: inherit; font-size: 15px; font-weight: 500; color: #47525C; background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 999px; padding: 10px 18px; min-height: 44px; cursor: pointer; flex-shrink: 0;">Ficção</button>
+      <button type="button" style="font-family: inherit; font-size: 15px; font-weight: 500; color: #47525C; background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 999px; padding: 10px 18px; min-height: 44px; cursor: pointer; flex-shrink: 0;">Clássico</button>
+      <button type="button" style="font-family: inherit; font-size: 15px; font-weight: 500; color: #47525C; background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 999px; padding: 10px 18px; min-height: 44px; cursor: pointer; flex-shrink: 0;">Terror</button>
+      <a href="FilterSheet.mobile.html" style="display: inline-flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; color: #3A63B8; background: #FFFFFF; border: 1px solid #C6D6F2; border-radius: 999px; padding: 10px 18px; min-height: 44px; box-sizing: border-box; flex-shrink: 0;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3A63B8" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 7h14"></path><path d="M8 12h8"></path><path d="M10 17h4"></path></svg>
+        Mais filtros
+      </a>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #E7EBEF; padding-top: 14px;">
+      <span style="font-size: 16px; color: #47525C;"><strong style="color: #141A1F; font-weight: 700;">87</strong> livros</span>
+      <div style="display: flex; align-items: center; gap: 9px; background: #FFFFFF; border: 1px solid #D3DAE0; border-radius: 10px; padding: 0 13px; min-height: 44px;">
+        <span style="font-size: 15px; font-weight: 500; color: #141A1F;">Mais recentes</span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5F6B77" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 22px;">
+      <sc-for list="{{books}}" as="b" hint-placeholder-count="6">
+        <a href="Detail.tablet.html" style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="height: 276px; border-radius: 12px; padding: 14px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; background: {{b.bg}}; border: 1px solid {{b.bd}};">
+            <div style="display: flex; justify-content: flex-end; min-height: 26px;">
+              <sc-if value="{{b.temPill}}" hint-placeholder-val="{{true}}">
+                <span style="font-size: 12px; font-weight: 600; color: #141A1F; background: #FFFFFF; border: 1px solid #D3DAE0; border-radius: 999px; padding: 4px 10px;">{{b.pill}}</span>
+              </sc-if>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 3px;">
+              <span style="font-size: 18px; font-weight: 700; line-height: 1.2; color: {{b.tc}};">{{b.titulo}}</span>
+              <span style="font-size: 12px; color: {{b.ac}};">{{b.autor}}</span>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <span style="font-size: 16px; font-weight: 600; line-height: 1.3; color: #141A1F;">{{b.titulo}}</span>
+            <span style="font-size: 14px; color: #5F6B77;">{{b.autor}}</span>
+            <span style="font-size: 14px; color: #5F6B77;">{{b.meta}}</span>
+          </div>
+        </a>
+      </sc-for>
+    </div>
+
+  </div>
+
+  <!-- Barra inferior -->
+  <div style="background: #FFFFFF; border-top: 1px solid #E7EBEF; padding: 8px 40px 16px; display: flex; justify-content: space-around; align-items: flex-start; flex-shrink: 0;">
+    <a href="Catalog.tablet.html" style="width: 104px; min-height: 58px; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 7px 0; border-radius: 10px; background: #EAF0FB;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3A63B8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5L12 4l9 6.5"></path><path d="M5.5 9.5V20h13V9.5"></path></svg>
+      <span style="font-size: 12px; font-weight: 600; color: #3A63B8;">Catálogo</span>
+    </a>
+    <button type="button" style="font-family: inherit; width: 104px; min-height: 58px; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 7px 0; background: transparent; border: 0; cursor: pointer;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5F6B77" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v16l-5-3.5L7 20z"></path></svg>
+      <span style="font-size: 12px; font-weight: 500; color: #5F6B77;">Meus livros</span>
+    </button>
+    <button type="button" style="font-family: inherit; width: 104px; min-height: 58px; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 7px 0; background: transparent; border: 0; cursor: pointer;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5F6B77" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+      <span style="font-size: 12px; font-weight: 500; color: #5F6B77;">Adicionar</span>
+    </button>
+    <button type="button" style="font-family: inherit; width: 104px; min-height: 58px; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 7px 0; background: transparent; border: 0; cursor: pointer;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5F6B77" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"></circle><path d="M5 20c1.2-3.5 4-5 7-5s5.8 1.5 7 5"></path></svg>
+      <span style="font-size: 12px; font-weight: 500; color: #5F6B77;">Minha conta</span>
+    </button>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

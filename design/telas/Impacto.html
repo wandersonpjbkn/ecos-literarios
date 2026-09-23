@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Inventário de funções 2</title>
+<style>x-dc{display:block}helmet{display:none}</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body { margin: 0; font-family: 'Figtree', system-ui, sans-serif; background: #FBFCFD; color: #141A1F; }
+a { color: #3A63B8; }
+a:hover { color: #2B5192; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em; color: #47525C; }
+</style>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body { margin: 0; font-family: 'Figtree', system-ui, sans-serif; background: #FBFCFD; color: #141A1F; }
+a { color: #3A63B8; }
+a:hover { color: #2B5192; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em; color: #47525C; }
+</style>
+</helmet>
+
+<div style="width: 1440px; height: 2200px; box-sizing: border-box; padding: 56px; display: flex; flex-direction: column; gap: 24px; background: #FBFCFD;">
+
+  <!-- Cabeçalho -->
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; border-bottom: 1px solid #E7EBEF; padding-bottom: 22px;">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-size: 14px; font-weight: 600; color: #3A63B8;">Inventário · 2 de 2</span>
+      <h1 style="margin: 0; font-size: 40px; font-weight: 700; line-height: 1.05; letter-spacing: -0.025em; color: #141A1F;">Contribuição, admin e plataforma</h1>
+    </div>
+    <p style="margin: 0; max-width: 520px; font-size: 15px; line-height: 1.6; color: #47525C;">O resto do escopo, e no fim a lista curta do que o redesign obriga a mexer no servidor — que é onde a surpresa costuma aparecer na semana da implementação.</p>
+  </div>
+
+  <!-- Tabela -->
+  <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 18px; overflow: hidden; display: flex; flex-direction: column;">
+
+    <div style="display: flex; gap: 24px; padding: 14px 24px; background: #F4F6F8; border-bottom: 1px solid #E7EBEF;">
+      <span style="width: 268px; font-size: 13px; font-weight: 700; color: #47525C; flex-shrink: 0;">Função</span>
+      <span style="width: 418px; font-size: 13px; font-weight: 700; color: #47525C; flex-shrink: 0;">Onde vive hoje</span>
+      <span style="width: 418px; font-size: 13px; font-weight: 700; color: #47525C; flex-shrink: 0;">No redesign</span>
+      <span style="width: 122px; font-size: 13px; font-weight: 700; color: #47525C; flex-shrink: 0;">Impacto</span>
+    </div>
+
+    <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+      <div>
+        <div style="padding: 12px 24px; background: #FBFCFD; border-bottom: 1px solid #E7EBEF;">
+          <span style="font-size: 15px; font-weight: 700; color: #3A63B8;">{{g.nome}}</span>
+        </div>
+        <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="8">
+          <div style="display: flex; gap: 24px; padding: 14px 24px; border-bottom: 1px solid #F1F4F6; align-items: flex-start;">
+            <span style="width: 268px; font-size: 15px; font-weight: 600; line-height: 1.45; color: #141A1F; flex-shrink: 0;">{{r.f}}</span>
+            <span style="width: 418px; font-size: 14px; line-height: 1.5; color: #5F6B77; flex-shrink: 0;">{{r.hoje}}</span>
+            <span style="width: 418px; font-size: 14px; line-height: 1.5; color: #47525C; flex-shrink: 0;">{{r.novo}}</span>
+            <span style="width: 122px; flex-shrink: 0;"><span style="display: inline-block; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; color: {{r.ink}}; background: {{r.bg}};">{{r.tag}}</span></span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+
+  </div>
+
+  <!-- O que obriga backend -->
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    <span style="font-size: 15px; font-weight: 600; color: #141A1F;">As decisões que sobravam — e o que ficou resolvido</span>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px;">
+
+      <div style="background: #FFFFFF; border: 1px solid #C6D6F2; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 13px; font-weight: 700; color: #2B5192;">Resolvido · reivindica-se o nome</span>
+        <span style="font-size: 18px; font-weight: 600; line-height: 1.3; color: #141A1F;">O "quem" é um lugar reservado</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #47525C;">O primeiro lote não foi cadastrado pelos membros: saiu de uma extração do grupo de WhatsApp. Por isso <code>quem_nome</code> e <code>user_id</code> são coisas diferentes — o nome é uma identidade que ainda não existia no sistema, guardando o lugar até a pessoa de verdade chegar. Reivindicar é ocupar esse lugar, com tudo que está nele. <code>POST /users/me/claim</code> continua como está.</p>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #EFD6D6; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 13px; font-weight: 700; color: #7A3A3A;">Corrigido · o tipo mente</span>
+        <span style="font-size: 18px; font-weight: 600; line-height: 1.3; color: #141A1F;">Não existe rosto, existe nome</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #47525C;">O tipo <code>ApiBook</code> declara <code>quem_user_id.avatar_url</code>, mas não há dado por trás disso: os "quem" vieram da extração de mensagens, e o nome é a única coisa verificada — é ele, inclusive, que serve de chave para a pessoa se reconhecer. O filtro usa nome e monograma, nunca foto, e o campo fantasma sai do tipo antes que alguém construa em cima dele.</p>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #F3D6C9; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 13px; font-weight: 700; color: #8A4529;">Resolvido · mexe no servidor</span>
+        <span style="font-size: 18px; font-weight: 600; line-height: 1.3; color: #141A1F;">Enriquecer o que é seu</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #47525C;">O membro pode enriquecer as próprias indicações — ao cadastrar um livro novo e depois de reivindicar o nome. Ser editor passa a significar uma coisa só: poder mexer no livro dos outros. Na prática, <code>POST /books/:id/enrich</code> deixa de autorizar por papel e passa a autorizar por posse, com o papel de editor como exceção que amplia.</p>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 13px; font-weight: 700; color: #2B5192;">Resolvido · a tela fica</span>
+        <span style="font-size: 18px; font-weight: 600; line-height: 1.3; color: #141A1F;">Matriz de permissões</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #47525C;">Errei ao propor tirar. A tela existe justamente para não ter que ligar e desligar permissão às cegas, direto no banco. <code>PUT /permissions/:role/:resource</code> fica; o que muda é o desenho — ligar, desligar e alterar recurso por recurso, de forma modular e legível, em vez de uma grade crua.</p>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #EFD6D6; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 13px; font-weight: 700; color: #5F6B77;">A confirmar · pode estar velho</span>
+        <span style="font-size: 18px; font-weight: 600; line-height: 1.3; color: #141A1F;">Falha ao verificar o token</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #47525C;">Isto veio de uma nota de sessão anterior, não da leitura do repositório: uma falha em <code>verifyAuth</code> com a hipótese de <code>SUPABASE_URL</code> indefinida no <code>.env</code> do backend, deixando a URI do JWKS malformada. O front só repassa a mensagem de erro do servidor, então daqui não dá para confirmar nada. Se não soa familiar, provavelmente já caiu — vale um teste de login antes de considerar isso um risco.</p>
+      </div>
+
+      <div style="background: #EAF0FB; border: 1px solid #C6D6F2; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 13px; font-weight: 700; color: #2B5192;">O que não precisa de servidor</span>
+        <span style="font-size: 18px; font-weight: 600; line-height: 1.3; color: #141A1F;">Quase tudo o que se vê</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #47525C;">Busca, filtro, ordenação, "ver mais", abertura do livro, rotas de filtro por URL e os estados vazios acontecem todos sobre a lista que <code>GET /books</code> já entrega inteira e o Pinia guarda. Uma exceção pequena: guardar em <code>users/me</code> quais formatos a pessoa não lê. <b>Correção:</b> eu tinha previsto aqui um script de migração para tirar "Mangá" e "HQ" de <code>categoria</code>. O catálogo real não tem essa colisão — os 87 livros já usam os dois eixos direito. A migração sai do plano.</p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

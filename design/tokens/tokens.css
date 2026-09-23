@@ -1,0 +1,79 @@
+:root {
+  --bg-page: #FBFCFD; /* Fundo de toda página. Nunca branco puro: dá o contraste de nível contra as superfícies. */
+  --bg-surface: #FFFFFF; /* Cartão, painel, gaveta, barra superior e trilho. O que está "em cima". */
+  --bg-sunken: #F4F6F8; /* Bloco citado, cabeçalho de tabela, avatar vazio. O que está "afundado". */
+  --border-hair: #E7EBEF; /* Divisória entre áreas e borda de cartão. Separa sem desenhar caixa. */
+  --border-strong: #D3DAE0; /* Borda de campo, de botão secundário e de controle. 3:1 sobre bg-surface. */
+  --ink: #141A1F; /* Texto principal e título. 16,4:1 sobre bg-surface. */
+  --ink-2: #47525C; /* Texto de apoio, autor, corpo longo. 8,1:1 sobre bg-surface. */
+  --ink-muted: #5F6B77; /* Rótulo, contagem, legenda. 5,4:1 — é o cinza mais claro permitido para texto. */
+  --action: #3A63B8; /* A única cor de ação. Se está nesta cor, clica. 5,8:1 sobre branco. */
+  --action-hover: #2B5192; /* Ação sob o cursor e pressionada. 7,6:1 — o azul-marinho do logo. */
+  --action-soft: #EAF0FB; /* Fundo de item selecionado e de destino ativo no trilho. Nunca fundo de botão. */
+  --action-line: #C6D6F2; /* Borda de chip selecionado e de botão secundário de ação. */
+  --on-action: #FFFFFF; /* Texto e ícone sobre action. Só sobre action ou action-hover. */
+  --tint-ficcao-bg: #EEF1F5; /* Fundo da capa de Ficção. Quase acromática de propósito: 9 gêneros na mesma grade não podem competir. */
+  --tint-ficcao-line: #DFE5EC; /* Borda da capa de Ficção. */
+  --tint-ficcao-ink: #2C3540; /* Título sobre a capa de Ficção. Passa de 7:1 sobre a própria tinta. */
+  --tint-drama-bg: #F2EFF4; /* Fundo da capa de Drama. Quase acromática de propósito: 9 gêneros na mesma grade não podem competir. */
+  --tint-drama-line: #E5DFEA; /* Borda da capa de Drama. */
+  --tint-drama-ink: #352C3E; /* Título sobre a capa de Drama. Passa de 7:1 sobre a própria tinta. */
+  --tint-fantasia-bg: #EAF1EE; /* Fundo da capa de Fantasia. Quase acromática de propósito: 9 gêneros na mesma grade não podem competir. */
+  --tint-fantasia-line: #DAE7E2; /* Borda da capa de Fantasia. */
+  --tint-fantasia-ink: #24382F; /* Título sobre a capa de Fantasia. Passa de 7:1 sobre a própria tinta. */
+  --tint-suspense-bg: #F1F0EA; /* Fundo da capa de Suspense. Quase acromática de propósito: 9 gêneros na mesma grade não podem competir. */
+  --tint-suspense-line: #E4E2D7; /* Borda da capa de Suspense. */
+  --tint-suspense-ink: #383425; /* Título sobre a capa de Suspense. Passa de 7:1 sobre a própria tinta. */
+  --tint-terror-bg: #F3EEED; /* Fundo da capa de Terror. Quase acromática de propósito: 9 gêneros na mesma grade não podem competir. */
+  --tint-terror-line: #E7DDDC; /* Borda da capa de Terror. */
+  --tint-terror-ink: #3E2C2C; /* Título sobre a capa de Terror. Passa de 7:1 sobre a própria tinta. */
+  --tint-romance-bg: #F6EEF2; /* Fundo da capa de Romance. Quase acromática de propósito: 9 gêneros na mesma grade não podem competir. */
+  --tint-romance-line: #EBDCE4; /* Borda da capa de Romance. */
+  --tint-romance-ink: #3E2C35; /* Título sobre a capa de Romance. Passa de 7:1 sobre a própria tinta. */
+  --tint-nao-ficcao-bg: #ECF1F4; /* Fundo da capa de Não Ficção. Quase acromática de propósito: 9 gêneros na mesma grade não podem competir. */
+  --tint-nao-ficcao-line: #DCE5EB; /* Borda da capa de Não Ficção. */
+  --tint-nao-ficcao-ink: #26333D; /* Título sobre a capa de Não Ficção. Passa de 7:1 sobre a própria tinta. */
+  --tint-infantil-bg: #F5F1E6; /* Fundo da capa de Infantil. Quase acromática de propósito: 9 gêneros na mesma grade não podem competir. */
+  --tint-infantil-line: #E9E1CC; /* Borda da capa de Infantil. */
+  --tint-infantil-ink: #4A4128; /* Título sobre a capa de Infantil. Passa de 7:1 sobre a própria tinta. */
+  --tint-poesia-bg: #EEF1ED; /* Fundo da capa de Poesia. Quase acromática de propósito: 9 gêneros na mesma grade não podem competir. */
+  --tint-poesia-line: #DFE5DC; /* Borda da capa de Poesia. */
+  --tint-poesia-ink: #2E362C; /* Título sobre a capa de Poesia. Passa de 7:1 sobre a própria tinta. */
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-14: 56px;
+  --space-24: 96px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-pill: 999px;
+
+  --touch-min: 44px;
+  --touch-cta: 48px;
+  --rail-width: 96px;
+  --drawer-width: 388px;
+  --text-column: 760px;
+
+  --font-sans: "Figtree", system-ui, -apple-system, sans-serif;
+}
+
+.display-l { font-family: var(--font-sans); font-size: 38px; line-height: 42px; font-weight: 700; letter-spacing: -0.02em; }
+.display-m { font-family: var(--font-sans); font-size: 30px; line-height: 35px; font-weight: 700; letter-spacing: -0.02em; }
+.title { font-family: var(--font-sans); font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.01em; }
+.section { font-family: var(--font-sans); font-size: 20px; line-height: 26px; font-weight: 700; letter-spacing: -0.01em; }
+.body-l { font-family: var(--font-sans); font-size: 19px; line-height: 30px; font-weight: 400; }
+.body { font-family: var(--font-sans); font-size: 16px; line-height: 24px; font-weight: 400; }
+.ui { font-family: var(--font-sans); font-size: 15px; line-height: 20px; font-weight: 600; }
+.meta { font-family: var(--font-sans); font-size: 14px; line-height: 20px; font-weight: 400; }
+.caption { font-family: var(--font-sans); font-size: 13px; line-height: 19px; font-weight: 400; }
+.micro { font-family: var(--font-sans); font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.07em; }

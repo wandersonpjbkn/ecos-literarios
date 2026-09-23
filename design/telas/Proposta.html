@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Diagnóstico e proposta</title>
+<style>x-dc{display:block}helmet{display:none}</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body { margin: 0; font-family: 'Figtree', system-ui, sans-serif; background: #FBFCFD; color: #141A1F; }
+a { color: #3A63B8; }
+a:hover { color: #2B5192; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.87em; background: #F4F6F8; border: 1px solid #E7EBEF; border-radius: 5px; padding: 1px 5px; }
+</style>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body { margin: 0; font-family: 'Figtree', system-ui, sans-serif; background: #FBFCFD; color: #141A1F; }
+a { color: #3A63B8; }
+a:hover { color: #2B5192; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.87em; background: #F4F6F8; border: 1px solid #E7EBEF; border-radius: 5px; padding: 1px 5px; }
+</style>
+</helmet>
+
+<div style="width: 1440px; height: 1320px; box-sizing: border-box; padding: 64px; display: flex; flex-direction: column; gap: 32px; background: #FBFCFD;">
+
+  <!-- Cabeçalho -->
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 48px; border-bottom: 1px solid #E7EBEF; padding-bottom: 26px;">
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <span style="font-size: 14px; font-weight: 600; color: #3A63B8;">Ecos Literários · redesign</span>
+      <h1 style="margin: 0; font-size: 46px; font-weight: 700; line-height: 1.05; letter-spacing: -0.025em; color: #141A1F;">O que está no caminho</h1>
+    </div>
+    <p style="margin: 0; max-width: 560px; font-size: 16px; line-height: 1.6; color: #47525C;">O esqueleto não foi desenhado — foi acumulado. Cada recurso novo (login, cadastro, enriquecimento, vínculo de menção) ganhou a própria superfície, e nenhuma foi retirada. O que está abaixo sai da leitura do repositório, não de impressão.</p>
+  </div>
+
+  <!-- Diagnóstico -->
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    <span style="font-size: 15px; font-weight: 600; color: #141A1F;">01 · Diagnóstico</span>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px;">
+
+      <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 36px; font-weight: 700; line-height: 1; color: #3A63B8;">5</span>
+        <span style="font-size: 19px; font-weight: 600; line-height: 1.25; color: #141A1F;">superfícies de navegação disputam a mesma tarefa</span>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #47525C;"><code>AppSidebar</code>, <code>PanelCategories</code>, <code>PanelPreferences</code>, <code>SideBar</code> e <code>UserMenu</code> abrem de jeitos diferentes, em lugares diferentes. Nada tem endereço fixo.</p>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 36px; font-weight: 700; line-height: 1; color: #3A63B8;">2</span>
+        <span style="font-size: 19px; font-weight: 600; line-height: 1.25; color: #141A1F;">interfaces de filtro para o mesmo filtro</span>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #47525C;">Em <code>BooksView.vue</code>, <code>isTablet</code> troca a <code>filter-bar</code> de quatro <code>MultiSelect</code> por uma <code>SideBar</code> com outro layout. Quem usa no celular e no computador aprende duas vezes.</p>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 36px; font-weight: 700; line-height: 1; color: #3A63B8;">2</span>
+        <span style="font-size: 19px; font-weight: 600; line-height: 1.25; color: #141A1F;">destinos para abrir o mesmo livro</span>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #47525C;">O <code>BookCard</code> é um <code>RouterLink</code> para <code>BookDetailsView</code> — e carrega um botão <code>info</code> que abre o <code>BookDetailDrawer</code>. Dois conteúdos, duas manutenções, uma dúvida a cada clique.</p>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 19px; font-weight: 600; line-height: 1.25; color: #141A1F;">A busca chega depois da decoração</span>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #47525C;">A <code>catalog-intro</code> ocupa a primeira dobra antes da <code>SearchBar</code> — e está marcada <code>aria-hidden="true"</code>, então o único <code>h1</code> da página some para leitores de tela. O catálogo é uma ferramenta de achar.</p>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 19px; font-weight: 600; line-height: 1.25; color: #141A1F;">Contribuir mora longe do conteúdo</span>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #47525C;">Reivindicar uma menção vive em <code>ProfileClaim</code>, dentro do perfil. Mas a vontade nasce ao ver o livro — o convite tem que estar no livro, com o nome de quem mencionou ao lado.</p>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 19px; font-weight: 600; line-height: 1.25; color: #141A1F;">Tudo pesa igual</span>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #47525C;">No trilho, "Preferências" tem o mesmo tamanho e peso que "Catálogo": uma escolha feita uma vez na vida compete com o destino usado toda semana. E os seis temas dobram a superfície de manutenção sem resolver nenhuma tarefa.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Antes e depois -->
+  <div style="display: flex; flex-direction: column; gap: 14px; flex-grow: 1;">
+    <span style="font-size: 15px; font-weight: 600; color: #141A1F;">02 · Mapa de navegação</span>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; flex-grow: 1;">
+
+      <div style="background: #F4F6F8; border: 1px solid #E7EBEF; border-radius: 20px; padding: 26px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: baseline; gap: 12px;">
+          <span style="font-size: 22px; font-weight: 700; color: #5F6B77;">Hoje</span>
+          <span style="font-size: 15px; color: #5F6B77;">9 superfícies</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <span style="font-size: 16px; color: #47525C;">Trilho de ícones — 5 alvos sem rótulo</span>
+          <span style="font-size: 16px; color: #47525C;">Painel de categorias <span style="color: #5F6B77;">(portal lateral)</span></span>
+          <span style="font-size: 16px; color: #47525C;">Painel de preferências <span style="color: #5F6B77;">(portal lateral)</span></span>
+          <span style="font-size: 16px; color: #47525C;">Barra de filtros desktop — 4 selects</span>
+          <span style="font-size: 16px; color: #47525C;">SideBar de filtros mobile — outro layout</span>
+          <span style="font-size: 16px; color: #47525C;">Menu de usuário no cabeçalho</span>
+          <span style="font-size: 16px; color: #47525C;">Página de detalhe do livro</span>
+          <span style="font-size: 16px; color: #47525C;">Drawer de detalhe do livro</span>
+          <span style="font-size: 16px; color: #47525C;">Perfil com abas <span style="color: #5F6B77;">(conta, livros, reivindicação)</span></span>
+        </div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 2px solid #3A63B8; border-radius: 20px; padding: 26px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: baseline; gap: 12px;">
+          <span style="font-size: 22px; font-weight: 700; color: #3A63B8;">Proposta</span>
+          <span style="font-size: 15px; color: #5F6B77;">4 destinos + 3 superfícies</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <span style="font-size: 15px; font-weight: 600; color: #141A1F;">Destinos — sempre com o nome escrito</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <span style="font-size: 15px; font-weight: 600; color: #FFFFFF; background: #3A63B8; border-radius: 999px; padding: 9px 16px;">Catálogo</span>
+            <span style="font-size: 15px; font-weight: 500; color: #2B5192; background: #EAF0FB; border: 1px solid #C6D6F2; border-radius: 999px; padding: 9px 16px;">Meus livros</span>
+            <span style="font-size: 15px; font-weight: 500; color: #2B5192; background: #EAF0FB; border: 1px solid #C6D6F2; border-radius: 999px; padding: 9px 16px;">Adicionar</span>
+            <span style="font-size: 15px; font-weight: 500; color: #2B5192; background: #EAF0FB; border: 1px solid #C6D6F2; border-radius: 999px; padding: 9px 16px;">Minha conta</span>
+          </div>
+          <span style="font-size: 15px; font-weight: 600; color: #141A1F; margin-top: 4px;">Superfícies — abrem sobre a lista</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <span style="font-size: 15px; font-weight: 500; color: #47525C; background: #F4F6F8; border: 1px solid #E7EBEF; border-radius: 999px; padding: 9px 16px;">Busca · sempre visível</span>
+            <span style="font-size: 15px; font-weight: 500; color: #47525C; background: #F4F6F8; border: 1px solid #E7EBEF; border-radius: 999px; padding: 9px 16px;">Filtros · painel = sheet</span>
+            <span style="font-size: 15px; font-weight: 500; color: #47525C; background: #F4F6F8; border: 1px solid #E7EBEF; border-radius: 999px; padding: 9px 16px;">Livro · rota própria</span>
+          </div>
+        </div>
+        <div style="border-top: 1px solid #E7EBEF; padding-top: 14px; display: flex; flex-direction: column; gap: 8px;">
+          <span style="font-size: 15px; line-height: 1.55; color: #47525C;"><strong style="font-weight: 600; color: #141A1F;">Categorias</strong> deixam de ser menu e viram filtro — é o que sempre foram.</span>
+          <span style="font-size: 15px; line-height: 1.55; color: #47525C;"><strong style="font-weight: 600; color: #141A1F;">Preferências e tema</strong> saem do trilho e vão para a conta. Um tema claro só, em vez de seis.</span>
+          <span style="font-size: 15px; line-height: 1.55; color: #47525C;"><strong style="font-weight: 600; color: #141A1F;">Página e drawer de detalhe</strong> viram um componente sobre uma rota: painel à direita no desktop, painel de baixo no celular, link compartilhável nos dois.</span>
+          <span style="font-size: 15px; line-height: 1.55; color: #47525C;"><strong style="font-weight: 600; color: #141A1F;">Admin</strong> continua separado — o que sai dele é a duplicação de formulário com o cadastro do membro.</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
