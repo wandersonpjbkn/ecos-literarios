@@ -1,19 +1,12 @@
 <template>
   <div class="books-grid-wrap">
     <TransitionGroup v-if="books.length > 0" name="grid" tag="div" class="books-grid">
-      <BookCard
-        v-for="book in visibleBooks"
-        :key="book.id"
-        :book="book"
-        :active-filters="activeFilters"
-        @detail="emit('detail', $event)"
-      />
+      <BookCard v-for="book in visibleBooks" :key="book.id" :book="book" />
     </TransitionGroup>
 
     <div v-else class="empty-state">
-      <BaseIcon name="book" aria-hidden="true" />
       <p>{{ emptyMessage }}</p>
-      <button class="retry-btn" @click="emit('clear')">Limpar filtros</button>
+      <button class="retry-btn" type="button" @click="emit('clear')">Limpar os filtros</button>
     </div>
 
     <div v-if="hasMore" ref="sentinelRef" class="sentinel" aria-hidden="true" />
@@ -39,24 +32,21 @@ import { ref, watch, onBeforeUnmount } from 'vue'
 
 import BookCard from '@/components/BookCard.vue'
 import { useBooksGrid } from '@/composables'
-import type { Book, Options } from '@/types'
+import type { Book } from '@/types'
 
 const books = defineModel<Book[]>({ required: true })
 
 withDefaults(
   defineProps<{
     emptyMessage?: string
-    activeFilters?: Options
   }>(),
   {
-    emptyMessage: 'Nenhum título encontrado com estes filtros.',
-    activeFilters: undefined,
+    emptyMessage: 'Nenhum livro com esses filtros',
   },
 )
 
 const emit = defineEmits<{
   clear: []
-  detail: [book: Book]
 }>()
 
 const { visibleBooks, hasMore, isLoading, pageSize, loadMore } = useBooksGrid(books)
@@ -93,12 +83,12 @@ onBeforeUnmount(() => observer?.disconnect())
 
 .books-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-5) var(--space-3);
 
-  @media (max-width: 767px) {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 0.75rem;
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: calc(var(--space-5) + var(--space-2)) var(--space-5);
   }
 }
 
@@ -106,18 +96,20 @@ onBeforeUnmount(() => observer?.disconnect())
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 60px 24px;
-  color: var(--color-text-subtle);
+  gap: var(--space-4);
+  max-width: 380px;
+  margin: 0 auto;
+  padding: var(--space-14) var(--space-6);
+  color: var(--color-text-default);
   text-align: center;
   font-size: 1rem;
 }
 
 .retry-btn {
   border: none;
-  padding: 10px 20px;
-  border-radius: var(--border-radius-sm);
-  min-height: 44px;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-lg);
+  min-height: var(--touch-cta);
   font-family: var(--font-family-body);
   font-size: 1rem;
   cursor: pointer;
@@ -131,7 +123,7 @@ onBeforeUnmount(() => observer?.disconnect())
   }
   &:focus-visible {
     outline: 2px solid var(--color-border-focus);
-    outline-offset: 2px;
+    outline-offset: var(--space-1);
   }
 }
 

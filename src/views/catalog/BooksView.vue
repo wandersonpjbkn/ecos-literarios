@@ -158,18 +158,7 @@
 
       <!-- Grid -->
       <div class="grid-area">
-        <BooksGrid
-          v-model="sortedBooks"
-          :active-filters="{
-            midia: selectedMidia,
-            categoria: selectedCategoria,
-            subgeneros: selectedSubgeneros,
-            quem: selectedQuem,
-          }"
-          @clear="clearAll"
-          @detail="openDetail"
-        />
-        <BookDetailDrawer :book="detailBook" @close="closeDetail" />
+        <BooksGrid v-model="sortedBooks" @clear="clearAll" />
       </div>
     </div>
   </div>
@@ -187,9 +176,8 @@ import MultiSelect from '@/components/MultiSelect.vue'
 import ActiveFilters from '@/components/ActiveFilters.vue'
 import PageStatus from '@/components/PageStatus.vue'
 import BooksGrid from '@/components/BooksGrid.vue'
-import BookDetailDrawer from '@/components/BookDetailDrawer.vue'
 
-import type { Book, BookSortOrder, Suggestion } from '@/types'
+import type { BookSortOrder, Suggestion } from '@/types'
 
 usePageMeta({
   title: 'Catálogo de Livros',
@@ -251,14 +239,6 @@ const onSelectSuggestion = (suggestion: Suggestion) => {
 
 const openMobileFilters = () => {
   filtersSidebar.value?.open()
-}
-
-const detailBook = ref<Book | null>(null)
-const openDetail = (book: Book) => {
-  detailBook.value = book
-}
-const closeDetail = () => {
-  detailBook.value = null
 }
 </script>
 

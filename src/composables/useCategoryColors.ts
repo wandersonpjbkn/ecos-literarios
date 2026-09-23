@@ -13,6 +13,9 @@ const categoryColor = (cat: string | undefined): string => {
   return token ? `var(--category-color-${token})` : 'var(--color-action-default)'
 }
 
+/** Genre slug that picks the cover tint (`--tint-<slug>-*`); unknown or missing genre falls back to ficcao. */
+const coverTint = (cat: string | undefined): string => (cat && CATEGORY_COLORS[cat as KnownCategory]) || 'ficcao'
+
 /** Returns the CSS class for the media badge. */
 const mediaBadgeClass = (midia: string): string => {
   if (midia === 'Mangá') return 'badge-manga'
@@ -21,5 +24,5 @@ const mediaBadgeClass = (midia: string): string => {
 }
 
 export function useCategoryColors() {
-  return { categoryColor, mediaBadgeClass }
+  return { categoryColor, coverTint, mediaBadgeClass }
 }
