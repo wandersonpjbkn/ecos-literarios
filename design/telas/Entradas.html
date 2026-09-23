@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Entradas e saídas</title>
+<style>x-dc{display:block}helmet{display:none}</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body { margin: 0; font-family: 'Figtree', system-ui, sans-serif; background: #FBFCFD; color: #141A1F; }
+a { color: #3A63B8; }
+a:hover { color: #2B5192; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em; color: #47525C; }
+</style>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body { margin: 0; font-family: 'Figtree', system-ui, sans-serif; background: #FBFCFD; color: #141A1F; }
+a { color: #3A63B8; }
+a:hover { color: #2B5192; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em; color: #47525C; }
+</style>
+</helmet>
+
+<div style="width: 1440px; height: 1520px; box-sizing: border-box; padding: 64px; display: flex; flex-direction: column; gap: 30px; background: #FBFCFD;">
+
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 48px; border-bottom: 1px solid #E7EBEF; padding-bottom: 24px;">
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <span style="font-size: 14px; font-weight: 600; color: #3A63B8;">Ecos Literários · navegação</span>
+      <h1 style="margin: 0; font-size: 44px; font-weight: 700; line-height: 1.05; letter-spacing: -0.025em; color: #141A1F;">Entradas e saídas</h1>
+    </div>
+    <p style="margin: 0; max-width: 520px; font-size: 16px; line-height: 1.6; color: #47525C;">O desenho das telas não segura nada se o caminho de volta quebrar. Aqui estão as regras de histórico, foco e recuperação — e o furo que aparece quando o login corta a pessoa no meio de uma ação.</p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    <span style="font-size: 15px; font-weight: 600; color: #141A1F;">01 · Cinco regras em pedra</span>
+    <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px;">
+      <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 9px;">
+        <span style="font-size: 26px; font-weight: 700; line-height: 1; color: #3A63B8;">1</span>
+        <span style="font-size: 16px; font-weight: 600; line-height: 1.3; color: #141A1F;">Um painel, nunca dois</span>
+        <span style="font-size: 14px; line-height: 1.55; color: #47525C;">O catálogo é o chão. No máximo uma camada acima dele. A proibição mora no roteador, não na disciplina de quem escreve a tela.</span>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 9px;">
+        <span style="font-size: 26px; font-weight: 700; line-height: 1; color: #3A63B8;">2</span>
+        <span style="font-size: 16px; font-weight: 600; line-height: 1.3; color: #141A1F;">Rota para o que se compartilha</span>
+        <span style="font-size: 14px; line-height: 1.55; color: #47525C;">O livro é <code>push</code>. Filtro, ordenação e quantidade carregada são querystring com <code>replace</code> — sobrevivem ao recarregar sem virar dez passos de voltar.</span>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 9px;">
+        <span style="font-size: 26px; font-weight: 700; line-height: 1; color: #3A63B8;">3</span>
+        <span style="font-size: 16px; font-weight: 600; line-height: 1.3; color: #141A1F;">Fechar não é voltar</span>
+        <span style="font-size: 14px; line-height: 1.55; color: #47525C;">Sem histórico interno na sessão, "Fechar" faz <code>replace</code> para o catálogo. <code>history.back()</code> cego joga para fora do site quem chegou por link do WhatsApp.</span>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 9px;">
+        <span style="font-size: 26px; font-weight: 700; line-height: 1; color: #3A63B8;">4</span>
+        <span style="font-size: 16px; font-weight: 600; line-height: 1.3; color: #141A1F;">Âncora é id, não pixel</span>
+        <span style="font-size: 14px; line-height: 1.55; color: #47525C;">Voltar do livro recoloca a pessoa no card pelo id, com <code>scrollIntoView</code>. Pixel não sobrevive a capa que carrega tarde nem a mudança de largura.</span>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 9px;">
+        <span style="font-size: 26px; font-weight: 700; line-height: 1; color: #3A63B8;">5</span>
+        <span style="font-size: 16px; font-weight: 600; line-height: 1.3; color: #141A1F;">Intenção é reapresentada</span>
+        <span style="font-size: 14px; line-height: 1.55; color: #47525C;">Ação cortada pelo login volta como pergunta, nunca executada sozinha. Adotar 23 livros em silêncio é inaceitável.</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    <span style="font-size: 15px; font-weight: 600; color: #141A1F;">02 · O furo do magic link — a pessoa toca em "Sou eu" sem estar logada</span>
+    <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 20px; padding: 26px; display: flex; align-items: stretch; gap: 18px;">
+
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 13px; font-weight: 700; color: #5F6B77;">Antes de mandar o e-mail</span>
+        <span style="font-size: 17px; font-weight: 600; line-height: 1.3; color: #141A1F;">Guarda a intenção fora da aba</span>
+        <span style="font-size: 14px; line-height: 1.55; color: #47525C;"><code>localStorage</code>, não o state do redirect: <code>{returnTo:'/livro/abc', acao:'reivindicar', nome:'Nati'}</code>. O link pode abrir em outra aba, no navegador do Gmail, ou em outro aparelho.</span>
+      </div>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C3CCD4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="align-self: center; flex-shrink: 0;" aria-hidden="true"><path d="M5 12h14"></path><path d="M14 7l5 5-5 5"></path></svg>
+
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 13px; font-weight: 700; color: #5F6B77;">Na volta</span>
+        <span style="font-size: 17px; font-weight: 600; line-height: 1.3; color: #141A1F;">Pergunta de novo</span>
+        <div style="background: #EAF0FB; border: 1px solid #C6D6F2; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+          <span style="font-size: 15px; line-height: 1.5; color: #141A1F;">Você ia dizer <strong style="font-weight: 600;">"Sou eu"</strong> em <strong style="font-weight: 600;">Nati</strong>. São 23 livros. Confirmar?</span>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" style="font-family: inherit; font-size: 14px; font-weight: 600; color: #FFFFFF; background: #3A63B8; border: 0; border-radius: 999px; padding: 11px 16px; min-height: 44px; cursor: pointer;">Confirmar</button>
+            <button type="button" style="font-family: inherit; font-size: 14px; font-weight: 500; color: #47525C; background: #FFFFFF; border: 1px solid #D3DAE0; border-radius: 999px; padding: 11px 16px; min-height: 44px; cursor: pointer;">Agora não</button>
+          </div>
+        </div>
+      </div>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C3CCD4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="align-self: center; flex-shrink: 0;" aria-hidden="true"><path d="M5 12h14"></path><path d="M14 7l5 5-5 5"></path></svg>
+
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 13px; font-weight: 700; color: #5F6B77;">Se abriu em outro aparelho</span>
+        <span style="font-size: 17px; font-weight: 600; line-height: 1.3; color: #141A1F;">Segunda via no próprio link</span>
+        <span style="font-size: 14px; line-height: 1.55; color: #47525C;">Lá a intenção não existe. O <code>returnTo</code> viaja também na query do magic link, e o catálogo abre com a faixa "Você entrou. Voltar para <em>Torto Arado</em>".</span>
+        <span style="font-size: 14px; line-height: 1.55; color: #47525C; border-top: 1px solid #E7EBEF; padding-top: 10px;">A aba antiga acorda logada por <code>onAuthStateChange</code> mais o evento <code>storage</code>, em vez de continuar mentindo que ninguém entrou.</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    <span style="font-size: 15px; font-weight: 600; color: #141A1F;">03 · De onde se chega, para onde se sai</span>
+    <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 18px; overflow: hidden;">
+      <div style="display: flex; gap: 20px; padding: 13px 24px; background: #F4F6F8; border-bottom: 1px solid #E7EBEF;">
+        <span style="width: 200px; font-size: 13px; font-weight: 700; color: #47525C; flex-shrink: 0;">Tela</span>
+        <span style="width: 130px; font-size: 13px; font-weight: 700; color: #47525C; flex-shrink: 0;">É o quê</span>
+        <span style="width: 430px; font-size: 13px; font-weight: 700; color: #47525C; flex-shrink: 0;">Chega de onde</span>
+        <span style="width: 430px; font-size: 13px; font-weight: 700; color: #47525C; flex-shrink: 0;">Sai para onde</span>
+      </div>
+      <sc-for list="{{linhas}}" as="r" hint-placeholder-count="8">
+        <div style="display: flex; gap: 20px; padding: 13px 24px; border-bottom: 1px solid #F1F4F6; align-items: flex-start;">
+          <span style="width: 200px; font-size: 15px; font-weight: 600; line-height: 1.45; color: #141A1F; flex-shrink: 0;">{{r.tela}}</span>
+          <span style="width: 130px; flex-shrink: 0;"><span style="display: inline-block; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; color: {{r.ink}}; background: {{r.bg}};">{{r.tipo}}</span></span>
+          <span style="width: 430px; font-size: 14px; line-height: 1.5; color: #5F6B77; flex-shrink: 0;">{{r.entra}}</span>
+          <span style="width: 430px; font-size: 14px; line-height: 1.5; color: #47525C; flex-shrink: 0;">{{r.sai}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 14px; flex-grow: 1;">
+    <span style="font-size: 15px; font-weight: 600; color: #141A1F;">04 · Dois erros que vão aparecer na implementação</span>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px;">
+      <div style="background: #FFFFFF; border: 1px solid #EFD6D6; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 17px; font-weight: 600; color: #141A1F;">Fechamento duplo</span>
+        <span style="font-size: 15px; line-height: 1.55; color: #47525C;">Esc ou voltar fecha o painel, e o <code>watch</code> da rota dispara um segundo fechamento: a pessoa volta dois passos e não entende por quê. A rota é a única fonte de verdade; o watcher observa e nunca navega.</span>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #EFD6D6; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 17px; font-weight: 600; color: #141A1F;">Guard que come a querystring</span>
+        <span style="font-size: 15px; line-height: 1.55; color: #47525C;">O <code>authGuard</code> redireciona para o login e devolve a rota sem <code>?genero=…</code>. Irmão dele: travar a rolagem com <code>position: fixed</code> no body do celular — ao fechar o painel, a lista salta para o topo.</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,110 @@
+// Tema "ecos" — redesign 2026.
+// Drop-in para src/assets/scss/themes/_ecos.scss.
+//
+// Diferença de fundo em relação ao arquivo antigo: as cores deixam de ser
+// derivadas por generate-palette e passam a ser os valores exatos do design
+// system. Paleta gerada é boa para inventar um tema; aqui os valores foram
+// medidos (contraste anotado em cada linha) e derivar de novo os quebraria.
+//
+// O contrato do mixin create-theme continua o mesmo, então nenhum componente
+// que já usa --color-* precisa mudar junto.
+
+@use '@/assets/scss/abstracts/mixins' as *;
+
+$config: (
+  'badges': (
+      'livro': ('bg': #F4F6F8, 'ink': #47525C),
+      'manga': ('bg': #F4F6F8, 'ink': #47525C),
+      'hq':    ('bg': #F4F6F8, 'ink': #47525C),
+      'tag':   ('bg': #F4F6F8, 'ink': #47525C),
+    ),
+
+  'semantics': (
+      'bg':             #FBFCFD,  // bg-page
+      'bg-subtle':      #F4F6F8,  // bg-sunken
+      'surface':        #FFFFFF,  // bg-surface
+      'surface-raised': #FFFFFF,
+      'ink':            #141A1F,  // 16,4:1 sobre branco
+      'ink-secondary':  #47525C,  //  8,1:1
+      'muted':          #5F6B77,  //  5,4:1 — piso do sistema para texto
+      'muted-light':    #5F6B77   // idem: não existe cinza mais claro para texto
+    ),
+
+  'actions': (
+      'primary':         #3A63B8,  // 5,8:1 — azul do logo
+      'primary-hover':   #2B5192,  // 7,6:1 — marinho do logo
+      'primary-light':   #EAF0FB,  // fundo de selecionado, nunca de botão
+      'primary-muted':   #C6D6F2,  // borda de selecionado
+      // O sistema tem UM acento. As chaves de secondary existem só para o
+      // mixin não quebrar e apontam para o mesmo azul de propósito.
+      'secondary':       #3A63B8,
+      'secondary-hover': #2B5192,
+      'secondary-light': #EAF0FB,
+      'secondary-text':  #2B5192
+    ),
+
+  'borders': (
+      'default': #E7EBEF,  // border-hair
+      'strong':  #D3DAE0,  // border-strong, 3:1
+      'focus':   #3A63B8
+    ),
+
+  'header-bg': #FFFFFF
+);
+
+@include create-theme('ecos', $config);
+
+// O que o mixin não cobre: tintas de gênero, escala de espaço, raio e alvo.
+:root[data-theme='ecos'] {
+    --tint-ficcao-bg: #EEF1F5;
+    --tint-ficcao-line: #DFE5EC;
+    --tint-ficcao-ink: #2C3540;
+    --tint-drama-bg: #F2EFF4;
+    --tint-drama-line: #E5DFEA;
+    --tint-drama-ink: #352C3E;
+    --tint-fantasia-bg: #EAF1EE;
+    --tint-fantasia-line: #DAE7E2;
+    --tint-fantasia-ink: #24382F;
+    --tint-suspense-bg: #F1F0EA;
+    --tint-suspense-line: #E4E2D7;
+    --tint-suspense-ink: #383425;
+    --tint-terror-bg: #F3EEED;
+    --tint-terror-line: #E7DDDC;
+    --tint-terror-ink: #3E2C2C;
+    --tint-romance-bg: #F6EEF2;
+    --tint-romance-line: #EBDCE4;
+    --tint-romance-ink: #3E2C35;
+    --tint-nao-ficcao-bg: #ECF1F4;
+    --tint-nao-ficcao-line: #DCE5EB;
+    --tint-nao-ficcao-ink: #26333D;
+    --tint-infantil-bg: #F5F1E6;
+    --tint-infantil-line: #E9E1CC;
+    --tint-infantil-ink: #4A4128;
+    --tint-poesia-bg: #EEF1ED;
+    --tint-poesia-line: #DFE5DC;
+    --tint-poesia-ink: #2E362C;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-14: 56px;
+    --space-24: 96px;
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 20px;
+    --radius-pill: 999px;
+
+    --touch-min: 44px;
+    --touch-cta: 48px;
+    --rail-width: 96px;
+    --drawer-width: 388px;
+    --text-column: 760px;
+}

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Inventário de funções 1</title>
+<style>x-dc{display:block}helmet{display:none}</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body { margin: 0; font-family: 'Figtree', system-ui, sans-serif; background: #FBFCFD; color: #141A1F; }
+a { color: #3A63B8; }
+a:hover { color: #2B5192; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em; color: #47525C; }
+</style>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body { margin: 0; font-family: 'Figtree', system-ui, sans-serif; background: #FBFCFD; color: #141A1F; }
+a { color: #3A63B8; }
+a:hover { color: #2B5192; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em; color: #47525C; }
+</style>
+</helmet>
+
+<div style="width: 1440px; height: 2000px; box-sizing: border-box; padding: 56px; display: flex; flex-direction: column; gap: 24px; background: #FBFCFD;">
+
+  <!-- Cabeçalho -->
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; border-bottom: 1px solid #E7EBEF; padding-bottom: 22px;">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-size: 14px; font-weight: 600; color: #3A63B8;">Inventário · 1 de 2</span>
+      <h1 style="margin: 0; font-size: 40px; font-weight: 700; line-height: 1.05; letter-spacing: -0.025em; color: #141A1F;">Catálogo, livro e conta</h1>
+    </div>
+    <p style="margin: 0; max-width: 520px; font-size: 15px; line-height: 1.6; color: #47525C;">Tudo que o app faz hoje, lido do repositório — rotas, componentes, stores e chamadas à API — e o que acontece com cada função no redesign. Nada aqui é suposição sobre o backend: só o que o front chama.</p>
+  </div>
+
+  <!-- Legenda -->
+  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+    <span style="font-size: 14px; color: #5F6B77;">Impacto:</span>
+    <span style="font-size: 13px; font-weight: 600; color: #47525C; background: #F4F6F8; border: 1px solid #E7EBEF; border-radius: 999px; padding: 5px 12px;">Mantém</span>
+    <span style="font-size: 13px; font-weight: 600; color: #2B5192; background: #EAF0FB; border: 1px solid #C6D6F2; border-radius: 999px; padding: 5px 12px;">Front</span>
+    <span style="font-size: 13px; font-weight: 600; color: #8A4529; background: #FBEDE7; border: 1px solid #F3D6C9; border-radius: 999px; padding: 5px 12px;">Front + Back</span>
+    <span style="font-size: 13px; font-weight: 600; color: #7A3A3A; background: #F6EAEA; border: 1px solid #EFD6D6; border-radius: 999px; padding: 5px 12px;">Sai</span>
+  </div>
+
+  <!-- Tabela -->
+  <div style="background: #FFFFFF; border: 1px solid #E7EBEF; border-radius: 18px; overflow: hidden; display: flex; flex-direction: column;">
+
+    <div style="display: flex; gap: 24px; padding: 14px 24px; background: #F4F6F8; border-bottom: 1px solid #E7EBEF;">
+      <span style="width: 268px; font-size: 13px; font-weight: 700; color: #47525C; flex-shrink: 0;">Função</span>
+      <span style="width: 418px; font-size: 13px; font-weight: 700; color: #47525C; flex-shrink: 0;">Onde vive hoje</span>
+      <span style="width: 418px; font-size: 13px; font-weight: 700; color: #47525C; flex-shrink: 0;">No redesign</span>
+      <span style="width: 122px; font-size: 13px; font-weight: 700; color: #47525C; flex-shrink: 0;">Impacto</span>
+    </div>
+
+    <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+      <div>
+        <div style="padding: 12px 24px; background: #FBFCFD; border-bottom: 1px solid #E7EBEF;">
+          <span style="font-size: 15px; font-weight: 700; color: #3A63B8;">{{g.nome}}</span>
+        </div>
+        <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="8">
+          <div style="display: flex; gap: 24px; padding: 14px 24px; border-bottom: 1px solid #F1F4F6; align-items: flex-start;">
+            <span style="width: 268px; font-size: 15px; font-weight: 600; line-height: 1.45; color: #141A1F; flex-shrink: 0;">{{r.f}}</span>
+            <span style="width: 418px; font-size: 14px; line-height: 1.5; color: #5F6B77; flex-shrink: 0;">{{r.hoje}}</span>
+            <span style="width: 418px; font-size: 14px; line-height: 1.5; color: #47525C; flex-shrink: 0;">{{r.novo}}</span>
+            <span style="width: 122px; flex-shrink: 0;"><span style="display: inline-block; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; color: {{r.ink}}; background: {{r.bg}};">{{r.tag}}</span></span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
