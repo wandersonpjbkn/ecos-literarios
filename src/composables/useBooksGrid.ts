@@ -6,30 +6,17 @@ import type { Book } from '@/types'
 
 export function useBooksGrid(books: ModelRef<Book[]>) {
   const store = useBooksGridStore()
-  const { visibleCount, isLoading } = storeToRefs(store)
+  const { visibleCount } = storeToRefs(store)
 
   const source = computed(() => books.value)
   const visibleBooks = computed(() => source.value.slice(0, visibleCount.value))
-  const hasMore = computed(() => visibleCount.value < source.value.length)
-
-  const loadMore = () => {
-    if (!hasMore.value || isLoading.value) return
-    isLoading.value = true
-    requestAnimationFrame(() => {
-      store.increment()
-      isLoading.value = false
-    })
-  }
+  const nextBatch = computed(() => Math.min(store.pageSize, source.value.length - visibleBooks.value.length))
 
   watch(source, store.reset)
 
   return {
     visibleBooks,
-    hasMore,
-    isLoading,
-    pageSize: store.pageSize,
-    loadMore,
-    reset: store.reset,
-    increment: store.increment,
+    nextBatch,
+    loadMore: store.increment,
   }
 }

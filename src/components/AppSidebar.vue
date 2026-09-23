@@ -1,105 +1,132 @@
 <template>
-  <aside class="app-sidebar">
-    <nav class="app-sidebar--inner">
-      <!-- home -->
-      <RouterLink :to="{ name: 'catalog-books' }" class="btn" aria-label="Catálogo">
-        <BaseIcon name="home" aria-hidden="true" />
-      </RouterLink>
-
-      <!-- categories -->
-      <button
-        class="btn"
-        type="button"
-        :aria-expanded="categoryIsOpen"
-        aria-label="Categorias"
-        @click="emit('toggle-categories')"
-      >
-        <BaseIcon name="menu" aria-hidden="true" />
-      </button>
-
-      <!-- add -->
-      <RouterLink
-        v-if="isLoggedIn"
-        :to="{ name: isEditor ? 'admin-books' : 'profile-books' }"
-        class="btn"
-        aria-label="Cadastrar livro"
-      >
-        <BaseIcon name="plus" aria-hidden="true" />
-      </RouterLink>
-
-      <!-- profile -->
-      <RouterLink v-if="isLoggedIn" :to="{ name: 'profile-account' }" class="btn" aria-label="Meu perfil">
-        <BaseIcon name="user" aria-hidden="true" />
-      </RouterLink>
-
-      <!-- preferences -->
-      <button
-        class="btn"
-        type="button"
-        :aria-expanded="menuIsOpen"
-        aria-label="Preferências"
-        @click="emit('toggle-menu')"
-      >
-        <BaseIcon name="filter" aria-hidden="true" />
-      </button>
-    </nav>
-  </aside>
+  <nav class="app-sidebar" aria-label="Principal">
+    <ul class="app-sidebar__list">
+      <li v-for="item in items" :key="item.label">
+        <RouterLink
+          :to="item.to"
+          class="app-sidebar__item"
+          :class="{ 'is-active': item.active }"
+          :aria-current="item.active ? 'page' : undefined"
+        >
+          <BaseIcon :name="item.icon" class="app-sidebar__icon" aria-hidden="true" />
+          <span class="app-sidebar__label">{{ item.label }}</span>
+        </RouterLink>
+      </li>
+    </ul>
+  </nav>
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
 import { useAuthStore } from '@/stores'
 
-withDefaults(
-  defineProps<{
-    categoryIsOpen?: boolean
-    menuIsOpen?: boolean
-  }>(),
+const route = useRoute()
+const { isEditor } = storeToRefs(useAuthStore())
+
+// "Adicionar" keeps the pre-redesign targets until the add panel exists.
+const addTarget = computed(() => (isEditor.value ? 'admin-books' : 'profile-books'))
+
+const items = computed(() => [
+  { label: 'Catálogo', icon: 'home', to: { name: 'catalog-books' }, active: route.name === 'catalog-books' },
+  { label: 'Meus livros', icon: 'book', to: { name: 'profile-books' }, active: route.name === 'profile-books' },
   {
-    categoryIsOpen: false,
-    menuIsOpen: false,
+    label: 'Adicionar',
+    icon: 'plus',
+    to: { name: addTarget.value },
+    active: addTarget.value === 'admin-books' && route.name === 'admin-books',
   },
-)
-
-const emit = defineEmits(['toggle-menu', 'toggle-categories'])
-
-const { isEditor, isLoggedIn } = storeToRefs(useAuthStore())
+])
 </script>
 
 <style lang="scss" scoped>
-@use '@/assets/scss/components/config-btn';
-
 .app-sidebar {
   position: relative;
   z-index: 60;
 
-  background: var(--color-header-bg, var(--color-text-default));
-  border-right: 1px solid var(--color-border-default);
+  background: var(--color-surface-default);
+  border-top: 1px solid var(--color-border-default);
+  padding-bottom: env(safe-area-inset-bottom);
 
-  &--inner {
+  &__list {
     display: flex;
-    width: fit-content;
-    height: 100%;
-    padding: 5.25rem var(--space-3);
+    list-style: none;
 
-    align-items: center;
-    justify-content: space-around;
-    flex-direction: column;
-    gap: 2rem;
+    li {
+      flex: 1;
+    }
   }
 
-  @media (max-width: 767px) {
-    border-right: none;
-    border-top: 1px solid var(--color-border-default);
+  &__item {
+    display: flex;
+    min-height: 58px;
+    padding: var(--space-2) var(--space-1);
 
-    &--inner {
-      width: 100%;
-      height: fit-content;
-      padding: 0.5rem 1rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
 
-      flex-direction: row;
-      gap: 1rem;
+    color: var(--color-text-subtle);
+    text-decoration: none;
+    border-radius: var(--radius-lg);
+    transition:
+      background-color var(--motion-transition-default),
+      color var(--motion-transition-default);
+
+    &:hover {
+      color: var(--color-action-default);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-border-focus);
+      outline-offset: calc(-1 * var(--space-1));
+    }
+
+    &.is-active {
+      color: var(--color-action-default);
+
+      .app-sidebar__label {
+        font-weight: 600;
+      }
+    }
+  }
+
+  &__icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  &__label {
+    font-size: 0.8125rem;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  @media (min-width: 768px) {
+    width: var(--rail-width);
+    padding: var(--space-6) var(--space-2);
+
+    border-top: none;
+    border-right: 1px solid var(--color-border-default);
+
+    &__list {
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    &__item {
+      min-height: 66px;
+
+      &:hover {
+        background: var(--color-background-subtle);
+      }
+
+      &.is-active {
+        background: var(--color-action-background-subtle);
+      }
     }
   }
 }

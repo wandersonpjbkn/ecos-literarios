@@ -5,7 +5,6 @@ const PAGE_SIZE = 24
 
 export const useBooksGridStore = defineStore('books-grid', () => {
   const visibleCount = ref(PAGE_SIZE)
-  const isLoading = ref(false)
 
   const increment = () => {
     visibleCount.value += PAGE_SIZE
@@ -16,7 +15,6 @@ export const useBooksGridStore = defineStore('books-grid', () => {
 
   return {
     visibleCount,
-    isLoading,
     pageSize: PAGE_SIZE,
     increment,
     reset,

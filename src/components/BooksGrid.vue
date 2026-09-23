@@ -9,28 +9,19 @@
       <button class="retry-btn" type="button" @click="emit('clear')">Limpar os filtros</button>
     </div>
 
-    <div v-if="hasMore" ref="sentinelRef" class="sentinel" aria-hidden="true" />
-
-    <Transition name="loader">
-      <div v-if="isLoading" class="load-indicator" aria-live="polite" aria-label="Carregando mais títulos">
-        <span class="load-dot" />
-        <span class="load-dot" />
-        <span class="load-dot" />
-      </div>
-    </Transition>
-
-    <Transition name="loader">
-      <p v-if="!hasMore && books.length > pageSize" class="end-label">
-        -- <i>FIM DA LISTA</i>: {{ books.length }} títulos encontrados --
-      </p>
-    </Transition>
+    <ListFooter
+      v-if="books.length > 0"
+      :shown="visibleBooks.length"
+      :total="books.length"
+      :next-batch="nextBatch"
+      @more="loadMore"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, onBeforeUnmount } from 'vue'
-
 import BookCard from '@/components/BookCard.vue'
+import ListFooter from '@/components/ListFooter.vue'
 import { useBooksGrid } from '@/composables'
 import type { Book } from '@/types'
 
@@ -49,31 +40,7 @@ const emit = defineEmits<{
   clear: []
 }>()
 
-const { visibleBooks, hasMore, isLoading, pageSize, loadMore } = useBooksGrid(books)
-
-const sentinelRef = ref<HTMLElement | null>(null)
-let observer: IntersectionObserver | null = null
-
-const connectObserver = (el: HTMLElement) => {
-  observer = new IntersectionObserver(
-    ([entry]) => {
-      if (entry?.isIntersecting) loadMore()
-    },
-    { rootMargin: '300px' },
-  )
-  observer.observe(el)
-}
-
-watch(
-  sentinelRef,
-  (el) => {
-    observer?.disconnect()
-    if (el) connectObserver(el)
-  },
-  { immediate: true },
-)
-
-onBeforeUnmount(() => observer?.disconnect())
+const { visibleBooks, nextBatch, loadMore } = useBooksGrid(books)
 </script>
 
 <style lang="scss" scoped>
@@ -127,64 +94,6 @@ onBeforeUnmount(() => observer?.disconnect())
   }
 }
 
-.sentinel {
-  height: 1px;
-  pointer-events: none;
-}
-
-.load-indicator {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  padding: 24px 0 8px;
-}
-
-.load-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-border-strong);
-  animation: bounce 0.9s ease-in-out infinite;
-
-  &:nth-child(2) {
-    animation-delay: 0.15s;
-  }
-  &:nth-child(3) {
-    animation-delay: 0.3s;
-  }
-}
-
-@keyframes bounce {
-  0%,
-  80%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.4;
-  }
-  40% {
-    transform: translateY(-6px);
-    opacity: 1;
-  }
-}
-
-.end-label {
-  padding: 20px 0 8px;
-  text-align: center;
-  font-size: 0.82rem;
-  color: var(--color-text-disabled);
-  letter-spacing: 0.04em;
-}
-
-.loader-enter-active,
-.loader-leave-active {
-  transition: opacity var(--motion-transition-default);
-}
-.loader-enter-from,
-.loader-leave-to {
-  opacity: 0;
-}
-
 .grid-enter-active {
   transition:
     opacity var(--motion-transition-default),
@@ -194,9 +103,9 @@ onBeforeUnmount(() => observer?.disconnect())
   opacity: 0;
   transform: scale(0.96);
 }
+// Leaving cards stay in flow: taking them out collapses the list for a frame and clamps the scroll to 0.
 .grid-leave-active {
   transition: opacity var(--motion-transition-default);
-  position: absolute;
 }
 .grid-leave-to {
   opacity: 0;

@@ -39,12 +39,9 @@ export interface Book {
   published_year?: number
 }
 
-export interface Options {
-  midia: string[]
-  categoria: string[]
-  subgeneros: string[]
-  quem: string[]
-}
+export type FilterKey = 'midia' | 'categoria' | 'subgeneros' | 'quem' | 'autor' | 'tamanho'
+
+export type Options = Record<FilterKey, string[]>
 
 export interface Suggestion {
   id: string
@@ -52,13 +49,9 @@ export interface Suggestion {
   sub: string
 }
 
-export type FilterType = 'midia' | 'categoria' | 'autor' | 'mencao'
-
-export type ExploreKey = 'midia' | 'categoria' | 'autor' | 'quem'
-
 export type CategoryType = keyof typeof CategoriesColors
 
-export type BookSortOrder = 'old' | 'new' | 'asc' | 'desc'
+export type BookSortOrder = 'titulo' | 'pessoa' | 'genero'
 
 export interface BookPayload {
   _id: string

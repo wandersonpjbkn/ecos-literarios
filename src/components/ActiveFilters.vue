@@ -5,13 +5,8 @@
 
       <TransitionGroup name="af-tag" tag="div" class="af-tags">
         <template v-for="(values, key) in selected" :key="key">
-          <button
-            v-for="value in values"
-            :key="`${key}-${value}`"
-            class="af-tag"
-            @click="emit('remove', key as string, value)"
-          >
-            <span class="af-tag-group">{{ labelMap[key as keyof typeof labelMap] }}</span>
+          <button v-for="value in values" :key="`${key}-${value}`" class="af-tag" @click="emit('remove', key, value)">
+            <span class="af-tag-group">{{ labelMap[key] }}</span>
             <span class="af-tag-value">{{ value }}</span>
             <BaseIcon name="times" />
           </button>
@@ -26,22 +21,24 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import type { Options } from '@/types'
+import type { FilterKey, Options } from '@/types'
 
 const props = defineProps<{
   selected: Options
 }>()
 
 const emit = defineEmits<{
-  remove: [key: string, value: string]
+  remove: [key: FilterKey, value: string]
   clearAll: []
 }>()
 
-const labelMap = {
+const labelMap: Record<FilterKey, string> = {
   midia: 'Mídia',
   categoria: 'Categoria',
   subgeneros: 'Sub-gênero',
   quem: 'Quem mencionou',
+  autor: 'Autor',
+  tamanho: 'Tamanho',
 }
 
 const hasActive = computed(() => Object.values(props.selected).some((arr) => arr.length > 0))

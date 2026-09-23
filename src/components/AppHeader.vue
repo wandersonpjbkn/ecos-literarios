@@ -13,8 +13,6 @@ import UserMenu from '@/components/UserMenu.vue'
 </script>
 
 <style lang="scss" scoped>
-@use '@/assets/scss/components/config-btn';
-
 .app-header {
   position: relative;
 

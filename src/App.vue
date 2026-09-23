@@ -5,15 +5,10 @@
   </Head>
   <div class="app-wrapper">
     <!-- sidebar -->
-    <AppSidebar
-      :category-is-open="categorySidebar?.instance?.isOpen"
-      :menu-is-open="preferencesSidebar?.instance?.isOpen"
-      @toggle-categories="toggleCategories"
-      @toggle-menu="togglePreferences"
-    />
+    <AppSidebar />
 
     <!-- header -->
-    <AppHeader :menu-is-open="preferencesSidebar?.instance?.isOpen" @toggle-menu="togglePreferences" />
+    <AppHeader />
 
     <!-- content -->
     <main ref="content" class="app-main">
@@ -26,12 +21,6 @@
 
     <!-- portal -->
     <aside id="sidebar" />
-
-    <!-- categories sidebar -->
-    <PanelCategories ref="categorySidebar" />
-
-    <!-- preferences sidebar -->
-    <PanelPreferences ref="preferencesSidebar" />
 
     <!-- back to top -->
     <BackTop :target="content" />
@@ -52,8 +41,6 @@ import AppHeader from '@/components/AppHeader.vue'
 import UpdateNotification from '@/components/UpdateNotification.vue'
 
 const AppSidebar = defineAsyncComponent(() => import('@/components/AppSidebar.vue'))
-const PanelCategories = defineAsyncComponent(() => import('@/components/PanelCategories.vue'))
-const PanelPreferences = defineAsyncComponent(() => import('@/components/PanelPreferences.vue'))
 const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
 
 const route = useRoute()
@@ -66,12 +53,6 @@ useHead({
 })
 
 const content = ref<HTMLElement | null>(null)
-const preferencesSidebar = ref<InstanceType<typeof PanelPreferences> | null>(null)
-const categorySidebar = ref<InstanceType<typeof PanelCategories> | null>(null)
-
-const togglePreferences = () => preferencesSidebar.value?.instance?.toggle()
-const toggleCategories = () => categorySidebar.value?.instance?.toggle()
-
 const scrollPositions = new Map<string, number>()
 
 router.beforeEach((_, from) => {
@@ -80,18 +61,22 @@ router.beforeEach((_, from) => {
   }
 })
 
-watch(route, async (to) => {
-  await nextTick()
-  setTimeout(() => {
-    if (!content.value) return
-    const saved = scrollPositions.get(to.fullPath)
-    if (saved !== undefined) {
-      content.value.scrollTo({ top: saved, behavior: 'instant' })
-    } else {
-      content.value.scrollTo({ top: 0, behavior: 'smooth' })
-    }
-  }, 350)
-})
+// Path only: filters live in the query, and toggling one must not scroll the catalog back to the top.
+watch(
+  () => route.path,
+  async () => {
+    await nextTick()
+    setTimeout(() => {
+      if (!content.value) return
+      const saved = scrollPositions.get(route.fullPath)
+      if (saved !== undefined) {
+        content.value.scrollTo({ top: saved, behavior: 'instant' })
+      } else {
+        content.value.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    }, 350)
+  },
+)
 
 let stopWatchSession: (() => void) | null = null
 

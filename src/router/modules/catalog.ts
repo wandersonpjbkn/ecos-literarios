@@ -1,4 +1,12 @@
-export const routes = [
+import type { RouteLocation, RouteRecordRaw } from 'vue-router'
+
+// Old per-filter pages were shared in the club group; they keep their names and land on the catalog query.
+const toCatalogQuery = (param: string) => (to: RouteLocation) => ({
+  path: '/',
+  query: { [param]: String(to.params.slug) },
+})
+
+export const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'catalog-books',
@@ -11,30 +19,10 @@ export const routes = [
     component: () => import('@/views/catalog/BookDetailsView.vue'),
     meta: { title: 'Livro — Ecos Literários', pageClass: 'page-book' },
   },
-  {
-    path: '/midia/:slug',
-    name: 'catalog-midia',
-    component: () => import('@/views/catalog/FilterView.vue'),
-    meta: { title: 'Mídia — Ecos Literários', pageClass: 'page-filter' },
-  },
-  {
-    path: '/categoria/:slug',
-    name: 'catalog-category',
-    component: () => import('@/views/catalog/FilterView.vue'),
-    meta: { title: 'Categoria — Ecos Literários', pageClass: 'page-filter' },
-  },
-  {
-    path: '/autor/:slug',
-    name: 'catalog-author',
-    component: () => import('@/views/catalog/FilterView.vue'),
-    meta: { title: 'Autor — Ecos Literários', pageClass: 'page-filter' },
-  },
-  {
-    path: '/mencao/:slug',
-    name: 'catalog-mention',
-    component: () => import('@/views/catalog/FilterView.vue'),
-    meta: { title: 'Mencionado por — Ecos Literários', pageClass: 'page-filter' },
-  },
+  { path: '/midia/:slug', name: 'catalog-midia', redirect: toCatalogQuery('midia') },
+  { path: '/categoria/:slug', name: 'catalog-category', redirect: toCatalogQuery('genero') },
+  { path: '/autor/:slug', name: 'catalog-author', redirect: toCatalogQuery('autor') },
+  { path: '/mencao/:slug', name: 'catalog-mention', redirect: toCatalogQuery('quem') },
 ]
 
 export default {

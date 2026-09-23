@@ -44,7 +44,6 @@
 
       <!-- Desktop filters -->
       <div v-if="!isTablet" class="filter-bar">
-        <!-- sort -->
         <MultiSelect
           class="filter-bar-sorted"
           label="Ordenação"
@@ -55,45 +54,21 @@
           @toggle="(v) => (sortOrder = v as BookSortOrder)"
         />
 
-        <!-- filters -->
         <MultiSelect
+          v-for="control in FILTER_CONTROLS"
+          :key="control.key"
           class="multi-select"
-          label="Mídia"
-          :options="optionsMidia"
-          :selected="selectedMidia"
-          @toggle="(v) => handleToggle('midia', v)"
-          @clear="clearKey('midia')"
-        />
-        <MultiSelect
-          class="multi-select"
-          label="Categoria"
-          :options="optionsCategoria"
-          :selected="selectedCategoria"
-          @toggle="(v) => handleToggle('categoria', v)"
-          @clear="clearKey('categoria')"
-        />
-        <MultiSelect
-          class="multi-select"
-          label="Sub-gêneros"
-          :options="optionsSubgeneros"
-          :selected="selectedSubgeneros"
-          @toggle="(v) => handleToggle('subgeneros', v)"
-          @clear="clearKey('subgeneros')"
-        />
-        <MultiSelect
-          class="multi-select"
-          label="Mencionado por"
-          :options="optionsQuem"
-          :selected="selectedQuem"
-          @toggle="(v) => handleToggle('quem', v)"
-          @clear="clearKey('quem')"
+          :label="control.label"
+          :options="options[control.key]"
+          :selected="selected[control.key]"
+          @toggle="(v) => toggle(control.key, v)"
+          @clear="clearKey(control.key)"
         />
       </div>
 
       <!-- Mobile sidebar -->
       <SideBar ref="filtersSidebar" title="Filtros">
         <template #body>
-          <!-- sort -->
           <MultiSelect
             class="filter-bar-sorted"
             label="Ordenação"
@@ -104,57 +79,25 @@
             @toggle="(v) => (sortOrder = v as BookSortOrder)"
           />
 
-          <!-- filters -->
           <MultiSelect
+            v-for="control in FILTER_CONTROLS"
+            :key="control.key"
             class="multi-select mobile"
-            label="Mídia"
-            :options="optionsMidia"
-            :selected="selectedMidia"
-            @toggle="(v) => handleToggle('midia', v)"
-            @clear="clearKey('midia')"
-          />
-          <MultiSelect
-            class="multi-select mobile"
-            label="Categoria"
-            :options="optionsCategoria"
-            :selected="selectedCategoria"
-            @toggle="(v) => handleToggle('categoria', v)"
-            @clear="clearKey('categoria')"
-          />
-          <MultiSelect
-            class="multi-select mobile"
-            label="Sub-gêneros"
-            :options="optionsSubgeneros"
-            :selected="selectedSubgeneros"
-            @toggle="(v) => handleToggle('subgeneros', v)"
-            @clear="clearKey('subgeneros')"
-          />
-          <MultiSelect
-            class="multi-select mobile"
-            label="Mencionado por"
-            :options="optionsQuem"
-            :selected="selectedQuem"
-            @toggle="(v) => handleToggle('quem', v)"
-            @clear="clearKey('quem')"
+            :label="control.label"
+            :options="options[control.key]"
+            :selected="selected[control.key]"
+            @toggle="(v) => toggle(control.key, v)"
+            @clear="clearKey(control.key)"
           />
         </template>
         <template #footer="{ close }">
-          <button class="secondary-btn" type="button" @click="clearAll">Limpar</button>
-          <button class="primary-btn" type="button" @click="close">Mostrar</button>
+          <button class="secondary-btn" type="button" @click="clearAll">Limpar os filtros</button>
+          <button class="primary-btn" type="button" @click="close">Ver {{ filtered.length }} livros</button>
         </template>
       </SideBar>
 
       <!-- Active filter tags -->
-      <ActiveFilters
-        :selected="{
-          midia: selectedMidia,
-          categoria: selectedCategoria,
-          subgeneros: selectedSubgeneros,
-          quem: selectedQuem,
-        }"
-        @remove="handleRemove"
-        @clear-all="clearAll"
-      />
+      <ActiveFilters :selected="selected" @remove="toggle" @clear-all="clearAll" />
 
       <!-- Grid -->
       <div class="grid-area">
@@ -177,29 +120,23 @@ import ActiveFilters from '@/components/ActiveFilters.vue'
 import PageStatus from '@/components/PageStatus.vue'
 import BooksGrid from '@/components/BooksGrid.vue'
 
-import type { BookSortOrder, Suggestion } from '@/types'
+import type { BookSortOrder, FilterKey, Suggestion } from '@/types'
 
 usePageMeta({
   title: 'Catálogo de Livros',
-  description: 'Explore os livros, mangás e HQs indicados pelo Clube Ecos Literários.',
+  description: 'Os livros, mangás e HQs mencionados no Clube Ecos Literários.',
 })
 
 const SideBar = defineAsyncComponent(() => import('@/components/SideBar.vue'))
 
-const {
-  search,
-  selectedMidia,
-  selectedCategoria,
-  selectedSubgeneros,
-  selectedQuem,
-  optionsMidia,
-  optionsCategoria,
-  optionsSubgeneros,
-  optionsQuem,
-  filtered,
-  clearAll,
-  searchSuggestions,
-} = useFilters()
+const FILTER_CONTROLS: { key: FilterKey; label: string }[] = [
+  { key: 'midia', label: 'Mídia' },
+  { key: 'categoria', label: 'Categoria' },
+  { key: 'subgeneros', label: 'Sub-gêneros' },
+  { key: 'quem', label: 'Mencionado por' },
+]
+
+const { search, options, selected, toggle, clearKey, clearAll, filtered, searchSuggestions } = useFilters()
 const { sortOrder, sortedBooks, sortOptions } = useBookSort(filtered)
 
 onMounted(() => useApi().fetchBooks())
@@ -207,31 +144,6 @@ onMounted(() => useApi().fetchBooks())
 const filtersSidebar = ref<InstanceType<typeof SideBar> | null>(null)
 
 const isTablet = useMediaQuery(useBreakpoints.isTablet)
-
-const handleToggle = (key: string, value: string) => {
-  const map = {
-    midia: selectedMidia,
-    categoria: selectedCategoria,
-    subgeneros: selectedSubgeneros,
-    quem: selectedQuem,
-  }
-  const arr = map[key as keyof typeof map]
-  const idx = arr.value.indexOf(value)
-  if (idx === -1) arr.value.push(value)
-  else arr.value.splice(idx, 1)
-}
-
-const clearKey = (key: string) => {
-  const map = {
-    midia: selectedMidia,
-    categoria: selectedCategoria,
-    subgeneros: selectedSubgeneros,
-    quem: selectedQuem,
-  }
-  map[key as keyof typeof map].value = []
-}
-
-const handleRemove = (key: string, value: string) => handleToggle(key, value)
 
 const onSelectSuggestion = (suggestion: Suggestion) => {
   search.value = suggestion.main

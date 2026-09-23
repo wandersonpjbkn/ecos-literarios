@@ -29,7 +29,7 @@
       <form class="account-form" @submit.prevent="submit">
         <div class="field">
           <label for="userName" class="field__label">Nome de exibição</label>
-          <p class="field__hint">Este nome aparece nas indicações de livros vinculadas ao seu perfil.</p>
+          <p class="field__hint">Este nome aparece nos livros que você mencionou.</p>
           <input
             id="userName"
             v-model.trim="name"
@@ -88,21 +88,48 @@
         Email e nível de permissão não podem ser alterados por aqui. Contate um administrador se necessário.
       </p>
     </section>
+
+    <!-- Cache do catálogo neste aparelho -->
+    <section class="readonly-panel">
+      <header class="readonly-panel__header">
+        <h3>Catálogo neste aparelho</h3>
+      </header>
+      <div class="account-actions">
+        <button type="button" class="action-btn action-btn--secondary" @click="forceRefresh">
+          Recarregar catálogo
+        </button>
+        <button type="button" class="action-btn action-btn--secondary" @click="forceReset">Resetar cache</button>
+      </div>
+    </section>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import { useAuthStore } from '@/stores'
-import { useErrorReporter } from '@/composables'
+import { useApi, useErrorReporter, useUtils } from '@/composables'
 import { buildHeaders } from '@/composables/useApi'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
 import { API_BASE } from '@/data/config'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
+
+const forceRefresh = () => {
+  useApi().fetchBooks(true)
+  useUtils().sendGtmEvent({
+    event: 'force_refresh',
+    force_refresh_origin: route.fullPath,
+  })
+}
+
+const forceReset = () => {
+  localStorage.clear()
+  forceRefresh()
+}
 
 if (!authStore.isLoggedIn) {
   router.replace('/login')
