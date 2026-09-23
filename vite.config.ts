@@ -58,7 +58,7 @@ export default defineConfig({
         description: 'Catálogo de livros do Clube Ecos Literários',
         start_url: '/',
         scope: '/',
-        theme_color: '#0b1956',
+        theme_color: '#2B5192',
         background_color: '#fb9ebb',
         display: 'fullscreen',
         orientation: 'portrait',
