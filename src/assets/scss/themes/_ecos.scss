@@ -1,71 +1,100 @@
-@use 'sass:map';
+// Values mirror design/tokens/tokens.json; never regenerate them with generate-palette (breaks measured contrast).
 
-@use '@/assets/scss/abstracts/functions' as *;
 @use '@/assets/scss/abstracts/mixins' as *;
 
-$palette: (
-  'cerulean': generate-palette(#227c9d),
-  'seagreen': generate-palette(#17c3b2),
-  'apricot': generate-palette(#ffcb77),
-  'floral': generate-palette(#fef9ef),
-  'grapefruit': generate-palette(#fe6d73),
-  'ice': generate-palette(#f8fafc),
-);
-
 $config: (
-  // Camada de Badges (Mídia)
   'badges': (
-      'livro': (
-        'bg': palette($palette, 'cerulean', 'tint', '90'),      // #e9f2f5
-        'ink': palette($palette, 'cerulean', 'shade', '30'),    // #18576e
-      ),
-      'manga': (
-        'bg': palette($palette, 'apricot', 'tint', '80'),       // #fff5e4,
-        'ink': palette($palette, 'apricot', 'shade', '50'),     // #80663c,
-      ),
-      'hq': (
-        'bg': palette($palette, 'grapefruit', 'tint', '80'),    // #ffe2e3,
-        'ink': palette($palette, 'grapefruit', 'shade', '40'),  // #984145,
-      ),
-      'tag': (
-        'bg': palette($palette, 'ice', 'tone', '10'),           // #eceef0,
-        'ink': palette($palette, 'ice', 'shade', '60'),         // #636465,
-      ),
+      'livro': ('bg': #F4F6F8, 'ink': #47525C),
+      'manga': ('bg': #F4F6F8, 'ink': #47525C),
+      'hq':    ('bg': #F4F6F8, 'ink': #47525C),
+      'tag':   ('bg': #F4F6F8, 'ink': #47525C),
     ),
 
-  // Camada Semântica (Superfícies e Texto)
   'semantics': (
-      'bg': palette($palette, 'ice', 'base'),                         // #f8fafc,
-      'bg-subtle': palette($palette, 'ice', 'tint', '30'),            // #fafcfd,
-      'surface': #ffffff,
-      'surface-raised': #ffffff,
-      'ink': palette($palette, 'cerulean', 'shade', '90'),            // #030c10,
-      'ink-secondary': palette($palette, 'cerulean', 'shade', '70'),  // #0a252f,
-      'muted': palette($palette, 'ice', 'shade', '60'),               // #636465,
-      'muted-light': palette($palette, 'ice', 'shade', '50')          // #7c7d7e,
+      'bg':             #FBFCFD,  // bg-page
+      'bg-subtle':      #F4F6F8,  // bg-sunken
+      'surface':        #FFFFFF,  // bg-surface
+      'surface-raised': #FFFFFF,
+      'ink':            #141A1F,  // 16.4:1 on white
+      'ink-secondary':  #47525C,  //  8.1:1
+      'muted':          #5F6B77,  //  5.4:1, lightest grey allowed for text
+      'muted-light':    #5F6B77   // same on purpose: there is no lighter text grey
     ),
 
-  // Camada de Ações (Accents)
   'actions': (
-      'primary': palette($palette, 'cerulean', 'base'),                 // #227c9d,
-      'primary-hover': palette($palette, 'cerulean', 'shade', '10'),    // #1f708d,
-      'primary-light': palette($palette, 'cerulean', 'tint', '90'),     // #e9f2f5,
-      'primary-muted': palette($palette, 'cerulean', 'tint', '60'),     // #a7cbd8,
-      'secondary': palette($palette, 'seagreen', 'base'),               // #17c3b2,
-      'secondary-hover': palette($palette, 'seagreen', 'shade', '20'),  // #129c8e,
-      'secondary-light': palette($palette, 'seagreen', 'tint', '80'),   // #d1f3f0,
-      'secondary-text': palette($palette, 'seagreen', 'shade', '40')    // #0e756b,
+      'primary':         #3A63B8,  // 5.8:1, logo blue
+      'primary-hover':   #2B5192,  // 7.6:1, logo navy
+      'primary-light':   #EAF0FB,  // selected background, never a button background
+      'primary-muted':   #C6D6F2,  // selected border; never text
+      // One accent only: secondary keys exist for the mixin and point to the same blue.
+      'secondary':       #3A63B8,
+      'secondary-hover': #2B5192,
+      'secondary-light': #EAF0FB,
+      'secondary-text':  #2B5192
     ),
 
-  // Camada de Bordas
   'borders': (
-      'default': palette($palette, 'ice', 'tone', '20'),      // #e0e2e3,
-      'strong': palette($palette, 'ice', 'shade', '20'),      // #c6c8ca,
-      'focus': palette($palette, 'cerulean', 'base')          // #227c9d,
+      'default': #E7EBEF,  // border-hair
+      'strong':  #D3DAE0,  // border-strong, 3:1
+      'focus':   #3A63B8
     ),
 
-  // Extras específicos
-  'header-bg': palette($palette, 'cerulean', 'shade', '90')     // #030c10
+  'header-bg': #FFFFFF
 );
 
 @include create-theme('ecos', $config);
+
+// Not covered by the mixin: genre tints, spacing, radius and target sizes.
+:root[data-theme='ecos'] {
+    --tint-ficcao-bg: #EEF1F5;
+    --tint-ficcao-line: #DFE5EC;
+    --tint-ficcao-ink: #2C3540;
+    --tint-drama-bg: #F2EFF4;
+    --tint-drama-line: #E5DFEA;
+    --tint-drama-ink: #352C3E;
+    --tint-fantasia-bg: #EAF1EE;
+    --tint-fantasia-line: #DAE7E2;
+    --tint-fantasia-ink: #24382F;
+    --tint-suspense-bg: #F1F0EA;
+    --tint-suspense-line: #E4E2D7;
+    --tint-suspense-ink: #383425;
+    --tint-terror-bg: #F3EEED;
+    --tint-terror-line: #E7DDDC;
+    --tint-terror-ink: #3E2C2C;
+    --tint-romance-bg: #F6EEF2;
+    --tint-romance-line: #EBDCE4;
+    --tint-romance-ink: #3E2C35;
+    --tint-nao-ficcao-bg: #ECF1F4;
+    --tint-nao-ficcao-line: #DCE5EB;
+    --tint-nao-ficcao-ink: #26333D;
+    --tint-infantil-bg: #F5F1E6;
+    --tint-infantil-line: #E9E1CC;
+    --tint-infantil-ink: #4A4128;
+    --tint-poesia-bg: #EEF1ED;
+    --tint-poesia-line: #DFE5DC;
+    --tint-poesia-ink: #2E362C;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-14: 56px;
+    --space-24: 96px;
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 20px;
+    --radius-pill: 999px;
+
+    --touch-min: 44px;
+    --touch-cta: 48px;
+    --rail-width: 96px;
+    --drawer-width: 388px;
+    --text-column: 760px;
+}

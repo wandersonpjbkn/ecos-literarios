@@ -51,7 +51,7 @@ onMounted(() => {
   min-width: 280px;
   max-width: calc(100dvw - 2rem);
 
-  background: var(--color-header-bg, var(--color-text-default));
+  background: var(--color-text-default);
   color: var(--color-surface-default);
   border-radius: var(--border-radius-default);
   box-shadow: var(--shadow-xl);
@@ -66,11 +66,11 @@ onMounted(() => {
     display: inline-flex;
     padding: 6px 12px;
     width: fit-content;
-    min-width: 34px;
-    min-height: 34px;
+    min-width: var(--touch-min);
+    min-height: var(--touch-min);
     border: none;
     border-radius: var(--border-radius-sm);
-    background: rgba(#fff, 0.15);
+    background: rgba(var(--color-surface-default-rgb), 0.15);
 
     color: var(--color-surface-default);
 
@@ -84,7 +84,7 @@ onMounted(() => {
       color var(--motion-transition-default);
 
     &:hover {
-      background: rgba(#fff, 0.25);
+      background: rgba(var(--color-surface-default-rgb), 0.25);
       color: var(--color-surface-default);
     }
   }
@@ -94,7 +94,7 @@ onMounted(() => {
     font-size: 0.9rem;
 
     @media (max-width: 767px) {
-      font-size: 0.8rem;
+      font-size: 0.8125rem;
     }
   }
 
@@ -114,7 +114,7 @@ onMounted(() => {
     bottom: 4rem;
 
     &__text {
-      font-size: 0.8rem;
+      font-size: 0.8125rem;
     }
   }
 }

@@ -18,7 +18,7 @@
         </template>
       </TransitionGroup>
 
-      <button class="af-clear-all" @click="emit('clearAll')">Limpar tudo</button>
+      <button class="af-clear-all" @click="emit('clearAll')">Limpar os filtros</button>
     </div>
   </Transition>
 </template>
@@ -88,15 +88,15 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
   display: inline-flex;
   align-items: stretch;
   gap: 0;
-  border: none;
-  border-radius: 20px;
+  border: 1px solid var(--color-action-text-subtle);
+  border-radius: var(--radius-pill);
   overflow: hidden;
   cursor: pointer;
   font-family: var(--font-family-body);
   font-size: 0.9rem;
   padding: 0;
   background: none;
-  min-height: 36px;
+  min-height: var(--touch-min);
   transition: opacity var(--motion-transition-default);
 
   &:hover {
@@ -107,8 +107,8 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
     display: flex;
     align-items: center;
     padding: #{$pad};
-    background: var(--color-action-default);
-    color: white;
+    background: var(--color-action-background-subtle);
+    color: var(--color-action-default-hover);
     font-weight: 600;
     white-space: nowrap;
   }
@@ -119,7 +119,7 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
     gap: 5px;
     padding: #{$pad};
     background: var(--color-action-background-subtle);
-    color: var(--color-action-default);
+    color: var(--color-action-default-hover);
     font-weight: 500;
     white-space: nowrap;
   }
@@ -128,7 +128,7 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
     display: block;
     padding: 0 8px 0 0;
     background: var(--color-action-background-subtle);
-    color: var(--color-action-text-subtle);
+    color: var(--color-action-default-hover);
     height: 100%;
     box-sizing: content-box;
     align-self: stretch;
@@ -138,9 +138,9 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
 .af-clear-all {
   padding: 0.45rem 1rem;
   border: 1px solid var(--color-border-strong);
-  border-radius: 20px;
+  border-radius: var(--radius-pill);
   background: none;
-  min-height: 36px;
+  min-height: var(--touch-min);
 
   font: {
     family: var(--font-family-body);
@@ -171,7 +171,7 @@ const hasActive = computed(() => Object.values(props.selected).some((arr) => arr
 
   .af-tag {
     font-size: 0.82rem;
-    min-height: 32px;
+    min-height: var(--touch-min);
 
     &-group,
     &-value {

@@ -75,13 +75,13 @@ const { isEditor, isLoggedIn } = storeToRefs(useAuthStore())
   z-index: 60;
 
   background: var(--color-header-bg, var(--color-text-default));
-  border-bottom: 1px solid rgba(var(--color-surface-default-rgb), 0.08);
+  border-right: 1px solid var(--color-border-default);
 
   &--inner {
     display: flex;
     width: fit-content;
     height: 100%;
-    padding: 5.25rem 1rem;
+    padding: 5.25rem var(--space-3);
 
     align-items: center;
     justify-content: space-around;
@@ -90,6 +90,9 @@ const { isEditor, isLoggedIn } = storeToRefs(useAuthStore())
   }
 
   @media (max-width: 767px) {
+    border-right: none;
+    border-top: 1px solid var(--color-border-default);
+
     &--inner {
       width: 100%;
       height: fit-content;

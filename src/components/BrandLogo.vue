@@ -21,7 +21,7 @@ const isTablet = useMediaQuery(useBreakpoints.isTablet)
 <style lang="scss" scoped>
 .brand {
   display: flex;
-  color: var(--color-action-text-subtle);
+  color: var(--color-action-default);
   align-items: center;
   gap: 12px;
   transition: opacity var(--motion-transition-default);
@@ -52,7 +52,7 @@ const isTablet = useMediaQuery(useBreakpoints.isTablet)
 
   &-sub {
     font: {
-      size: 0.7rem;
+      size: 0.8125rem;
       weight: 500;
     }
     color: var(--color-text-subtle);
@@ -66,7 +66,7 @@ const isTablet = useMediaQuery(useBreakpoints.isTablet)
     }
 
     &-sub {
-      font-size: 0.6rem;
+      font-size: 0.8125rem;
     }
   }
 }

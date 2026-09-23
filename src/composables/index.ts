@@ -5,7 +5,6 @@ import { useFilters } from '@/composables/useFilters'
 import { usePageMeta } from '@/composables/usePageMeta'
 import { useApi } from '@/composables/useApi'
 import { useAuth } from '@/composables/useAuth'
-import { useTheme } from '@/composables/useTheme'
 import { useUtils } from '@/composables/useUtils'
 import { useBreakpoints } from '@/composables/useBreakpoints'
 import { useBookEnrichment } from '@/composables/useBookEnrichment'
@@ -20,7 +19,6 @@ export {
   usePageMeta,
   useApi,
   useAuth,
-  useTheme,
   useUtils,
   useBreakpoints,
   useBookEnrichment,

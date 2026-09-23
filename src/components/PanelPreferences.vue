@@ -1,19 +1,7 @@
 <template>
-  <SideBar ref="instance" title="Preferências" :enter="isTablet ? 'right' : 'left:4.5rem'">
+  <SideBar ref="instance" title="Preferências" :enter="isTablet ? 'right' : 'left:69px'">
     <template #body>
       <div class="menu-painel">
-        <div class="menu-painel__card">
-          <p>Tema</p>
-          <MultiSelect
-            label="Tema"
-            :multiple="false"
-            :searchable="false"
-            :options="themesOptions"
-            :selected="activeTheme"
-            @toggle="(value) => select(value)"
-          />
-        </div>
-
         <div class="menu-painel__card">
           <p>Cache</p>
 
@@ -38,22 +26,15 @@ import { ref, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMediaQuery } from '@vueuse/core'
 
-import { useApi, useTheme, useUtils, useBreakpoints } from '@/composables'
+import { useApi, useUtils, useBreakpoints } from '@/composables'
 
 const SideBar = defineAsyncComponent(() => import('@/components/SideBar.vue'))
-const MultiSelect = defineAsyncComponent(() => import('@/components/MultiSelect.vue'))
 
 const route = useRoute()
-const { themes, activeTheme, select } = useTheme()
 
 const isTablet = useMediaQuery(useBreakpoints.isTablet)
 
 const instance = ref<InstanceType<typeof SideBar> | null>(null)
-
-const themesOptions = themes.map((t) => ({
-  value: t.value,
-  label: `${t.emoji} ${t.label}`,
-}))
 
 const forceRefresh = () => {
   useApi().fetchBooks(true)
@@ -75,7 +56,6 @@ defineExpose({ instance })
 <style lang="scss" scoped>
 .menu-painel {
   display: grid;
-  grid-template-rows: 1fr 1fr;
   row-gap: 2rem;
 
   &__card {
