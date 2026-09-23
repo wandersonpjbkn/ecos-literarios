@@ -21,7 +21,7 @@ Cole isto na raiz do projeto, com a pasta `design/` já commitada. Um prompt por
 > - Uma cor de ação. `--color-action-default` quer dizer _isto clica_. Estado selecionado usa `--color-action-background-subtle` com borda, nunca azul preenchido. Nunca duas ações primárias na mesma dobra.
 > - Nenhum texto afirma intenção: **mencionado por**, nunca _indicado por_. `design/COPY.md` manda.
 > - Todo componente que você tocar tem o estado vazio implementado junto, com o texto de `design/COPY.md`. Um em cada quatro livros do acervo está incompleto — o estado vazio não é caso de borda.
-> - Qualquer coisa clicável é `<button>` ou `<a href>` de verdade, com no mínimo 44px, e texto nunca abaixo de 13px.
+> - Qualquer coisa clicável é `<button>` ou `<a href>` de verdade, com no mínimo 44px. Texto nunca abaixo de 11px (`micro`, só palavra isolada); frase nunca abaixo de 13px.
 > - Valor de cor, espaço ou raio vem de token. Se você precisou escrever um hex, pare e me pergunte.
 >
 > Ao terminar: me diga o que mudou, o que você não fez e por quê, e rode `yarn build` antes de dizer que acabou.

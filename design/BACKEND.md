@@ -16,14 +16,22 @@ Tire o campo do tipo. Onde havia avatar, a interface mostra o **nome**, que é v
 
 ## 2. Preferência de formato em `users/me`
 
-A pessoa desmarca "Mangá" em **O que você quer ver** e isso vale em todos os aparelhos, sem remarcar. É o único estado novo que precisa persistir:
+A pessoa desmarca "Mangá" em **O que você quer ver** e isso vale em todos os aparelhos, sem remarcar:
 
 ```
 GET  /users/me        → { ..., hidden_midias: ["Mangá"] }
 PATCH /users/me       ← { hidden_midias: ["Mangá"] }
 ```
 
+O `PATCH /users/me` já existe no `ecos-api`, mas hoje só aceita `name` e responde 400 sem ele. A mudança é estender a rota: `hidden_midias` opcional, validado contra os formatos que existem, e `name` deixa de ser obrigatório. O campo também entra no model `User`.
+
+Até a fatia 7 a preferência fica guardada no aparelho (fatia 4); na fatia 7 ela passa a ir para `users/me`, levando junto o que já estava salvo localmente.
+
 Aplicado no cliente, sobre a lista já carregada. O servidor guarda, não filtra — filtrar no servidor quebraria o cache do Pinia e obrigaria a recarregar a cada mudança de preferência.
+
+## 2b. "Quero ler" e "Lido"
+
+O `COPY.md` e o `IA.md` contam com os dois botões ("Guardar em Quero ler", "Marcar como lido") e com Meus livros mostrando o que a pessoa guardou. Nada disso existe hoje, nem no cliente nem na API, e vai ser implementado. É estado por pessoa que precisa persistir, então o contrato (onde o dado mora, quais rotas, o que vê quem não entrou na conta) é proposto e aprovado antes da fatia 5, que é onde os botões aparecem.
 
 ## 3. O que **não** precisa de migração
 

@@ -21,7 +21,7 @@ A especificação do redesign do Ecos Literários, commitada junto do código pa
 
 **A cor das capas não compete.** Nove tintas quase acromáticas com texto escuro. A tinta serve para reconhecer, não para chamar.
 
-**44px e 13px.** Piso de alvo clicável e piso de texto. O cinza mais claro para texto é `#5F6B77` (5,4:1), e ele já é o limite.
+**44px e 11px.** Piso de alvo clicável e piso de texto. 11px é o token `micro`, só para palavra isolada (selo de formato, etiqueta em caixa-alta); frase nunca fica abaixo de 13px (`caption`). O cinza mais claro para texto é `#5F6B77` (5,4:1), e ele já é o limite.
 
 ## O que tem aqui
 

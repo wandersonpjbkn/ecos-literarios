@@ -27,16 +27,23 @@ A conta (`/perfil/conta`) fica no avatar, no fim do trilho. O painel do clube (`
 ```
 /                                  → tudo
 /?genero=fantasia,suspense         → gênero
+/?subgenero=crime                  → subgênero
 /?quem=brenda                      → quem mencionou
+/?autor=kafka                      → autor
 /?midia=livro,hq                   → formato
 /?tamanho=curto                    → menos de 200 páginas
-/?busca=kafka                      → busca
+/?tamanho=desconhecido             → sem número de páginas anotado (23 dos 87)
+/?busca=kafka                      → busca no título, no autor e no que a pessoa escreveu (`porque`)
 /?ordem=titulo|pessoa|genero       → ordenação
 ```
 
+`autor` e `subgenero` entraram depois do estudo: `/autor/:slug` precisava de destino para o redirect, e o filtro de subgênero que o app já tinha continua valendo. Os valores da query casam com o dado pelo mesmo slug que a `FilterView` usa hoje, senão `/categoria/nao-ficcao` não encontra "Não Ficção".
+
 Motivos para ser query e não rota: o filtro é combinável (gênero + pessoa + tamanho ao mesmo tempo, o que a rota por slug nunca permitiu), continua compartilhável por URL, e some a duplicação de tela.
 
-`FilterView.vue` é deletado. Os links antigos ganham um redirect permanente para a query equivalente, porque já foram mandados no grupo.
+`FilterView.vue` é deletado. Os links antigos ganham um redirect permanente para a query equivalente, porque já foram mandados no grupo: `/midia/:slug` vai para `?midia=`, `/categoria/:slug` para `?genero=`, `/autor/:slug` para `?autor=` e `/mencao/:slug` para `?quem=`.
+
+`BookDetailDrawer.vue` (a espiada lateral aberta pelo botão de informação do cartão) também sai. Era o segundo destino do mesmo livro; com o cartão virando um link só, o livro abre em `/livro/:id` e em nenhum outro lugar.
 
 ## Rotas que ficam
 

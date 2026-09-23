@@ -14,7 +14,7 @@ O grupo de formato hoje se chama **"O que você quer ver"**, com Livro, Mangá e
 
 ## Regras
 
-Grupos na ordem: Gênero, Tamanho, O que você quer ver, Quem mencionou. Cada linha tem `touch-min` de altura e a contagem em `ink-muted`. Listas longas mostram os seis primeiros e um link "Mostrar as outras 8 pessoas".
+Grupos na ordem: Gênero, Tamanho, O que você quer ver, Quem mencionou. Subgênero também entra como grupo (decisão posterior ao estudo); a posição dele se decide na fatia 4. Tamanho tem a opção dos livros sem número de páginas, e o rótulo dela também se decide na fatia 4. Cada linha tem `touch-min` de altura e a contagem em `ink-muted`. Listas longas mostram os seis primeiros e um link "Mostrar as outras 8 pessoas".
 
 O que está aplicado aparece como chip removível **junto do resultado**, fora da gaveta.
 
