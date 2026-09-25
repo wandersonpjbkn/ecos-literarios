@@ -1,299 +1,329 @@
 <template>
   <div class="page catalog-page" data-page="catalog">
-    <!-- Loading / Error -->
-    <PageStatus
-      :loading="useBooksStore().loading"
-      :error="useBooksStore().error"
-      loading-text="Carregando catálogo…"
-      error-hint="Contacte o administrador do site se o erro persistir."
-      :on-retry="() => useApi().fetchBooks(true)"
-    />
-
-    <!-- Catalog -->
-    <div v-if="!useBooksStore().loading && !useBooksStore().error" class="catalog-body">
-      <section class="catalog-intro" aria-hidden="true">
-        <div class="intro-inner">
-          <h1 class="intro-title">Catálogo de Livros</h1>
-          <p class="intro-desc">
-            Use os filtros abaixo para navegar entre os livros já citados no Clube Ecos Literários.
-          </p>
+    <div class="catalog-body">
+      <!-- States take only the place of the list (Estados): the header search stays usable -->
+      <CatalogSkeleton v-if="booksStore.loading && !booksStore.books.length" />
+      <PageStatus
+        v-else-if="booksStore.error && !booksStore.books.length"
+        :error="booksStore.error"
+        error-hint="Se não voltar, avise no grupo."
+        :on-retry="retry"
+      />
+      <template v-else>
+        <div v-if="banner" class="catalog-banner" role="status">
+          <p>{{ banner }}</p>
+          <AppButton v-if="booksStore.error" @click="retry">Tentar de novo</AppButton>
         </div>
-      </section>
 
-      <!-- Search + count -->
-      <div class="search-row">
-        <div class="search-main">
-          <SearchBar
-            v-model="search"
-            :suggestions="searchSuggestions"
-            :total="useBooksStore().size"
-            :filtered="filtered.length"
-            @select="onSelectSuggestion"
-          />
-          <button
-            v-if="isTablet"
-            class="show-all-btn mobile"
-            type="button"
-            aria-label="Abrir filtros"
-            @click="openMobileFilters"
+        <div class="catalog-bar">
+          <header class="catalog-bar__head">
+            <h1 class="catalog-bar__title">Catálogo</h1>
+            <p class="catalog-bar__summary">
+              <span class="catalog-bar__count">{{ summary.count }}</span
+              >{{ summary.rest }}
+            </p>
+          </header>
+
+          <AppButton
+            class="catalog-bar__filter"
+            variant="soft"
+            size="md"
+            :aria-expanded="drawerOpen"
+            aria-haspopup="dialog"
+            @click="drawerOpen = true"
           >
             <BaseIcon name="filter" aria-hidden="true" />
-          </button>
+            Filtrar
+          </AppButton>
+
+          <!-- Applied filters take the place of the quick chips, next to the result -->
+          <div v-if="showApplied" class="catalog-bar__chips">
+            <FilterChip
+              v-for="chip in appliedChips"
+              :key="`${chip.key}-${chip.value}`"
+              :label="chip.label"
+              :to="hrefToggling(chip.key, chip.value)"
+              selected
+              removable
+            />
+            <FilterChip
+              v-for="midia in preferenceChips"
+              :key="`sem-${midia}`"
+              :label="`Sem ${formatName(midia, 1)}`"
+              removable
+              @click="preferences.toggleMidia(midia)"
+            />
+            <AppButton class="catalog-bar__clear" variant="ghost" size="md" @click="clearAll"
+              >Limpar os filtros</AppButton
+            >
+          </div>
+          <div v-else class="catalog-bar__chips">
+            <FilterChip
+              v-for="genre in quickGenres"
+              :key="genre"
+              :label="genre"
+              :count="optionCounts.categoria[genre]"
+              :to="hrefToggling('categoria', genre)"
+            />
+          </div>
+
+          <AppSelect v-model="sortOrder" class="catalog-bar__sort" label="Ordenar" :options="sortOptions" />
         </div>
-      </div>
 
-      <!-- Desktop filters -->
-      <div v-if="!isTablet" class="filter-bar">
-        <MultiSelect
-          class="filter-bar-sorted"
-          label="Ordenação"
-          :multiple="false"
-          :searchable="false"
-          :options="sortOptions"
-          :selected="sortOrder"
-          @toggle="(v) => (sortOrder = v as BookSortOrder)"
+        <BooksGrid v-model="sortedBooks" class="catalog-grid" :eco="showEco ? eco : null" @clear="clearAll" />
+
+        <CatalogShelves v-if="isDefaultView" />
+
+        <FilterDrawer
+          :open="drawerOpen"
+          :sort-order="sortOrder"
+          :sort-options="sortOptions"
+          @close="drawerOpen = false"
         />
-
-        <MultiSelect
-          v-for="control in FILTER_CONTROLS"
-          :key="control.key"
-          class="multi-select"
-          :label="control.label"
-          :options="options[control.key]"
-          :selected="selected[control.key]"
-          @toggle="(v) => toggle(control.key, v)"
-          @clear="clearKey(control.key)"
-        />
-      </div>
-
-      <!-- Mobile sidebar -->
-      <SideBar ref="filtersSidebar" title="Filtros">
-        <template #body>
-          <MultiSelect
-            class="filter-bar-sorted"
-            label="Ordenação"
-            :multiple="false"
-            :searchable="false"
-            :options="sortOptions"
-            :selected="sortOrder"
-            @toggle="(v) => (sortOrder = v as BookSortOrder)"
-          />
-
-          <MultiSelect
-            v-for="control in FILTER_CONTROLS"
-            :key="control.key"
-            class="multi-select mobile"
-            :label="control.label"
-            :options="options[control.key]"
-            :selected="selected[control.key]"
-            @toggle="(v) => toggle(control.key, v)"
-            @clear="clearKey(control.key)"
-          />
-        </template>
-        <template #footer="{ close }">
-          <button class="secondary-btn" type="button" @click="clearAll">Limpar os filtros</button>
-          <button class="primary-btn" type="button" @click="close">Ver {{ filtered.length }} livros</button>
-        </template>
-      </SideBar>
-
-      <!-- Active filter tags -->
-      <ActiveFilters :selected="selected" @remove="toggle" @clear-all="clearAll" />
-
-      <!-- Grid -->
-      <div class="grid-area">
-        <BooksGrid v-model="sortedBooks" @clear="clearAll" />
-      </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, defineAsyncComponent } from 'vue'
-import { useMediaQuery } from '@vueuse/core'
+import { computed, onMounted, ref } from 'vue'
+import { useMediaQuery, useOnline } from '@vueuse/core'
 
-import { useBooksStore } from '@/stores'
-import { useApi, useFilters, useBookSort, usePageMeta, useBreakpoints } from '@/composables'
+import { useBooksStore, useCacheStore, usePreferencesStore } from '@/stores'
+import { useApi, useBreakpoints, useEcoOfTheWeek, useFilters, useBookSort, usePageMeta } from '@/composables'
 
-import SearchBar from '@/components/SearchBar.vue'
-import MultiSelect from '@/components/MultiSelect.vue'
-import ActiveFilters from '@/components/ActiveFilters.vue'
+import AppSelect from '@/components/AppSelect.vue'
+import FilterChip from '@/components/FilterChip.vue'
+import FilterDrawer from '@/components/FilterDrawer.vue'
 import PageStatus from '@/components/PageStatus.vue'
+import AppButton from '@/components/AppButton.vue'
+import CatalogSkeleton from '@/components/CatalogSkeleton.vue'
+import CatalogShelves from '@/components/CatalogShelves.vue'
 import BooksGrid from '@/components/BooksGrid.vue'
 
-import type { BookSortOrder, FilterKey, Suggestion } from '@/types'
+import type { FilterKey } from '@/types'
 
 usePageMeta({
   title: 'Catálogo de Livros',
   description: 'Os livros, mangás e HQs mencionados no Clube Ecos Literários.',
 })
 
-const SideBar = defineAsyncComponent(() => import('@/components/SideBar.vue'))
+const QUICK_GENRES = 5
 
-const FILTER_CONTROLS: { key: FilterKey; label: string }[] = [
-  { key: 'midia', label: 'Mídia' },
-  { key: 'categoria', label: 'Categoria' },
-  { key: 'subgeneros', label: 'Sub-gêneros' },
-  { key: 'quem', label: 'Mencionado por' },
-]
+// People get a phrase so the one who mentioned is not mistaken for the author, and vice versa.
+const CHIP_LABEL: Partial<Record<FilterKey, (value: string) => string>> = {
+  quem: (value) => `mencionado por ${value}`,
+  autor: (value) => `de ${value}`,
+}
 
-const { search, options, selected, toggle, clearKey, clearAll, filtered, searchSuggestions } = useFilters()
+const APPLIED_ORDER: FilterKey[] = ['categoria', 'subgeneros', 'tamanho', 'midia', 'quem', 'autor']
+
+const FORMAT_NAMES: Record<string, [string, string]> = {
+  Livro: ['livro', 'livros'],
+  Mangá: ['mangá', 'mangás'],
+  HQ: ['HQ', 'HQs'],
+}
+
+const { search, optionCounts, selected, hasFilters, hrefToggling, clearAll, filtered, hiddenByPreference } =
+  useFilters()
 const { sortOrder, sortedBooks, sortOptions } = useBookSort(filtered)
 
 onMounted(() => useApi().fetchBooks())
 
-const filtersSidebar = ref<InstanceType<typeof SideBar> | null>(null)
+const preferences = usePreferencesStore()
 
-const isTablet = useMediaQuery(useBreakpoints.isTablet)
+const booksStore = useBooksStore()
+const online = useOnline()
 
-const onSelectSuggestion = (suggestion: Suggestion) => {
-  search.value = suggestion.main
+const retry = () => useApi().fetchBooks(true)
+
+// Which list the reader is seeing when the server is down: from today, yesterday or the day it was saved here.
+const savedWhen = computed(() => {
+  const saved = useCacheStore().ts
+  if (!saved) return 'a última lista salva neste aparelho'
+  const days = Math.floor((Date.now() - saved) / 86_400_000)
+  if (days === 0) return 'a lista de hoje'
+  if (days === 1) return 'a lista de ontem'
+  return `a lista de ${new Date(saved).toLocaleDateString('pt-BR', { day: 'numeric', month: 'numeric' })}`
+})
+
+const banner = computed(() => {
+  if (!online.value) return 'Você está sem internet. Dá pra olhar, mas não pra adicionar.'
+  if (booksStore.error)
+    return `A plataforma está fora do ar agora. Você está vendo ${savedWhen.value}: dá pra olhar, mas não pra adicionar.`
+  return ''
+})
+
+const drawerOpen = ref(false)
+
+const eco = useEcoOfTheWeek()
+
+// The eco and the shelves belong to the whole catalog; next to a filtered list they would be out of context.
+const isDefaultView = computed(() => !hasFilters.value && !search.value.trim())
+// Catalog.mobile has no eco. Decided here rather than hidden by CSS, because the eco takes a book's slot.
+const isPhone = useMediaQuery(useBreakpoints.isTablet)
+const showEco = computed(() => isDefaultView.value && !isPhone.value)
+
+const formatName = (midia: string, count: number) => {
+  const [singular, plural] = FORMAT_NAMES[midia] ?? [midia, midia]
+  return count === 1 ? singular : plural
 }
 
-const openMobileFilters = () => {
-  filtersSidebar.value?.open()
-}
+// A format picked by the link overrides the preference, so its chip only shows when the preference is in force.
+const preferenceChips = computed(() => (selected.value.midia.length ? [] : preferences.hiddenMidias))
+
+const showApplied = computed(() => hasFilters.value || preferenceChips.value.length > 0)
+
+const quickGenres = computed(() =>
+  Object.entries(optionCounts.value.categoria)
+    .sort(([a, x], [b, y]) => y - x || a.localeCompare(b, 'pt-BR'))
+    .slice(0, QUICK_GENRES)
+    .map(([genre]) => genre),
+)
+
+const appliedChips = computed(() =>
+  APPLIED_ORDER.flatMap((key) =>
+    selected.value[key].map((value) => ({
+      key,
+      value,
+      label: CHIP_LABEL[key]?.(value) ?? value,
+    })),
+  ),
+)
+
+const summary = computed(() => {
+  const books = useBooksStore().books
+  const total = books.length
+  const narrowed = hasFilters.value || !!search.value.trim() || hiddenByPreference.value.length > 0
+  const count = narrowed ? `${filtered.value.length} de ${total} livros` : `${total} livros`
+
+  const hidden = hiddenByPreference.value
+  if (!hidden.length) return { count, rest: '' }
+
+  const parts = hidden.map(({ midia, count: n }) => `${n} ${formatName(midia, n)}`)
+  const onlyOne = hidden.length === 1 && hidden[0]!.count === 1
+  return { count, rest: ` · ${parts.join(' e ')} ${onlyOne ? 'está' : 'estão'} fora por sua escolha` }
+})
 </script>
 
 <style lang="scss" scoped>
-.catalog {
-  &-intro {
-    margin: 0 auto 2rem;
-
-    display: none;
-    background: var(--color-background-default);
-    border-bottom: 1px solid rgba(var(--color-surface-default-rgb), 0.08);
-  }
-
-  &-body {
-    margin: 0 auto;
-    max-width: 1200px;
-    padding: 20px 1rem 48px;
-  }
+.catalog-body {
+  margin: 0 auto;
+  max-width: 1200px;
+  padding: var(--space-5) var(--space-4) var(--space-10);
 }
 
-.intro {
-  &-inner {
-    margin: 0 auto;
-    max-width: 1200px;
-  }
-
-  &-title {
-    margin-bottom: 0.25rem;
-    font: {
-      family: var(--font-family-display);
-      size: 1.25rem;
-      weight: 600;
-    }
-    color: var(--color-text-default);
-  }
-
-  &-desc {
-    font-size: 0.9rem;
-    color: var(--color-text-secondary);
-    line-height: 1.5;
-  }
-}
-
-.search-row {
-  margin-bottom: 12px;
+.catalog-banner {
   display: flex;
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+
   align-items: center;
-  gap: 12px;
-}
-
-.search-main {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-}
-
-.filter-bar {
-  margin-bottom: 2rem;
-  display: flex;
-  gap: 10px;
   flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-3);
+
+  font-size: 0.9375rem;
+  color: var(--alert-ink);
+
+  background: var(--alert-bg);
+  border: 1px solid var(--alert-line);
+  border-radius: var(--radius-lg);
 }
 
-.multi-select {
-  position: relative;
-  flex: 1;
-  min-width: 140px;
+// Phones give the bar no top margin of its own; without this the banner touches "Filtrar".
+.catalog-banner + .catalog-bar {
+  margin-top: var(--space-4);
+
+  @media (min-width: 768px) {
+    margin-top: var(--space-6);
+  }
 }
 
-.show-all-btn {
-  background: var(--color-action-default);
-  border: none;
-  padding: 0 16px;
-  border-radius: var(--border-radius-sm);
-  min-height: 44px;
-  font-family: var(--font-family-body);
-  font-size: 1rem;
-  color: var(--color-surface-default);
-  cursor: pointer;
-  transition: opacity var(--motion-transition-default);
-  white-space: nowrap;
-  display: inline-flex;
+.catalog-bar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'head filter'
+    'chips chips';
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  gap: var(--space-3) var(--space-2);
 
-  &:hover {
-    opacity: 0.85;
-    background: var(--color-action-default-hover);
-  }
-}
-
-.grid-area {
-  margin-top: 2rem;
-}
-
-.primary-btn,
-.secondary-btn {
-  border: none;
-  padding: 10px 20px;
-  border-radius: var(--border-radius-sm);
-  min-height: 44px;
-  font-family: var(--font-family-body);
-  font-size: 1rem;
-  cursor: pointer;
-  transition: opacity var(--motion-transition-default);
-}
-
-.primary-btn {
-  background: var(--color-action-default);
-  color: var(--color-surface-default);
-
-  &:hover {
-    opacity: 0.85;
-    background: var(--color-action-default-hover);
-  }
-}
-
-.secondary-btn {
-  background: var(--color-background-subtle);
-  color: var(--color-text-default);
-
-  &:hover {
-    opacity: 0.85;
-  }
-}
-
-@media (max-width: 767px) {
-  .intro-desc {
-    font-size: 0.875rem;
+  @media (min-width: 768px) {
+    margin-top: var(--space-6);
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      'head head head'
+      'filter chips sort';
   }
 
-  .search-row {
+  &__head {
+    display: flex;
+    grid-area: head;
+    align-items: baseline;
     flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
   }
 
-  .search-main {
-    width: 100%;
+  // The catalog heading stays for screen readers; on phones the count carries the row (Catalog.mobile).
+  &__title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+
+    @media (max-width: 767px) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+    }
   }
 
-  .show-all-btn.mobile {
-    flex-shrink: 0;
+  &__summary {
+    font-size: 0.9375rem;
+    color: var(--color-text-subtle);
   }
+
+  // Phone (Catalog.mobile): with no title on screen, the count leads the row.
+  &__count {
+    @media (max-width: 767px) {
+      font-weight: 700;
+      color: var(--color-text-default);
+    }
+  }
+
+  &__filter {
+    grid-area: filter;
+    justify-self: start;
+  }
+
+  &__chips {
+    display: flex;
+    grid-area: chips;
+    min-width: 0;
+    align-items: center;
+    gap: var(--space-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    @media (min-width: 768px) {
+      flex-wrap: wrap;
+      overflow: visible;
+    }
+  }
+
+  // On phones the sort lives inside the filter sheet (Catalog.mobile shows only the quick chips).
+  &__sort {
+    grid-area: sort;
+
+    @media (max-width: 767px) {
+      display: none;
+    }
+  }
+}
+
+.catalog-grid {
+  margin-top: var(--space-6);
 }
 </style>

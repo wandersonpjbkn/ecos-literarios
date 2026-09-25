@@ -1,73 +1,34 @@
 <template>
   <RouterLink :to="{ name: 'catalog-books' }" class="brand">
-    <span class="brand-icon">📚</span>
-    <div class="brand-text">
-      <span class="brand-name">Ecos Literários</span>
-      <span class="brand-sub">
-        {{ isTablet ? 'Catálogo do clube' : 'Catálogo de livros do clube' }}
-      </span>
-    </div>
+    <img src="/icons/icon-192x192.png" alt="" class="brand__logo" width="32" height="32" />
+    <span class="brand__name">Ecos Literários</span>
   </RouterLink>
 </template>
 
-<script lang="ts" setup>
-import { useMediaQuery } from '@vueuse/core'
-
-import { useBreakpoints } from '@/composables'
-
-const isTablet = useMediaQuery(useBreakpoints.isTablet)
-</script>
-
 <style lang="scss" scoped>
 .brand {
-  display: flex;
-  color: var(--color-action-default);
+  display: inline-flex;
+  min-height: var(--touch-min);
   align-items: center;
-  gap: 12px;
-  transition: opacity var(--motion-transition-default);
+  gap: var(--space-3);
+  text-decoration: none;
 
-  &:hover {
-    opacity: 0.85;
+  &__logo {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
   }
 
-  &-icon {
-    font-size: 1.25rem;
-    line-height: 1;
+  &__name {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--color-text-default);
   }
 
-  &-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.2;
-  }
-
-  &-name {
-    font: {
-      family: var(--font-family-display);
-      size: 1.1rem;
-      weight: 500;
-    }
-    color: var(--color-action-default);
-  }
-
-  &-sub {
-    font: {
-      size: 0.8125rem;
-      weight: 500;
-    }
-    color: var(--color-text-subtle);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  @media (max-width: 767px) {
-    &-name {
-      font-size: 1rem;
-    }
-
-    &-sub {
-      font-size: 0.8125rem;
-    }
+  &:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: var(--space-1);
+    border-radius: var(--radius-sm);
   }
 }
 </style>

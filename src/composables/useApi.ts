@@ -25,6 +25,7 @@ const normalizeBook = (raw: ApiBook): Book => ({
   synopsis: raw.synopsis,
   published_year: raw.published_year,
   page_count: raw.page_count,
+  added_at: raw.added_at,
   subgenerosArr: raw.subgeneros.map((s) => (typeof s === 'string' ? s : s.nome.toLowerCase())),
 })
 

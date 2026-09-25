@@ -4,7 +4,7 @@
       <!-- Formulário -->
       <div v-if="step === 'form'" class="login-form">
         <div class="field">
-          <label for="email" class="field-label">Email</label>
+          <label for="email" class="field-label">E-mail</label>
           <input
             id="email"
             ref="inputRef"
@@ -20,24 +20,23 @@
           <span v-if="errorMsg" class="field-error">{{ errorMsg }}</span>
         </div>
 
-        <button class="submit-btn" :disabled="loading || !email.trim()" @click="submit">
+        <AppButton class="submit-btn" variant="primary" :disabled="loading || !email.trim()" @click="submit">
           <span v-if="!loading">Enviar link de acesso</span>
           <span v-else class="loading-dots"> <span /><span /><span /> </span>
-        </button>
+        </AppButton>
       </div>
 
       <!-- Confirmação -->
       <div v-else class="login-sent">
-        <div class="sent-icon">✉️</div>
-        <p class="sent-title">Link enviado!</p>
+        <p class="sent-title">Mandamos o link</p>
         <p class="sent-desc">
-          Enviamos um link de acesso para <strong>{{ email }}</strong
-          >. Verifique sua caixa de entrada e clique no link para entrar.
+          Foi para <strong>{{ email }}</strong
+          >. Veja seu e-mail e toque no link pra entrar.
         </p>
-        <button class="resend-btn" :disabled="resendCooldown > 0" @click="submit">
-          <template v-if="resendCooldown > 0">Reenviar em {{ resendCooldown }}s</template>
-          <template v-else>Não recebeu? Reenviar</template>
-        </button>
+        <AppButton class="resend-btn" :disabled="resendCooldown > 0" @click="submit">
+          <template v-if="resendCooldown > 0">Mandar de novo em {{ resendCooldown }} segundos</template>
+          <template v-else>Não chegou? Mandar de novo</template>
+        </AppButton>
       </div>
 
       <!-- Voltar -->
@@ -50,6 +49,7 @@
 </template>
 
 <script lang="ts" setup>
+import AppButton from '@/components/AppButton.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -91,7 +91,7 @@ const submit = async () => {
     step.value = 'sent'
     startCooldown()
   } catch (err) {
-    errorMsg.value = err instanceof Error ? err.message : 'Erro ao enviar o link. Tente novamente.'
+    errorMsg.value = err instanceof Error ? err.message : 'Não deu pra enviar o link. Tente de novo.'
   } finally {
     loading.value = false
   }
@@ -107,6 +107,10 @@ const startCooldown = () => {
 </script>
 
 <style lang="scss" scoped>
+.submit-btn {
+  width: 100%;
+}
+
 .login-page {
   display: flex;
   align-items: center;
@@ -185,30 +189,6 @@ const startCooldown = () => {
   }
 }
 
-.submit-btn {
-  height: 48px;
-  border: none;
-  border-radius: var(--border-radius-default);
-  background: var(--color-action-default);
-  color: var(--color-surface-default);
-  font-family: var(--font-family-body);
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    opacity var(--motion-transition-default),
-    background var(--motion-transition-default);
-
-  &:hover:not(:disabled) {
-    background: var(--color-action-default-hover);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
 // ── Loading dots ──────────────────────────────────────────────────
 .loading-dots {
   display: inline-flex;
@@ -258,11 +238,6 @@ const startCooldown = () => {
   border-radius: var(--border-radius-default);
 }
 
-.sent-icon {
-  font-size: 2rem;
-  line-height: 1;
-}
-
 .sent-title {
   margin: 0;
   font-family: var(--font-family-display);
@@ -279,29 +254,6 @@ const startCooldown = () => {
 
   strong {
     color: var(--color-text-default);
-  }
-}
-
-.resend-btn {
-  margin-top: 0.25rem;
-  padding: 6px 12px;
-  border: none;
-  background: none;
-  font-family: var(--font-family-body);
-  font-size: 0.875rem;
-  color: var(--color-action-default);
-  cursor: pointer;
-  transition: opacity var(--motion-transition-default);
-  border-radius: var(--border-radius-sm);
-
-  &:hover:not(:disabled) {
-    background: var(--color-action-background-subtle);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    color: var(--color-text-subtle);
   }
 }
 

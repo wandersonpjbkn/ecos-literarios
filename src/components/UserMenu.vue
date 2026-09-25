@@ -1,8 +1,9 @@
 <template>
-  <div ref="wrapRef" class="user-btn-wrap">
+  <div ref="wrapRef" class="user-btn-wrap" :class="`user-btn-wrap--${placement}`">
     <!-- guest -->
     <RouterLink v-if="!store.isLoggedIn" :to="{ name: 'auth-login' }" class="user-btn">
       <BaseIcon name="user" aria-hidden="true" />
+      <span class="user-btn__label" :class="{ 'visually-hidden': placement === 'header' }">Entrar</span>
     </RouterLink>
 
     <!-- logged in -->
@@ -14,11 +15,12 @@
       @click="isOpen = !isOpen"
     >
       <UserAvatar :alt="store.user!.name" />
+      <span class="user-btn__label" :class="{ 'visually-hidden': placement === 'header' }">Conta</span>
     </button>
 
     <!-- Dropdown do usuário logado -->
     <Transition name="dropdown">
-      <div v-if="isOpen && store.isLoggedIn" class="user-dropdown" role="menu">
+      <div v-if="isOpen && store.isLoggedIn" class="user-dropdown" :class="`user-dropdown--${placement}`" role="menu">
         <div class="user-dropdown__header">
           <UserAvatar :alt="store.user!.name" class="user-dropdown__avatar" />
           <div class="user-dropdown__info">
@@ -62,6 +64,14 @@ import { onClickOutside } from '@vueuse/core'
 import { useAuth } from '@/composables'
 import UserAvatar from '@/components/UserAvatar.vue'
 
+withDefaults(
+  defineProps<{
+    // "rail": sits at the foot of the desktop rail, so the menu opens to the right and upward.
+    placement?: 'header' | 'rail'
+  }>(),
+  { placement: 'header' },
+)
+
 const { store, logout } = useAuth()
 const router = useRouter()
 
@@ -87,6 +97,24 @@ const handleLogout = async () => {
 <style lang="scss" scoped>
 .user-btn-wrap {
   position: relative;
+}
+
+.user-btn-wrap--rail {
+  .user-btn {
+    width: auto;
+    height: auto;
+    min-height: 66px;
+    padding: var(--space-2) var(--space-1);
+    flex-direction: column;
+    gap: var(--space-1);
+    color: var(--color-text-subtle);
+  }
+
+  // The word names the control for everyone: visible under the avatar here, screen-reader only in the phone header.
+  .user-btn__label {
+    font-size: 0.8125rem;
+    line-height: 1.2;
+  }
 }
 
 // ── Botão base ────────────────────────────────────────────────────
@@ -146,6 +174,13 @@ const handleLogout = async () => {
   border-radius: var(--border-radius-default);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+
+  &--rail {
+    top: auto;
+    right: auto;
+    bottom: 0;
+    left: calc(100% + var(--space-3));
+  }
 
   &__header {
     display: flex;

@@ -44,7 +44,7 @@ $config: (
 
 @include create-theme('ecos', $config);
 
-// Not covered by the mixin: genre tints, spacing, radius and target sizes.
+// Not covered by the mixin: genre tints, alert tints, spacing, radius and target sizes.
 :root[data-theme='ecos'] {
     --tint-ficcao-bg: #EEF1F5;
     --tint-ficcao-line: #DFE5EC;
@@ -73,6 +73,10 @@ $config: (
     --tint-poesia-bg: #EEF1ED;
     --tint-poesia-line: #DFE5DC;
     --tint-poesia-ink: #2E362C;
+
+    --alert-bg: #FBF3E2;
+    --alert-line: #EDDAB0;
+    --alert-ink: #5A4210; // 8.56:1 on alert-bg
 
     --space-1: 4px;
     --space-2: 8px;

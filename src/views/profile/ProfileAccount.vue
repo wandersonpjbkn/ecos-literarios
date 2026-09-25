@@ -108,7 +108,7 @@
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { useAuthStore } from '@/stores'
+import { useAuthStore, PREFERENCES_STORE_ID } from '@/stores'
 import { useApi, useErrorReporter, useUtils } from '@/composables'
 import { buildHeaders } from '@/composables/useApi'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
@@ -127,7 +127,9 @@ const forceRefresh = () => {
 }
 
 const forceReset = () => {
-  localStorage.clear()
+  Object.keys(localStorage)
+    .filter((key) => key !== PREFERENCES_STORE_ID)
+    .forEach((key) => localStorage.removeItem(key))
   forceRefresh()
 }
 

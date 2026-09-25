@@ -1,12 +1,12 @@
 <template>
   <Transition name="update-banner">
     <div v-if="isVisible" class="update-banner" role="status" aria-live="polite">
-      <span class="update-banner__text">Nova versão disponível</span>
-      <button class="update-banner__btn" type="button" @click="reload">
-        <span v-if="!isMobile">Recarregar</span>
-        <BaseIcon name="reload" class="update-banner__icon" aria-hidden="true" />
-      </button>
-      <button class="update-banner__dismiss" type="button" aria-label="Dispensar" @click="isVisible = false">
+      <span class="update-banner__text">Tem uma versão nova da plataforma</span>
+      <AppButton class="update-banner__btn" variant="primary" size="md" @click="reload">
+        <BaseIcon name="reload" aria-hidden="true" />
+        Atualizar
+      </AppButton>
+      <button class="update-banner__dismiss" type="button" aria-label="Fechar" @click="isVisible = false">
         <BaseIcon name="times" aria-hidden="true" />
       </button>
     </div>
@@ -14,14 +14,10 @@
 </template>
 
 <script lang="ts" setup>
+import AppButton from '@/components/AppButton.vue'
 import { ref, onMounted } from 'vue'
-import { useMediaQuery } from '@vueuse/core'
-
-import { useBreakpoints } from '@/composables'
 
 const isVisible = ref(false)
-
-const isMobile = useMediaQuery(useBreakpoints.isMobile)
 
 const reload = () => window.location.reload()
 
@@ -61,7 +57,6 @@ onMounted(() => {
     height: var(--icn-size);
   }
 
-  &__btn,
   &__dismiss {
     display: inline-flex;
     padding: 6px 12px;
@@ -96,16 +91,6 @@ onMounted(() => {
     @media (max-width: 767px) {
       font-size: 0.8125rem;
     }
-  }
-
-  &__btn {
-    gap: 6px;
-
-    font-family: var(--font-family-body);
-    font-size: 0.875rem;
-    font-weight: 500;
-
-    white-space: nowrap;
   }
 
   @media (max-width: 767px) {

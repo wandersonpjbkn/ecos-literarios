@@ -1,7 +1,7 @@
 <template>
   <div ref="wrapRef" class="search-wrap">
     <div class="search-box" :class="{ 'is-focused': focused }">
-      <button v-if="model" class="clear-search" aria-label="Limpar" @click="cleanAll">
+      <button v-if="model" class="clear-search" aria-label="Apagar a busca" @click="cleanAll">
         <BaseIcon name="times" />
       </button>
       <BaseIcon v-else name="search" class="search-icon" />
@@ -75,6 +75,8 @@ const emit = defineEmits(['update:modelValue', 'select'])
 
 const wrapRef = ref<HTMLDivElement | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
+
+defineExpose({ focus: () => inputRef.value?.focus() })
 const focused = ref(false)
 const activeIdx = ref(-1)
 
@@ -135,8 +137,8 @@ onClickOutside(wrapRef, () => close())
   &-box {
     display: flex;
     background: var(--color-surface-default);
-    border: 1.5px solid var(--color-border-default);
-    border-radius: var(--border-radius-default);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-lg);
     padding: 0 14px;
     min-height: 44px;
 

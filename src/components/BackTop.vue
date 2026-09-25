@@ -1,23 +1,17 @@
 <template>
   <Transition name="fade">
-    <aside
-      v-if="isVisible"
-      class="back-top"
-      aria-label="Voltar ao topo"
-      role="button"
-      tabindex="0"
-      @click="backTop"
-      @keydown.enter="backTop"
-      @keydown.space.prevent="backTop"
-    >
-      <BaseIcon name="arrow-left" class="back-top-icon" aria-hidden="true" />
-    </aside>
+    <AppButton v-if="isVisible" class="back-top" @click="backTop">
+      <BaseIcon name="arrow-left" class="back-top__icon" aria-hidden="true" />
+      Voltar ao topo
+    </AppButton>
   </Transition>
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useScroll } from '@vueuse/core'
+
+import AppButton from '@/components/AppButton.vue'
 
 const props = defineProps<{
   target: HTMLElement | null
@@ -36,58 +30,21 @@ const backTop = () => {
 </script>
 
 <style lang="scss" scoped>
+// Outlined, not filled: the screen already has its one primary action.
 .back-top {
-  $size: 3rem;
-
   position: fixed;
-  right: 3rem;
-  bottom: 1rem;
-  z-index: 10;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background-color: var(--color-action-default);
-  border: none;
-  border-radius: var(--border-radius-default);
-  width: $size;
-  height: $size;
-  cursor: pointer;
+  right: var(--space-6);
+  bottom: var(--space-6);
+  z-index: 40;
+  box-shadow: var(--shadow-default);
 
   @media (max-width: 767px) {
-    $size-mobile: 44px;
-
-    right: 1rem;
-    bottom: 4rem;
-
-    width: $size-mobile;
-    height: $size-mobile;
+    right: var(--space-4);
+    bottom: calc(var(--space-14) + var(--space-5) + env(safe-area-inset-bottom));
   }
 
-  &:focus-visible {
-    outline: 2px solid var(--color-border-focus);
-    outline-offset: 2px;
-  }
-
-  &-icon {
-    $size: 1.5rem;
-
-    width: $size;
-    height: $size;
-
-    color: var(--color-surface-default);
-
+  &__icon {
     transform: rotate(90deg);
   }
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity var(--motion-transition-default);
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>

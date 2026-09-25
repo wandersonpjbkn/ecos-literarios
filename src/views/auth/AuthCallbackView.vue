@@ -2,19 +2,20 @@
   <div class="callback-page">
     <div class="callback-card">
       <BaseSpinner v-if="status === 'loading'">
-        <p class="callback-msg">Verificando acesso…</p>
+        <p class="callback-msg">Entrando…</p>
       </BaseSpinner>
 
       <template v-else-if="status === 'error'">
         <BaseIcon name="error" class="callback-error-icon" aria-hidden="true" />
         <p class="callback-msg callback-msg--error">{{ errorMsg }}</p>
-        <RouterLink :to="{ name: 'auth-login' }" class="callback-btn">Tentar novamente</RouterLink>
+        <AppButton :to="{ name: 'auth-login' }" variant="primary">Pedir outro link</AppButton>
       </template>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import AppButton from '@/components/AppButton.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -33,8 +34,7 @@ onMounted(async () => {
     router.replace('/')
   } catch (err) {
     status.value = 'error'
-    errorMsg.value =
-      err instanceof Error ? err.message : 'Não foi possível verificar o acesso. O link pode ter expirado.'
+    errorMsg.value = err instanceof Error ? err.message : 'Não deu pra entrar com esse link. Ele pode ter vencido.'
   }
 })
 </script>
@@ -77,25 +77,5 @@ onMounted(async () => {
   width: 40px;
   height: 40px;
   color: var(--color-action-default);
-}
-
-.callback-btn {
-  margin-top: 0.5rem;
-  padding: 10px 20px;
-  min-height: 44px;
-  border: none;
-  border-radius: var(--border-radius-sm);
-  background: var(--color-action-default);
-  color: var(--color-surface-default);
-  text-decoration: none;
-  font-size: 1rem;
-  font-family: var(--font-family-body);
-  display: inline-flex;
-  align-items: center;
-  transition: opacity var(--motion-transition-default);
-
-  &:hover {
-    opacity: 0.85;
-  }
 }
 </style>

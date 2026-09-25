@@ -1,12 +1,12 @@
 <template>
   <div class="books-grid-wrap">
     <TransitionGroup v-if="books.length > 0" name="grid" tag="div" class="books-grid">
-      <BookCard v-for="book in visibleBooks" :key="book.id" :book="book" />
+      <component :is="item.eco ? EcoCard : BookCard" v-for="item in items" :key="item.key" :book="item.book" />
     </TransitionGroup>
 
     <div v-else class="empty-state">
       <p>{{ emptyMessage }}</p>
-      <button class="retry-btn" type="button" @click="emit('clear')">Limpar os filtros</button>
+      <AppButton class="retry-btn" variant="primary" @click="emit('clear')">Limpar os filtros</AppButton>
     </div>
 
     <ListFooter
@@ -20,27 +20,45 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
+
+import AppButton from '@/components/AppButton.vue'
 import BookCard from '@/components/BookCard.vue'
+import EcoCard from '@/components/EcoCard.vue'
 import ListFooter from '@/components/ListFooter.vue'
 import { useBooksGrid } from '@/composables'
 import type { Book } from '@/types'
 
 const books = defineModel<Book[]>({ required: true })
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     emptyMessage?: string
+    // Third card (Main): takes a book's slot but stays out of the counts.
+    eco?: Book | null
   }>(),
   {
     emptyMessage: 'Nenhum livro com esses filtros',
+    eco: null,
   },
 )
+
+const ECO_SLOT = 2
 
 const emit = defineEmits<{
   clear: []
 }>()
 
-const { visibleBooks, nextBatch, loadMore } = useBooksGrid(books)
+const { visibleBooks, nextBatch, loadMore } = useBooksGrid(
+  books,
+  computed(() => (props.eco ? 1 : 0)),
+)
+
+const items = computed(() => {
+  const list = visibleBooks.value.map((book) => ({ key: book.id, book, eco: false }))
+  if (props.eco && list.length > ECO_SLOT) list.splice(ECO_SLOT, 0, { key: 'eco', book: props.eco, eco: true })
+  return list
+})
 </script>
 
 <style lang="scss" scoped>
@@ -70,28 +88,6 @@ const { visibleBooks, nextBatch, loadMore } = useBooksGrid(books)
   color: var(--color-text-default);
   text-align: center;
   font-size: 1rem;
-}
-
-.retry-btn {
-  border: none;
-  padding: var(--space-3) var(--space-5);
-  border-radius: var(--radius-lg);
-  min-height: var(--touch-cta);
-  font-family: var(--font-family-body);
-  font-size: 1rem;
-  cursor: pointer;
-  background: var(--color-action-default);
-  color: var(--color-surface-default);
-  transition: opacity var(--motion-transition-default);
-
-  &:hover {
-    opacity: 0.85;
-    background: var(--color-action-default-hover);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--color-border-focus);
-    outline-offset: var(--space-1);
-  }
 }
 
 .grid-enter-active {

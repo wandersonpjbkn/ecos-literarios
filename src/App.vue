@@ -19,9 +19,6 @@
       </RouterView>
     </main>
 
-    <!-- portal -->
-    <aside id="sidebar" />
-
     <!-- back to top -->
     <BackTop :target="content" />
 
@@ -93,7 +90,7 @@ onUnmounted(() => stopWatchSession?.())
   display: grid;
   height: 100dvh;
 
-  grid-template-rows: 4rem 1fr;
+  grid-template-rows: auto 1fr;
   grid-template-columns: auto 1fr;
   overflow: hidden;
 
@@ -106,7 +103,7 @@ onUnmounted(() => stopWatchSession?.())
   }
 
   @media (max-width: 767px) {
-    grid-template-rows: 3rem 1fr auto;
+    grid-template-rows: auto 1fr auto;
     grid-template-columns: 1fr;
 
     :deep(.app-sidebar) {

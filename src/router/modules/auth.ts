@@ -9,7 +9,7 @@ export const routes = [
     path: '/auth/callback',
     name: 'auth-callback',
     component: () => import('@/views/auth/AuthCallbackView.vue'),
-    meta: { title: 'Verificando acesso — Ecos Literários', pageClass: 'page-auth' },
+    meta: { title: 'Entrando — Ecos Literários', pageClass: 'page-auth' },
   },
 ]
 

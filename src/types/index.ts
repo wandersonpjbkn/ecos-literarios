@@ -37,6 +37,7 @@ export interface Book {
   isbn?: string
   page_count?: number
   published_year?: number
+  added_at?: string
 }
 
 export type FilterKey = 'midia' | 'categoria' | 'subgeneros' | 'quem' | 'autor' | 'tamanho'
@@ -51,7 +52,7 @@ export interface Suggestion {
 
 export type CategoryType = keyof typeof CategoriesColors
 
-export type BookSortOrder = 'titulo' | 'pessoa' | 'genero'
+export type BookSortOrder = 'recentes' | 'titulo' | 'pessoa' | 'genero'
 
 export interface BookPayload {
   _id: string
@@ -114,6 +115,7 @@ export interface ApiBook {
   synopsis?: string
   published_year?: number
   page_count?: number
+  added_at?: string
   subgeneros: (ApiPopulated | string)[]
 }
 

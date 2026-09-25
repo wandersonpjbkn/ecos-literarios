@@ -4,15 +4,16 @@
       <BaseIcon name="error" class="forbidden-icon" aria-hidden="true" />
       <h1 class="forbidden-title">Sem permissão</h1>
       <p class="forbidden-desc">
-        Esta área é restrita a administradores.<br />
-        Você será redirecionado em <strong>{{ countdown }}s</strong>.
+        Só quem cuida da plataforma entra aqui.<br />
+        Voltando para o catálogo em <strong>{{ countdown }} segundos</strong>.
       </p>
-      <RouterLink :to="{ name: 'catalog-books' }" class="forbidden-btn">Ir agora</RouterLink>
+      <AppButton :to="{ name: 'catalog-books' }" variant="primary">Ir para o catálogo</AppButton>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import AppButton from '@/components/AppButton.vue'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -78,25 +79,6 @@ onBeforeUnmount(() => clearInterval(interval))
 
   strong {
     color: var(--color-text-default);
-  }
-}
-
-.forbidden-btn {
-  margin-top: 0.5rem;
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 10px 24px;
-  border-radius: var(--border-radius-sm);
-  background: var(--color-action-default);
-  color: var(--color-surface-default);
-  text-decoration: none;
-  font-size: 1rem;
-  font-family: var(--font-family-body);
-  transition: opacity var(--motion-transition-default);
-
-  &:hover {
-    opacity: 0.85;
   }
 }
 </style>

@@ -2,16 +2,17 @@
   <div class="list-footer">
     <p class="list-footer__count" aria-live="polite">
       <template v-if="shown < total">Você está vendo {{ shown }} de {{ total }}</template>
+      <template v-else-if="total === 1">Este é o único</template>
       <template v-else>Estes são todos os {{ total }}</template>
     </p>
 
-    <button v-if="shown < total" class="list-footer__more" type="button" @click="emit('more')">
-      Ver mais {{ nextBatch }}
-    </button>
+    <AppButton v-if="shown < total" class="list-footer__more" @click="emit('more')">Ver mais {{ nextBatch }}</AppButton>
   </div>
 </template>
 
 <script lang="ts" setup>
+import AppButton from '@/components/AppButton.vue'
+
 defineProps<{
   shown: number
   total: number
@@ -38,30 +39,6 @@ const emit = defineEmits<{
 
   &__more {
     width: 100%;
-    min-height: var(--touch-cta);
-    padding: 0 var(--space-6);
-
-    font: {
-      family: var(--font-family-body);
-      size: 0.9375rem;
-      weight: 600;
-    }
-    color: var(--color-text-default);
-
-    background: var(--color-surface-default);
-    border: 1px solid var(--color-border-strong);
-    border-radius: var(--radius-lg);
-    cursor: pointer;
-    transition: border-color var(--motion-transition-default);
-
-    &:hover {
-      border-color: var(--color-action-default);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--color-border-focus);
-      outline-offset: var(--space-1);
-    }
 
     @media (min-width: 768px) {
       width: auto;
