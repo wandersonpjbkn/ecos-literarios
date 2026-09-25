@@ -86,11 +86,20 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useMediaQuery, useOnline } from '@vueuse/core'
 
 import { useBooksStore, useCacheStore, usePreferencesStore } from '@/stores'
-import { useApi, useBreakpoints, useEcoOfTheWeek, useFilters, useBookSort, usePageMeta } from '@/composables'
+import {
+  rememberCatalog,
+  useApi,
+  useBreakpoints,
+  useEcoOfTheWeek,
+  useFilters,
+  useBookSort,
+  usePageMeta,
+} from '@/composables'
 
 import AppSelect from '@/components/AppSelect.vue'
 import FilterChip from '@/components/FilterChip.vue'
@@ -110,9 +119,9 @@ usePageMeta({
 
 const QUICK_GENRES = 5
 
-// People get a phrase so the one who mentioned is not mistaken for the author, and vice versa.
+// "por" (who mentioned) and "de" (author) keep the two apart without repeating "mencionado por" per chip.
 const CHIP_LABEL: Partial<Record<FilterKey, (value: string) => string>> = {
-  quem: (value) => `mencionado por ${value}`,
+  quem: (value) => `por ${value}`,
   autor: (value) => `de ${value}`,
 }
 
@@ -129,6 +138,9 @@ const { search, optionCounts, selected, hasFilters, hrefToggling, clearAll, filt
 const { sortOrder, sortedBooks, sortOptions } = useBookSort(filtered)
 
 onMounted(() => useApi().fetchBooks())
+
+const route = useRoute()
+watch(() => route.fullPath, rememberCatalog, { immediate: true })
 
 const preferences = usePreferencesStore()
 

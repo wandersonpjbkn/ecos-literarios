@@ -1,6 +1,15 @@
 import { useErrorReporter } from '@/composables'
 import { useBooksStore, useCacheStore } from '@/stores'
-import type { Book, ApiBook, ApiPopulated, MyClaimStatus, RegisterResponse } from '@/types'
+import type {
+  Book,
+  ApiBook,
+  ApiPopulated,
+  MyClaimStatus,
+  ReadingCounts,
+  ReadingEntry,
+  ReadingStatus,
+  RegisterResponse,
+} from '@/types'
 import { API_BASE } from '@/data/config'
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -26,6 +35,9 @@ const normalizeBook = (raw: ApiBook): Book => ({
   published_year: raw.published_year,
   page_count: raw.page_count,
   added_at: raw.added_at,
+  isbn: raw.isbn,
+  google_books_id: raw.google_books_id,
+  origem: raw.origem,
   subgenerosArr: raw.subgeneros.map((s) => (typeof s === 'string' ? s : s.nome.toLowerCase())),
 })
 
@@ -168,3 +180,35 @@ export const unclaimRegister = async (): Promise<{ message?: string }> => {
 
   return res.json() as Promise<{ message?: string }>
 }
+
+// ── "Quero ler" / "Lido" ─────────────────────────────
+
+const readingRequest = async <T>(path: string, init: RequestInit, fallback: string): Promise<T> => {
+  const res = await fetch(`${API_BASE}${path}`, { ...init, headers: buildHeaders() })
+  if (!res.ok) {
+    // The API's own message when it sends one ("Livro não encontrado."); never a bare "HTTP 500".
+    const { error } = await res.json().catch(() => ({}))
+    throw new Error(error ?? fallback)
+  }
+  return (res.status === 204 ? null : res.json()) as Promise<T>
+}
+
+export const getMyReading = () =>
+  readingRequest<ReadingEntry[]>('/users/me/reading', { method: 'GET' }, 'Não deu pra abrir sua lista. Tente de novo.')
+
+export const saveReading = (bookId: string, status: ReadingStatus) =>
+  readingRequest<ReadingEntry>(
+    `/users/me/reading/${bookId}`,
+    { method: 'PUT', body: JSON.stringify({ status }) },
+    'Não deu pra salvar na sua lista. Tente de novo.',
+  )
+
+export const removeReading = (bookId: string) =>
+  readingRequest<null>(
+    `/users/me/reading/${bookId}`,
+    { method: 'DELETE' },
+    'Não deu pra tirar da sua lista. Tente de novo.',
+  )
+
+export const getReadingCounts = (bookId: string) =>
+  readingRequest<ReadingCounts>(`/books/${bookId}/reading`, { method: 'GET' }, 'Não deu pra carregar essa contagem.')

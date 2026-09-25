@@ -1,14 +1,18 @@
 <template>
   <BasePill
-    :as="isLink ? RouterLink : 'button'"
+    :as="isExternal ? 'a' : isLink ? RouterLink : 'button'"
     :to="isLink ? to : undefined"
-    :type="isLink ? undefined : type"
+    :href="isExternal ? href : undefined"
+    :target="isExternal ? '_blank' : undefined"
+    :rel="isExternal ? 'noopener noreferrer' : undefined"
+    :type="isLink || isExternal ? undefined : type"
     :disabled="disabled || undefined"
     :tone="TONE[variant]"
     :size="size"
     class="app-button"
   >
     <slot />
+    <span v-if="isExternal" class="visually-hidden">{{ EXTERNAL_NOTE }}</span>
   </BasePill>
 </template>
 
@@ -33,12 +37,17 @@ const props = withDefaults(
     variant?: Variant
     size?: 'md' | 'lg'
     to?: RouteLocationRaw
+    // Outside the app (WhatsApp, stores): opens in a new tab.
+    href?: string
     type?: 'button' | 'submit'
     disabled?: boolean
   }>(),
-  { variant: 'secondary', size: 'lg', to: undefined, type: 'button', disabled: false },
+  { variant: 'secondary', size: 'lg', to: undefined, href: undefined, type: 'button', disabled: false },
 )
 
 // A disabled destination renders as a disabled button: a link cannot be disabled.
 const isLink = computed(() => !!props.to && !props.disabled)
+const isExternal = computed(() => !!props.href && !props.disabled)
+// Leading space: without it a screen reader hears the label and the note as one word.
+const EXTERNAL_NOTE = ' (abre em outra aba)'
 </script>

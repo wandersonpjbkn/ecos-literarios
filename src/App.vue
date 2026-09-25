@@ -24,6 +24,7 @@
 
     <!-- update notification -->
     <UpdateNotification />
+    <AppToast />
   </div>
 </template>
 
@@ -36,6 +37,7 @@ import { Head } from '@unhead/vue/components'
 import { useAuth } from '@/composables'
 import AppHeader from '@/components/AppHeader.vue'
 import UpdateNotification from '@/components/UpdateNotification.vue'
+import AppToast from '@/components/AppToast.vue'
 
 const AppSidebar = defineAsyncComponent(() => import('@/components/AppSidebar.vue'))
 const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))

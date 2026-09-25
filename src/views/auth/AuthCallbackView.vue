@@ -20,6 +20,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useAuth } from '@/composables/useAuth'
+import { takeReturn } from '@/composables/useReturnPath'
 
 const { handleCallback } = useAuth()
 const router = useRouter()
@@ -30,8 +31,7 @@ const errorMsg = ref('')
 onMounted(async () => {
   try {
     await handleCallback()
-    // Redireciona para a home após login bem-sucedido
-    router.replace('/')
+    router.replace(takeReturn())
   } catch (err) {
     status.value = 'error'
     errorMsg.value = err instanceof Error ? err.message : 'Não deu pra entrar com esse link. Ele pode ter vencido.'

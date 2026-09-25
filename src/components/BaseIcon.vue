@@ -15,6 +15,7 @@ const props = defineProps<{
     | 'chevron'
     | 'info'
     | 'error'
+    | 'external'
     | 'filter'
     | 'funil'
     | 'home'

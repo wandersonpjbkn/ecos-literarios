@@ -119,6 +119,12 @@ export function useFilters() {
     }
   }
 
+  /** The catalog filtered by one value, for links outside the catalog (the open book). */
+  const catalogLink = (key: FilterKey, value: string): RouteLocationRaw => ({
+    name: 'catalog-books',
+    query: { [QUERY_PARAM[key]]: toSlug(key, value) },
+  })
+
   /** Location with one value toggled, for filters rendered as real links. */
   const hrefToggling = (key: FilterKey, value: string): RouteLocationRaw => ({
     query: queryFor(withToggled(key, value)),
@@ -181,6 +187,7 @@ export function useFilters() {
     hasFilters,
     withToggled,
     hrefToggling,
+    catalogLink,
     apply,
     clearAll,
     filtered,

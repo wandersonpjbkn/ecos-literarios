@@ -14,7 +14,7 @@
         @select="(suggestion: Suggestion) => (model = suggestion.main)"
       />
 
-      <AppButton :to="{ name: addTarget }" class="app-header__add" variant="primary" :disabled="!canWrite">
+      <AppButton :to="{ name: addTarget }" class="app-header__add" :variant="addVariant" :disabled="!canWrite">
         <BaseIcon name="plus" aria-hidden="true" />
         Adicionar um livro
       </AppButton>
@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMediaQuery } from '@vueuse/core'
 
@@ -43,6 +43,8 @@ const { model, suggestions, filteredCount } = useCatalogSearch()
 const canWrite = useCanWrite()
 
 const route = useRoute()
+// One primary per fold: on the open book that is "Guardar em Quero ler" (Detail.desktop).
+const addVariant = computed(() => (route.name === 'catalog-book-details' ? 'secondary' : 'primary'))
 const router = useRouter()
 const search = ref<InstanceType<typeof SearchBar> | null>(null)
 

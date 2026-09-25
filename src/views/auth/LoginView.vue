@@ -51,14 +51,16 @@
 <script lang="ts" setup>
 import AppButton from '@/components/AppButton.vue'
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import { useAuth } from '@/composables/useAuth'
+import { rememberReturn, takeReturn } from '@/composables/useReturnPath'
 import { useAuthStore } from '@/stores'
 
 const { sendMagicLink } = useAuth()
 const authStore = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 const inputRef = ref<HTMLInputElement | null>(null)
 const email = ref('')
@@ -67,9 +69,11 @@ const errorMsg = ref('')
 const step = ref<'form' | 'sent'>('form')
 const resendCooldown = ref(0)
 
-// Se já está logado, redireciona
 onMounted(() => {
-  if (authStore.isLoggedIn) router.replace('/')
+  if (authStore.isLoggedIn) {
+    rememberReturn(route.query.voltar)
+    router.replace(takeReturn())
+  }
   inputRef.value?.focus()
 })
 
@@ -80,11 +84,12 @@ const submit = async () => {
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(email.value.trim())) {
-    errorMsg.value = 'Digite um email válido.'
+    errorMsg.value = 'Digite um e-mail válido.'
     return
   }
 
   loading.value = true
+  rememberReturn(route.query.voltar)
 
   try {
     await sendMagicLink(email.value.trim())

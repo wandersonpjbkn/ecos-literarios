@@ -103,7 +103,13 @@
     </template>
 
     <!-- Book form drawer -->
-    <BookFormDrawer :book="editingBook" :is-open="isDrawerOpen" scope="member" @close="closeDrawer" @saved="onSaved" />
+    <BookFormDrawer
+      :book="editingBook"
+      :is-open="isDrawerOpen"
+      scope="member"
+      @close="editor.close"
+      @saved="editor.onSaved"
+    />
   </div>
 </template>
 
@@ -111,14 +117,12 @@
 import { ref, computed, onMounted } from 'vue'
 
 import { useAuthStore, useBooksStore } from '@/stores'
-import { useApi, useErrorReporter } from '@/composables'
-import { buildHeaders } from '@/composables/useApi'
+import { useApi, useBookEditor } from '@/composables'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import PaginationNav from '@/components/PaginationNav.vue'
 import BookFormDrawer from '@/components/admin/BookFormDrawer.vue'
-import type { Book, Suggestion, BookForEdit } from '@/types'
-import { API_BASE } from '@/data/config'
+import type { Book, Suggestion } from '@/types'
 
 const authStore = useAuthStore()
 const booksStore = useBooksStore()
@@ -127,10 +131,8 @@ const paginationNav = ref<InstanceType<typeof PaginationNav> | null>(null)
 
 const searchQuery = ref('')
 const loading = computed(() => booksStore.loading)
-const fetchError = ref('')
-const isDrawerOpen = ref(false)
-const editingBook = ref<BookForEdit | null>(null)
-const editingLoadingId = ref<string | number | null>(null)
+const editor = useBookEditor()
+const { editingBook, isOpen: isDrawerOpen, loadingId: editingLoadingId, error: fetchError } = editor
 
 const myBooks = computed(() => booksStore.books.filter((b) => b.quem_user_id === authStore.user?._id))
 
@@ -152,32 +154,7 @@ const withCover = computed(() => myBooks.value.filter((b) => !!b.cover_url).leng
 
 const resolveName = (field: string | { nome: string }): string => (typeof field === 'string' ? field : field.nome)
 
-const openEdit = async (book: Book) => {
-  if (editingLoadingId.value !== null) return
-  editingLoadingId.value = book.id
-  fetchError.value = ''
-
-  try {
-    const res = await fetch(`${API_BASE}/books/${book.id}`, { headers: buildHeaders() })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    editingBook.value = (await res.json()) as BookForEdit
-    isDrawerOpen.value = true
-  } catch (err) {
-    fetchError.value = 'Não foi possível carregar os detalhes do livro. Tente novamente.'
-    useErrorReporter().captureException(err, { context: 'openEdit' })
-  } finally {
-    editingLoadingId.value = null
-  }
-}
-
-const closeDrawer = () => {
-  isDrawerOpen.value = false
-  editingBook.value = null
-}
-
-const onSaved = () => {
-  useApi().fetchBooks(true)
-}
+const openEdit = (book: Book) => editor.open(book.id)
 
 // ── Autocomplete ──────────────────────────────────────────────────
 const searchSuggestions = computed(() => {

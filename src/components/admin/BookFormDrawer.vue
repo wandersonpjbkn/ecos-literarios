@@ -169,7 +169,7 @@
               <h3 class="form-section__title">Contexto</h3>
               <div class="form-grid">
                 <div class="form-field form-field--full">
-                  <label for="bf-porque" class="form-field__label">Por que foi indicado</label>
+                  <label for="bf-porque" class="form-field__label">Comentário</label>
                   <textarea
                     id="bf-porque"
                     v-model.trim="form.porque"

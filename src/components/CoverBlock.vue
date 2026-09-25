@@ -1,5 +1,5 @@
 <template>
-  <div class="cover-block" :style="tintVars">
+  <div class="cover-block" :class="{ 'cover-block--page': size === 'page' }" :style="tintVars">
     <span class="cover-block__title">{{ title }}</span>
     <span v-if="!showImage" class="cover-block__missing">sem capa</span>
 
@@ -19,6 +19,8 @@ const props = defineProps<{
   genre?: string
   format?: string
   coverUrl?: string
+  // "page": the open book, a real book's 2:3 proportion instead of the grid's fixed height.
+  size?: 'grid' | 'page'
 }>()
 
 const BADGED_FORMATS = ['Mangá', 'HQ']
@@ -79,6 +81,20 @@ const badge = computed(() => (props.format && BADGED_FORMATS.includes(props.form
     @media (min-width: 768px) {
       font-size: 0.9375rem;
     }
+  }
+
+  &--page {
+    height: auto;
+    aspect-ratio: 2 / 3;
+
+    @media (min-width: 768px) {
+      height: auto;
+    }
+  }
+
+  &--page &__title {
+    font-size: 1.25rem;
+    -webkit-line-clamp: 5;
   }
 
   &__missing {

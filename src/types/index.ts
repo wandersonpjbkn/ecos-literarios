@@ -38,6 +38,23 @@ export interface Book {
   page_count?: number
   published_year?: number
   added_at?: string
+  // Where the book came from: the WhatsApp conversation (CSV import) or the site. Decided by the API.
+  origem?: BookOrigin
+}
+
+export type BookOrigin = 'conversa' | 'site'
+
+export type ReadingStatus = 'quero_ler' | 'lido'
+
+export interface ReadingEntry {
+  book_id: string
+  status: ReadingStatus
+  updated_at: string
+}
+
+export interface ReadingCounts {
+  quero_ler: number
+  lido: number
 }
 
 export type FilterKey = 'midia' | 'categoria' | 'subgeneros' | 'quem' | 'autor' | 'tamanho'
@@ -116,6 +133,9 @@ export interface ApiBook {
   published_year?: number
   page_count?: number
   added_at?: string
+  isbn?: string
+  google_books_id?: string
+  origem?: BookOrigin
   subgeneros: (ApiPopulated | string)[]
 }
 
