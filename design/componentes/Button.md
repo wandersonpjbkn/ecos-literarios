@@ -12,7 +12,7 @@ Quatro pesos, e a tela escolhe no máximo um primário.
 
 ## Regras
 
-Altura mínima `touch-cta` para a ação principal e para qualquer botão em celular; `touch-min` é o piso absoluto. Raio `radius-lg` — chip é que é pílula, botão não.
+Altura mínima `touch-cta` para a ação principal e para qualquer botão em celular; `touch-min` é o piso absoluto. Raio `radius-pill` em todo botão, nas três variações (decisão de 2026-09-23, depois de teste: uma forma só no sistema). O que separa botão de chip é o peso e a cor, não o raio.
 
 O rótulo diz o que acontece, não o estado desejado: **"Guardar em Quero ler"**, não "Quero ler". Depois do clique o botão muda de texto e oferece a volta ("Guardado em Quero ler · Tirar da lista"); sem isso o membro clica duas vezes.
 

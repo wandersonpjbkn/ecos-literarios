@@ -39,6 +39,9 @@
   --tint-poesia-bg: #EEF1ED; /* Fundo da capa de Poesia. Quase acromática de propósito: 9 gêneros na mesma grade não podem competir. */
   --tint-poesia-line: #DFE5DC; /* Borda da capa de Poesia. */
   --tint-poesia-ink: #2E362C; /* Título sobre a capa de Poesia. Passa de 7:1 sobre a própria tinta. */
+  --alert-bg: #FBF3E2; /* Fundo do aviso de sem internet ou plataforma fora do ar. Âmbar: atenção, não erro. */
+  --alert-line: #EDDAB0; /* Borda do aviso. */
+  --alert-ink: #5A4210; /* Texto do aviso. 8,56:1 sobre alert-bg. */
 
   --space-1: 4px;
   --space-2: 8px;

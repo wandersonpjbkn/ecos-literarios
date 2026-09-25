@@ -17,6 +17,15 @@ design system; aqui está o texto, que é o que decide implementação.
 | [NavRail](componentes/NavRail.md) | Os três destinos, no desktop | 3 |
 | [TabBar](componentes/TabBar.md) | Os mesmos três, no celular | 3 |
 
+## Controles de formulário
+
+Cada navegador pinta `select` e caixa de marcar do seu jeito, então nenhum controle nativo aparece cru. A forma vem de uma pílula só (`BasePill`: tamanho, borda, foco, desabilitado), e os controles montam em cima dela:
+
+- `AppButton`: os quatro pesos do [Button](componentes/Button.md).
+- `AppSelect`: lista própria (`listbox`) para escolha única, como a ordenação; setas, Home/End, Enter, Esc e letra inicial.
+- `AppCheck`: caixa ou rádio desenhados sobre o input nativo transparente.
+- `ComboSelect`: campo com autocompletar para listas longas de escolha múltipla (Subgênero).
+
 ## O que não é componente
 
 Prateleiras, a faixa de relacionados e o cabeçalho de resultado são composições de
