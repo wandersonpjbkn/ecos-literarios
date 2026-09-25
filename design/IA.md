@@ -69,8 +69,15 @@ Um cartão de citação na terceira posição da grade (`Main`): o que ficou reg
 - "Eco" fica: é vocabulário do próprio clube ("Onde as ideias ecoam", descrição do grupo; "que suas ideias ecoem", poema de um ano). Não é jargão para quem chega, é o nome que o grupo já usa.
 
 - Um comentário por semana: sorteado entre os livros com `porque`, estável da segunda ao domingo (semana ISO) e igual para todos. Livro novo com comentário entra no sorteio sozinho.
+- O sorteio é de propósito aberto a qualquer comentário, curto ou longo. O cartão é um chamariz, outra porta de entrada pela curiosidade (como as prateleiras), não uma resenha; comentário curto às vezes é o mais engraçado. Filtrar por tamanho foi considerado e descartado.
 - Só na vista sem filtro e sem busca; ao lado de uma lista filtrada ficaria fora de contexto. No celular não aparece (`Catalog.mobile`).
 - As prateleiras seguem a mesma regra de contexto: só na vista sem filtro; a contagem é a da lista que a prateleira abre (já sem o formato escondido pela preferência), e o formato escondido não ganha prateleira.
+
+## Livro aberto
+
+A lateral "Explorar" saiu; a navegação que ela dava ficou no próprio conteúdo. Todo valor da tela leva ao catálogo filtrado: mídia, gênero, autor, "mencionado por", subgêneros e "Ver os N de Gênero". "Voltar ao catálogo" volta para a última lista que a pessoa viu, com os filtros (guardada na aba, sobrevive ao recarregar); aberto direto por link, volta para o catálogo inteiro. Links para fora (Amazon, Google Books, Google, YouTube, WhatsApp) abrem em outra aba e dizem isso ao leitor de tela.
+
+No celular a ordem é cabeçalho, capa e ações, ficha, comentário, sobre o livro, subgêneros, onde encontrar e relacionados; o HTML segue a mesma ordem, para leitor de tela e Tab não pularem.
 
 ## Estado do catálogo
 

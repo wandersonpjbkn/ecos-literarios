@@ -26,6 +26,10 @@ Cada navegador pinta `select` e caixa de marcar do seu jeito, então nenhum cont
 - `AppCheck`: caixa ou rádio desenhados sobre o input nativo transparente.
 - `ComboSelect`: campo com autocompletar para listas longas de escolha múltipla (Subgênero).
 
+## Aviso rápido
+
+`AppToast`, montado uma vez no `App.vue`, e `useToast().show(texto)` para qualquer tela. Um aviso por vez (o novo substitui o anterior), some sozinho em 3,5 s e fica numa região `aria-live` que já existe antes da mensagem, para o leitor de tela anunciar. Uso atual: "Link copiado. É só colar na conversa." (Compartilhar). Aviso com ação (como "Recarregar" na versão nova) continua sendo banner, não toast.
+
 ## O que não é componente
 
 Prateleiras, a faixa de relacionados e o cabeçalho de resultado são composições de

@@ -27,7 +27,11 @@ Vale na interface, nos títulos de página, nos textos de estado vazio, nos e-ma
 | Limpar | **Limpar os filtros** — nunca "Limpar tudo", que soa como apagar a conta |
 | Ver mais da lista | Ver mais 24 |
 | Sorteio | Sortear um livro pra mim |
-| Corrigir ficha | Corrigir algo neste livro · ou, quando falta um campo: **Está faltando o ano. Você sabe?** |
+| Corrigir ficha (quem pode editar: quem mencionou, com o nome vinculado, ou admin) | ✎ **Corrigir algo neste livro** · ou, quando falta um campo: **Falta o ano. Você sabe?** / **Faltam o ano e o número de páginas. Você sabe?** |
+| Corrigir ficha (os outros: abre o WhatsApp) | **Avisar no grupo sobre um erro** · ou **Falta o ano. Perguntar no grupo** |
+| Compartilhar | Celular: a folha de compartilhar do aparelho. Desktop: copia e avisa **Link copiado. É só colar na conversa.** (some sozinho) |
+| Quem marcou o livro | **3 pessoas querem ler · 1 pessoa já leu** · ninguém: **Ninguém guardou nem marcou como lido ainda.** Só totais, nunca nomes. |
+| Texto longo (comentário, sinopse) | **Ler o resto** / **Mostrar menos** |
 
 ## Contagens
 
@@ -39,15 +43,22 @@ O resumo do catálogo diz só os livros: **"87 livros"**, e com filtro **"25 de 
 
 Quando um formato está escondido pela preferência da pessoa, o cabeçalho diz em texto: **"25 de 87 livros · 15 mangás estão fora por sua escolha"**, e a preferência aparece como chip **"Sem mangá"** junto dos filtros aplicados.
 
+Os chips aplicados de pessoa e de autor levam só a preposição: **"por Brenda"** (quem mencionou) e **"de Junji Ito"** (autor). Com várias pessoas marcadas, repetir "mencionado por" em cada chip pesava a linha; curto, ela se lê de uma vez ("Ficção · por Wanderson"). Fora dos chips, onde o nome aparece sozinho, continua **"mencionado por"**.
+
 ## Estados vazios
 
 **Livro sem comentário** (18 dos 87)
 > Brenda não escreveu nada sobre este livro
-> Ele apareceu na conversa do grupo, sem comentário junto.
-> `[Perguntar pra Brenda]` — ou, para quem mencionou: `[Escrever o que achei]`
+> O livro apareceu na conversa do grupo, sem comentário junto. *(só nos que vieram da conversa)*
+> `[Perguntar pra Brenda]` + *Abre o WhatsApp com a pergunta pronta.* — ou, para quem mencionou: `[✎ Escrever o que achei]`
 
-**Sem número de páginas** (23) — `Páginas / ninguém anotou` + link `Dizer quantas páginas tem`
-**Sem ano** (10) — `Publicado em / não sabemos` + link `Dizer o ano`
+O bloco se chama **Comentário**, não "O que a Fulana escreveu": parte dos textos está em terceira pessoa ("Favorito da Brenda."), e depois de editado o texto pode ser de outra pessoa. O rótulo não afirma autoria.
+
+"Perguntar pra" e as perguntas de dado faltando abrem o WhatsApp com a mensagem pronta (`Brenda, o que você acha de "X"?`, `Alguém sabe o ano de "X"?`): ninguém tem contato guardado, e a pessoa escolhe o grupo.
+
+**Sem número de páginas** (23) — `Páginas / ninguém anotou`
+**Sem ano** (10) — `Publicado em / não sabemos`
+Um campo só, na linha de baixo da ficha, pergunta pelo que falta (veja "Corrigir ficha"), em vez de um link por campo.
 **Sem capa** (18) — a tinta do gênero com a palavra `sem capa`. Nenhum texto de erro.
 
 **Busca sem resultado**
@@ -65,6 +76,11 @@ Quando um formato está escondido pela preferência da pessoa, o cabeçalho diz 
 > Sem internet: `Você está sem internet. Dá pra olhar, mas não pra adicionar.`
 > Servidor fora: `A plataforma está fora do ar agora. Você está vendo a lista de ontem: dá pra olhar, mas não pra adicionar.` `[Tentar de novo]`
 > Sem lista salva e servidor fora: `A plataforma está fora do ar agora. Tente daqui a pouco.` / `Se não voltar, avise no grupo.`
+
+**Volta do link mágico com a plataforma fora** — o link funcionou; quem não respondeu foi a plataforma. Nunca "Pedir outro link" nesse caso, e nunca o erro do navegador ("Failed to fetch").
+> `A plataforma está fora do ar agora.` / `Seu link funcionou, só a plataforma que não respondeu. Dá pra olhar os livros enquanto isso.` `[Tentar de novo]` `[Continuar sem entrar]`
+
+Link recusado ou sem sessão: `Não deu pra entrar com esse link. Ele pode ter vencido.` `[Pedir outro link]`.
 
 O banner diz por que "Adicionar" está desligado; sem isso o botão cinza não se explica. "Servidor" não aparece: é palavra de quem fez o sistema. O nome é **plataforma**: "o Ecos" se confunde com o clube, e "site" lembra site institucional. O banner usa as tintas `alert-*` (âmbar): atenção, não erro, porque dá pra continuar olhando.
 

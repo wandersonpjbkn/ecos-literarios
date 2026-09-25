@@ -33,6 +33,25 @@ Aplicado no cliente, sobre a lista já carregada. O servidor guarda, não filtra
 
 O `COPY.md` e o `IA.md` contam com os dois botões ("Guardar em Quero ler", "Marcar como lido") e com Meus livros mostrando o que a pessoa guardou. Nada disso existe hoje, nem no cliente nem na API, e vai ser implementado. É estado por pessoa que precisa persistir, então o contrato (onde o dado mora, quais rotas, o que vê quem não entrou na conta) é proposto e aprovado antes da fatia 5, que é onde os botões aparecem.
 
+**Contrato aprovado (fatia 5):**
+
+```
+GET    /users/me/reading          → [{ book_id, status, updated_at }]     (só a própria pessoa)
+PUT    /users/me/reading/:bookId  ← { status: "quero_ler" | "lido" }      (grava ou troca)
+DELETE /users/me/reading/:bookId  → 204                                  (tira da lista; repetir não dá erro)
+GET    /books/:id/reading         → { quero_ler: N, lido: M }            (público, só totais)
+```
+
+- Coleção `ReadingStatus` (usuário, livro, estado, data), com índice único por pessoa e livro: **um estado por livro**; marcar como lido tira de "Quero ler".
+- Quem não entrou vê os botões; o clique leva ao login e o link mágico volta para o livro (só caminhos internos).
+- Sem internet ou com a plataforma fora, os botões desligam junto com "Adicionar" (escrita).
+- Apagar um livro apaga as marcações dele.
+- A tela Meus livros mostrando essas listas fica para depois (tela sem fatia).
+
+## 2c. De onde veio o livro
+
+`GET /books` e `GET /books/:id` trazem `origem: "conversa" | "site"`, calculado no servidor pelo usuário da migração do CSV. A tela do livro diz "Veio da conversa do grupo no WhatsApp" só quando é verdade; o cliente não adivinha por data nem por id.
+
 ## 3. O que **não** precisa de migração
 
 Eu tinha previsto no inventário um script para tirar "Mangá" e "HQ" de `categoria`, supondo que `midia` e `categoria` estivessem brigando. **O catálogo real não tem essa colisão**: os 87 livros usam os dois eixos direito — `midia` é Livro (67), Mangá (15) ou HQ (5), e `categoria` é um dos nove gêneros. Não rode migração nenhuma. Se aparecer um registro fora disso no futuro, é validação de entrada, não migração.
