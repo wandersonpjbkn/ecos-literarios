@@ -49,6 +49,15 @@ const resolveSessionFromUrl = async (): Promise<string> => {
   throw new Error('Link de acesso inválido ou expirado.')
 }
 
+export class CallbackError extends Error {
+  constructor(
+    readonly reason: 'link' | 'platform',
+    readonly cause: unknown,
+  ) {
+    super(reason)
+  }
+}
+
 // ── Composable ────────────────────────────────────────────────────
 
 export function useAuth() {
@@ -65,9 +74,20 @@ export function useAuth() {
     if (error) throw new Error(error.message)
   }
 
+  // "platform" = valid session but the API did not answer (network or 5xx): a new link would not help.
   const handleCallback = async (): Promise<void> => {
-    const accessToken = await resolveSessionFromUrl()
-    await syncWithApi(accessToken)
+    let accessToken: string
+    try {
+      accessToken = await resolveSessionFromUrl()
+    } catch (err) {
+      throw new CallbackError('link', err)
+    }
+    try {
+      await syncWithApi(accessToken)
+    } catch (err) {
+      const status = (err as { status?: number }).status
+      throw new CallbackError(err instanceof TypeError || (status ?? 0) >= 500 ? 'platform' : 'link', err)
+    }
   }
 
   const syncWithApi = async (accessToken: string): Promise<void> => {

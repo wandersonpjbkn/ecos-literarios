@@ -130,7 +130,8 @@ export const verifyAuth = async (token: string) => {
   if (!res.ok) {
     // Surface the backend error so callers (and DevTools) get the real cause.
     const { error } = await res.json().catch(() => ({ error: `HTTP ${res.status} ${res.statusText}` }))
-    throw new Error(error ?? 'Falha na verificação do token.')
+    // The status lets the callback tell a rejected link (4xx) from a platform that is down (5xx).
+    throw Object.assign(new Error(error ?? 'Falha na verificação do token.'), { status: res.status })
   }
 
   return res.json() as Promise<{
