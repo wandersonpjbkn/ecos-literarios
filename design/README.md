@@ -17,7 +17,7 @@ A especificação do redesign do Ecos Literários, commitada junto do código pa
 
 **O sistema nunca afirma intenção.** Os livros foram **mencionados** na conversa do WhatsApp, não indicados. Um membro já reclamou da palavra errada.
 
-**Falta de informação é conteúdo.** 18 dos 87 livros sem capa, 23 sem páginas, 10 sem ano, 18 sem comentário. Um em cada quatro. Todo componente tem o estado vazio desenhado, e nenhum mostra caixa cinza ou campo em branco.
+**Falta de informação é conteúdo.** No levantamento feito para este estudo, 18 de 87 livros estavam sem capa, 23 sem páginas, 10 sem ano, 18 sem comentário. Os números mudam com o acervo; o que não muda é que sempre vai faltar algo em parte dele. Todo componente tem o estado vazio desenhado, e nenhum mostra caixa cinza ou campo em branco.
 
 **A cor das capas não compete.** Nove tintas quase acromáticas com texto escuro. A tinta serve para reconhecer, não para chamar.
 
@@ -36,4 +36,4 @@ telas/            os artboards exportados em HTML; abra no navegador
 
 ## Quem é o clube
 
-Doze pessoas, nenhuma nativa digital. 87 livros que saíram de uma conversa de WhatsApp — em alguns casos alguém recomendou, em outros só citou o título. O acervo é irregular e vai continuar sendo. Tudo aqui foi escrito com essas três frases na frente.
+Um grupo pequeno de leitores, e ninguém precisa ser nativo digital para usar: o sistema tem de fluir sozinho. O acervo saiu de uma conversa de WhatsApp; em alguns casos alguém recomendou, em outros só citou o título. É irregular e vai continuar sendo. Tudo aqui foi escrito com essas três frases na frente. (Os números que aparecem nos estudos, de pessoas e de livros, são o retrato do momento em que foram feitos, não um limite.)

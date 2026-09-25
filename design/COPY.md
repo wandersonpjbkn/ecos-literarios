@@ -2,7 +2,7 @@
 
 ## A regra que manda em todas as outras
 
-**O sistema nunca afirma intenção.** Os 87 livros saíram de uma conversa de WhatsApp. Em alguns casos a pessoa recomendou; em outros só citou. Um membro leu "indicado por Brenda" e respondeu *"mas eu não indiquei esse livro"*.
+**O sistema nunca afirma intenção.** O acervo começou numa conversa de WhatsApp. Em alguns casos a pessoa recomendou; em outros só citou. Um membro leu "indicado por Brenda" e respondeu *"mas eu não indiquei esse livro"*.
 
 | Nunca | Sempre |
 | --- | --- |
@@ -35,6 +35,8 @@ Vale na interface, nos títulos de página, nos textos de estado vazio, nos e-ma
 
 ## Contagens
 
+Os números abaixo são exemplos de como a frase se escreve; na tela entram os reais.
+
 Sempre os dois números: **"Você está vendo 23 de 87"**. Nunca "Mostrando os 24 primeiros" — não diz primeiros de quê nem quantos faltam.
 
 Quando a lista acabou, o botão some e a frase vira **"Estes são todos os 25"**.
@@ -47,7 +49,7 @@ Os chips aplicados de pessoa e de autor levam só a preposição: **"por Brenda"
 
 ## Estados vazios
 
-**Livro sem comentário** (18 dos 87)
+**Livro sem comentário** (no levantamento do estudo, 18 de 87)
 > Brenda não escreveu nada sobre este livro
 > O livro apareceu na conversa do grupo, sem comentário junto. *(só nos que vieram da conversa)*
 > `[Perguntar pra Brenda]` + *Abre o WhatsApp com a pergunta pronta.* — ou, para quem mencionou: `[✎ Escrever o que achei]`

@@ -6,7 +6,7 @@ Ele mostra **o título e nada mais**. Autor e quem mencionou vivem fora do bloco
 
 **Com capa** — a imagem preenche o bloco; a tinta do gênero fica por baixo como cor de carregamento.
 
-**Sem capa** (18 dos 87 livros) — a tinta do gênero com o título centralizado e a palavra *sem capa* embaixo, discreta. Não é estado de erro: é o acervo como ele é. Nunca retângulo cinza, nunca ícone de imagem quebrada.
+**Sem capa** (no levantamento do estudo, 18 de 87) — a tinta do gênero com o título centralizado e a palavra *sem capa* embaixo, discreta. Não é estado de erro: é o acervo como ele é. Nunca retângulo cinza, nunca ícone de imagem quebrada.
 
 **Com selo de formato** — Mangá e HQ ganham selo branco no canto superior direito. Livro é o padrão e não recebe marca nenhuma; se tudo tivesse selo, nada teria.
 

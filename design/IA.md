@@ -12,7 +12,7 @@ O app tem cinco superfícies de navegação, duas interfaces de filtro e dois de
 | Meus livros | `/perfil/livros` | O que a pessoa mencionou e o que ela guardou. |
 | Adicionar | painel sobre o catálogo | Não é página: é um painel. Ao salvar, abre o livro recém-criado. |
 
-A conta (`/perfil/conta`) fica no avatar, no fim do trilho. O painel do clube (`/admin`) fica dentro da conta — doze pessoas não precisam de um item de administração fixo na navegação.
+A conta (`/perfil/conta`) fica no avatar, no fim do trilho. O painel do clube (`/admin`) fica dentro da conta: um grupo pequeno não precisa de um item de administração fixo na navegação.
 
 ## As três superfícies
 
@@ -34,7 +34,7 @@ A conta (`/perfil/conta`) fica no avatar, no fim do trilho. O painel do clube (`
 /?tamanho=curto                    → menos de 200 páginas
 /?tamanho=medio                    → de 200 a 500 páginas
 /?tamanho=longo                    → mais de 500 páginas
-/?tamanho=desconhecido             → "Não sabemos quantas páginas" (23 dos 87)
+/?tamanho=desconhecido             → "Não sabemos quantas páginas" (no levantamento do estudo, 23 de 87)
 /?busca=kafka                      → busca no título, no autor, em quem mencionou e no que a pessoa escreveu (`porque`)
 /?ordem=recentes|titulo|pessoa|genero → ordenação
 ```
@@ -55,7 +55,7 @@ Motivos para ser query e não rota: o filtro é combinável (gênero + pessoa + 
 
 ## O que muda na ordenação
 
-O padrão é **Mais recentes**, por `added_at` decrescente, que é a ordem em que a API já entrega a lista. Os 87 livros entraram no mesmo dia, mas cada um tem um `added_at` próprio (a ordem da importação), e todo livro adicionado pela plataforma vai para o topo. Sem ela, some a pista de qual foi o último livro que entrou.
+O padrão é **Mais recentes**, por `added_at` decrescente, que é a ordem em que a API já entrega a lista. Os livros que vieram da conversa entraram no mesmo dia, mas cada um tem um `added_at` próprio (a ordem da importação), e todo livro adicionado pela plataforma vai para o topo. Sem ela, some a pista de qual foi o último livro que entrou.
 
 As opções são: Mais recentes, Título (A–Z), Por quem mencionou, Por gênero.
 
@@ -81,4 +81,4 @@ No celular a ordem é cabeçalho, capa e ações, ficha, comentário, sobre o li
 
 ## Estado do catálogo
 
-Tudo continua acontecendo sobre a lista que `GET /books` já entrega inteira e o Pinia guarda: busca, filtro, ordenação, "ver mais", abertura do livro e os estados vazios. 87 itens em memória é o que permite filtrar sem ida ao servidor, e é o motivo de nada disso precisar de endpoint novo.
+Tudo continua acontecendo sobre a lista que `GET /books` já entrega inteira e o Pinia guarda: busca, filtro, ordenação, "ver mais", abertura do livro e os estados vazios. Ter o acervo inteiro em memória é o que permite filtrar sem ida ao servidor, e é o motivo de nada disso precisar de endpoint novo.

@@ -2,7 +2,7 @@
 
 Três destinos e a conta. É a decisão de arquitetura do redesign inteiro, não um enfeite.
 
-**Catálogo · Meus livros · Adicionar**, e o avatar embaixo levando à conta. O painel do clube mora dentro da conta: doze pessoas não precisam de um item de administração fixo na tela.
+**Catálogo · Meus livros · Adicionar**, e o avatar embaixo levando à conta. O painel do clube mora dentro da conta: um grupo pequeno não precisa de um item de administração fixo na tela.
 
 Não existe "Início" separado do "Catálogo". Duas telas com grade de livros foi o problema original do app (`BooksView` e `FilterView` faziam a mesma coisa) e chegou a ser recriado no redesign antes de ser cortado. O catálogo **é** a raiz: a grade abre a página e as prateleiras vêm depois dela, na mesma rolagem.
 

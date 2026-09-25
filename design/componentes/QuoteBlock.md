@@ -2,7 +2,7 @@
 
 O que uma pessoa escreveu sobre um livro — e o que aparece quando ela não escreveu nada.
 
-É a alma do produto e o motivo de existir um catálogo em vez de uma planilha, então **o bloco nunca some**. Dos 87 livros do acervo, 18 não têm texto nenhum e só 17 passam de 80 caracteres: a versão vazia é tão frequente quanto a cheia e foi desenhada junto.
+É a alma do produto e o motivo de existir um catálogo em vez de uma planilha, então **o bloco nunca some**. No levantamento do estudo, 18 de 87 livros não tinham texto nenhum e só 17 passavam de 80 caracteres: a versão vazia é tão comum quanto a cheia e foi desenhada junto.
 
 O rótulo é **"Comentário"** (fatia 5). Nunca "Por que Fulana indicou": o texto veio de uma conversa de WhatsApp, e afirmar intenção é exatamente o erro que fez um membro responder "mas eu não indiquei esse livro". Também não "O que Fulana escreveu": parte dos textos está em terceira pessoa ("Favorito da Brenda.") e pode ser editada depois; o rótulo não afirma autoria. Quem mencionou já aparece no cabeçalho do livro.
 

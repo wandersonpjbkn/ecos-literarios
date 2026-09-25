@@ -1,6 +1,6 @@
 # O que muda no servidor
 
-Começa pela notícia boa: **quase nada**. Busca, filtro, ordenação, "ver mais", abertura do livro, os estados vazios e as prateleiras acontecem todos sobre a lista que `GET /books` já entrega inteira e o Pinia guarda. 87 itens em memória é o que torna isso possível, e é por isso que o redesign do catálogo não precisa de endpoint novo.
+Começa pela notícia boa: **quase nada**. Busca, filtro, ordenação, "ver mais", abertura do livro, os estados vazios e as prateleiras acontecem todos sobre a lista que `GET /books` já entrega inteira e o Pinia guarda. Ter o acervo inteiro em memória é o que torna isso possível, e é por isso que o redesign do catálogo não precisa de endpoint novo.
 
 ## 1. O campo fantasma sai do tipo
 
@@ -54,7 +54,7 @@ GET    /books/:id/reading         → { quero_ler: N, lido: M }            (púb
 
 ## 3. O que **não** precisa de migração
 
-Eu tinha previsto no inventário um script para tirar "Mangá" e "HQ" de `categoria`, supondo que `midia` e `categoria` estivessem brigando. **O catálogo real não tem essa colisão**: os 87 livros usam os dois eixos direito — `midia` é Livro (67), Mangá (15) ou HQ (5), e `categoria` é um dos nove gêneros. Não rode migração nenhuma. Se aparecer um registro fora disso no futuro, é validação de entrada, não migração.
+Eu tinha previsto no inventário um script para tirar "Mangá" e "HQ" de `categoria`, supondo que `midia` e `categoria` estivessem brigando. **O catálogo real não tem essa colisão**: os livros usam os dois eixos direito — `midia` é Livro (67), Mangá (15) ou HQ (5), e `categoria` é um dos nove gêneros. Não rode migração nenhuma. Se aparecer um registro fora disso no futuro, é validação de entrada, não migração.
 
 ## 4. Painel do clube: fica e melhora
 
@@ -66,7 +66,7 @@ Entrada por link mágico (Supabase), sem senha. O texto de erro **"Falha ao veri
 
 ## 6. Dados que faltam, e o que fazer com eles
 
-Do acervo real: 18 livros sem `cover_url`, 23 sem `page_count`, 10 sem `published_year`, 18 sem `porque`, e os 87 com a **mesma** data de entrada (vieram de uma importação só).
+No levantamento feito para o estudo: 18 de 87 livros sem `cover_url`, 23 sem `page_count`, 10 sem `published_year`, 18 sem `porque`, e todos os importados com a **mesma** data de entrada (vieram de uma importação só). Os números mudam com o acervo; que sempre vai faltar algo em parte dele, não.
 
 Nada disso é bug e nada disso deve ser preenchido com valor inventado. O servidor devolve o campo ausente; a interface já sabe o que dizer em cada caso (veja `COPY.md`). A única coisa que a ausência da data de entrada proíbe é ordenar por "mais recentes" — o campo só passa a significar alguma coisa depois da primeira adição feita pelo site.
 

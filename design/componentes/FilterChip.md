@@ -10,7 +10,7 @@ O chip que já está aplicado ganha um X e vira o jeito de tirar o filtro. Ele f
 
 Altura `touch-min`. Pílula (`radius-pill`) — é o que separa filtro de botão à primeira vista.
 
-No máximo cinco ou seis chips visíveis, e o resto atrás do botão de filtrar. O catálogo chegou a ter doze pessoas mais dez gêneros mais dois controles em cima da grade: 24 alvos antes do primeiro livro.
+No máximo cinco ou seis chips visíveis, e o resto atrás do botão de filtrar. O catálogo chegou a ter um chip por pessoa, mais um por gênero e dois controles em cima da grade: dezenas de alvos antes do primeiro livro.
 
 Rótulo na afirmativa. "Sem mangá" é um estado do resultado; "Esconder mangá" num controle cuja marcação significa mostrar é a contradição que confundiu o painel inteiro.
 
