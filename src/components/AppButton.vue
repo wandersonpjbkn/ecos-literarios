@@ -2,9 +2,7 @@
   <BasePill
     :as="isExternal ? 'a' : isLink ? RouterLink : 'button'"
     :to="isLink ? to : undefined"
-    :href="isExternal ? href : undefined"
-    :target="isExternal ? '_blank' : undefined"
-    :rel="isExternal ? 'noopener noreferrer' : undefined"
+    v-bind="externalAttrs"
     :type="isLink || isExternal ? undefined : type"
     :disabled="disabled || undefined"
     :tone="TONE[variant]"
@@ -48,6 +46,10 @@ const props = withDefaults(
 // A disabled destination renders as a disabled button: a link cannot be disabled.
 const isLink = computed(() => !!props.to && !props.disabled)
 const isExternal = computed(() => !!props.href && !props.disabled)
+// Only for external links: an explicit href="undefined" would override the one RouterLink builds (no href, no Tab).
+const externalAttrs = computed(() =>
+  isExternal.value ? { href: props.href, target: '_blank', rel: 'noopener noreferrer' } : {},
+)
 // Leading space: without it a screen reader hears the label and the note as one word.
 const EXTERNAL_NOTE = ' (abre em outra aba)'
 </script>
