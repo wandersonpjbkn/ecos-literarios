@@ -1,7 +1,7 @@
 <template>
   <div class="admin-section">
     <SectionHeader title="Permissões">
-      Clique em "Editar" para alterar as permissões de um role. As mudanças só são salvas ao confirmar.
+      Toque em "Editar" para mudar o que cada nível de permissão pode fazer. Nada muda até você confirmar.
     </SectionHeader>
 
     <BaseSpinner v-if="loading">
@@ -11,7 +11,7 @@
     <div v-else-if="error" class="admin-state admin-state--error">
       <BaseIcon name="error" aria-hidden="true" />
       <p>{{ error }}</p>
-      <button class="retry-btn" @click="fetchPermissions">Tentar novamente</button>
+      <button class="retry-btn" @click="fetchPermissions">Tentar de novo</button>
     </div>
 
     <div v-else class="permissions-grid">
@@ -19,7 +19,6 @@
         <div class="role-card__header">
           <div>
             <span class="role-card__title">{{ roleLabel(role) }}</span>
-            <span class="role-card__badge">{{ role }}</span>
           </div>
 
           <div class="role-card__actions">
@@ -76,7 +75,7 @@
     <ConfirmModal
       v-model="confirm.open"
       title="Confirmar alteração?"
-      :description="`As permissões do role '${roleLabel(editingRole ?? '')}' serão atualizadas.`"
+      :description="`As permissões de ${roleLabel(editingRole ?? '')} vão mudar.`"
       confirm-label="Salvar alterações"
       :loading="confirm.loading"
       @confirm="applyChanges"
@@ -86,6 +85,8 @@
 </template>
 
 <script lang="ts" setup>
+import { toApiError } from '@/composables/apiError'
+import { roleLabel } from '@/data/roles'
 import { ref, computed, onMounted, reactive } from 'vue'
 
 import { useErrorReporter } from '@/composables'
@@ -99,16 +100,14 @@ const ROLES: Role[] = ['admin', 'editor', 'viewer']
 const RESOURCES: Resource[] = ['books', 'users', 'autores', 'midias', 'categorias', 'subgeneros', 'permissions']
 const ACTIONS: Action[] = ['create', 'read', 'update', 'delete']
 
-const roleLabel = (r: string) => ({ admin: 'Administrador', editor: 'Editor', viewer: 'Membro' })[r] ?? r
-
 const resourceLabel = (r: string) =>
   ({
     books: 'Livros',
     users: 'Membros',
     autores: 'Autores',
     midias: 'Mídias',
-    categorias: 'Categorias',
-    subgeneros: 'Sub-gêneros',
+    categorias: 'Gêneros',
+    subgeneros: 'Subgêneros',
     permissions: 'Permissões',
   })[r] ?? r
 
@@ -193,10 +192,7 @@ const applyChanges = async () => {
         body: JSON.stringify({ actions: newActions }),
       })
 
-      if (!res.ok) {
-        const { error: msg } = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-        throw new Error(msg)
-      }
+      if (!res.ok) throw await toApiError(res, 'Não deu pra salvar as permissões. Tente de novo.', 'PUT')
 
       const perm = permissions.value.find((p) => p.role === role && p.resource === resource)
       if (perm) perm.actions = newActions
@@ -208,8 +204,8 @@ const applyChanges = async () => {
     editingRole.value = null
     draft.value = new Map()
   } catch (e) {
-    useErrorReporter().captureException(e, { context: 'applyChanges', role: editingRole.value })
-    error.value = e instanceof Error ? e.message : 'Erro ao salvar permissões.'
+    useErrorReporter().captureException(e, { context: 'AdminPermissions.applyChanges', role: editingRole.value })
+    error.value = e instanceof Error ? e.message : 'Não deu pra salvar as permissões. Tente de novo.'
     confirm.open = false
   } finally {
     confirm.loading = false
@@ -224,10 +220,11 @@ const fetchPermissions = async () => {
     const res = await fetch(`${API_BASE}/permissions`, {
       headers: buildHeaders(),
     })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    if (!res.ok) throw await toApiError(res, 'Não deu pra carregar as permissões. Tente de novo.')
     permissions.value = await res.json()
   } catch (e) {
-    error.value = 'Não foi possível carregar as permissões.'
+    error.value = 'Não deu pra carregar as permissões. Tente de novo.'
+    useErrorReporter().captureException(e, { context: 'AdminPermissions.fetchPermissions' })
     console.error('[AdminPermissions]', e)
   } finally {
     loading.value = false

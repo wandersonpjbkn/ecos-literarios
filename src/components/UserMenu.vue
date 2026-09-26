@@ -44,7 +44,7 @@
           @click="isOpen = false"
         >
           <BaseIcon name="filter" aria-hidden="true" />
-          <span>Painel admin</span>
+          <span>Painel do clube</span>
         </RouterLink>
 
         <button class="user-dropdown__item user-dropdown__item--danger" role="menuitem" @click="handleLogout">

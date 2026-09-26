@@ -1,7 +1,10 @@
 <template>
   <div class="admin-section">
     <SectionHeader title="Enriquecimento do catálogo">
-      <span>Rode o batch de enriquecimento e acompanhe status atual, resultado da execução e histórico recente.</span>
+      <span
+        >Busca capa, sinopse, páginas e ano no Google Books para os livros do catálogo, e mostra o que já foi
+        feito.</span
+      >
       <template #actions>
         <button class="run-btn" :disabled="isRunning || loadingStatus" @click="runEnrichment">
           <span v-if="isRunning">Executando…</span>
@@ -41,7 +44,7 @@
 
           <label class="force-toggle" :class="{ 'is-disabled': isRunning }">
             <input v-model="force" type="checkbox" :disabled="isRunning" />
-            <span>Forçar re-enriquecimento</span>
+            <span>Buscar de novo também nos que já têm dados</span>
           </label>
         </header>
 
@@ -111,19 +114,19 @@
               <span>{{ formatDateTime(run.finished_at) }}</span>
               <span class="history-item__meta">{{ run.total }} livros · {{ run.coverage_pct_after }}% cobertura</span>
               <span class="history-item__badge" :class="{ 'is-force': run.force }">{{
-                run.force ? 'force' : 'padrão'
+                run.force ? 'de novo em todos' : 'padrão'
               }}</span>
             </summary>
 
             <div class="history-item__stats">
               <span
-                >applied: <strong>{{ run.applied }}</strong></span
+                >aplicados: <strong>{{ run.applied }}</strong></span
               >
               <span
-                >skipped: <strong>{{ run.skipped }}</strong></span
+                >ignorados: <strong>{{ run.skipped }}</strong></span
               >
               <span
-                >failed: <strong>{{ run.failed }}</strong></span
+                >com falha: <strong>{{ run.failed }}</strong></span
               >
               <span
                 >por: <strong>{{ run.initiated_by_email }}</strong></span
@@ -150,6 +153,7 @@
 </template>
 
 <script lang="ts" setup>
+import { toApiError } from '@/composables/apiError'
 import { computed, ref } from 'vue'
 
 import { useErrorReporter } from '@/composables'
@@ -193,9 +197,9 @@ const formatDateTime = (iso: string) => {
 
 const statusLabel = (value: ResultStatus) => {
   const map: Record<ResultStatus, string> = {
-    applied: 'applied',
-    skipped: 'skipped',
-    failed: 'failed',
+    applied: 'aplicado',
+    skipped: 'ignorado',
+    failed: 'com falha',
   }
   return map[value]
 }
@@ -225,7 +229,7 @@ const normalizeSummary = (list: EnrichmentResult[], raw: Record<string, unknown>
 
 const fetchStatus = async () => {
   const res = await fetch(`${API_BASE}/admin/books/enrich/status`, { headers: buildHeaders() })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  if (!res.ok) throw await toApiError(res, 'Não deu pra carregar o que já foi feito. Tente de novo.')
 
   const payload = (await res.json()) as {
     total: number
@@ -246,7 +250,7 @@ const fetchStatus = async () => {
 
 const fetchHistory = async () => {
   const res = await fetch(`${API_BASE}/admin/books/enrich/history?limit=8`, { headers: buildHeaders() })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  if (!res.ok) throw await toApiError(res, 'Não deu pra carregar o que já foi feito. Tente de novo.')
 
   const payload = (await res.json()) as {
     history?: Array<Record<string, unknown>>
@@ -290,8 +294,8 @@ const fetchStatusAndHistory = async () => {
   try {
     await Promise.all([fetchStatus(), fetchHistory()])
   } catch (e) {
-    useErrorReporter().captureException(e, { context: 'fetchStatusAndHistory' })
-    historyError.value = 'Não foi possível carregar status/histórico de enriquecimento.'
+    useErrorReporter().captureException(e, { context: 'AdminEnrichment.fetchStatus' })
+    historyError.value = 'Não deu pra carregar o que já foi feito. Tente de novo.'
     console.error('[AdminEnrichment][status/history]', e)
   } finally {
     loadingStatus.value = false
@@ -329,10 +333,7 @@ const runEnrichment = async () => {
       body: JSON.stringify({ force: force.value }),
     })
 
-    if (!res.ok) {
-      const payload = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-      throw new Error(payload.error ?? `HTTP ${res.status}`)
-    }
+    if (!res.ok) throw await toApiError(res, 'Não deu pra buscar os dados. Tente de novo.', 'POST')
 
     const payload = (await res.json()) as Record<string, unknown>
     const list = ((payload.results as unknown[]) ?? []).map((item, idx) => normalizeRunResult(item, idx))
@@ -342,8 +343,8 @@ const runEnrichment = async () => {
 
     await fetchStatusAndHistory()
   } catch (e) {
-    runError.value = e instanceof Error ? e.message : 'Erro ao executar enriquecimento.'
-    useErrorReporter().captureException(e, { context: 'runEnrichment' })
+    runError.value = e instanceof Error ? e.message : 'Não deu pra buscar os dados. Tente de novo.'
+    useErrorReporter().captureException(e, { context: 'AdminEnrichment.run' })
     console.error('[AdminEnrichment][run]', e)
   } finally {
     stopEstimation()

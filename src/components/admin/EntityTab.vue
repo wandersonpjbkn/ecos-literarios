@@ -44,11 +44,11 @@
     <div v-else-if="crud.error.value" class="entity-state entity-state--error">
       <BaseIcon name="error" aria-hidden="true" />
       <p>{{ crud.error.value }}</p>
-      <button class="entity-retry" @click="crud.fetchAll()">Tentar novamente</button>
+      <button class="entity-retry" @click="crud.fetchAll()">Tentar de novo</button>
     </div>
 
     <!-- Empty -->
-    <p v-else-if="crud.items.value.length === 0" class="entity-empty">Nenhum item cadastrado.</p>
+    <p v-else-if="crud.items.value.length === 0" class="entity-empty">Nada aqui ainda.</p>
 
     <!-- List -->
     <template v-else>
@@ -249,8 +249,8 @@ const handleCreate = async () => {
     newName.value = ''
     showFeedback(`"${created.nome}" criado com sucesso.`, 'success')
   } catch (e) {
-    showFeedback(e instanceof Error ? e.message : 'Erro ao criar item.', 'error')
-    useErrorReporter().captureException(e, { context: 'createItem' })
+    showFeedback(e instanceof Error ? e.message : 'Não deu pra criar. Tente de novo.', 'error')
+    useErrorReporter().captureException(e, { context: 'EntityTab.createItem' })
   } finally {
     isCreating.value = false
   }
@@ -278,8 +278,8 @@ const handleUpdate = async () => {
     showFeedback(`Renomeado para "${updated.nome}".`, 'success')
     cancelEdit()
   } catch (e) {
-    showFeedback(e instanceof Error ? e.message : 'Erro ao atualizar item.', 'error')
-    useErrorReporter().captureException(e, { context: 'updateItem' })
+    showFeedback(e instanceof Error ? e.message : 'Não deu pra salvar. Tente de novo.', 'error')
+    useErrorReporter().captureException(e, { context: 'EntityTab.updateItem' })
   } finally {
     isUpdating.value = false
   }
@@ -301,8 +301,8 @@ const handleDelete = async () => {
     showFeedback('Item removido.', 'success')
   } catch (e) {
     deleteModal.open = false
-    showFeedback(e instanceof Error ? e.message : 'Erro ao remover item.', 'error')
-    useErrorReporter().captureException(e, { context: 'deleteItem' })
+    showFeedback(e instanceof Error ? e.message : 'Não deu pra remover. Tente de novo.', 'error')
+    useErrorReporter().captureException(e, { context: 'EntityTab.deleteItem' })
   } finally {
     deletingId.value = null
   }

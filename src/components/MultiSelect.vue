@@ -34,7 +34,7 @@
             v-model="query"
             type="text"
             class="ms-search"
-            :placeholder="`Buscar ${label.toLowerCase()}…`"
+            placeholder="Buscar…"
             autocomplete="off"
             @keydown.escape="close"
             @keydown.tab="close"

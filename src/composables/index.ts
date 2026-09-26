@@ -1,7 +1,7 @@
 import { useBookSort } from '@/composables/useBookSort'
 import { useCategoryColors } from '@/composables/useCategoryColors'
 import { useEntityCrud } from '@/composables/useEntityCrud'
-import { useFilters } from '@/composables/useFilters'
+import { describeSelection, useFilters } from '@/composables/useFilters'
 import { useCatalogSearch } from '@/composables/useCatalogSearch'
 import { useAddTarget } from '@/composables/useAddTarget'
 import { useCanWrite } from '@/composables/useCanWrite'
@@ -24,6 +24,7 @@ export {
   useBookSort,
   useCategoryColors,
   useEntityCrud,
+  describeSelection,
   useFilters,
   useCatalogSearch,
   useAddTarget,

@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { toApiError } from '@/composables/apiError'
 
 import { useErrorReporter } from '@/composables'
 import { buildHeaders } from '@/composables/useApi'
@@ -10,8 +11,8 @@ const FIELD_META: ReadonlyArray<{ field: EnrichmentField; label: string }> = [
   { field: 'coverUrl', label: 'URL da capa' },
   { field: 'publisher', label: 'Editora' },
   { field: 'isbn', label: 'ISBN' },
-  { field: 'pageCount', label: 'Qtd. páginas' },
-  { field: 'publishedYear', label: 'Ano publicação' },
+  { field: 'pageCount', label: 'Páginas' },
+  { field: 'publishedYear', label: 'Publicado em' },
 ]
 
 function resolvePreview(field: EnrichmentField, value: unknown): string {
@@ -41,10 +42,7 @@ function buildPreviewItems(raw: EnrichmentApiResponse['preview']): EnrichmentIte
 }
 
 async function safeJson<T>(res: Response, fallback: string): Promise<T> {
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({ error: fallback }))
-    throw new Error(body.error ?? fallback)
-  }
+  if (!res.ok) throw await toApiError(res, fallback, 'POST')
   return res.json() as Promise<T>
 }
 
@@ -74,7 +72,7 @@ export function useBookEnrichment(bookId: () => string | undefined) {
         method: 'POST',
         headers: buildHeaders(),
       })
-      const data = await safeJson<EnrichmentApiResponse>(res, `HTTP ${res.status}`)
+      const data = await safeJson<EnrichmentApiResponse>(res, 'Não deu pra buscar os dados do livro. Tente de novo.')
 
       const sourceLabel = data.source === 'google_books' ? 'Google Books' : 'Open Library'
       const items = buildPreviewItems(data.preview)
@@ -82,9 +80,9 @@ export function useBookEnrichment(bookId: () => string | undefined) {
       preview.value = { sourceLabel, items }
       selectedFields.value = items.filter((i) => i.hasValue).map((i) => i.field)
     } catch (e) {
-      error.value = e instanceof Error ? e.message : 'Erro ao buscar preview de enriquecimento.'
+      error.value = e instanceof Error ? e.message : 'Não deu pra buscar os dados do livro. Tente de novo.'
       if (import.meta.env.DEV) console.error('[useBookEnrichment] fetchPreview', e)
-      useErrorReporter().captureException(e, { context: 'fetchEnrichmentPreview' })
+      useErrorReporter().captureException(e, { context: 'useBookEnrichment.preview' })
     } finally {
       isLoading.value = false
     }
@@ -104,13 +102,13 @@ export function useBookEnrichment(bookId: () => string | undefined) {
         headers: buildHeaders(),
         body: JSON.stringify({ fields: selectedFields.value }),
       })
-      await safeJson(res, `HTTP ${res.status}`)
+      await safeJson(res, 'Não deu pra aplicar os dados. Tente de novo.')
       await fetchPreview()
       return true
     } catch (e) {
-      error.value = e instanceof Error ? e.message : 'Erro ao aplicar enriquecimento.'
+      error.value = e instanceof Error ? e.message : 'Não deu pra aplicar os dados. Tente de novo.'
       if (import.meta.env.DEV) console.error('[useBookEnrichment] applySelected', e)
-      useErrorReporter().captureException(e, { context: 'applyEnrichment' })
+      useErrorReporter().captureException(e, { context: 'useBookEnrichment.apply' })
       return false
     } finally {
       isApplying.value = false

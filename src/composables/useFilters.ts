@@ -18,16 +18,54 @@ const QUERY_PARAM: Record<FilterKey, string> = {
   tamanho: 'tamanho',
 }
 
-const SIZES: { slug: string; label: string; match: (book: Book) => boolean }[] = [
-  { slug: 'curto', label: 'Menos de 200 páginas', match: (b) => !!b.page_count && b.page_count < 200 },
+// `phrase` completes "Nada de …" in the empty state (EmptyState.md: the combination said in Portuguese).
+const SIZES: { slug: string; label: string; phrase: string; match: (book: Book) => boolean }[] = [
+  {
+    slug: 'curto',
+    label: 'Menos de 200 páginas',
+    phrase: 'com menos de 200 páginas',
+    match: (b) => !!b.page_count && b.page_count < 200,
+  },
   {
     slug: 'medio',
     label: 'De 200 a 500 páginas',
+    phrase: 'com 200 a 500 páginas',
     match: (b) => !!b.page_count && b.page_count >= 200 && b.page_count <= 500,
   },
-  { slug: 'longo', label: 'Mais de 500 páginas', match: (b) => !!b.page_count && b.page_count > 500 },
-  { slug: 'desconhecido', label: 'Não sabemos quantas páginas', match: (b) => !b.page_count },
+  {
+    slug: 'longo',
+    label: 'Mais de 500 páginas',
+    phrase: 'com mais de 500 páginas',
+    match: (b) => !!b.page_count && b.page_count > 500,
+  },
+  {
+    slug: 'desconhecido',
+    label: 'Não sabemos quantas páginas',
+    phrase: 'sem o número de páginas',
+    match: (b) => !b.page_count,
+  },
 ]
+
+const orList = (values: string[]) => values.join(' ou ')
+const inSentence = (value: string) => (value === value.toUpperCase() ? value : value.toLowerCase())
+
+/**
+ * The applied filters as one sentence, "Nada de terror mencionado por Natália." No gendered article ("pela"):
+ * the data does not say anyone's gender.
+ */
+export const describeSelection = (selection: Options): string => {
+  const kinds = [...selection.categoria, ...selection.subgeneros].map(inSentence)
+  const formats = selection.midia.map(inSentence)
+  const noun = kinds.length ? orList(kinds) : formats.length ? orList(formats) : 'livro'
+  const parts = [
+    `Nada de ${noun}`,
+    kinds.length && formats.length && `em ${orList(formats)}`,
+    selection.tamanho.length && orList(selection.tamanho.map((label) => SIZES.find((s) => s.label === label)!.phrase)),
+    selection.autor.length && `de ${orList(selection.autor)}`,
+    selection.quem.length && `mencionado por ${orList(selection.quem)}`,
+  ]
+  return `${parts.filter(Boolean).join(' ')}.`
+}
 
 const valuesOf = (book: Book, key: FilterKey): string[] => {
   if (key === 'tamanho') return SIZES.filter((size) => size.match(book)).map((size) => size.label)

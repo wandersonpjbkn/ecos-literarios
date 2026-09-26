@@ -13,7 +13,7 @@
     <!-- Idle — ainda não carregou -->
     <div v-if="!loaded && !loading" class="admin-state admin-state--idle">
       <BaseIcon name="reload" aria-hidden="true" />
-      <p>Clique em "Carregar histórico" para buscar as alterações registradas.</p>
+      <p>Toque em "Carregar histórico" para ver quem vinculou qual nome.</p>
     </div>
 
     <!-- Loading -->
@@ -56,6 +56,7 @@
 </template>
 
 <script lang="ts" setup>
+import { toApiError } from '@/composables/apiError'
 import { ref } from 'vue'
 
 import { useErrorReporter } from '@/composables'
@@ -84,17 +85,14 @@ const loadHistory = async () => {
       headers: buildHeaders(),
     })
 
-    if (!res.ok) {
-      const payload = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-      throw new Error(payload.error ?? `HTTP ${res.status}`)
-    }
+    if (!res.ok) throw await toApiError(res, 'Não deu pra carregar o histórico. Tente de novo.')
 
     const payload = (await res.json()) as { total: number; history: AdminClaimHistoryEntry[] }
     history.value = payload.history
     loaded.value = true
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Não foi possível carregar o histórico.'
-    useErrorReporter().captureException(e, { context: 'loadHistory' })
+    error.value = e instanceof Error ? e.message : 'Não deu pra carregar o histórico. Tente de novo.'
+    useErrorReporter().captureException(e, { context: 'AdminClaimHistory.load' })
     console.error('[AdminClaimHistory]', e)
   } finally {
     loading.value = false

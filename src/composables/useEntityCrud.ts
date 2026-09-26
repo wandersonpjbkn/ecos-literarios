@@ -1,3 +1,4 @@
+import { toApiError } from '@/composables/apiError'
 import { ref } from 'vue'
 
 import { useErrorReporter } from '@/composables'
@@ -16,12 +17,12 @@ export function useEntityCrud({ resource }: EntityCrudOptions) {
     error.value = ''
     try {
       const res = await fetch(`${API_BASE}/${resource}`, { headers: buildHeaders() })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      if (!res.ok) throw await toApiError(res, 'Não deu pra carregar a lista. Tente de novo.')
       items.value = await res.json()
     } catch (e) {
-      error.value = e instanceof Error ? e.message : 'Erro ao carregar itens.'
+      error.value = e instanceof Error ? e.message : 'Não deu pra carregar a lista. Tente de novo.'
       if (import.meta.env.DEV) console.error(`[useEntityCrud][${resource}]`, e)
-      useErrorReporter().captureException(e, { context: 'fetchItems' })
+      useErrorReporter().captureException(e, { context: 'useEntityCrud.fetchAll' })
     } finally {
       loading.value = false
     }
@@ -34,10 +35,7 @@ export function useEntityCrud({ resource }: EntityCrudOptions) {
       body: JSON.stringify({ nome }),
     })
 
-    if (!res.ok) {
-      const { error: msg } = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-      throw new Error(msg ?? 'Erro ao criar item.')
-    }
+    if (!res.ok) throw await toApiError(res, 'Não deu pra criar. Tente de novo.', 'POST')
 
     const created: SupportEntity = await res.json()
     items.value = [...items.value, created].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
@@ -51,10 +49,7 @@ export function useEntityCrud({ resource }: EntityCrudOptions) {
       body: JSON.stringify({ nome }),
     })
 
-    if (!res.ok) {
-      const { error: msg } = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-      throw new Error(msg ?? 'Erro ao atualizar item.')
-    }
+    if (!res.ok) throw await toApiError(res, 'Não deu pra salvar. Tente de novo.', 'PATCH')
 
     const updated: SupportEntity = await res.json()
     items.value = items.value
@@ -69,10 +64,7 @@ export function useEntityCrud({ resource }: EntityCrudOptions) {
       headers: buildHeaders(),
     })
 
-    if (!res.ok) {
-      const { error: msg } = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-      throw new Error(msg ?? 'Erro ao remover item.')
-    }
+    if (!res.ok) throw await toApiError(res, 'Não deu pra remover. Tente de novo.', 'DELETE')
 
     items.value = items.value.filter((e) => e._id !== id)
   }

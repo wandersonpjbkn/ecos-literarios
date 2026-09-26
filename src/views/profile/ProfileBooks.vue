@@ -1,8 +1,8 @@
 <template>
   <div class="profile-section">
     <SectionHeader title="Meus livros">
-      Livros do catálogo vinculados ao seu perfil. Edite título, autor, categoria, mídia, sub-gêneros, sinopse e o
-      motivo da sua indicação.
+      Os livros que você mencionou, ligados ao seu nome. Dá pra corrigir título, autor, gênero, mídia, subgêneros,
+      sinopse e o que você escreveu.
     </SectionHeader>
 
     <!-- loading -->
@@ -45,14 +45,13 @@
       </div>
 
       <!-- empty -->
-      <div v-if="myBooks.length === 0" class="profile-empty">
-        <BaseIcon name="book" class="profile-empty__icon" aria-hidden="true" />
-        <p>Nenhum livro vinculado ao seu perfil.</p>
-        <RouterLink :to="{ name: 'profile-claim' }" class="profile-empty__link">
-          Ir para vínculos
-          <BaseIcon name="arrow-right" aria-hidden="true" />
-        </RouterLink>
-      </div>
+      <EmptyState
+        v-if="myBooks.length === 0"
+        title="Nenhum livro com o seu nome ainda"
+        text="Aqui aparecem os livros que você mencionou no grupo, depois que você vincula a sua conta ao nome que aparece neles."
+      >
+        <AppButton :to="{ name: 'profile-claim' }">Vincular meu nome</AppButton>
+      </EmptyState>
 
       <!-- list -->
       <div v-else class="books-list">
@@ -93,9 +92,13 @@
         </div>
 
         <!-- No results -->
-        <p v-if="filteredBooks.length === 0 && searchQuery" class="book-empty">
-          Nenhum resultado para "{{ searchQuery }}".
-        </p>
+        <EmptyState
+          v-if="filteredBooks.length === 0 && searchQuery"
+          :title="`Nada com &quot;${searchQuery}&quot;`"
+          text="Procuramos no título e no autor dos seus livros."
+        >
+          <AppButton @click="searchQuery = ''">Apagar a busca</AppButton>
+        </EmptyState>
 
         <!-- Pagination -->
         <PaginationNav ref="paginationNav" :items="filteredBooks" />
@@ -119,6 +122,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore, useBooksStore } from '@/stores'
 import { useApi, useBookEditor } from '@/composables'
 import SectionHeader from '@/components/admin/SectionHeader.vue'
+import AppButton from '@/components/AppButton.vue'
+import EmptyState from '@/components/EmptyState.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import PaginationNav from '@/components/PaginationNav.vue'
 import BookFormDrawer from '@/components/admin/BookFormDrawer.vue'
@@ -239,51 +244,6 @@ onMounted(() => {
 }
 
 // ── Empty state ───────────────────────────────────────────────────
-.profile-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: 3rem 1.5rem;
-  border: 1px dashed var(--color-border-default);
-  border-radius: var(--border-radius-default);
-  text-align: center;
-  color: var(--color-text-subtle);
-  font-size: 0.9rem;
-
-  &__icon {
-    width: 2.5rem;
-    height: 2.5rem;
-    opacity: 0.4;
-  }
-
-  &__link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--color-action-default);
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: opacity var(--motion-transition-default);
-
-    svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    &:hover {
-      opacity: 0.75;
-    }
-  }
-}
-.book-empty {
-  padding: 2rem;
-  text-align: center;
-  color: var(--color-text-subtle);
-  border: 1px dashed var(--color-border-default);
-  border-radius: var(--border-radius-default);
-}
 
 // ── Books list ────────────────────────────────────────────────────
 .books-list {

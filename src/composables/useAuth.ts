@@ -130,7 +130,7 @@ export function useAuth() {
         await syncWithApi(session.access_token)
       } catch (error) {
         useErrorReporter().captureException(error, {
-          context: 'restoreSession.syncWithApi',
+          context: 'useAuth.restoreSession',
         })
         store.clearSession()
       }

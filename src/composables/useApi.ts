@@ -11,6 +11,7 @@ import type {
   RegisterResponse,
 } from '@/types'
 import { API_BASE } from '@/data/config'
+import { toApiError } from '@/composables/apiError'
 
 // ── Helpers ───────────────────────────────────────────────────────
 
@@ -103,10 +104,10 @@ export function useApi() {
         useBooksStore().error = null
       } else {
         const raw = e instanceof Error ? e.message : String(e)
-        useBooksStore().error = raw || 'Erro ao carregar dados'
+        useBooksStore().error = raw || 'Não deu pra carregar os livros.'
         if (import.meta.env.DEV) console.error('[useApi]', e)
 
-        useErrorReporter().captureException(e, { context: 'fetchBooks' })
+        useErrorReporter().captureException(e, { context: 'useApi.fetchBooks' })
       }
     } finally {
       useBooksStore().loading = false
@@ -129,9 +130,8 @@ export const verifyAuth = async (token: string) => {
 
   if (!res.ok) {
     // Surface the backend error so callers (and DevTools) get the real cause.
-    const { error } = await res.json().catch(() => ({ error: `HTTP ${res.status} ${res.statusText}` }))
-    // The status lets the callback tell a rejected link (4xx) from a platform that is down (5xx).
-    throw Object.assign(new Error(error ?? 'Falha na verificação do token.'), { status: res.status })
+    // Its status lets the callback tell a rejected link (4xx) from a platform that is down (5xx).
+    throw await toApiError(res, 'Falha na verificação do token.', 'POST')
   }
 
   return res.json() as Promise<{
@@ -147,8 +147,7 @@ export const claimRegister = async (quemNome: string): Promise<RegisterResponse>
   })
 
   if (!res.ok) {
-    const { error } = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-    throw new Error(error ?? 'Não foi possível concluir o vínculo do nome.')
+    throw await toApiError(res, 'Não deu pra vincular o nome. Tente de novo.', 'POST')
   }
 
   return res.json() as Promise<RegisterResponse>
@@ -161,8 +160,7 @@ export const getMyClaimStatus = async (): Promise<MyClaimStatus> => {
   })
 
   if (!res.ok) {
-    const { error } = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-    throw new Error(error ?? 'Não foi possível carregar o vínculo atual.')
+    throw await toApiError(res, 'Não deu pra carregar seu vínculo. Tente de novo.', 'GET')
   }
 
   return res.json() as Promise<MyClaimStatus>
@@ -175,8 +173,7 @@ export const unclaimRegister = async (): Promise<{ message?: string }> => {
   })
 
   if (!res.ok) {
-    const { error } = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-    throw new Error(error ?? 'Não foi possível remover o vínculo atual.')
+    throw await toApiError(res, 'Não deu pra desfazer o vínculo. Tente de novo.', 'DELETE')
   }
 
   return res.json() as Promise<{ message?: string }>
@@ -186,11 +183,7 @@ export const unclaimRegister = async (): Promise<{ message?: string }> => {
 
 const readingRequest = async <T>(path: string, init: RequestInit, fallback: string): Promise<T> => {
   const res = await fetch(`${API_BASE}${path}`, { ...init, headers: buildHeaders() })
-  if (!res.ok) {
-    // The API's own message when it sends one ("Livro não encontrado."); never a bare "HTTP 500".
-    const { error } = await res.json().catch(() => ({}))
-    throw new Error(error ?? fallback)
-  }
+  if (!res.ok) throw await toApiError(res, fallback, init.method)
   return (res.status === 204 ? null : res.json()) as Promise<T>
 }
 

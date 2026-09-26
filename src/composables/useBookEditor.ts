@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { toApiError } from '@/composables/apiError'
 
 import { buildHeaders, useApi } from '@/composables/useApi'
 import { useErrorReporter } from '@/composables/useErrorReporter'
@@ -18,7 +19,7 @@ export function useBookEditor() {
     error.value = ''
     try {
       const res = await fetch(`${API_BASE}/books/${bookId}`, { headers: buildHeaders() })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      if (!res.ok) throw await toApiError(res, 'Não deu pra abrir este livro pra editar. Tente de novo.')
       editingBook.value = (await res.json()) as BookForEdit
       isOpen.value = true
     } catch (err) {

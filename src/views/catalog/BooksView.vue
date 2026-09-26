@@ -70,7 +70,20 @@
           <AppSelect v-model="sortOrder" class="catalog-bar__sort" label="Ordenar" :options="sortOptions" />
         </div>
 
-        <BooksGrid v-model="sortedBooks" class="catalog-grid" :eco="showEco ? eco : null" @clear="clearAll" />
+        <BooksGrid v-model="sortedBooks" class="catalog-grid" :eco="showEco ? eco : null">
+          <template #empty>
+            <EmptyState v-if="searchTerm" :title="`Nada com &quot;${searchTerm}&quot;`" :text="searchWhere">
+              <AppButton @click="search = ''">Apagar a busca</AppButton>
+              <AppButton v-if="hasFilters" @click="clearAll">Limpar os filtros</AppButton>
+              <AppButton v-if="canAddBooks" :to="{ name: addTarget }" :disabled="!canWrite">
+                Adicionar esse livro
+              </AppButton>
+            </EmptyState>
+            <EmptyState v-else title="Nenhum livro com esses filtros" :text="describeSelection(selected)">
+              <AppButton @click="clearAll">Limpar os filtros</AppButton>
+            </EmptyState>
+          </template>
+        </BooksGrid>
 
         <CatalogShelves v-if="isDefaultView" />
 
@@ -90,11 +103,16 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMediaQuery, useOnline } from '@vueuse/core'
 
-import { useBooksStore, useCacheStore, usePreferencesStore } from '@/stores'
+import { storeToRefs } from 'pinia'
+
+import { useAuthStore, useBooksStore, useCacheStore, usePreferencesStore } from '@/stores'
 import {
+  describeSelection,
   rememberCatalog,
+  useAddTarget,
   useApi,
   useBreakpoints,
+  useCanWrite,
   useEcoOfTheWeek,
   useFilters,
   useBookSort,
@@ -109,6 +127,7 @@ import AppButton from '@/components/AppButton.vue'
 import CatalogSkeleton from '@/components/CatalogSkeleton.vue'
 import CatalogShelves from '@/components/CatalogShelves.vue'
 import BooksGrid from '@/components/BooksGrid.vue'
+import EmptyState from '@/components/EmptyState.vue'
 
 import type { FilterKey } from '@/types'
 
@@ -172,6 +191,17 @@ const eco = useEcoOfTheWeek()
 
 // The eco and the shelves belong to the whole catalog; next to a filtered list they would be out of context.
 const isDefaultView = computed(() => !hasFilters.value && !search.value.trim())
+
+// Empty states (COPY.md): say where the search looked; only people who can create books are offered to add one.
+const searchTerm = computed(() => search.value.trim())
+const searchWhere = computed(() =>
+  hasFilters.value
+    ? 'Procuramos no título, no autor e no que as pessoas escreveram, dentro dos filtros escolhidos.'
+    : 'Procuramos no título, no autor e no que as pessoas escreveram sobre cada livro.',
+)
+const { isEditor: canAddBooks } = storeToRefs(useAuthStore())
+const addTarget = useAddTarget()
+const canWrite = useCanWrite()
 // Catalog.mobile has no eco. Decided here rather than hidden by CSS, because the eco takes a book's slot.
 const isPhone = useMediaQuery(useBreakpoints.isTablet)
 const showEco = computed(() => isDefaultView.value && !isPhone.value)

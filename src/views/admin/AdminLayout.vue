@@ -6,7 +6,7 @@
           <BaseIcon name="arrow-left" />
           <span>Catálogo</span>
         </RouterLink>
-        <h1 class="admin-sidebar__title">Painel Admin</h1>
+        <h1 class="admin-sidebar__title">Painel do clube</h1>
       </div>
 
       <nav class="admin-sidebar__nav" aria-label="Navegação do painel">
@@ -28,7 +28,7 @@
           :class="{ 'is-active': route.name === 'admin-entities' }"
         >
           <BaseIcon name="menu" class="admin-sidebar__link-icon" />
-          <span>Segmentações</span>
+          <span>Autores e gêneros</span>
         </RouterLink>
 
         <!-- enrichment -->
@@ -102,7 +102,7 @@ import UserAvatar from '@/components/UserAvatar.vue'
 import { API_BASE } from '@/data/config'
 
 usePageMeta({
-  title: 'Painel Admin',
+  title: 'Painel do clube',
   description: 'Painel de administração do Ecos Literários',
 })
 

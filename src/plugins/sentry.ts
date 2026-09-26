@@ -1,5 +1,7 @@
 import * as Sentry from '@sentry/vue'
 import type { App } from 'vue'
+
+import { ApiError } from '@/composables/apiError'
 import type { Router } from 'vue-router'
 
 interface SentrySetupOptions {
@@ -60,8 +62,8 @@ export function setupSentry({ app, router, dsn, release }: SentrySetupOptions): 
         // Drop fetch aborts (user navigated away mid-request, not a bug).
         if (error.name === 'AbortError') return null
 
-        // Drop expected HTTP 4xx (client/permission errors, not bugs).
-        // The app already surfaces these to the user via UI feedback.
+        // Expected 4xx are not bugs; ApiError by status, plain errors by their "HTTP 4xx" message.
+        if (error instanceof ApiError && error.status >= 400 && error.status < 500) return null
         if (/HTTP 4\d\d/.test(error.message)) return null
       }
 

@@ -76,7 +76,7 @@
 
                 <!-- páginas — admin only -->
                 <div v-if="!isMemberScope" class="form-field">
-                  <label for="bf-pages" class="form-field__label">Qtd. de páginas</label>
+                  <label for="bf-pages" class="form-field__label">Páginas</label>
                   <input
                     id="bf-pages"
                     v-model.trim="form.page_count"
@@ -97,7 +97,7 @@
                     v-model.trim="form.quem_nome"
                     type="text"
                     class="form-field__input"
-                    placeholder="Nome de quem indicou"
+                    placeholder="Nome de quem mencionou"
                     :disabled="isSaving"
                     autocomplete="off"
                   />
@@ -137,9 +137,9 @@
 
                 <!-- categoria -->
                 <div class="form-field">
-                  <label class="form-field__label">Categoria *</label>
+                  <label class="form-field__label">Gênero *</label>
                   <MultiSelect
-                    label="Selecionar categoria"
+                    label="Selecionar gênero"
                     :options="categoriaOptions"
                     :selected="form.categoria"
                     :multiple="false"
@@ -150,9 +150,9 @@
 
                 <!-- subgêneros -->
                 <div class="form-field">
-                  <label class="form-field__label">Sub-gêneros</label>
+                  <label class="form-field__label">Subgêneros</label>
                   <MultiSelect
-                    label="Selecionar sub-gêneros"
+                    label="Selecionar subgêneros"
                     :options="subgeneroOptions"
                     :selected="form.subgeneros"
                     :multiple="true"
@@ -270,6 +270,7 @@
 </template>
 
 <script lang="ts" setup>
+import { toApiError } from '@/composables/apiError'
 import { ref, reactive, computed, watch, nextTick, onMounted } from 'vue'
 
 import { useEntityCrud, useErrorReporter } from '@/composables'
@@ -454,10 +455,7 @@ const handleSubmit = async () => {
       body: JSON.stringify(payload),
     })
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-      throw new Error(body.error ?? `HTTP ${res.status}`)
-    }
+    if (!res.ok) throw await toApiError(res, 'Não deu pra salvar. Tente de novo.', method)
 
     success.value = isEditMode.value ? 'Livro atualizado.' : 'Livro criado.'
     emit('saved')
@@ -466,8 +464,8 @@ const handleSubmit = async () => {
       setTimeout(() => close(), 800)
     }
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Erro ao salvar.'
-    useErrorReporter().captureException(e, { context: 'handleSubmit' })
+    error.value = e instanceof Error ? e.message : 'Não deu pra salvar. Tente de novo.'
+    useErrorReporter().captureException(e, { context: 'BookFormDrawer.submit' })
   } finally {
     isSaving.value = false
   }

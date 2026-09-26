@@ -1,7 +1,7 @@
 <template>
   <div class="admin-section">
-    <SectionHeader title="Segmentação do catálogo">
-      Gerencie autores, mídias, categorias e sub-gêneros disponíveis para os livros do catálogo.
+    <SectionHeader title="Autores e gêneros">
+      As listas que aparecem nos livros: autores, mídias, gêneros e subgêneros.
     </SectionHeader>
 
     <!-- Tab navigation -->
@@ -54,15 +54,15 @@ const tabs: TabConfig[] = [
   },
   {
     key: 'categorias',
-    label: 'Categorias',
+    label: 'Gêneros',
     resource: 'categorias',
-    description: 'Categorias principais do catálogo (Suspense, Fantasia, etc.).',
+    description: 'Os gêneros do catálogo (Suspense, Fantasia…).',
   },
   {
     key: 'subgeneros',
-    label: 'Sub-gêneros',
+    label: 'Subgêneros',
     resource: 'subgeneros',
-    description: 'Tags de sub-gênero aplicáveis a qualquer livro.',
+    description: 'Os subgêneros que um livro pode ter.',
   },
 ]
 

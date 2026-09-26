@@ -1,6 +1,6 @@
 <template>
   <div class="profile-section">
-    <SectionHeader title="Conta"> Gerencie as informações do seu perfil exibidas no clube. </SectionHeader>
+    <SectionHeader title="Conta"> Seu nome no clube e como você entra na plataforma. </SectionHeader>
 
     <!-- Status cards -->
     <div class="status-grid">
@@ -10,7 +10,7 @@
       </article>
 
       <article class="status-card">
-        <p class="status-card__label">Email</p>
+        <p class="status-card__label">E-mail</p>
         <p class="status-card__value">{{ authStore.user?.email ?? '—' }}</p>
       </article>
 
@@ -72,7 +72,7 @@
       </header>
       <div class="readonly-list">
         <div class="readonly-item">
-          <span class="readonly-item__label">Email</span>
+          <span class="readonly-item__label">E-mail</span>
           <span class="readonly-item__value">{{ authStore.user?.email ?? '—' }}</span>
         </div>
         <div class="readonly-item">
@@ -80,12 +80,12 @@
           <span class="readonly-item__value">{{ roleLabel }}</span>
         </div>
         <div class="readonly-item">
-          <span class="readonly-item__label">Autenticação</span>
-          <span class="readonly-item__value">Link (via e-mail)</span>
+          <span class="readonly-item__label">Como você entra</span>
+          <span class="readonly-item__value">Link por e-mail</span>
         </div>
       </div>
       <p class="readonly-note">
-        Email e nível de permissão não podem ser alterados por aqui. Contate um administrador se necessário.
+        O e-mail e o nível de permissão não mudam por aqui. Se precisar, fale com quem cuida da plataforma.
       </p>
     </section>
 
@@ -98,13 +98,17 @@
         <button type="button" class="action-btn action-btn--secondary" @click="forceRefresh">
           Recarregar catálogo
         </button>
-        <button type="button" class="action-btn action-btn--secondary" @click="forceReset">Resetar cache</button>
+        <button type="button" class="action-btn action-btn--secondary" @click="forceReset">
+          Limpar os dados deste aparelho
+        </button>
       </div>
+      <p class="account-actions__hint">Limpar sai da conta e baixa o catálogo de novo. Sua escolha de formatos fica.</p>
     </section>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { toApiError } from '@/composables/apiError'
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -174,10 +178,7 @@ const submit = async () => {
       body: JSON.stringify({ name: name.value }),
     })
 
-    if (!res.ok) {
-      const payload = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-      throw new Error(payload.error ?? 'Não foi possível salvar o nome.')
-    }
+    if (!res.ok) throw await toApiError(res, 'Não deu pra salvar o nome. Tente de novo.', 'PATCH')
 
     const updated = await res.json()
 
@@ -187,10 +188,10 @@ const submit = async () => {
     }
 
     name.value = updated.name
-    successMessage.value = 'Nome atualizado com sucesso.'
+    successMessage.value = 'Nome salvo.'
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Erro ao salvar alterações.'
-    useErrorReporter().captureException(err, { context: 'submit' })
+    error.value = err instanceof Error ? err.message : 'Não deu pra salvar. Tente de novo.'
+    useErrorReporter().captureException(err, { context: 'ProfileAccount.submit' })
   } finally {
     isSubmitting.value = false
   }
@@ -360,6 +361,12 @@ const submit = async () => {
       min-height: 44px;
     }
   }
+}
+
+.account-actions__hint {
+  margin-top: var(--space-2);
+  font-size: 0.875rem;
+  color: var(--color-text-subtle);
 }
 
 .action-btn {

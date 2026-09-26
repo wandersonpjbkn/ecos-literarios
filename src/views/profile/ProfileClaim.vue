@@ -2,7 +2,8 @@
   <div class="profile-section">
     <!-- Header -->
     <SectionHeader title="Vínculos">
-      Associe seu usuário às menções do catálogo. Um vínculo ativo conecta seus livros indicados ao seu perfil.
+      Vincule a sua conta ao nome que aparece nos livros que você mencionou. Com o vínculo, eles aparecem em Meus livros
+      e você pode corrigi-los.
     </SectionHeader>
 
     <!-- Status cards -->
@@ -53,7 +54,7 @@
         <form class="claim-form" @submit.prevent="submitClaim">
           <div v-if="!hasActiveClaim" class="field">
             <label class="field__label">Nome em menções</label>
-            <p class="field__hint">Selecione o nome que aparece nos livros que você indicou.</p>
+            <p class="field__hint">Escolha o nome que aparece nos livros que você mencionou.</p>
             <MultiSelect
               label="Selecionar nome…"
               :options="availableNames"
@@ -94,7 +95,7 @@
         <ul class="rules-list">
           <li>Você só pode ter <strong>um vínculo ativo por vez</strong>.</li>
           <li>Você pode <strong>desvincular</strong> a qualquer momento e refazer com outro nome.</li>
-          <li>Um nome já vinculado por outra conta <strong>não pode ser reivindicado novamente</strong>.</li>
+          <li>Um nome já vinculado por outra conta <strong>não pode ser vinculado de novo</strong>.</li>
         </ul>
       </section>
     </template>
@@ -147,8 +148,8 @@ const loadStatus = async () => {
   try {
     claimStatus.value = await getMyClaimStatus()
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Não foi possível carregar seu vínculo atual.'
-    useErrorReporter().captureException(err, { context: 'loadStatus' })
+    error.value = err instanceof Error ? err.message : 'Não deu pra carregar seu vínculo. Tente de novo.'
+    useErrorReporter().captureException(err, { context: 'ProfileClaim.loadStatus' })
   } finally {
     loadingStatus.value = false
   }
@@ -169,16 +170,16 @@ const submitClaim = async () => {
     }
 
     if (typeof result.updated_books === 'number' && typeof result.matched_books === 'number') {
-      successMessage.value = `Pronto! ${result.updated_books} livro(s) vinculados de ${result.matched_books} menção(ões) encontradas.`
+      successMessage.value = `Pronto: ${result.updated_books === 1 ? '1 livro ligado' : `${result.updated_books} livros ligados`} ao seu nome.`
     } else {
-      successMessage.value = result.message ?? 'Vínculo realizado com sucesso.'
+      successMessage.value = result.message ?? 'Nome vinculado.'
     }
 
     quemNome.value = ''
     await loadStatus()
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Não foi possível concluir o vínculo.'
-    useErrorReporter().captureException(err, { context: 'submitClaim', quemNome: quemNome.value })
+    error.value = err instanceof Error ? err.message : 'Não deu pra vincular o nome. Tente de novo.'
+    useErrorReporter().captureException(err, { context: 'ProfileClaim.submit', quemNome: quemNome.value })
   } finally {
     isSubmitting.value = false
   }
@@ -193,11 +194,11 @@ const unclaim = async () => {
 
   try {
     const result = await unclaimRegister()
-    successMessage.value = result.message ?? 'Vínculo removido com sucesso.'
+    successMessage.value = result.message ?? 'Vínculo desfeito.'
     await loadStatus()
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Não foi possível desvincular o vínculo atual.'
-    useErrorReporter().captureException(err, { context: 'unclaim' })
+    error.value = err instanceof Error ? err.message : 'Não deu pra desfazer o vínculo. Tente de novo.'
+    useErrorReporter().captureException(err, { context: 'ProfileClaim.unclaim' })
   } finally {
     isUnclaiming.value = false
   }

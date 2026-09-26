@@ -16,10 +16,24 @@
         </div>
       </template>
 
+      <template v-else-if="status === 'resent'">
+        <p ref="resentTitle" class="callback-title" tabindex="-1">Mandamos outro link</p>
+        <p class="callback-msg">Foi para {{ resentTo }}. Veja seu e-mail e toque no link pra entrar.</p>
+      </template>
+
       <template v-else>
         <BaseIcon name="error" class="callback-error-icon" aria-hidden="true" />
         <p class="callback-msg callback-msg--error">Não deu pra entrar com esse link. Ele pode ter vencido.</p>
-        <AppButton :to="{ name: 'auth-login' }" variant="primary">Pedir outro link</AppButton>
+        <template v-if="lastEmail">
+          <!-- The address wraps in the text; a long one inside a pill would run off a phone screen. -->
+          <p class="callback-msg">O link foi pedido para {{ lastEmail }}.</p>
+          <div class="callback-actions">
+            <AppButton variant="primary" :disabled="sending" @click="resend">Mandar outro link</AppButton>
+            <AppButton :to="{ name: 'auth-login' }">Usar outro e-mail</AppButton>
+          </div>
+        </template>
+        <AppButton v-else :to="{ name: 'auth-login' }" variant="primary">Pedir outro link</AppButton>
+        <p v-if="resendError" class="callback-msg" role="status">{{ resendError }}</p>
       </template>
     </div>
   </div>
@@ -27,23 +41,52 @@
 
 <script lang="ts" setup>
 import AppButton from '@/components/AppButton.vue'
-import { ref, onMounted } from 'vue'
+import { nextTick, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useErrorReporter } from '@/composables'
 import { CallbackError, useAuth } from '@/composables/useAuth'
+import { forgetEmail, recallEmail } from '@/composables/useLastEmail'
 import { takeReturn } from '@/composables/useReturnPath'
 
-const { handleCallback } = useAuth()
+const { handleCallback, sendMagicLink } = useAuth()
 const router = useRouter()
 
-const status = ref<'loading' | 'link' | 'platform'>('loading')
+const status = ref<'loading' | 'link' | 'platform' | 'resent'>('loading')
+
+// Expired link: resend to the e-mail that asked for it (same browser, within the hour) instead of retyping it.
+const lastEmail = ref(recallEmail())
+const resentTo = ref('')
+const resentTitle = ref<HTMLElement | null>(null)
+const sending = ref(false)
+const resendError = ref('')
+
+const resend = async () => {
+  if (!lastEmail.value) return
+  sending.value = true
+  resendError.value = ''
+  try {
+    await sendMagicLink(lastEmail.value)
+    resentTo.value = lastEmail.value
+    forgetEmail()
+    status.value = 'resent'
+    // The pressed button is gone; move focus to the news so it is not lost on the page.
+    await nextTick()
+    resentTitle.value?.focus()
+  } catch (err) {
+    resendError.value = 'Não deu pra mandar agora. Tente de novo daqui a pouco.'
+    useErrorReporter().captureException(err, { context: 'AuthCallback.resend' })
+  } finally {
+    sending.value = false
+  }
+}
 
 // The browser's or the API's own error ("Failed to fetch") goes to the reporter, never to the screen.
 const enter = async () => {
   status.value = 'loading'
   try {
     await handleCallback()
+    forgetEmail()
     router.replace(takeReturn())
   } catch (err) {
     status.value = err instanceof CallbackError ? err.reason : 'link'
@@ -83,6 +126,7 @@ onMounted(enter)
 
 .callback-msg {
   margin: 0;
+  overflow-wrap: anywhere;
   font-size: 1rem;
   color: var(--color-text-subtle);
 

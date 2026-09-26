@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/vue'
 
+import { ApiError } from '@/composables/apiError'
 import type { AuthUser } from '@/types'
 
 type ErrorContext = Record<string, unknown>
@@ -10,13 +11,24 @@ type ErrorContext = Record<string, unknown>
  * not on Sentry directly. Swapping providers later means changing
  * this file only.
  */
+// Searchable in Sentry: where it happened and, for API failures, the status and the route.
+const tagsFor = (error: unknown, context?: ErrorContext): Record<string, string> => ({
+  ...(context?.context ? { context: String(context.context) } : {}),
+  ...(error instanceof ApiError ? { status: String(error.status), endpoint: error.endpoint } : {}),
+})
+
 export function useErrorReporter() {
   /**
    * Report a thrown error. Use in catch blocks and async failures
    * where the error indicates a real bug worth tracking.
    */
   function captureException(error: unknown, context?: ErrorContext): void {
-    Sentry.captureException(error, context ? { extra: context } : undefined)
+    Sentry.captureException(error, {
+      extra: context,
+      tags: tagsFor(error, context),
+      // Screen texts repeat on purpose ("Não deu pra salvar."); the place, not the text, tells issues apart.
+      fingerprint: context?.context ? ['{{ default }}', String(context.context)] : undefined,
+    })
   }
 
   /**

@@ -4,10 +4,8 @@
       <component :is="item.eco ? EcoCard : BookCard" v-for="item in items" :key="item.key" :book="item.book" />
     </TransitionGroup>
 
-    <div v-else class="empty-state">
-      <p>{{ emptyMessage }}</p>
-      <AppButton class="retry-btn" variant="primary" @click="emit('clear')">Limpar os filtros</AppButton>
-    </div>
+    <!-- The page knows why the list is empty (search or filters) and says so (EmptyState.md). -->
+    <slot v-else name="empty" />
 
     <ListFooter
       v-if="books.length > 0"
@@ -22,7 +20,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import AppButton from '@/components/AppButton.vue'
 import BookCard from '@/components/BookCard.vue'
 import EcoCard from '@/components/EcoCard.vue'
 import ListFooter from '@/components/ListFooter.vue'
@@ -33,21 +30,13 @@ const books = defineModel<Book[]>({ required: true })
 
 const props = withDefaults(
   defineProps<{
-    emptyMessage?: string
     // Third card (Main): takes a book's slot but stays out of the counts.
     eco?: Book | null
   }>(),
-  {
-    emptyMessage: 'Nenhum livro com esses filtros',
-    eco: null,
-  },
+  { eco: null },
 )
 
 const ECO_SLOT = 2
-
-const emit = defineEmits<{
-  clear: []
-}>()
 
 const { visibleBooks, nextBatch, loadMore } = useBooksGrid(
   books,
@@ -75,19 +64,6 @@ const items = computed(() => {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: calc(var(--space-5) + var(--space-2)) var(--space-5);
   }
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-4);
-  max-width: 380px;
-  margin: 0 auto;
-  padding: var(--space-14) var(--space-6);
-  color: var(--color-text-default);
-  text-align: center;
-  font-size: 1rem;
 }
 
 .grid-enter-active {

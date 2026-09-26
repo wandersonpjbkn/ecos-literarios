@@ -1,7 +1,7 @@
 <template>
   <div class="admin-section">
     <SectionHeader title="Livros">
-      <span>Gerencie os livros do catálogo. Crie, edite ou remova títulos e suas informações.</span>
+      <span>Os livros do catálogo: adicione, corrija ou remova.</span>
       <template #actions>
         <button class="action-btn" @click="openCreate">+ Novo livro</button>
       </template>
@@ -45,18 +45,18 @@
     <div v-else-if="error" class="admin-state admin-state--error">
       <BaseIcon name="error" aria-hidden="true" />
       <p>{{ error }}</p>
-      <button class="retry-btn" @click="fetchBooks">Tentar novamente</button>
+      <button class="retry-btn" @click="fetchBooks">Tentar de novo</button>
     </div>
 
     <!-- Empty -->
-    <p v-else-if="books.length === 0" class="admin-empty">Nenhum livro cadastrado.</p>
+    <p v-else-if="books.length === 0" class="admin-empty">Nenhum livro no catálogo ainda.</p>
 
     <!-- List -->
     <div v-else class="books-list">
       <div class="books-row books-row--header">
         <span>Título</span>
         <span>Autor</span>
-        <span>Categoria</span>
+        <span>Gênero</span>
         <span>Mídia</span>
         <span>Ações</span>
       </div>
@@ -116,6 +116,7 @@
 </template>
 
 <script lang="ts" setup>
+import { toApiError } from '@/composables/apiError'
 import { ref, computed, reactive, watch, onMounted } from 'vue'
 
 import { useErrorReporter } from '@/composables'
@@ -195,11 +196,11 @@ const fetchBooks = async () => {
 
   try {
     const res = await fetch(`${API_BASE}/books`, { headers: buildHeaders() })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    if (!res.ok) throw await toApiError(res, 'Não deu pra carregar os livros. Tente de novo.')
     books.value = await res.json()
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Erro ao carregar livros.'
-    useErrorReporter().captureException(e, { context: 'fetchBooks' })
+    error.value = e instanceof Error ? e.message : 'Não deu pra carregar os livros. Tente de novo.'
+    useErrorReporter().captureException(e, { context: 'AdminBooks.fetchBooks' })
     console.error('[AdminBooks]', e)
   } finally {
     loading.value = false
@@ -264,16 +265,13 @@ const handleDelete = async () => {
       headers: buildHeaders(),
     })
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-      throw new Error(body.error ?? `HTTP ${res.status}`)
-    }
+    if (!res.ok) throw await toApiError(res, 'Não deu pra remover o livro. Tente de novo.', 'DELETE')
 
     books.value = books.value.filter((b) => b._id !== deleteModal.targetId)
     deleteModal.open = false
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Erro ao remover livro.'
-    useErrorReporter().captureException(e, { context: 'handleDelete' })
+    error.value = e instanceof Error ? e.message : 'Não deu pra remover o livro. Tente de novo.'
+    useErrorReporter().captureException(e, { context: 'AdminBooks.delete' })
     deleteModal.open = false
   } finally {
     isDeleting.value = false

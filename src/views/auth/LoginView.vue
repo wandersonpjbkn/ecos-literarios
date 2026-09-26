@@ -54,6 +54,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { useAuth } from '@/composables/useAuth'
+import { rememberEmail } from '@/composables/useLastEmail'
 import { rememberReturn, takeReturn } from '@/composables/useReturnPath'
 import { useAuthStore } from '@/stores'
 
@@ -93,6 +94,7 @@ const submit = async () => {
 
   try {
     await sendMagicLink(email.value.trim())
+    rememberEmail(email.value.trim())
     step.value = 'sent'
     startCooldown()
   } catch (err) {

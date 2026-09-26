@@ -64,7 +64,7 @@ import UserAvatar from '@/components/UserAvatar.vue'
 
 usePageMeta({
   title: 'Meu perfil',
-  description: 'Gerencie seu vínculo de menções e informações de conta no Ecos Literários',
+  description: 'Seus livros, o vínculo com o seu nome e a sua conta no Ecos Literários',
 })
 
 const route = useRoute()

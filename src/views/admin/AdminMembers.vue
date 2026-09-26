@@ -1,6 +1,6 @@
 <template>
   <div class="admin-section">
-    <SectionHeader title="Membros"> Gerencie os membros do clube e suas permissões de acesso. </SectionHeader>
+    <SectionHeader title="Membros"> Quem entrou na plataforma e o que cada pessoa pode fazer. </SectionHeader>
 
     <!-- Loading -->
     <BaseSpinner v-if="loading">
@@ -11,7 +11,7 @@
     <div v-else-if="error" class="admin-state admin-state--error">
       <BaseIcon name="error" aria-hidden="true" />
       <p>{{ error }}</p>
-      <button class="retry-btn" @click="fetchUsers">Tentar novamente</button>
+      <button class="retry-btn" @click="fetchUsers">Tentar de novo</button>
     </div>
 
     <!-- Lista -->
@@ -42,7 +42,7 @@
             class="role-select"
             :value="user.role"
             :disabled="user._id === authStore.user?._id"
-            :title="user._id === authStore.user?._id ? 'Você não pode alterar sua própria role' : ''"
+            :title="user._id === authStore.user?._id ? 'Você não pode mudar o seu próprio nível de permissão' : ''"
             @change="onRoleChange(user, ($event.target as HTMLSelectElement).value)"
           >
             <option value="viewer">Membro</option>
@@ -69,6 +69,8 @@
 </template>
 
 <script lang="ts" setup>
+import { toApiError } from '@/composables/apiError'
+import { roleLabel } from '@/data/roles'
 import { ref, onMounted, reactive } from 'vue'
 
 import { useAuthStore } from '@/stores'
@@ -94,11 +96,6 @@ const confirm = reactive({
   previousRole: '' as ApiUser['role'],
 })
 
-const roleLabel = (role: string) => {
-  const map: Record<string, string> = { admin: 'Administrador', editor: 'Editor', viewer: 'Membro' }
-  return map[role] ?? role
-}
-
 const formatDate = (iso: string) => {
   return new Date(iso).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })
 }
@@ -111,10 +108,11 @@ const fetchUsers = async () => {
     const res = await fetch(`${API_BASE}/users`, {
       headers: buildHeaders(),
     })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    if (!res.ok) throw await toApiError(res, 'Não deu pra carregar os membros. Tente de novo.')
     users.value = await res.json()
   } catch (e) {
-    error.value = 'Não foi possível carregar os membros.'
+    error.value = 'Não deu pra carregar os membros. Tente de novo.'
+    useErrorReporter().captureException(e, { context: 'AdminMembers.fetchUsers' })
     console.error('[AdminMembers]', e)
   } finally {
     loading.value = false
@@ -143,10 +141,7 @@ const applyRoleChange = async () => {
       body: JSON.stringify({ role: confirm.newRole }),
     })
 
-    if (!res.ok) {
-      const { error: msg } = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-      throw new Error(msg)
-    }
+    if (!res.ok) throw await toApiError(res, 'Não deu pra mudar a permissão. Tente de novo.', 'PATCH')
 
     // Atualiza localmente
     const idx = users.value.findIndex((u) => u._id === confirm.userId)
@@ -154,8 +149,8 @@ const applyRoleChange = async () => {
 
     confirm.open = false
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Erro ao alterar permissão.'
-    useErrorReporter().captureException(e, { context: 'applyRoleChange', userId: confirm.userId })
+    error.value = e instanceof Error ? e.message : 'Não deu pra mudar a permissão. Tente de novo.'
+    useErrorReporter().captureException(e, { context: 'AdminMembers.applyRoleChange', userId: confirm.userId })
     confirm.open = false
   } finally {
     confirm.loading = false
