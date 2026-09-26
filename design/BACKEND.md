@@ -62,7 +62,13 @@ A tela de permissões continua, e é para ela existir que o painel existe: a alt
 
 ## 5. Autenticação
 
-Entrada por link mágico (Supabase), sem senha. O texto de erro **"Falha ao verificar o token"** que aparece hoje no callback precisa virar linguagem de gente: *"Esse link expirou. Mandamos outro para o seu e-mail."* com o botão de reenviar ao lado. Um link mágico expirado é o caso normal, não uma falha do sistema.
+Entrada por link mágico (Supabase), sem senha. Um link vencido é o caso normal, não uma falha do sistema (fatia 6):
+
+- O callback não sabe se o link venceu ou se é inválido, então diz "Não deu pra entrar com esse link. Ele pode ter vencido." em vez de afirmar "expirou".
+- O e-mail que pediu o link fica guardado no aparelho (`localStorage`, porque o link abre numa aba nova) por no máximo 1 hora, a validade do link. Ele é apagado quando o login dá certo ou quando o reenvio é usado. Com ele, a tela oferece **Mandar outro link para fulano@…** e **Usar outro e-mail**; sem ele, **Pedir outro link**.
+- "Mandamos outro link" só aparece depois que o reenvio foi feito de verdade. O sistema não manda sozinho.
+- Quando o link funcionou mas a plataforma não respondeu, o callback diz isso e não pede outro link (veja `COPY.md`).
+- Mensagens do servidor que chegam à tela seguem o `COPY.md`: sessão vencida é "Sua sessão venceu. Entre de novo.", falta de permissão é "Você não tem permissão para isso."
 
 ## 6. Dados que faltam, e o que fazer com eles
 

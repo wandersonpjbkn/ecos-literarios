@@ -10,7 +10,7 @@ A saída é sempre um botão de verdade, nunca um conselho em texto. "Tente outr
 
 **Busca sem resultado** — repete o termo buscado entre aspas, diz onde procurou, oferece apagar a busca e adicionar o livro.
 
-**Filtro sem resultado** — nomeia a combinação aplicada em português ("Nada de terror mencionado pela Nati") e oferece limpar os filtros.
+**Filtro sem resultado** — nomeia a combinação aplicada em português ("Nada de terror mencionado por Natália"; sem artigo de gênero, que o dado não informa) e oferece limpar os filtros.
 
 **Lista própria vazia** — diz o que a lista vai guardar quando tiver algo, e leva ao catálogo.
 

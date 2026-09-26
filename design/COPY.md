@@ -65,13 +65,25 @@ Um campo só, na linha de baixo da ficha, pergunta pelo que falta (veja "Corrigi
 
 **Busca sem resultado**
 > Nada com "kafka no espaço"
-> Procuramos no título, no autor e no que as pessoas escreveram sobre cada livro.
-> `[Apagar a busca]` `[Adicionar esse livro]`
+> Procuramos no título, no autor e no que as pessoas escreveram sobre cada livro. *(com filtro junto: "…, dentro dos filtros escolhidos.")*
+> `[Apagar a busca]` · `[Limpar os filtros]` quando há filtro · `[Adicionar esse livro]` só para quem pode criar livro (admin e editor); membro não vê um caminho que ainda não existe para ele
 
 **Filtro sem resultado**
 > Nenhum livro com esses filtros
-> Nada de terror mencionado pela Nati.
+> Nada de terror mencionado por Natália.
 > `[Limpar os filtros]`
+
+A frase monta a combinação aplicada: gênero ou subgênero, formato ("em mangá"), tamanho ("com menos de 200 páginas"), autor ("de Junji Ito") e pessoa ("mencionado por Natália"). Sem artigo de gênero ("pela"): o dado não diz o gênero de ninguém.
+
+**Lista própria vazia** (Meus livros)
+> Nenhum livro com o seu nome ainda
+> Aqui aparecem os livros que você mencionou no grupo, depois que você vincula a sua conta ao nome que aparece neles.
+> `[Vincular meu nome]`
+
+**Link mágico que não funcionou** (pode ter vencido; o sistema não sabe qual dos dois)
+> Não deu pra entrar com esse link. Ele pode ter vencido.
+> `[Mandar outro link para fulano@…]` `[Usar outro e-mail]` quando o e-mail foi pedido neste aparelho na última hora; senão `[Pedir outro link]`
+> Depois do reenvio: `Mandamos outro link` / `Foi para fulano@…. Veja seu e-mail e toque no link pra entrar.`
 
 **Sem internet / servidor fora** — mostra a lista salva com a data ("a lista de ontem") e desliga só a escrita, em todo lugar onde dá para adicionar (topo, trilho e barra de baixo juntos). Nunca tela em branco.
 
@@ -85,6 +97,16 @@ Um campo só, na linha de baixo da ficha, pergunta pelo que falta (veja "Corrigi
 Link recusado ou sem sessão: `Não deu pra entrar com esse link. Ele pode ter vencido.` `[Pedir outro link]`.
 
 O banner diz por que "Adicionar" está desligado; sem isso o botão cinza não se explica. "Servidor" não aparece: é palavra de quem fez o sistema. O nome é **plataforma**: "o Ecos" se confunde com o clube, e "site" lembra site institucional. O banner usa as tintas `alert-*` (âmbar): atenção, não erro, porque dá pra continuar olhando.
+
+## Palavras de sistema que não aparecem
+
+Na tela, inclusive no painel do clube e nas mensagens que vêm do servidor:
+- "role", "claim", "reivindicar", "batch", "token", "cache", "cadastrado", "importação", "Qtd.", "livro(s)";
+- "Erro ao …" e "Não foi possível …" viram **"Não deu pra … Tente de novo."**; "Tentar novamente" vira **"Tentar de novo"**;
+- "Categoria" vira **"Gênero"** e "Sub-gêneros", **"Subgêneros"**, como na tela pública; "Email" vira **"E-mail"**;
+- "Painel admin" vira **"Painel do clube"**; "Segmentações" vira **"Autores e gêneros"**;
+- os níveis de permissão aparecem como **Administrador, Editor, Membro**, nunca `admin`, `editor`, `viewer`;
+- "Resetar cache" vira **"Limpar os dados deste aparelho"**, com o que acontece: "Limpar sai da conta e baixa o catálogo de novo. Sua escolha de formatos fica."
 
 ## Tom
 
