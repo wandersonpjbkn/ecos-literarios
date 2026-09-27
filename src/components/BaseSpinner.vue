@@ -8,24 +8,22 @@
 <style lang="scss" scoped>
 .base-spinner {
   display: flex;
-  padding: 60px 24px;
+  padding: var(--space-14) var(--space-6);
 
   text-align: center;
   color: var(--color-text-subtle);
 
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 
   &--icon {
-    $size: 2.25rem;
-
-    width: $size;
-    height: $size;
+    width: var(--spinner);
+    height: var(--spinner);
     border: 3px solid var(--color-border-default);
     border-top-color: var(--color-action-default);
     border-radius: 50%;
-    animation: spin 0.7s linear infinite;
+    animation: spin var(--motion-spin) linear infinite;
   }
 }
 

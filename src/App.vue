@@ -3,47 +3,38 @@
   <Head>
     <bodyAttrs :class="[useRoute().meta.pageClass, `page-${useRoute().name as string}`]" />
   </Head>
-  <div class="app-wrapper">
-    <!-- sidebar -->
-    <AppSidebar />
+  <div class="app-root">
+    <!-- Areas (panel, Minha conta) are route components with their own frame; entering has its own; the rest reads. -->
+    <RouterView v-if="route.meta.frame === 'area'" v-slot="{ Component }">
+      <Transition name="fade" mode="out-in">
+        <component :is="Component" />
+      </Transition>
+    </RouterView>
+    <AuthLayout v-else-if="route.meta.frame === 'auth'" />
+    <ReadingLayout v-else />
 
-    <!-- header -->
-    <AppHeader />
-
-    <!-- content -->
-    <main ref="content" class="app-main">
-      <RouterView v-slot="{ Component }">
-        <Transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </Transition>
-      </RouterView>
-    </main>
-
-    <!-- back to top -->
-    <BackTop :target="content" />
-
-    <!-- update notification -->
     <UpdateNotification />
     <AppToast />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { defineAsyncComponent, ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import { Head } from '@unhead/vue/components'
 
 import { useAuth } from '@/composables'
-import AppHeader from '@/components/AppHeader.vue'
-import UpdateNotification from '@/components/UpdateNotification.vue'
-import AppToast from '@/components/AppToast.vue'
-
-const AppSidebar = defineAsyncComponent(() => import('@/components/AppSidebar.vue'))
-const BackTop = defineAsyncComponent(() => import('@/components/BackTop.vue'))
+import { startFormatsSync } from '@/composables/formatsSync'
+import { startAccountSync } from '@/composables/accountSync'
+import { useRouteFocus } from '@/composables/useRouteFocus'
+import AuthLayout from '@/layouts/AuthLayout.vue'
+import ReadingLayout from '@/layouts/ReadingLayout.vue'
+import UpdateNotification from '@/layouts/UpdateNotification.vue'
+import AppToast from '@/layouts/AppToast.vue'
 
 const route = useRoute()
-const router = useRouter()
+useRouteFocus()
 const { restoreSession, watchSession } = useAuth()
 
 useHead({
@@ -51,84 +42,38 @@ useHead({
   meta: [{ name: 'robots', content: 'noindex, nofollow' }],
 })
 
-const content = ref<HTMLElement | null>(null)
-const scrollPositions = new Map<string, number>()
+let stopWatchSession: (() => void) | null = null
+let stopAccount: (() => void) | null = null
 
-router.beforeEach((_, from) => {
-  if (content.value) {
-    scrollPositions.set(from.fullPath, content.value.scrollTop)
+onMounted(async () => {
+  stopWatchSession = watchSession()
+  // A returning visit may carry an expired token: the account is read only after Supabase has refreshed it.
+  await restoreSession()
+  const formats = startFormatsSync()
+  const stopAccountSync = startAccountSync(formats)
+  stopAccount = () => {
+    stopAccountSync()
+    formats.stop()
   }
 })
 
-// Path only: filters live in the query, and toggling one must not scroll the catalog back to the top.
-watch(
-  () => route.path,
-  async () => {
-    await nextTick()
-    setTimeout(() => {
-      if (!content.value) return
-      const saved = scrollPositions.get(route.fullPath)
-      if (saved !== undefined) {
-        content.value.scrollTo({ top: saved, behavior: 'instant' })
-      } else {
-        content.value.scrollTo({ top: 0, behavior: 'smooth' })
-      }
-    }, 350)
-  },
-)
-
-let stopWatchSession: (() => void) | null = null
-
-onMounted(() => {
-  restoreSession()
-  stopWatchSession = watchSession()
+onUnmounted(() => {
+  stopWatchSession?.()
+  stopAccount?.()
 })
-
-onUnmounted(() => stopWatchSession?.())
 </script>
 
 <style lang="scss" scoped>
-.app-wrapper {
-  display: grid;
+.app-root {
   height: 100dvh;
-
-  grid-template-rows: auto 1fr;
-  grid-template-columns: auto 1fr;
   overflow: hidden;
-
-  :deep(.app-sidebar) {
-    grid-row: 1 / 3;
-  }
-
-  :deep(.app-header) {
-    grid-column: 2 / 3;
-  }
-
-  @media (max-width: 767px) {
-    grid-template-rows: auto 1fr auto;
-    grid-template-columns: 1fr;
-
-    :deep(.app-sidebar) {
-      grid-row: 3 / 4;
-    }
-
-    :deep(.app-header) {
-      grid-row: 1 / 2;
-      grid-column: 1 / 2;
-    }
-  }
 }
 
-.app-main {
-  width: auto;
-  overflow-y: auto;
-}
-
-/* Route transitions */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity var(--motion-transition-default);
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;

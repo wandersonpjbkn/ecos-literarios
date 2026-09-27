@@ -1,7 +1,13 @@
 <template>
   <div class="books-grid-wrap">
-    <TransitionGroup v-if="books.length > 0" name="grid" tag="div" class="books-grid">
-      <component :is="item.eco ? EcoCard : BookCard" v-for="item in items" :key="item.key" :book="item.book" />
+    <TransitionGroup v-if="books.length > 0" ref="grid" name="grid" tag="div" class="books-grid book-grid">
+      <component
+        :is="item.eco ? EcoCard : BookCard"
+        v-for="item in items"
+        :key="item.key"
+        :book="item.book"
+        :data-list-item="item.eco ? undefined : ''"
+      />
     </TransitionGroup>
 
     <!-- The page knows why the list is empty (search or filters) and says so (EmptyState.md). -->
@@ -12,18 +18,18 @@
       :shown="visibleBooks.length"
       :total="books.length"
       :next-batch="nextBatch"
-      @more="loadMore"
+      @more="more(gridElement())"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 import BookCard from '@/components/BookCard.vue'
 import EcoCard from '@/components/EcoCard.vue'
 import ListFooter from '@/components/ListFooter.vue'
-import { useBooksGrid } from '@/composables'
+import { useLoadMore } from '@/composables/useLoadMore'
 import type { Book } from '@/types'
 
 const books = defineModel<Book[]>({ required: true })
@@ -38,10 +44,14 @@ const props = withDefaults(
 
 const ECO_SLOT = 2
 
-const { visibleBooks, nextBatch, loadMore } = useBooksGrid(
-  books,
-  computed(() => (props.eco ? 1 : 0)),
-)
+const {
+  visible: visibleBooks,
+  nextBatch,
+  more,
+} = useLoadMore(books, { name: 'catalogo', reserved: computed(() => (props.eco ? 1 : 0)) })
+
+const grid = ref<{ $el: HTMLElement } | null>(null)
+const gridElement = () => grid.value?.$el
 
 const items = computed(() => {
   const list = visibleBooks.value.map((book) => ({ key: book.id, book, eco: false }))
@@ -53,17 +63,6 @@ const items = computed(() => {
 <style lang="scss" scoped>
 .books-grid-wrap {
   position: relative;
-}
-
-.books-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: var(--space-5) var(--space-3);
-
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: calc(var(--space-5) + var(--space-2)) var(--space-5);
-  }
 }
 
 .grid-enter-active {

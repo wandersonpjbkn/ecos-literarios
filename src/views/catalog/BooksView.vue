@@ -10,64 +10,72 @@
         :on-retry="retry"
       />
       <template v-else>
-        <div v-if="banner" class="catalog-banner" role="status">
-          <p>{{ banner }}</p>
-          <AppButton v-if="booksStore.error" @click="retry">Tentar de novo</AppButton>
-        </div>
+        <AppNotice
+          v-if="banner"
+          class="catalog-banner"
+          live="status"
+          :text="banner"
+          :retry="!!booksStore.error"
+          @retry="retry"
+        />
 
         <div class="catalog-bar">
           <header class="catalog-bar__head">
             <h1 class="catalog-bar__title">Catálogo</h1>
-            <p class="catalog-bar__summary">
+            <LiveStatus :text="announced" />
+            <p v-if="booksStore.books.length" class="catalog-bar__summary">
               <span class="catalog-bar__count">{{ summary.count }}</span
               >{{ summary.rest }}
             </p>
           </header>
 
-          <AppButton
-            class="catalog-bar__filter"
-            variant="soft"
-            size="md"
-            :aria-expanded="drawerOpen"
-            aria-haspopup="dialog"
-            @click="drawerOpen = true"
-          >
-            <BaseIcon name="filter" aria-hidden="true" />
-            Filtrar
-          </AppButton>
-
-          <!-- Applied filters take the place of the quick chips, next to the result -->
-          <div v-if="showApplied" class="catalog-bar__chips">
-            <FilterChip
-              v-for="chip in appliedChips"
-              :key="`${chip.key}-${chip.value}`"
-              :label="chip.label"
-              :to="hrefToggling(chip.key, chip.value)"
-              selected
-              removable
-            />
-            <FilterChip
-              v-for="midia in preferenceChips"
-              :key="`sem-${midia}`"
-              :label="`Sem ${formatName(midia, 1)}`"
-              removable
-              @click="preferences.toggleMidia(midia)"
-            />
-            <AppButton class="catalog-bar__clear" variant="ghost" size="md" @click="clearAll"
-              >Limpar os filtros</AppButton
+          <!-- With nothing in the collection there is nothing to filter, sort or count: only the empty state speaks. -->
+          <template v-if="booksStore.books.length">
+            <AppButton
+              class="catalog-bar__filter"
+              variant="outline"
+              size="md"
+              :aria-expanded="drawerOpen"
+              aria-haspopup="dialog"
+              @click="drawerOpen = true"
             >
-          </div>
-          <div v-else class="catalog-bar__chips">
-            <FilterChip
-              v-for="genre in quickGenres"
-              :key="genre"
-              :label="genre"
-              :count="optionCounts.categoria[genre]"
-              :to="hrefToggling('categoria', genre)"
-            />
-          </div>
+              <BaseIcon name="filter" aria-hidden="true" />
+              Filtrar
+            </AppButton>
 
-          <AppSelect v-model="sortOrder" class="catalog-bar__sort" label="Ordenar" :options="sortOptions" />
+            <!-- Applied filters take the place of the quick chips, next to the result -->
+            <div v-if="showApplied" class="catalog-bar__chips chip-strip">
+              <FilterChip
+                v-for="chip in appliedChips"
+                :key="`${chip.key}-${chip.value}`"
+                :label="chip.label"
+                :to="hrefToggling(chip.key, chip.value)"
+                selected
+                removable
+              />
+              <FilterChip
+                v-for="midia in preferenceChips"
+                :key="`sem-${midia}`"
+                :label="`Sem ${formatName(midia, 1)}`"
+                removable
+                @click="preferences.toggleMidia(midia)"
+              />
+              <AppButton class="catalog-bar__clear" variant="ghost" size="md" @click="clearAll"
+                >Limpar os filtros</AppButton
+              >
+            </div>
+            <div v-else class="catalog-bar__chips chip-strip">
+              <FilterChip
+                v-for="genre in quickGenres"
+                :key="genre"
+                :label="genre"
+                :count="optionCounts.categoria[genre]"
+                :to="hrefToggling('categoria', genre)"
+              />
+            </div>
+
+            <AppSelect v-model="sortOrder" class="catalog-bar__sort" label="Ordenar" :options="sortOptions" />
+          </template>
         </div>
 
         <BooksGrid v-model="sortedBooks" class="catalog-grid" :eco="showEco ? eco : null">
@@ -75,9 +83,14 @@
             <EmptyState v-if="searchTerm" :title="`Nada com &quot;${searchTerm}&quot;`" :text="searchWhere">
               <AppButton @click="search = ''">Apagar a busca</AppButton>
               <AppButton v-if="hasFilters" @click="clearAll">Limpar os filtros</AppButton>
-              <AppButton v-if="canAddBooks" :to="{ name: addTarget }" :disabled="!canWrite">
-                Adicionar esse livro
-              </AppButton>
+              <AppButton v-if="canAddBooks" :to="addTarget" :disabled="!canWrite"> Adicionar esse livro </AppButton>
+            </EmptyState>
+            <EmptyState
+              v-else-if="!booksStore.books.length"
+              title="Nenhum livro no catálogo ainda"
+              text="Os livros que o clube adicionar aparecem aqui."
+            >
+              <AppButton v-if="canAddBooks" :to="addTarget" :disabled="!canWrite"> Adicionar um livro </AppButton>
             </EmptyState>
             <EmptyState v-else title="Nenhum livro com esses filtros" :text="describeSelection(selected)">
               <AppButton @click="clearAll">Limpar os filtros</AppButton>
@@ -103,9 +116,8 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMediaQuery, useOnline } from '@vueuse/core'
 
-import { storeToRefs } from 'pinia'
-
-import { useAuthStore, useBooksStore, useCacheStore, usePreferencesStore } from '@/stores'
+import { joinWords } from '@/data/words'
+import { useBooksStore, useCacheStore, usePermissionsStore, usePreferencesStore } from '@/stores'
 import {
   describeSelection,
   rememberCatalog,
@@ -124,15 +136,17 @@ import FilterChip from '@/components/FilterChip.vue'
 import FilterDrawer from '@/components/FilterDrawer.vue'
 import PageStatus from '@/components/PageStatus.vue'
 import AppButton from '@/components/AppButton.vue'
+import AppNotice from '@/components/AppNotice.vue'
 import CatalogSkeleton from '@/components/CatalogSkeleton.vue'
 import CatalogShelves from '@/components/CatalogShelves.vue'
 import BooksGrid from '@/components/BooksGrid.vue'
+import LiveStatus from '@/components/LiveStatus.vue'
 import EmptyState from '@/components/EmptyState.vue'
 
 import type { FilterKey } from '@/types'
 
 usePageMeta({
-  title: 'Catálogo de Livros',
+  title: 'Catálogo',
   description: 'Os livros, mangás e HQs mencionados no Clube Ecos Literários.',
 })
 
@@ -199,11 +213,13 @@ const searchWhere = computed(() =>
     ? 'Procuramos no título, no autor e no que as pessoas escreveram, dentro dos filtros escolhidos.'
     : 'Procuramos no título, no autor e no que as pessoas escreveram sobre cada livro.',
 )
-const { isEditor: canAddBooks } = storeToRefs(useAuthStore())
+// The API's matrix decides who may add a book (front mirrors backend), not the role.
+const permissions = usePermissionsStore()
+const canAddBooks = computed(() => permissions.can('books', 'create'))
 const addTarget = useAddTarget()
 const canWrite = useCanWrite()
 // Catalog.mobile has no eco. Decided here rather than hidden by CSS, because the eco takes a book's slot.
-const isPhone = useMediaQuery(useBreakpoints.isTablet)
+const isPhone = useMediaQuery(useBreakpoints.isPhone)
 const showEco = computed(() => isDefaultView.value && !isPhone.value)
 
 const formatName = (midia: string, count: number) => {
@@ -237,47 +253,40 @@ const summary = computed(() => {
   const books = useBooksStore().books
   const total = books.length
   const narrowed = hasFilters.value || !!search.value.trim() || hiddenByPreference.value.length > 0
-  const count = narrowed ? `${filtered.value.length} de ${total} livros` : `${total} livros`
+  const noun = total === 1 ? 'livro' : 'livros'
+  const count = narrowed ? `${filtered.value.length} de ${total} ${noun}` : `${total} ${noun}`
 
   const hidden = hiddenByPreference.value
   if (!hidden.length) return { count, rest: '' }
 
   const parts = hidden.map(({ midia, count: n }) => `${n} ${formatName(midia, n)}`)
   const onlyOne = hidden.length === 1 && hidden[0]!.count === 1
-  return { count, rest: ` · ${parts.join(' e ')} ${onlyOne ? 'está' : 'estão'} fora por sua escolha` }
+  return { count, rest: ` · ${joinWords(parts)} ${onlyOne ? 'está' : 'estão'} fora por sua escolha` }
 })
+
+// What a screen reader hears after a search or a filter: the count, or the empty result by name.
+const announced = computed(() =>
+  searchTerm.value && !filtered.value.length ? `Nada com "${searchTerm.value}"` : summary.value.count,
+)
 </script>
 
 <style lang="scss" scoped>
 .catalog-body {
   margin: 0 auto;
-  max-width: 1200px;
+  max-width: var(--page-max);
   padding: var(--space-5) var(--space-4) var(--space-10);
 }
 
+// The look comes from AppNotice; here only its place above the bar.
 .catalog-banner {
-  display: flex;
-  margin-top: var(--space-4);
-  padding: var(--space-3) var(--space-4);
-
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--space-3);
-
-  font-size: 0.9375rem;
-  color: var(--alert-ink);
-
-  background: var(--alert-bg);
-  border: 1px solid var(--alert-line);
-  border-radius: var(--radius-lg);
+  margin: var(--space-4) 0 0;
 }
 
 // Phones give the bar no top margin of its own; without this the banner touches "Filtrar".
 .catalog-banner + .catalog-bar {
   margin-top: var(--space-4);
 
-  @media (min-width: 768px) {
+  @media (min-width: $bp-tablet-min) {
     margin-top: var(--space-6);
   }
 }
@@ -291,7 +300,7 @@ const summary = computed(() => {
   align-items: center;
   gap: var(--space-3) var(--space-2);
 
-  @media (min-width: 768px) {
+  @media (min-width: $bp-tablet-min) {
     margin-top: var(--space-6);
     grid-template-columns: auto 1fr auto;
     grid-template-areas:
@@ -309,28 +318,24 @@ const summary = computed(() => {
 
   // The catalog heading stays for screen readers; on phones the count carries the row (Catalog.mobile).
   &__title {
-    font-size: 1.375rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-title);
 
-    @media (max-width: 767px) {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
+    @media (max-width: $bp-phone-max) {
+      @include visually-hidden;
     }
   }
 
   &__summary {
-    font-size: 0.9375rem;
+    font-size: var(--font-size-ui);
     color: var(--color-text-subtle);
   }
 
   // Phone (Catalog.mobile): with no title on screen, the count leads the row.
   &__count {
-    @media (max-width: 767px) {
-      font-weight: 700;
+    @media (max-width: $bp-phone-max) {
+      font-weight: var(--font-weight-bold);
       color: var(--color-text-default);
     }
   }
@@ -341,25 +346,14 @@ const summary = computed(() => {
   }
 
   &__chips {
-    display: flex;
     grid-area: chips;
-    min-width: 0;
-    align-items: center;
-    gap: var(--space-2);
-    overflow-x: auto;
-    scrollbar-width: none;
-
-    @media (min-width: 768px) {
-      flex-wrap: wrap;
-      overflow: visible;
-    }
   }
 
   // On phones the sort lives inside the filter sheet (Catalog.mobile shows only the quick chips).
   &__sort {
     grid-area: sort;
 
-    @media (max-width: 767px) {
+    @media (max-width: $bp-phone-max) {
       display: none;
     }
   }

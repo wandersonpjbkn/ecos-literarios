@@ -2,55 +2,61 @@
   <div class="login-page">
     <div class="login-card">
       <!-- Formulário -->
-      <div v-if="step === 'form'" class="login-form">
-        <div class="field">
-          <label for="email" class="field-label">E-mail</label>
-          <input
-            id="email"
-            ref="inputRef"
-            v-model="email"
-            type="email"
-            class="field-input"
-            :class="{ 'is-error': errorMsg }"
-            placeholder="seu@email.com"
-            autocomplete="email"
-            :disabled="loading"
-            @keydown.enter="submit"
-          />
-          <span v-if="errorMsg" class="field-error">{{ errorMsg }}</span>
-        </div>
+      <header class="login-head">
+        <h1 class="login-head__title">Entrar</h1>
+        <p class="login-head__text">Nós enviamos um link pro seu e-mail. Não tem senha.</p>
+      </header>
 
-        <AppButton class="submit-btn" variant="primary" :disabled="loading || !email.trim()" @click="submit">
-          <span v-if="!loading">Enviar link de acesso</span>
-          <span v-else class="loading-dots"> <span /><span /><span /> </span>
+      <div v-if="step === 'form'" class="login-form">
+        <AppField
+          id="email"
+          v-model="email"
+          label="E-mail"
+          type="email"
+          placeholder="seu@email.com"
+          autocomplete="email"
+          :error="errorMsg"
+          :disabled="loading"
+          @keydown.enter="submit"
+        />
+
+        <!-- Enabled with the field empty: a click says what is missing, a disabled button would say nothing. -->
+        <AppButton class="submit-btn" variant="primary" :disabled="loading" @click="submit">
+          {{ loading ? 'Enviando…' : 'Enviar o link' }}
         </AppButton>
       </div>
 
       <!-- Confirmação -->
       <div v-else class="login-sent">
-        <p class="sent-title">Mandamos o link</p>
-        <p class="sent-desc">
-          Foi para <strong>{{ email }}</strong
-          >. Veja seu e-mail e toque no link pra entrar.
-        </p>
-        <AppButton class="resend-btn" :disabled="resendCooldown > 0" @click="submit">
-          <template v-if="resendCooldown > 0">Mandar de novo em {{ resendCooldown }} segundos</template>
-          <template v-else>Não chegou? Mandar de novo</template>
-        </AppButton>
+        <AppNotice v-if="errorMsg" :text="errorMsg" />
+        <EmptyState title="Enviamos o link">
+          <template #text>Foi para <strong>{{ email }}</strong>. Veja seu e-mail e toque no link pra entrar.</template>
+          <AppButton class="resend-btn" :disabled="resendCooldown > 0" @click="submit">
+            <template v-if="resendCooldown > 0"
+              >Reenviar novo em {{ resendCooldown === 1 ? '1 segundo' : `${resendCooldown} segundos` }}</template
+            >
+            <template v-else>Enviar outro link</template>
+          </AppButton>
+        </EmptyState>
       </div>
 
       <!-- Voltar -->
-      <RouterLink :to="{ name: 'catalog-books' }" class="back-link">
-        <BaseIcon name="arrow-left" />
+      <AppButton :to="lastCatalog" variant="ghost" size="md" class="back-link">
+        <BaseIcon name="arrow-left" aria-hidden="true" />
         Voltar ao catálogo
-      </RouterLink>
+      </AppButton>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import AppButton from '@/components/AppButton.vue'
-import { ref, onMounted } from 'vue'
+import AppField from '@/components/AppField.vue'
+import AppNotice from '@/components/AppNotice.vue'
+import EmptyState from '@/components/EmptyState.vue'
+import { usePageMeta } from '@/composables/usePageMeta'
+import { useLastCatalog } from '@/composables/useLastCatalog'
+import { ref, onBeforeUnmount, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { useAuth } from '@/composables/useAuth'
@@ -58,12 +64,14 @@ import { rememberEmail } from '@/composables/useLastEmail'
 import { rememberReturn, takeReturn } from '@/composables/useReturnPath'
 import { useAuthStore } from '@/stores'
 
+usePageMeta({ title: 'Entrar', description: 'Entre no Ecos Literários com um link no seu e-mail.' })
+
 const { sendMagicLink } = useAuth()
 const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
+const lastCatalog = useLastCatalog()
 
-const inputRef = ref<HTMLInputElement | null>(null)
 const email = ref('')
 const loading = ref(false)
 const errorMsg = ref('')
@@ -75,13 +83,16 @@ onMounted(() => {
     rememberReturn(route.query.voltar)
     router.replace(takeReturn())
   }
-  inputRef.value?.focus()
+  document.getElementById('email')?.focus()
 })
 
 const submit = async () => {
   errorMsg.value = ''
 
-  if (!email.value.trim()) return
+  if (!email.value.trim()) {
+    errorMsg.value = 'Escreva o seu e-mail.'
+    return
+  }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(email.value.trim())) {
@@ -98,19 +109,27 @@ const submit = async () => {
     step.value = 'sent'
     startCooldown()
   } catch (err) {
-    errorMsg.value = err instanceof Error ? err.message : 'Não deu pra enviar o link. Tente de novo.'
+    const tooSoon = (err as { status?: number }).status === 429
+    errorMsg.value = tooSoon
+      ? 'Você já pediu um link agora há pouco. Espere um minuto e peça de novo.'
+      : 'Não deu pra enviar o link. Tente de novo.'
   } finally {
     loading.value = false
   }
 }
 
+let cooldown: ReturnType<typeof setInterval> | undefined
+
 const startCooldown = () => {
+  clearInterval(cooldown)
   resendCooldown.value = 60
-  const interval = setInterval(() => {
+  cooldown = setInterval(() => {
     resendCooldown.value -= 1
-    if (resendCooldown.value <= 0) clearInterval(interval)
+    if (resendCooldown.value <= 0) clearInterval(cooldown)
   }, 1000)
 }
+
+onBeforeUnmount(() => clearInterval(cooldown))
 </script>
 
 <style lang="scss" scoped>
@@ -122,161 +141,44 @@ const startCooldown = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100dvh - 4rem);
-  padding: 2rem 1rem;
+  // The auth frame gives the whole height under its bar: the form sits in the middle of it.
+  min-height: 100%;
+  padding: var(--space-8) var(--space-4);
   background: var(--color-background-default);
-
-  @media (max-width: 767px) {
-    min-height: calc(100dvh - 6rem);
-  }
 }
 
 .login-card {
   width: 100%;
-  max-width: 400px;
+  max-width: var(--message-max);
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--space-8);
 }
 
 // ── Formulário ────────────────────────────────────────────────────
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-
-  &-label {
-    font-size: 1rem;
-    font-weight: 500;
+.login-head {
+  &__title {
+    margin: 0;
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-bold);
     color: var(--color-text-default);
   }
 
-  &-input {
-    height: 48px;
-    padding: 0 14px;
-    background: var(--color-surface-default);
-    border: 1.5px solid var(--color-border-default);
-    border-radius: var(--border-radius-default);
-    font-family: var(--font-family-body);
-    font-size: 1rem;
-    color: var(--color-text-default);
-    transition:
-      border-color var(--motion-transition-default),
-      box-shadow var(--motion-transition-default);
-    outline: none;
-
-    &::placeholder {
-      color: var(--color-text-subtle);
-    }
-
-    &:focus {
-      border-color: var(--color-action-default);
-      box-shadow: 0 0 0 3px var(--color-action-background-subtle);
-    }
-
-    &.is-error {
-      border-color: #e53e3e;
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-  }
-
-  &-error {
-    font-size: 0.82rem;
-    color: #e53e3e;
-  }
-}
-
-// ── Loading dots ──────────────────────────────────────────────────
-.loading-dots {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-
-  span {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-    animation: dot-bounce 0.9s ease-in-out infinite;
-
-    &:nth-child(2) {
-      animation-delay: 0.15s;
-    }
-    &:nth-child(3) {
-      animation-delay: 0.3s;
-    }
-  }
-}
-
-@keyframes dot-bounce {
-  0%,
-  80%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.4;
-  }
-  40% {
-    transform: translateY(-5px);
-    opacity: 1;
-  }
-}
-
-// ── Confirmação ───────────────────────────────────────────────────
-.login-sent {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  text-align: center;
-  padding: 1.5rem;
-  background: var(--color-surface-default);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--border-radius-default);
-}
-
-.sent-title {
-  margin: 0;
-  font-family: var(--font-family-display);
-  font-size: 1.25rem;
-  font-weight: 400;
-  color: var(--color-text-default);
-}
-
-.sent-desc {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--color-text-subtle);
-  line-height: 1.6;
-
-  strong {
-    color: var(--color-text-default);
+  &__text {
+    margin: var(--space-1) 0 0;
+    font-size: var(--font-size-body);
+    color: var(--color-text-secondary);
   }
 }
 
 // ── Back link ─────────────────────────────────────────────────────
 .back-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  color: var(--color-text-subtle);
-  font-size: 0.9rem;
-  text-decoration: none;
-  transition: color var(--motion-transition-default);
-
-  &:hover {
-    color: var(--color-action-default);
-  }
+  align-self: center;
 }
 </style>

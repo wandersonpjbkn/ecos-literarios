@@ -58,7 +58,12 @@ export default defineConfigWithVueTs(
       ],
 
       // Global and require
-      'no-restricted-globals': 'off',
+      'no-restricted-globals': ['error', { name: 'fetch', message: 'Chame a API por uma função de useApi.' }],
+      'no-restricted-properties': [
+        'error',
+        { object: 'window', property: 'fetch', message: 'Chame a API por uma função de useApi.' },
+        { object: 'globalThis', property: 'fetch', message: 'Chame a API por uma função de useApi.' },
+      ],
       'global-require': 'off',
 
       // Operators and templates
@@ -76,6 +81,14 @@ export default defineConfigWithVueTs(
           varsIgnorePattern: '^_',
         },
       ],
+    },
+  },
+
+  {
+    name: 'app/api-gateway',
+    files: ['src/composables/useApi.ts'],
+    rules: {
+      'no-restricted-globals': 'off',
     },
   },
 

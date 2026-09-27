@@ -2,10 +2,7 @@
   <div ref="root" class="combo" @focusout="onFocusOut">
     <ul v-if="model.length" class="combo__chosen" :aria-label="`Escolhidos em ${label.toLowerCase()}`">
       <li v-for="value in model" :key="value">
-        <button type="button" class="combo__chip" :aria-label="`Tirar ${value}`" @click="removeChosen(value)">
-          {{ value }}
-          <BaseIcon name="times" aria-hidden="true" />
-        </button>
+        <FilterChip class="combo__chip" :label="value" selected removable @click="removeChosen(value)" />
       </li>
     </ul>
 
@@ -68,6 +65,7 @@
 import { computed, nextTick, ref, useId } from 'vue'
 
 import { useUtils } from '@/composables'
+import FilterChip from '@/components/FilterChip.vue'
 
 const props = defineProps<{
   options: string[]
@@ -160,37 +158,6 @@ const onFocusOut = (event: FocusEvent) => {
     list-style: none;
   }
 
-  &__chip {
-    display: inline-flex;
-    min-height: var(--touch-min);
-    padding: 0 var(--space-3) 0 var(--space-4);
-
-    align-items: center;
-    gap: var(--space-2);
-
-    font: {
-      family: var(--font-family-body);
-      size: 0.9375rem;
-      weight: 600;
-    }
-    color: var(--color-action-default-hover);
-
-    background: var(--color-action-background-subtle);
-    border: 1px solid var(--color-action-text-subtle);
-    border-radius: var(--radius-pill);
-    cursor: pointer;
-
-    :deep(.base-icon) {
-      width: 14px;
-      height: 14px;
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--color-border-focus);
-      outline-offset: var(--space-1);
-    }
-  }
-
   &__field {
     display: flex;
     min-height: var(--touch-min);
@@ -200,17 +167,22 @@ const onFocusOut = (event: FocusEvent) => {
     gap: var(--space-2);
 
     border: 1px solid var(--color-border-strong);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
+
+    &:hover {
+      border-color: var(--color-action-border-subtle);
+    }
 
     &:focus-within {
-      border-color: var(--color-border-focus);
+      outline: 2px solid var(--color-border-focus);
+      outline-offset: var(--focus-offset-tight);
     }
   }
 
   &__icon,
   &__chevron {
-    width: 16px;
-    height: 16px;
+    width: var(--icon-sm);
+    height: var(--icon-sm);
     flex-shrink: 0;
     color: var(--color-text-subtle);
   }
@@ -228,10 +200,8 @@ const onFocusOut = (event: FocusEvent) => {
     min-width: 0;
     min-height: var(--touch-min);
 
-    font: {
-      family: var(--font-family-body);
-      size: 1rem;
-    }
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-body);
     color: var(--color-text-default);
 
     background: none;
@@ -267,8 +237,8 @@ const onFocusOut = (event: FocusEvent) => {
   }
 
   &__check {
-    width: 16px;
-    height: 16px;
+    width: var(--icon-sm);
+    height: var(--icon-sm);
     flex-shrink: 0;
     color: var(--color-action-default);
     visibility: hidden;
@@ -280,17 +250,17 @@ const onFocusOut = (event: FocusEvent) => {
 
   &__label {
     flex: 1;
-    font-size: 0.9375rem;
+    font-size: var(--font-size-ui);
   }
 
   &__count {
-    font-size: 0.875rem;
+    font-size: var(--font-size-meta);
     color: var(--color-text-subtle);
   }
 
   &__empty {
     padding: var(--space-3);
-    font-size: 0.875rem;
+    font-size: var(--font-size-meta);
     color: var(--color-text-subtle);
   }
 }

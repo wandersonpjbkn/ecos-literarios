@@ -4,7 +4,7 @@
 
     <ul class="shelves__list">
       <li v-for="shelf in shelves" :key="shelf.title">
-        <RouterLink :to="hrefToggling(shelf.key, shelf.value)" class="shelf">
+        <RouterLink :to="hrefToggling(shelf.key, shelf.value)" class="shelf" :aria-current="undefined">
           <span class="shelf__stack" aria-hidden="true">
             <span
               v-for="(tint, index) in shelf.tints"
@@ -32,10 +32,10 @@ import { useCategoryColors, useFilters } from '@/composables'
 import type { FilterKey } from '@/types'
 
 const SHELVES: { title: string; key: FilterKey; value: string; note: string }[] = [
-  { title: 'Menos de 200 páginas', key: 'tamanho', value: 'Menos de 200 páginas', note: 'dá pra ler numa semana' },
+  { title: 'Menos de 200 páginas', key: 'tamanho', value: 'Menos de 200 páginas', note: 'dá pra ler em uma semana' },
   { title: 'Mais de 500 páginas', key: 'tamanho', value: 'Mais de 500 páginas', note: 'pra quem tem fôlego' },
-  { title: 'Mangás', key: 'midia', value: 'Mangá', note: 'todos que o grupo mencionou' },
-  { title: 'HQs', key: 'midia', value: 'HQ', note: 'leitura de uma sentada' },
+  { title: 'Mangás', key: 'midia', value: 'Mangá', note: 'pra curtir e acompanhar' },
+  { title: 'HQs', key: 'midia', value: 'HQ', note: 'termina em uma tarde só' },
 ]
 
 const STACKED_COVERS = 4
@@ -64,15 +64,15 @@ const shelves = computed(() =>
   margin-top: var(--space-14);
 
   &__title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    font-size: var(--font-size-section);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-title);
   }
 
   &__list {
     display: grid;
     margin-top: var(--space-4);
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(var(--shelf-min), 1fr));
     gap: var(--space-5);
     list-style: none;
   }
@@ -92,7 +92,7 @@ const shelves = computed(() =>
   transition: border-color var(--motion-transition-default);
 
   &:hover {
-    border-color: var(--color-action-text-subtle);
+    border-color: var(--color-action-border-subtle);
   }
 
   &:focus-visible {
@@ -105,8 +105,8 @@ const shelves = computed(() =>
   }
 
   &__cover {
-    width: 44px;
-    height: 64px;
+    width: var(--mini-cover-w);
+    height: var(--mini-cover-h);
     margin-right: calc(-1 * var(--space-3));
     border: 1px solid;
     border-radius: var(--radius-sm);
@@ -114,14 +114,14 @@ const shelves = computed(() =>
 
   &__name {
     margin-top: var(--space-4);
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-default);
   }
 
   &__note {
     margin-top: var(--space-1);
-    font-size: 0.875rem;
+    font-size: var(--font-size-meta);
     color: var(--color-text-subtle);
   }
 }

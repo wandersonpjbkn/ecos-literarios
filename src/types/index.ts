@@ -39,10 +39,8 @@ export interface Book {
   published_year?: number
   added_at?: string
   // Where the book came from: the WhatsApp conversation (CSV import) or the site. Decided by the API.
-  origem?: BookOrigin
 }
 
-export type BookOrigin = 'conversa' | 'site'
 
 export type ReadingStatus = 'quero_ler' | 'lido'
 
@@ -126,7 +124,7 @@ export interface ApiBook {
   midia: ApiPopulated | string
   categoria: ApiPopulated | string
   quem_nome: string
-  quem_user_id?: { _id: string; name: string; avatar_url?: string }
+  quem_user_id?: { _id: string; name: string }
   porque: string
   cover_url?: string
   synopsis?: string
@@ -135,7 +133,6 @@ export interface ApiBook {
   added_at?: string
   isbn?: string
   google_books_id?: string
-  origem?: BookOrigin
   subgeneros: (ApiPopulated | string)[]
 }
 
@@ -194,6 +191,7 @@ export interface AdminBook {
   categoria: string | { _id: string; nome: string }
   subgeneros: Array<string | { _id: string; nome: string }>
   quem_nome: string
+  quem_user_id?: { _id: string; name: string } | null
   porque: string
   isbn?: string
   cover_url?: string
@@ -250,9 +248,10 @@ export type Resource = 'books' | 'users' | 'autores' | 'midias' | 'categorias' |
 export type Action = 'create' | 'read' | 'update' | 'delete'
 
 export interface AdminClaimHistoryEntry {
-  id: string
+  _id: string
   user_id: string
   user_email: string
+  user_name?: string | null
   action: 'claim' | 'unclaim'
   claim_name?: string
   previous_claim_names?: string[]
@@ -263,15 +262,17 @@ export interface AdminClaimHistoryEntry {
 export interface TabConfig {
   key: string
   label: string
-  resource: string
+  resource: Extract<Resource, 'autores' | 'midias' | 'categorias' | 'subgeneros'>
   description: string
+  // For the sentences of this list: "Nenhum autor ainda", "Nome do autor".
+  singular: string
 }
 
 export interface ApiUser {
   _id: string
   name: string
   email: string
-  role: 'admin' | 'editor' | 'viewer'
+  role: Role
   created_at: string
   last_seen_at: string
 }

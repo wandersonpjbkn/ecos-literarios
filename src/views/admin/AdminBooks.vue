@@ -1,114 +1,123 @@
 <template>
-  <div class="admin-section">
+  <div class="area-section">
     <SectionHeader title="Livros">
-      <span>Os livros do catálogo: adicione, corrija ou remova.</span>
-      <template #actions>
-        <button class="action-btn" @click="openCreate">+ Novo livro</button>
+      <span v-if="books.length">{{ summary }}</span>
+      <span v-else>Os livros do acervo: adicione, corrija ou remova.</span>
+      <template v-if="canCreate && books.length" #actions>
+        <AppButton variant="primary" @click="openCreate()">Adicionar um livro</AppButton>
       </template>
     </SectionHeader>
 
-    <div class="book-segmentation">
-      <!-- Filters -->
-      <div class="books-filters">
-        <MultiSelect
-          label="Segmento"
-          :multiple="false"
-          :searchable="false"
-          :options="[
-            { value: 'all', label: 'Todos' },
-            { value: 'missing', label: 'Dados incompletos' },
-            { value: 'complete', label: 'Dados completos' },
-            { value: 'missing-isbn', label: 'ISBN ausente' },
-          ]"
-          :selected="segmentFilter"
-          @toggle="(v) => (segmentFilter = v as SegmentFilter)"
-        />
-      </div>
+    <AppNotice v-if="loadError" :text="loadError" retry @retry="fetchBooks()" />
 
-      <!-- Search -->
-      <SearchBar
-        v-model="searchQuery"
-        class="books-search"
-        :suggestions="searchSuggestions"
-        :total="books.length"
-        :filtered="filteredBooks.length"
-        @select="onSelectSuggestion"
-      />
-    </div>
-
-    <!-- Loading -->
     <BaseSpinner v-if="loading">
       <p>Carregando livros…</p>
     </BaseSpinner>
 
-    <!-- Error -->
-    <div v-else-if="error" class="admin-state admin-state--error">
-      <BaseIcon name="error" aria-hidden="true" />
-      <p>{{ error }}</p>
-      <button class="retry-btn" @click="fetchBooks">Tentar de novo</button>
-    </div>
+    <EmptyState
+      v-else-if="!loadError && books.length === 0"
+      title="Nenhum livro no acervo ainda"
+      text="Os livros que o clube adicionar aparecem aqui."
+    >
+      <AppButton v-if="canCreate" variant="primary" @click="openCreate()">Adicionar um livro</AppButton>
+    </EmptyState>
 
-    <!-- Empty -->
-    <p v-else-if="books.length === 0" class="admin-empty">Nenhum livro no catálogo ainda.</p>
+    <template v-else-if="books.length">
+      <div class="books-toolbar">
+        <div class="books-segments chip-strip" role="group" aria-label="Mostrar">
+          <FilterChip
+            v-for="option in SEGMENTS"
+            :key="option.value"
+            :label="option.label"
+            :count="segmentCounts[option.value]"
+            :selected="segment.value === option.value"
+            :to="segmentLink(option.value)"
+          />
+        </div>
 
-    <!-- List -->
-    <div v-else class="books-list">
-      <div class="books-row books-row--header">
-        <span>Título</span>
-        <span>Autor</span>
-        <span>Gênero</span>
-        <span>Mídia</span>
-        <span>Ações</span>
+        <SearchBar
+          v-model="searchQuery"
+          class="books-search"
+          placeholder="Buscar no acervo"
+          :suggestions="searchSuggestions"
+          :total="segmentBooks.length"
+          :filtered="filteredBooks.length"
+          @select="onSelectSuggestion"
+        />
       </div>
 
-      <!-- Content -->
-      <div class="books-row--content">
-        <div v-for="book in paginatedBooks" :key="book._id" class="books-row">
-          <span class="books-row__title" @click="openEdit(book)">{{ book.titulo }}</span>
-          <span class="books-row__field">{{ resolveName(book.autor) }}</span>
-          <span class="books-row__field">{{ resolveName(book.categoria) }}</span>
-          <span class="books-row__field">{{ resolveName(book.midia) }}</span>
-          <div class="books-row__actions">
-            <button
-              class="row-action row-action--edit"
-              type="button"
-              :aria-label="`Editar ${book.titulo}`"
-              @click="openEdit(book)"
-            >
+      <EmptyState
+        v-if="filteredBooks.length === 0 && searchQuery"
+        :title="`Nada com &quot;${searchQuery}&quot;`"
+        :text="searchWhere"
+      >
+        <AppButton @click="searchQuery = ''">Apagar a busca</AppButton>
+        <AppButton v-if="canCreate" @click="openCreate(searchQuery)">Adicionar esse livro</AppButton>
+      </EmptyState>
+
+      <EmptyState v-else-if="filteredBooks.length === 0" :title="segment.empty.title" :text="segment.empty.text">
+        <AppButton :to="segmentLink('all')">Ver todos os livros</AppButton>
+      </EmptyState>
+
+      <div v-else ref="table" class="books-table panel-box" role="table" aria-label="Livros do acervo">
+        <div class="books-table__row books-table__row--head panel-row" role="row">
+          <span role="columnheader">Título</span>
+          <span role="columnheader">Autor</span>
+          <span role="columnheader">Gênero</span>
+          <span role="columnheader">Formato</span>
+          <span role="columnheader">Quem mencionou</span>
+          <span role="columnheader">Faltando</span>
+          <span role="columnheader" class="visually-hidden">Ações</span>
+        </div>
+
+        <div v-for="book in pageItems" :key="book._id" class="books-table__row panel-row" role="row" tabindex="-1" data-list-item>
+          <span role="cell" class="books-table__title">{{ book.titulo }}</span>
+          <span role="cell" class="books-table__field" data-label="Autor">{{ resolveName(book.autor) || 'sem autor' }}</span>
+          <span role="cell" class="books-table__field" data-label="Gênero">{{
+            resolveName(book.categoria) || 'sem gênero'
+          }}</span>
+          <span role="cell" class="books-table__field" data-label="Formato">{{ resolveName(book.midia) || 'sem formato' }}</span>
+          <span role="cell" class="books-table__field" data-label="Quem mencionou">{{ book.quem_nome || 'ninguém' }}</span>
+          <span role="cell" class="books-table__missing" data-label="Faltando">{{ missingLabel(book) }}</span>
+          <span role="cell" class="books-table__actions">
+            <AppButton v-if="permissions.canEditBook(book.quem_user_id?._id)" size="md" @click="openEdit(book)">
               <BaseIcon name="pencil" aria-hidden="true" />
-            </button>
-            <button
-              class="row-action row-action--delete"
-              type="button"
-              :aria-label="`Remover ${book.titulo}`"
-              @click="confirmDelete(book)"
-            >
+              Editar<span class="visually-hidden">{{ ' ' }}{{ book.titulo }}</span>
+            </AppButton>
+            <AppButton v-if="canDelete" size="md" @click="confirmDelete(book)">
               <BaseIcon name="trash" aria-hidden="true" />
-            </button>
-          </div>
+              Remover<span class="visually-hidden">{{ ' ' }}{{ book.titulo }}</span>
+            </AppButton>
+          </span>
         </div>
       </div>
 
-      <!-- No results -->
-      <p v-if="filteredBooks.length === 0 && searchQuery" class="admin-empty">
-        Nenhum resultado para "{{ searchQuery }}".
-      </p>
+      <ListFooter
+        v-if="filteredBooks.length"
+        :shown="pageItems.length"
+        :total="filteredBooks.length"
+        :next-batch="nextBatch"
+        @more="more(table)"
+      />
+    </template>
 
-      <!-- Pagination -->
-      <PaginationNav ref="paginationNav" :items="filteredBooks" />
-    </div>
+    <BookFormDrawer
+      :book="editingBook"
+      :title="newTitle"
+      :is-open="isDrawerOpen"
+      @close="closeDrawer"
+      @saved="onBookSaved"
+    />
 
-    <!-- Book form drawer -->
-    <BookFormDrawer :book="editingBook" :is-open="isDrawerOpen" @close="closeDrawer" @saved="onBookSaved" />
-
-    <!-- Delete confirmation -->
     <ConfirmModal
       v-model="deleteModal.open"
-      title="Remover livro"
-      :description="deleteModal.description"
+      :title="deleteModal.title"
+      description="O livro sai do catálogo. Não dá pra desfazer."
       confirm-label="Remover"
-      :danger="true"
+      busy-label="Removendo…"
+      :error="deleteModal.error"
       :loading="isDeleting"
+      :return-focus="() => table?.querySelector<HTMLElement>('[data-list-item]')"
       @confirm="handleDelete"
       @cancel="deleteModal.open = false"
     />
@@ -116,90 +125,149 @@
 </template>
 
 <script lang="ts" setup>
-import { toApiError } from '@/composables/apiError'
+import { errorText } from '@/composables/apiError'
 import { ref, computed, reactive, watch, onMounted } from 'vue'
 
-import { useErrorReporter } from '@/composables'
-import { buildHeaders } from '@/composables/useApi'
-import SectionHeader from '@/components/admin/SectionHeader.vue'
+import { useErrorReporter, useToast } from '@/composables'
+import { getPanelBooks, removeBook } from '@/composables/useApi'
+import { useLoadMore } from '@/composables/useLoadMore'
+import { useSegments, type SegmentOption } from '@/composables/useSegments'
+import { joinWords } from '@/data/words'
+import { usePermissionsStore } from '@/stores'
+import AppButton from '@/components/AppButton.vue'
+import EmptyState from '@/components/EmptyState.vue'
+import FilterChip from '@/components/FilterChip.vue'
 import SearchBar from '@/components/SearchBar.vue'
-import MultiSelect from '@/components/MultiSelect.vue'
-import PaginationNav from '@/components/PaginationNav.vue'
-import BookFormDrawer from '@/components/admin/BookFormDrawer.vue'
-import ConfirmModal from '@/components/admin/ConfirmModal.vue'
+import SectionHeader from '@/components/SectionHeader.vue'
+import AppNotice from '@/components/AppNotice.vue'
+import ListFooter from '@/components/ListFooter.vue'
+import BookFormDrawer from '@/components/BookFormDrawer.vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 import type { Suggestion, SegmentFilter, AdminBook } from '@/types'
-import { API_BASE } from '@/data/config'
 
-const paginationNav = ref<InstanceType<typeof PaginationNav> | null>(null)
+// Segment and how many are open live in the URL (FilterChip.md), so going back keeps the list the admin was fixing.
+const permissions = usePermissionsStore()
 
+// The server decides; this only hides what it would refuse for this level (users/me).
+const canCreate = computed(() => permissions.can('books', 'create'))
+const canDelete = computed(() => permissions.can('books', 'delete'))
+
+const table = ref<HTMLElement | null>(null)
 const books = ref<AdminBook[]>([])
 const loading = ref(false)
-const error = ref('')
+const loadError = ref('')
 const searchQuery = ref('')
-const segmentFilter = ref<SegmentFilter>('all')
 
 const isDrawerOpen = ref(false)
 const editingBook = ref<AdminBook | null>(null)
+const newTitle = ref('')
 const isDeleting = ref(false)
 
 const deleteModal = reactive({
   open: false,
-  description: '',
+  title: '',
+  error: '',
   targetId: '',
 })
 
-const resolveName = (field: string | { nome: string }): string => (typeof field === 'string' ? field : field.nome)
+const resolveName = (field: string | { nome: string } | undefined): string =>
+  !field ? '' : typeof field === 'string' ? field : field.nome
 
 const isMissingField = (value?: string | null) => !value || !value.trim()
 
-const hasMissingData = (book: AdminBook) => {
-  const autorNome = resolveName(book.autor)
-  const categoriaNome = resolveName(book.categoria)
-  const midiaNome = resolveName(book.midia)
+// The fields a complete book has; the "Faltando" column and the "Completos" empty state both read this list.
+const FIELDS: { label: string; missing: (book: AdminBook) => boolean }[] = [
+  { label: 'capa', missing: (b) => isMissingField(b.cover_url) },
+  { label: 'ISBN', missing: (b) => isMissingField(b.isbn) },
+  { label: 'sinopse', missing: (b) => isMissingField(b.synopsis) },
+  { label: 'páginas', missing: (b) => !b.page_count },
+  { label: 'ano', missing: (b) => !b.published_year },
+  { label: 'comentário', missing: (b) => isMissingField(b.porque) },
+  { label: 'subgêneros', missing: (b) => b.subgeneros.length === 0 },
+  { label: 'autor', missing: (b) => isMissingField(resolveName(b.autor)) },
+  { label: 'gênero', missing: (b) => isMissingField(resolveName(b.categoria)) },
+  { label: 'formato', missing: (b) => isMissingField(resolveName(b.midia)) },
+  { label: 'título', missing: (b) => isMissingField(b.titulo) },
+]
 
-  return (
-    isMissingField(book.titulo) ||
-    isMissingField(autorNome) ||
-    isMissingField(categoriaNome) ||
-    isMissingField(midiaNome) ||
-    isMissingField(book.porque) ||
-    isMissingField(book.isbn) ||
-    isMissingField(book.cover_url) ||
-    isMissingField(book.synopsis) ||
-    !book.page_count ||
-    !book.published_year ||
-    book.subgeneros.length === 0
-  )
+const missingFields = (book: AdminBook) => FIELDS.filter((field) => field.missing(book)).map((field) => field.label)
+
+const hasMissingData = (book: AdminBook) => missingFields(book).length > 0
+
+// Two names are readable in a table cell; the rest becomes a count ("capa, ISBN e mais 3").
+const missingLabel = (book: AdminBook) => {
+  const fields = missingFields(book)
+  if (fields.length === 0) return 'nada'
+  if (fields.length <= 2) return joinWords(fields)
+  return `${fields.slice(0, 2).join(', ')} e mais ${fields.length - 2}`
 }
 
+const SEGMENTS: SegmentOption<SegmentFilter, AdminBook>[] = [
+  { value: 'all', label: 'Todos', test: () => true, empty: { title: 'Nenhum livro no acervo ainda' } },
+  {
+    value: 'missing',
+    label: 'Faltando algo',
+    query: 'faltando',
+    test: hasMissingData,
+    empty: { title: 'Todos os livros do acervo estão com a ficha completa' },
+  },
+  {
+    value: 'complete',
+    label: 'Completos',
+    query: 'completos',
+    test: (b) => !hasMissingData(b),
+    empty: {
+      title: 'Nenhum livro completo ainda',
+      text: `Um livro fica completo quando tem ${joinWords(FIELDS.map((field) => field.label))}.`,
+    },
+  },
+  {
+    value: 'missing-isbn',
+    label: 'Sem ISBN',
+    query: 'sem-isbn',
+    test: (b) => isMissingField(b.isbn),
+    empty: { title: 'Todos os livros do acervo têm ISBN' },
+  },
+]
+
+const {
+  current: segment,
+  counts: segmentCounts,
+  link: segmentLink,
+  inCurrent: segmentBooks,
+} = useSegments(SEGMENTS, books)
+
+const summary = computed(() => {
+  const missing = segmentCounts.value.missing
+  const total = `${books.value.length} no acervo`
+  return missing ? `${total} · ${missing} com algo faltando` : `${total} · todos completos`
+})
+
 const filteredBooks = computed(() => {
-  const base = books.value.filter((book) => {
-    if (segmentFilter.value === 'missing') return hasMissingData(book)
-    if (segmentFilter.value === 'complete') return !hasMissingData(book)
-    if (segmentFilter.value === 'missing-isbn') return isMissingField(book.isbn)
-    return true
-  })
-
-  if (!searchQuery.value.trim()) return base
-
+  if (!searchQuery.value.trim()) return segmentBooks.value
   const q = searchQuery.value.toLowerCase()
-  return base.filter((b) => b.titulo.toLowerCase().includes(q) || resolveName(b.autor).toLowerCase().includes(q))
+  return segmentBooks.value.filter(
+    (b) => b.titulo.toLowerCase().includes(q) || resolveName(b.autor).toLowerCase().includes(q),
+  )
 })
 
-const paginatedBooks = computed(() => {
-  return (paginationNav.value?.paginatedItems ?? []) as AdminBook[]
-})
+const { visible: pageItems, nextBatch, more, reset } = useLoadMore(filteredBooks, { name: 'painel-livros' })
 
-const fetchBooks = async () => {
-  loading.value = true
-  error.value = ''
+const searchWhere = computed(() =>
+  segment.value.value === 'all'
+    ? 'Procuramos no título e no autor de cada livro.'
+    : `Procuramos no título e no autor, só entre os livros em "${segment.value.label}".`,
+)
+
+// A refresh after saving keeps the table on screen instead of swapping it for the spinner.
+const fetchBooks = async (quiet = false) => {
+  if (!quiet) loading.value = true
+  loadError.value = ''
 
   try {
-    const res = await fetch(`${API_BASE}/books`, { headers: buildHeaders() })
-    if (!res.ok) throw await toApiError(res, 'Não deu pra carregar os livros. Tente de novo.')
-    books.value = await res.json()
+    books.value = await getPanelBooks()
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Não deu pra carregar os livros. Tente de novo.'
+    loadError.value = errorText(e, 'Não deu pra carregar os livros. Tente de novo.')
     useErrorReporter().captureException(e, { context: 'AdminBooks.fetchBooks' })
     console.error('[AdminBooks]', e)
   } finally {
@@ -230,8 +298,9 @@ const onSelectSuggestion = (suggestion: Suggestion) => {
 }
 
 // ── Drawer ────────────────────────────────────────────────────────
-const openCreate = () => {
+const openCreate = (title = '') => {
   editingBook.value = null
+  newTitle.value = title
   isDrawerOpen.value = true
 }
 
@@ -246,249 +315,145 @@ const closeDrawer = () => {
 }
 
 const onBookSaved = () => {
-  fetchBooks()
+  fetchBooks(true)
 }
 
 // ── Delete ────────────────────────────────────────────────────────
 const confirmDelete = (book: AdminBook) => {
-  deleteModal.open = true
-  deleteModal.description = `Remover "${book.titulo}"? Esta ação não pode ser desfeita.`
+  deleteModal.title = `Remover "${book.titulo}"?`
+  deleteModal.error = ''
   deleteModal.targetId = book._id
+  deleteModal.open = true
 }
 
+// A failed removal stays in the dialog, where the admin acted; confirming again retries it.
 const handleDelete = async () => {
   isDeleting.value = true
+  deleteModal.error = ''
 
   try {
-    const res = await fetch(`${API_BASE}/books/${deleteModal.targetId}`, {
-      method: 'DELETE',
-      headers: buildHeaders(),
-    })
+    await removeBook(deleteModal.targetId)
 
-    if (!res.ok) throw await toApiError(res, 'Não deu pra remover o livro. Tente de novo.', 'DELETE')
-
+    const removed = books.value.find((b) => b._id === deleteModal.targetId)
     books.value = books.value.filter((b) => b._id !== deleteModal.targetId)
+    useToast().show(`"${removed?.titulo}" removido.`)
     deleteModal.open = false
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Não deu pra remover o livro. Tente de novo.'
+    deleteModal.error = errorText(e, 'Não deu pra remover o livro. Tente de novo.')
     useErrorReporter().captureException(e, { context: 'AdminBooks.delete' })
-    deleteModal.open = false
   } finally {
     isDeleting.value = false
   }
 }
 
-// Reset pagination on search change
-watch([searchQuery, segmentFilter], () => {
-  paginationNav.value?.resetPage()
-})
+// The search is not in the URL, so a new term starts the list from the top here.
+watch(searchQuery, () => reset())
 
-onMounted(fetchBooks)
+onMounted(() => fetchBooks())
 </script>
 
 <style lang="scss" scoped>
-.action-btn {
-  border: none;
-  border-radius: var(--border-radius-sm);
-  min-height: 40px;
-  padding: 0.5rem 0.9rem;
-  font-family: var(--font-family-body);
-  font-size: 0.88rem;
-  font-weight: 500;
-  cursor: pointer;
-  background: var(--color-action-default);
-  color: #fff;
-  flex-shrink: 0;
-  transition: opacity var(--motion-transition-default);
-
-  &:hover {
-    opacity: 0.85;
-  }
-}
-
-// ── Search ────────────────────────────────────────────────────────
-.book-segmentation {
+.books-toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
-.books-filters {
-  flex: 25%;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
-// ── States ────────────────────────────────────────────────────────
-.admin-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 60px 24px;
-  text-align: center;
-  color: var(--color-text-subtle);
-
-  svg {
-    width: 36px;
-    height: 36px;
-  }
-
-  &--error {
-    color: var(--color-action-default);
-  }
+.books-search {
+  flex: 0 1 var(--panel-search);
 }
 
-.retry-btn {
-  border: none;
-  padding: 8px 16px;
-  min-height: 40px;
-  border-radius: var(--border-radius-sm);
-  background: var(--color-action-default);
-  color: #fff;
-  font-family: var(--font-family-body);
-  font-size: 0.9rem;
-  cursor: pointer;
-  &:hover {
-    opacity: 0.85;
-  }
-}
+.books-table {
+  overflow: hidden;
 
-.admin-empty {
-  padding: 2rem;
-  text-align: center;
-  color: var(--color-text-subtle);
-  border: 1px dashed var(--color-border-default);
-  border-radius: var(--border-radius-default);
-}
+  &__row {
+    display: grid;
+    grid-template-columns:
+      minmax(var(--col-xl), 2.4fr) minmax(var(--col-lg), 1.4fr) minmax(var(--col-md), 1fr) minmax(var(--col-sm), 0.8fr)
+      minmax(var(--col-md), 1.1fr) minmax(var(--col-md), 1.2fr) var(--col-actions);
+    align-items: center;
+    gap: var(--space-3);
+    min-height: var(--row-min);
+    font-size: var(--font-size-meta);
 
-// ── Book list ─────────────────────────────────────────────────────
-.books-list {
-  background: var(--color-surface-default);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--border-radius-default);
-  overflow: auto;
-  overflow-x: auto;
-}
-
-.books-row {
-  display: grid;
-  grid-template-columns: minmax(180px, 2.5fr) minmax(120px, 1.5fr) minmax(100px, 1fr) minmax(80px, 0.8fr) 0.5fr;
-  gap: 0.75rem;
-  padding: 0.7rem 1rem;
-  border-bottom: 1px solid var(--color-border-default);
-  font-size: 0.875rem;
-  align-items: center;
-  transition: background var(--motion-transition-default);
-
-  &:last-child {
-    border-bottom: none;
-  }
-  &:not(.books-row--header):hover {
-    background: var(--color-background-subtle);
-  }
-
-  &--header {
-    background: var(--color-background-subtle);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--color-text-subtle);
-  }
-
-  &--content {
-    overflow-y: auto;
-    max-height: 400px;
+    &--head {
+      min-height: var(--touch-min);
+      background: var(--color-background-subtle);
+      font-size: var(--font-size-caption);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+    }
   }
 
   &__title {
+    min-width: 0;
+    padding: var(--space-2) 0;
+    font-size: var(--font-size-ui);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-default);
-    font-weight: 500;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    cursor: pointer;
   }
 
   &__field {
-    color: var(--color-text-subtle);
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    color: var(--color-text-secondary);
+  }
+
+  // Wraps instead of cutting: "capa, sinopse e mais 3" is the reason to open the row.
+  &__missing {
+    min-width: 0;
+    padding: var(--space-2) 0;
+    color: var(--color-text-default);
   }
 
   &__actions {
     display: flex;
-    gap: 2px;
     justify-content: flex-end;
+    gap: var(--space-1);
   }
 }
 
-.row-action {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: none;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--color-text-subtle);
-  flex-shrink: 0;
-  transition:
-    background var(--motion-transition-default),
-    color var(--motion-transition-default);
-
-  &--edit:hover {
-    background: var(--color-action-background-subtle);
-    color: var(--color-action-default);
-  }
-
-  &--delete:hover {
-    background: rgba(192, 57, 43, 0.08);
-    color: #c0392b;
-  }
-}
-
-@media (max-width: 767px) {
-  .action-btn {
-    min-height: 44px;
-    align-self: flex-start;
-  }
-
-  .book-segmentation {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.6rem;
-    margin-bottom: 1rem;
-  }
-
-  .books-filters,
+// Phone: each book becomes a card; the column name goes in front of the value.
+@media (max-width: $bp-phone-max) {
   .books-search {
-    flex: 1 1 auto;
-    width: 100%;
+    flex: 1 1 100%;
   }
 
-  .books-row {
-    grid-template-columns: 1fr auto;
+  .books-table__row {
+    grid-template-columns: 1fr;
+    gap: var(--space-1) var(--space-3);
+    padding-block: var(--space-3);
 
-    &--header {
+    &--head {
       display: none;
-    }
-
-    &__field {
-      display: none;
-    }
-
-    &__title {
-      white-space: normal;
-      word-break: break-word;
     }
   }
 
-  .row-action {
-    width: 36px;
-    height: 36px;
+  .books-table__title {
+    grid-column: 1;
+  }
+
+  // The worded actions close the card, under the fields, instead of squeezing the title beside them.
+  .books-table__actions {
+    grid-row: auto;
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+
+  .books-table__field,
+  .books-table__missing {
+    grid-column: 1 / -1;
+    white-space: normal;
+
+    &::before {
+      content: attr(data-label) ': ';
+      color: var(--color-text-subtle);
+    }
   }
 }
 </style>

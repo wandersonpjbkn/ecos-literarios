@@ -7,6 +7,7 @@
     class="filter-chip"
     :class="{ 'is-selected': selected }"
     :aria-label="removable ? `Tirar o filtro ${label}` : undefined"
+    :aria-current="to && selected && !removable ? 'true' : undefined"
   >
     <span>{{ label }}</span>
     <span v-if="count !== undefined" class="filter-chip__count">{{ count }}</span>
@@ -31,8 +32,8 @@ defineProps<{
 <style lang="scss" scoped>
 .filter-chip {
   &__count {
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: var(--font-size-meta);
+    font-weight: var(--font-weight-regular);
     color: var(--color-text-subtle);
   }
 }

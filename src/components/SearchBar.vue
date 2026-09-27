@@ -1,12 +1,15 @@
 <template>
-  <div ref="wrapRef" class="search-wrap">
-    <div class="search-box" :class="{ 'is-focused': focused }">
-      <button v-if="model" class="clear-search" aria-label="Apagar a busca" @click="cleanAll">
-        <BaseIcon name="times" />
+  <div ref="wrapRef" class="search-wrap" role="search">
+    <!-- A real label, not only the placeholder: it stays when the person types and names the field on every width. -->
+    <label :for="inputId" class="visually-hidden">{{ label ?? placeholder }}</label>
+    <div class="search-box">
+      <button v-if="model" type="button" class="clear-search" aria-label="Apagar a busca" @click="cleanAll">
+        <BaseIcon name="times" aria-hidden="true" />
       </button>
       <BaseIcon v-else name="search" class="search-icon" />
 
       <input
+        :id="inputId"
         ref="inputRef"
         type="text"
         :value="model"
@@ -50,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { ref, computed, useId } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 
 import { useUtils } from '@/composables'
@@ -65,13 +68,16 @@ const props = withDefaults(
     suggestions: Suggestion[]
     filtered?: number
     placeholder?: string
+    label?: string
   }>(),
   {
     filtered: undefined,
     placeholder: 'Buscar por título ou autor…',
+    label: undefined,
   },
 )
 const emit = defineEmits(['update:modelValue', 'select'])
+const inputId = useId()
 
 const wrapRef = ref<HTMLDivElement | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
@@ -139,16 +145,17 @@ onClickOutside(wrapRef, () => close())
     background: var(--color-surface-default);
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-lg);
-    padding: 0 14px;
-    min-height: 44px;
+    padding: 0 var(--space-4);
+    min-height: var(--touch-min);
 
     align-items: center;
-    gap: 10px;
+    gap: var(--space-3);
     transition: all var(--motion-transition-default);
 
-    &.is-focused {
-      border-color: var(--color-action-default);
-      box-shadow: 0 0 0 3px var(--color-action-background-subtle);
+    // The same ring as AppField: a pale halo on white did not reach the 3:1 a focus indicator needs.
+    &:has(.search-input:focus-visible) {
+      outline: 2px solid var(--color-border-focus);
+      outline-offset: var(--focus-offset-tight);
     }
   }
 
@@ -158,15 +165,13 @@ onClickOutside(wrapRef, () => close())
   }
 
   &-input {
-    height: 44px;
+    height: var(--touch-min);
     background: none;
     border: none;
     outline: none;
 
-    font: {
-      family: var(--font-family-body);
-      size: 1rem;
-    }
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-body);
     color: var(--color-text-default);
 
     flex: 1;
@@ -177,12 +182,13 @@ onClickOutside(wrapRef, () => close())
   }
 
   &__count {
-    font-size: 0.78rem;
+    font-size: var(--font-size-caption);
     color: var(--color-text-subtle);
     flex-shrink: 0;
 
+    // Not the action colour: the count is read, never clicked.
     strong {
-      color: var(--color-action-default);
+      color: var(--color-text-default);
     }
   }
 }
@@ -191,10 +197,10 @@ onClickOutside(wrapRef, () => close())
   display: flex;
   background: none;
   border: none;
-  padding: 4px;
-  border-radius: 3px;
-  min-width: 36px;
-  min-height: 36px;
+  padding: var(--space-1);
+  border-radius: var(--radius-pill);
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
   color: var(--color-text-subtle);
 
   transition: color var(--motion-transition-default);
@@ -207,24 +213,22 @@ onClickOutside(wrapRef, () => close())
   }
 
   svg {
-    $size: 1rem;
-
-    width: $size;
-    height: $size;
+    width: var(--icon-sm);
+    height: var(--icon-sm);
   }
 }
 
 /* Dropdown */
 .suggestions {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + var(--space-1));
   left: 0;
   right: 0;
-  z-index: 200;
+  z-index: var(--layer-popover);
 
   background: var(--color-surface-default);
   border: 1px solid var(--color-border-default);
-  border-radius: var(--border-radius-default);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   list-style: none;
 
@@ -233,43 +237,43 @@ onClickOutside(wrapRef, () => close())
 
 .suggestion {
   display: flex;
-  min-height: 44px;
-  padding: 10px 16px;
+  min-height: var(--touch-min);
+  padding: var(--space-3) var(--space-4);
 
   cursor: pointer;
   transition: background var(--motion-transition-default);
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
 
   &:hover,
   &.is-active {
     background: var(--color-background-subtle);
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: $bp-small-max) {
     flex-direction: column;
     align-items: flex-start;
-    gap: 2px;
-    padding: 10px 12px;
+    gap: var(--space-1);
+    padding: var(--space-3);
   }
 }
 
 .sug {
   &-main {
-    font-size: 1rem;
+    font-size: var(--font-size-body);
     color: var(--color-text-default);
-    font-weight: 500;
+    font-weight: var(--font-weight-regular);
 
     :deep(mark) {
       background: var(--color-action-background-subtle);
       color: var(--color-action-default);
-      border-radius: 2px;
+      border-radius: var(--radius-sm);
     }
   }
 
   &-sub {
-    font-size: 0.875rem;
+    font-size: var(--font-size-meta);
     color: var(--color-text-subtle);
     flex-shrink: 0;
   }

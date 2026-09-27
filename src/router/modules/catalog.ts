@@ -11,18 +11,24 @@ export const routes: RouteRecordRaw[] = [
     path: '/',
     name: 'catalog-books',
     component: () => import('@/views/catalog/BooksView.vue'),
-    meta: { title: 'Catálogo — Ecos Literários', pageClass: 'page-catalog' },
+    meta: { title: 'Catálogo', pageClass: 'page-catalog' },
   },
   {
     path: '/livro/:id',
     name: 'catalog-book-details',
     component: () => import('@/views/catalog/BookDetailsView.vue'),
-    meta: { title: 'Livro — Ecos Literários', pageClass: 'page-book' },
+    meta: { title: 'Livro', pageClass: 'page-book' },
   },
   { path: '/midia/:slug', name: 'catalog-midia', redirect: toCatalogQuery('midia') },
   { path: '/categoria/:slug', name: 'catalog-category', redirect: toCatalogQuery('genero') },
   { path: '/autor/:slug', name: 'catalog-author', redirect: toCatalogQuery('autor') },
   { path: '/mencao/:slug', name: 'catalog-mention', redirect: toCatalogQuery('quem') },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: () => import('@/views/catalog/NotFoundView.vue'),
+    meta: { title: 'Página não encontrada', pageClass: 'page-not-found' },
+  },
 ]
 
 export default {

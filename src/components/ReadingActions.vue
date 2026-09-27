@@ -1,10 +1,10 @@
 <template>
-  <div class="reading" :aria-busy="pending">
+  <div ref="root" class="reading" :aria-busy="pending">
     <template v-if="status === 'lido'">
       <p class="reading__state">
         <BaseIcon name="check" aria-hidden="true" />
         <span>Lido</span>
-        <AppButton variant="ghost" size="md" :disabled="!canWrite || pending" @click="change(null)"
+        <AppButton variant="ghost" size="md" :disabled="!canWrite || pending" @click="act(null)"
           >Desmarcar</AppButton
         >
       </p>
@@ -14,32 +14,44 @@
       <p v-if="status === 'quero_ler'" class="reading__state">
         <BaseIcon name="check" aria-hidden="true" />
         <span>Guardado em Quero ler</span>
-        <AppButton variant="ghost" size="md" :disabled="!canWrite || pending" @click="change(null)">
+        <AppButton variant="ghost" size="md" :disabled="!canWrite || pending" @click="act(null)">
           Tirar da lista
         </AppButton>
       </p>
-      <AppButton v-else variant="primary" :disabled="!canWrite || pending" @click="change('quero_ler')">
+      <AppButton v-else variant="primary" :disabled="!canWrite || pending" @click="act('quero_ler')">
         Guardar em “Quero ler”
       </AppButton>
-      <AppButton :disabled="!canWrite || pending" @click="change('lido')">Marcar como lido</AppButton>
+      <AppButton :disabled="!canWrite || pending" @click="act('lido')">Marcar como lido</AppButton>
     </template>
 
-    <p v-if="error" class="reading__error" role="status">{{ error }}</p>
+    <AppNotice v-if="error" :text="error" />
     <p v-if="countsLabel" class="reading__counts">{{ countsLabel }}</p>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, toRef } from 'vue'
+import { computed, nextTick, ref, toRef } from 'vue'
 
 import AppButton from '@/components/AppButton.vue'
+import AppNotice from '@/components/AppNotice.vue'
 import { useReading } from '@/composables'
+import type { ReadingStatus } from '@/types'
 
 const props = defineProps<{
   bookId: string
 }>()
 
 const { status, counts, pending, error, canWrite, change } = useReading(toRef(props, 'bookId'))
+const root = ref<HTMLElement | null>(null)
+
+// The pressed button is replaced by the next state's buttons; focus moves to the first of them, not to the page.
+const act = async (next: ReadingStatus | null) => {
+  await change(next)
+  await nextTick()
+  const here = root.value
+  if (!here || here.contains(document.activeElement)) return
+  here.querySelector<HTMLButtonElement>('button:not([disabled])')?.focus()
+}
 
 const plural = (n: number, one: string, many: string) => (n === 1 ? `1 ${one}` : `${n} ${many}`)
 
@@ -75,17 +87,17 @@ const countsLabel = computed(() => {
     align-items: center;
     gap: var(--space-2);
 
-    font-size: 0.9375rem;
-    font-weight: 600;
+    font-size: var(--font-size-ui);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-action-default-hover);
 
     background: var(--color-action-background-subtle);
-    border: 1px solid var(--color-action-text-subtle);
+    border: 1px solid var(--color-action-border-subtle);
     border-radius: var(--radius-lg);
 
     :deep(.base-icon) {
-      width: 18px;
-      height: 18px;
+      width: var(--icon-md);
+      height: var(--icon-md);
       flex-shrink: 0;
     }
 
@@ -94,13 +106,8 @@ const countsLabel = computed(() => {
     }
   }
 
-  &__error {
-    font-size: 0.875rem;
-    color: var(--color-text-default);
-  }
-
   &__counts {
-    font-size: 0.875rem;
+    font-size: var(--font-size-meta);
     text-align: center;
     color: var(--color-text-subtle);
   }

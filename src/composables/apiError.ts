@@ -26,3 +26,6 @@ export const toApiError = async (res: Response, fallback: string, method = 'GET'
   const body = (await res.json().catch(() => ({}))) as { error?: string }
   return new ApiError(body.error ?? fallback, res.status, endpointOf(res.url, method))
 }
+
+/** What a failed call shows: the API's message, or the screen's own sentence (never the browser's "Failed to fetch"). */
+export const errorText = (e: unknown, fallback: string): string => (e instanceof ApiError ? e.message : fallback)

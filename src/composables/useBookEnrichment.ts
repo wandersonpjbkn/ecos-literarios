@@ -1,14 +1,13 @@
 import { ref } from 'vue'
-import { toApiError } from '@/composables/apiError'
+import { errorText } from '@/composables/apiError'
 
 import { useErrorReporter } from '@/composables'
-import { buildHeaders } from '@/composables/useApi'
-import type { EnrichmentField, EnrichmentItem, EnrichmentPreview, EnrichmentApiResponse } from '@/types'
-import { API_BASE } from '@/data/config'
+import { applyBookEnrichment, previewBookEnrichment } from '@/composables/useApi'
+import type { BookPayload, EnrichmentField, EnrichmentItem, EnrichmentPreview, EnrichmentApiResponse } from '@/types'
 
 const FIELD_META: ReadonlyArray<{ field: EnrichmentField; label: string }> = [
   { field: 'description', label: 'Sinopse' },
-  { field: 'coverUrl', label: 'URL da capa' },
+  { field: 'coverUrl', label: 'Capa' },
   { field: 'publisher', label: 'Editora' },
   { field: 'isbn', label: 'ISBN' },
   { field: 'pageCount', label: 'Páginas' },
@@ -41,11 +40,6 @@ function buildPreviewItems(raw: EnrichmentApiResponse['preview']): EnrichmentIte
   })
 }
 
-async function safeJson<T>(res: Response, fallback: string): Promise<T> {
-  if (!res.ok) throw await toApiError(res, fallback, 'POST')
-  return res.json() as Promise<T>
-}
-
 /** Accepts bookId as a getter to stay reactive without coupling to a Ref type. */
 export function useBookEnrichment(bookId: () => string | undefined) {
   const isLoading = ref(false)
@@ -68,11 +62,7 @@ export function useBookEnrichment(bookId: () => string | undefined) {
     error.value = ''
 
     try {
-      const res = await fetch(`${API_BASE}/books/${id}/enrich`, {
-        method: 'POST',
-        headers: buildHeaders(),
-      })
-      const data = await safeJson<EnrichmentApiResponse>(res, 'Não deu pra buscar os dados do livro. Tente de novo.')
+      const data = await previewBookEnrichment(id)
 
       const sourceLabel = data.source === 'google_books' ? 'Google Books' : 'Open Library'
       const items = buildPreviewItems(data.preview)
@@ -80,7 +70,7 @@ export function useBookEnrichment(bookId: () => string | undefined) {
       preview.value = { sourceLabel, items }
       selectedFields.value = items.filter((i) => i.hasValue).map((i) => i.field)
     } catch (e) {
-      error.value = e instanceof Error ? e.message : 'Não deu pra buscar os dados do livro. Tente de novo.'
+      error.value = errorText(e, 'Não deu pra buscar os dados do livro. Tente de novo.')
       if (import.meta.env.DEV) console.error('[useBookEnrichment] fetchPreview', e)
       useErrorReporter().captureException(e, { context: 'useBookEnrichment.preview' })
     } finally {
@@ -88,28 +78,23 @@ export function useBookEnrichment(bookId: () => string | undefined) {
     }
   }
 
-  /** Returns true on success so the caller can emit events or show feedback. */
-  async function applySelected(): Promise<boolean> {
+  /** Returns the saved book, or null when nothing was applied. */
+  async function applySelected(): Promise<BookPayload | null> {
     const id = bookId()
-    if (!id || selectedFields.value.length === 0) return false
+    if (!id || selectedFields.value.length === 0) return null
 
     isApplying.value = true
     error.value = ''
 
     try {
-      const res = await fetch(`${API_BASE}/books/${id}/enrich/apply`, {
-        method: 'POST',
-        headers: buildHeaders(),
-        body: JSON.stringify({ fields: selectedFields.value }),
-      })
-      await safeJson(res, 'Não deu pra aplicar os dados. Tente de novo.')
+      const data = await applyBookEnrichment(id, selectedFields.value)
       await fetchPreview()
-      return true
+      return data.book
     } catch (e) {
-      error.value = e instanceof Error ? e.message : 'Não deu pra aplicar os dados. Tente de novo.'
+      error.value = errorText(e, 'Não deu pra salvar os dados no livro. Tente de novo.')
       if (import.meta.env.DEV) console.error('[useBookEnrichment] applySelected', e)
       useErrorReporter().captureException(e, { context: 'useBookEnrichment.apply' })
-      return false
+      return null
     } finally {
       isApplying.value = false
     }

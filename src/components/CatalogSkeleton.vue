@@ -9,7 +9,7 @@
       </div>
     </div>
 
-    <div class="catalog-skeleton__grid" aria-hidden="true">
+    <div class="catalog-skeleton__grid book-grid" aria-hidden="true">
       <div v-for="n in 12" :key="n" class="catalog-skeleton__card">
         <span class="catalog-skeleton__cover" />
         <span class="catalog-skeleton__line" />
@@ -20,13 +20,36 @@
 </template>
 
 <style lang="scss" scoped>
+// A band of light crosses each shape; with reduced motion the shapes stay still, in the base grey.
+@mixin shimmer {
+  background-color: var(--color-skeleton);
+  background-image: var(--skeleton-gradient);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer var(--skeleton-shimmer) ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    background-image: none;
+    animation: none;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -100% 0;
+  }
+}
+
 // Same shapes and grid as the catalog, so nothing jumps when the books arrive (Estados: Carregando).
 .catalog-skeleton {
   &__bar {
     display: grid;
     gap: var(--space-3);
 
-    @media (min-width: 768px) {
+    @media (min-width: $bp-tablet-min) {
       margin-top: var(--space-6);
     }
   }
@@ -39,22 +62,14 @@
 
   &__chip {
     flex-shrink: 0;
-    width: 96px;
+    width: var(--skeleton-short);
     height: var(--touch-min);
     border-radius: var(--radius-pill);
-    background: var(--color-background-subtle);
+    @include shimmer;
   }
 
   &__grid {
-    display: grid;
     margin-top: var(--space-6);
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: var(--space-5) var(--space-3);
-
-    @media (min-width: 768px) {
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: calc(var(--space-5) + var(--space-2)) var(--space-5);
-    }
   }
 
   &__card {
@@ -63,12 +78,12 @@
   }
 
   &__cover {
-    height: 206px;
+    height: var(--cover-h);
     border-radius: var(--radius-md);
-    background: var(--color-background-subtle);
+    @include shimmer;
 
-    @media (min-width: 768px) {
-      height: 212px;
+    @media (min-width: $bp-tablet-min) {
+      height: var(--cover-h-lg);
     }
   }
 
@@ -76,14 +91,14 @@
     width: 80%;
     height: var(--space-3);
     border-radius: var(--radius-pill);
-    background: var(--color-background-subtle);
+    @include shimmer;
 
     &--short {
       width: 55%;
     }
 
     &--summary {
-      width: 120px;
+      width: var(--skeleton-long);
       height: var(--space-4);
     }
   }

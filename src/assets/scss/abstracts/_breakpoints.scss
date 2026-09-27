@@ -1,0 +1,7 @@
+// @media cannot read CSS variables; vite.config injects these. useBreakpoints.ts repeats them: change both.
+$bp-phone-max: 767px;
+$bp-tablet-min: 768px;
+$bp-small-max: 480px;
+$bp-wide-min: 900px;
+$bp-below-desktop-max: 1023px;
+$bp-desktop-wide-min: 1100px;

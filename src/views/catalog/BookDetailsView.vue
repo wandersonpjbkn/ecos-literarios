@@ -5,19 +5,24 @@
       :error="!book && !booksStore.books.length ? booksStore.error : null"
       :on-retry="retry"
       loading-text="Carregando livro…"
+      what="o livro"
       error-hint="Se não voltar, avise no grupo."
     />
 
-    <div v-if="!booksStore.loading && booksStore.books.length && !book" class="book-page__missing">
-      <h1 class="book-page__missing-title">Não achamos esse livro</h1>
-      <p>Ele pode ter saído do catálogo, ou o link chegou incompleto.</p>
+    <!-- Shown with an empty collection too: a link to a book that is not there never lands on a blank page. -->
+    <EmptyState
+      v-if="!booksStore.loading && !book && !(booksStore.error && !booksStore.books.length)"
+      title-tag="h1"
+      title="Não achamos esse livro"
+      text="Ele pode ter saído do catálogo, ou o link chegou incompleto."
+    >
       <AppButton variant="primary" :to="lastCatalog">Voltar ao catálogo</AppButton>
-    </div>
+    </EmptyState>
 
     <template v-if="book">
-      <RouterLink :to="lastCatalog" class="book-page__back">
+      <RouterLink :to="lastList.path" class="book-page__back">
         <BaseIcon name="arrow-left" aria-hidden="true" />
-        Voltar ao catálogo
+        Voltar {{ lastList.label }}
       </RouterLink>
 
       <div class="book-page__layout">
@@ -57,9 +62,8 @@
             :person="book.quem"
             :is-author="isOwner"
             :can-write="canWrite"
-            :from-conversation="book.origem === 'conversa'"
             :ask-link="askPerson"
-            @write="openEditor(book.id)"
+            @write="openEditor(book.id, 'porque')"
           />
 
           <div>
@@ -70,7 +74,7 @@
               :ask-link="ask"
               @edit="openEditor(book.id)"
             />
-            <p v-if="editError" class="book-page__edit-error" role="status">{{ editError }}</p>
+            <AppNotice v-if="editError" :text="editError" retry @retry="openEditor(book.id, editFocus)" />
           </div>
 
           <section v-if="book.synopsis" class="book-page__about" aria-labelledby="about-title">
@@ -124,7 +128,8 @@
       <BookFormDrawer
         :book="editingBook"
         :is-open="isEditing"
-        :scope="authStore.isAdmin && !isOwner ? 'admin' : 'member'"
+        :focus="editFocus"
+        scope="member"
         @close="closeEditor"
         @saved="onSaved"
       />
@@ -137,6 +142,8 @@ import { computed, onMounted, ref, useId, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import AppButton from '@/components/AppButton.vue'
+import AppNotice from '@/components/AppNotice.vue'
+import EmptyState from '@/components/EmptyState.vue'
 import BookCard from '@/components/BookCard.vue'
 import BookFacts from '@/components/BookFacts.vue'
 import BookFixLine from '@/components/BookFixLine.vue'
@@ -147,7 +154,7 @@ import QuoteBlock from '@/components/QuoteBlock.vue'
 import ReadingActions from '@/components/ReadingActions.vue'
 import ShareButton from '@/components/ShareButton.vue'
 import WhereToFind from '@/components/WhereToFind.vue'
-import BookFormDrawer from '@/components/admin/BookFormDrawer.vue'
+import BookFormDrawer from '@/components/BookFormDrawer.vue'
 import {
   askGroupLink,
   useApi,
@@ -155,9 +162,10 @@ import {
   useCanWrite,
   useFilters,
   useLastCatalog,
+  useLastList,
   usePageMeta,
 } from '@/composables'
-import { useAuthStore, useBooksStore } from '@/stores'
+import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
 import type { Book } from '@/types'
 
 const RELATED_COUNT = 6
@@ -172,11 +180,18 @@ const {
   editingBook,
   isOpen: isEditing,
   error: editError,
-  open: openEditor,
+  open: openBookEditor,
   close: closeEditor,
   onSaved,
 } = useBookEditor()
+const editFocus = ref<'porque' | undefined>()
+const openEditor = (id: string, focus?: 'porque') => {
+  editFocus.value = focus
+  return openBookEditor(id)
+}
 const lastCatalog = useLastCatalog()
+// Back goes to the list the book was opened from: the catalog, or Meus livros.
+const lastList = useLastList()
 const { catalogLink } = useFilters()
 
 onMounted(() => useApi().fetchBooks())
@@ -190,7 +205,9 @@ const genre = computed(() => book.value?.categoria.replace(/-/g, ' ') ?? '')
 
 // The API only lets the person who mentioned the book (after linking the name) or an admin edit it.
 const isOwner = computed(() => !!book.value?.quem_user_id && book.value.quem_user_id === authStore.user?._id)
-const canEdit = computed(() => isOwner.value || authStore.isAdmin)
+// The API's matrix, not the role (front mirrors backend): the owner, or whoever may edit any book.
+const permissions = usePermissionsStore()
+const canEdit = computed(() => permissions.canEditBook(book.value?.quem_user_id))
 
 const ask = (message: string) => askGroupLink(message, bookPath.value)
 const askPerson = computed(() => ask(`${book.value?.quem}, o que você acha de "${book.value?.titulo}"?`))
@@ -217,11 +234,11 @@ usePageMeta(
 
 <style lang="scss" scoped>
 .book-page {
-  max-width: 1120px;
+  max-width: var(--page-max);
   margin: 0 auto;
   padding: var(--space-4) var(--space-4) var(--space-14);
 
-  @media (min-width: 768px) {
+  @media (min-width: $bp-tablet-min) {
     padding: var(--space-6) var(--space-8) var(--space-24);
   }
 
@@ -231,20 +248,20 @@ usePageMeta(
     align-items: center;
     gap: var(--space-2);
 
-    font-size: 0.9375rem;
-    font-weight: 600;
+    font-size: var(--font-size-ui);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-action-default);
     text-decoration: none;
     border-radius: var(--radius-md);
 
     :deep(.base-icon) {
-      width: 16px;
-      height: 16px;
+      width: var(--icon-sm);
+      height: var(--icon-sm);
     }
 
     &:focus-visible {
       outline: 2px solid var(--color-border-focus);
-      outline-offset: 2px;
+      outline-offset: var(--focus-offset);
     }
   }
 
@@ -260,8 +277,8 @@ usePageMeta(
     gap: var(--space-6);
 
     // "Onde encontrar" stays under the cover on desktop and goes last on phones, after the file and comment.
-    @media (min-width: 900px) {
-      grid-template-columns: 280px minmax(0, 1fr);
+    @media (min-width: $bp-wide-min) {
+      grid-template-columns: var(--cover-column) minmax(0, 1fr);
       grid-template-areas:
         'side head'
         'side main'
@@ -285,16 +302,16 @@ usePageMeta(
 
   &__title {
     margin-top: var(--space-3);
-    font-size: 1.875rem;
-    line-height: 1.17;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-size: var(--font-size-display-m);
+    line-height: var(--line-height-display);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-display);
     color: var(--color-text-default);
     overflow-wrap: anywhere;
 
-    @media (min-width: 900px) {
-      font-size: 2.375rem;
-      line-height: 1.1;
+    @media (min-width: $bp-wide-min) {
+      font-size: var(--font-size-display-l);
+      line-height: var(--line-height-display);
     }
   }
 
@@ -308,18 +325,18 @@ usePageMeta(
 
     &:hover {
       text-decoration: underline;
-      text-underline-offset: 3px;
+      text-underline-offset: var(--underline-offset);
     }
 
     &:focus-visible {
       outline: 2px solid var(--color-border-focus);
-      outline-offset: 2px;
+      outline-offset: var(--focus-offset);
     }
   }
 
   // A link, so it takes the action colour like the person below (one colour means "this clicks").
   &__author {
-    font-size: 1.125rem;
+    font-size: var(--font-size-section);
     color: var(--color-action-default);
   }
 
@@ -327,12 +344,12 @@ usePageMeta(
     display: flex;
     align-items: center;
     gap: var(--space-1);
-    font-size: 0.9375rem;
+    font-size: var(--font-size-ui);
     color: var(--color-text-subtle);
   }
 
   &__person {
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     color: var(--color-action-default);
   }
 
@@ -345,10 +362,10 @@ usePageMeta(
   }
 
   &__cover {
-    width: min(180px, 50%);
+    width: min(var(--cover-w-phone), 50%);
     margin: 0 auto;
 
-    @media (min-width: 900px) {
+    @media (min-width: $bp-wide-min) {
       width: 100%;
     }
   }
@@ -368,22 +385,17 @@ usePageMeta(
     gap: var(--space-6);
   }
 
-  &__edit-error {
-    font-size: 0.875rem;
-    color: var(--color-text-default);
-  }
-
   &__section-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    font-size: var(--font-size-section);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-title);
     color: var(--color-text-default);
   }
 
   &__synopsis {
     margin-top: var(--space-2);
-    font-size: 1rem;
-    line-height: 1.5;
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-text);
     color: var(--color-text-secondary);
 
     &.is-collapsed {
@@ -405,23 +417,6 @@ usePageMeta(
     flex-wrap: wrap;
     gap: var(--space-2);
   }
-
-  &__missing {
-    display: flex;
-    max-width: 380px;
-    margin: var(--space-14) auto 0;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-3);
-    text-align: center;
-    color: var(--color-text-secondary);
-  }
-
-  &__missing-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--color-text-default);
-  }
 }
 
 .related {
@@ -436,9 +431,9 @@ usePageMeta(
   }
 
   &__title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    font-size: var(--font-size-section);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-title);
     color: var(--color-text-default);
   }
 
@@ -448,19 +443,19 @@ usePageMeta(
     align-items: center;
     gap: var(--space-1);
 
-    font-size: 0.9375rem;
-    font-weight: 600;
+    font-size: var(--font-size-ui);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-action-default);
     text-decoration: none;
 
     :deep(.base-icon) {
-      width: 14px;
-      height: 14px;
+      width: var(--icon-xs);
+      height: var(--icon-xs);
     }
 
     &:focus-visible {
       outline: 2px solid var(--color-border-focus);
-      outline-offset: 2px;
+      outline-offset: var(--focus-offset);
       border-radius: var(--radius-sm);
     }
   }
@@ -471,11 +466,11 @@ usePageMeta(
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-5) var(--space-3);
 
-    @media (min-width: 768px) {
+    @media (min-width: $bp-tablet-min) {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    @media (min-width: 1100px) {
+    @media (min-width: $bp-desktop-wide-min) {
       grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: var(--space-8) var(--space-5);
     }

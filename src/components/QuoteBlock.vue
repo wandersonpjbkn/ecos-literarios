@@ -21,9 +21,6 @@
 
     <template v-else>
       <p class="quote-block__empty-title">{{ person }} não escreveu nada sobre este livro</p>
-      <p v-if="fromConversation" class="quote-block__empty-note">
-        O livro apareceu na conversa do grupo, sem comentário junto.
-      </p>
       <div class="quote-block__actions">
         <AppButton v-if="isAuthor" size="md" :disabled="!canWrite" @click="emit('write')">
           <BaseIcon name="pencil" aria-hidden="true" />
@@ -49,7 +46,6 @@ const props = defineProps<{
   person: string
   isAuthor: boolean
   canWrite: boolean
-  fromConversation: boolean
   askLink: string
 }>()
 
@@ -68,7 +64,7 @@ const isLong = computed(() => props.text.length > COLLAPSE_CHARS)
   padding: var(--space-5) var(--space-6);
 
   background: var(--color-background-subtle);
-  border-left: 3px solid var(--color-action-text-subtle);
+  border-left: 3px solid var(--color-action-border-subtle);
   border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
 
   &.is-empty {
@@ -76,16 +72,16 @@ const isLong = computed(() => props.text.length > COLLAPSE_CHARS)
   }
 
   &__label {
-    font-size: 0.8125rem;
-    font-weight: 700;
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-bold);
     color: var(--color-text-subtle);
   }
 
   // body-l: the one large body size of the system (QuoteBlock.md).
   &__text {
     margin: var(--space-3) 0 0;
-    font-size: 1.1875rem;
-    line-height: 1.58;
+    font-size: var(--font-size-body-l);
+    line-height: var(--line-height-reading);
     color: var(--color-text-default);
     white-space: pre-line;
 
@@ -104,16 +100,11 @@ const isLong = computed(() => props.text.length > COLLAPSE_CHARS)
 
   &__empty-title {
     margin-top: var(--space-3);
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-default);
   }
 
-  &__empty-note {
-    margin-top: var(--space-1);
-    font-size: 0.9375rem;
-    color: var(--color-text-secondary);
-  }
 
   &__actions {
     margin-top: var(--space-4);
@@ -121,7 +112,7 @@ const isLong = computed(() => props.text.length > COLLAPSE_CHARS)
 
   &__hint {
     margin-top: var(--space-2);
-    font-size: 0.875rem;
+    font-size: var(--font-size-meta);
     color: var(--color-text-subtle);
   }
 }

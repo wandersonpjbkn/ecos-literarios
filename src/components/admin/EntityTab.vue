@@ -1,153 +1,134 @@
 <template>
-  <div class="entity-tab">
-    <!-- Header -->
+  <div class="entity-tab panel-box">
     <div class="entity-tab__header">
-      <div>
-        <h3 class="entity-tab__title">{{ title }}</h3>
-        <p v-if="description" class="entity-tab__desc">{{ description }}</p>
+      <p v-if="description" class="entity-tab__desc">{{ description }}</p>
+      <AppButton v-if="canCreate && !isFormOpen" size="md" :disabled="crud.loading.value" @click="isFormOpen = true">
+        Adicionar {{ singular }}
+      </AppButton>
+    </div>
+
+    <form v-if="isFormOpen" class="entity-form" @submit.prevent="handleCreate">
+      <AppField
+        :id="`new-${resource}`"
+        v-model="newName"
+        trim
+        class="entity-form__field"
+        :label="`Nome do ${singular}`"
+        :disabled="isCreating"
+        :maxlength="60"
+        autocomplete="off"
+      />
+      <div class="entity-form__actions">
+        <AppButton size="md" :disabled="isCreating" @click="closeForm">Cancelar</AppButton>
+        <AppButton type="submit" variant="primary" size="md" :disabled="isCreating || !newName.trim()">
+          {{ isCreating ? 'Adicionando…' : 'Adicionar' }}
+        </AppButton>
       </div>
-      <button class="entity-tab__add-btn" :disabled="crud.loading.value" @click="isFormOpen = !isFormOpen">
-        {{ isFormOpen ? 'Cancelar' : '+ Adicionar' }}
-      </button>
-    </div>
+    </form>
 
-    <!-- Inline create form -->
-    <Transition name="slide">
-      <form v-if="isFormOpen" class="entity-form" @submit.prevent="handleCreate">
-        <input
-          ref="inputRef"
-          v-model.trim="newName"
-          type="text"
-          class="entity-form__input"
-          :placeholder="`Nome do(a) ${title.toLowerCase()}…`"
-          :disabled="isCreating"
-          maxlength="80"
-          autocomplete="off"
-        />
-        <button type="submit" class="entity-form__submit" :disabled="isCreating || newName.length < 2">
-          {{ isCreating ? 'Criando…' : 'Criar' }}
-        </button>
-      </form>
-    </Transition>
+    <AppNotice v-if="actionError" class="entity-notice" :text="actionError" />
 
-    <!-- Feedback -->
-    <Transition name="fade">
-      <p v-if="feedback" class="entity-feedback" :class="`entity-feedback--${feedbackType}`">
-        {{ feedback }}
-      </p>
-    </Transition>
+    <BaseSpinner v-if="crud.loading.value" class="entity-state">
+      <p>Carregando {{ title.toLowerCase() }}…</p>
+    </BaseSpinner>
 
-    <!-- Loading -->
-    <BaseSpinner v-if="crud.loading.value" class="entity-state">Carregando…</BaseSpinner>
+    <AppNotice
+      v-else-if="crud.error.value"
+      class="entity-notice"
+      :text="crud.error.value"
+      retry
+      @retry="crud.fetchAll()"
+    />
 
-    <!-- Error -->
-    <div v-else-if="crud.error.value" class="entity-state entity-state--error">
-      <BaseIcon name="error" aria-hidden="true" />
-      <p>{{ crud.error.value }}</p>
-      <button class="entity-retry" @click="crud.fetchAll()">Tentar de novo</button>
-    </div>
+    <EmptyState
+      v-else-if="crud.items.value.length === 0"
+      :title="`Nenhum ${singular} ainda`"
+      :text="`Os ${title.toLowerCase()} adicionados aqui viram opção na ficha dos livros.`"
+    >
+      <AppButton v-if="canCreate && !isFormOpen" variant="primary" @click="isFormOpen = true">
+        Adicionar {{ singular }}
+      </AppButton>
+    </EmptyState>
 
-    <!-- Empty -->
-    <p v-else-if="crud.items.value.length === 0" class="entity-empty">Nada aqui ainda.</p>
-
-    <!-- List -->
     <template v-else>
-      <!-- Search (6+ items) -->
-      <div v-if="crud.items.value.length >= 6" class="entity-search">
-        <BaseIcon name="search" class="entity-search__icon" />
-        <input
-          v-model="searchQuery"
-          type="text"
-          class="entity-search__input"
-          placeholder="Filtrar…"
-          autocomplete="off"
-        />
-      </div>
+      <SearchBar
+        v-if="crud.items.value.length >= 6"
+        v-model="searchQuery"
+        class="entity-search"
+        :placeholder="`Buscar em ${title.toLowerCase()}`"
+        :suggestions="[]"
+        :total="crud.items.value.length"
+        :filtered="filteredItems.length"
+      />
 
-      <!-- Items -->
-      <TransitionGroup name="entity-item" tag="div" class="entity-items">
-        <div class="entity-row--content">
-          <div v-for="item in paginatedEntities" :key="item._id" class="entity-row">
-            <!-- Edit mode -->
-            <template v-if="editingId === item._id">
-              <form class="entity-row__edit-form" @submit.prevent="handleUpdate">
-                <input
-                  ref="editInputRef"
-                  v-model.trim="editingName"
-                  type="text"
-                  class="entity-row__edit-input"
-                  :disabled="isUpdating"
-                  maxlength="80"
-                  autocomplete="off"
-                  @keydown.escape="cancelEdit"
-                />
-                <button
-                  type="submit"
-                  class="entity-row__action entity-row__action--save"
-                  :disabled="isUpdating || editingName.length < 2 || editingName === item.nome"
-                  :aria-label="`Salvar ${editingName}`"
-                >
-                  <BaseIcon name="check" aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  class="entity-row__action entity-row__action--cancel"
-                  :disabled="isUpdating"
-                  aria-label="Cancelar edição"
-                  @click="cancelEdit"
-                >
-                  <BaseIcon name="times" aria-hidden="true" />
-                </button>
-              </form>
-            </template>
+      <EmptyState
+        v-if="filteredItems.length === 0 && searchQuery"
+        :title="`Nada com &quot;${searchQuery}&quot;`"
+        :text="`Procuramos no nome de cada ${singular}.`"
+      >
+        <AppButton @click="searchQuery = ''">Apagar a busca</AppButton>
+      </EmptyState>
 
-            <!-- Display mode -->
-            <template v-else>
-              <div class="entity-row__info">
-                <span class="entity-row__name" @click="startEdit(item)">{{ item.nome }}</span>
-                <span class="entity-row__slug">{{ item.slug }}</span>
-              </div>
-              <div class="entity-row__actions">
-                <button
-                  class="entity-row__action entity-row__action--edit"
-                  type="button"
-                  :aria-label="`Editar ${item.nome}`"
-                  :disabled="!!editingId"
-                  @click="startEdit(item)"
-                >
-                  <BaseIcon name="pencil" aria-hidden="true" />
-                </button>
-                <button
-                  class="entity-row__action entity-row__action--delete"
-                  type="button"
-                  :aria-label="`Remover ${item.nome}`"
-                  :disabled="deletingId === item._id || !!editingId"
-                  @click="confirmDelete(item)"
-                >
-                  <BaseIcon name="trash" aria-hidden="true" />
-                </button>
-              </div>
-            </template>
-          </div>
-        </div>
-      </TransitionGroup>
+      <ul v-else ref="list" class="entity-items" :aria-label="title">
+        <li v-for="item in pageItems" :key="item._id" class="entity-row panel-row" tabindex="-1" data-list-item>
+          <form v-if="editingId === item._id" class="entity-row__edit-form" @submit.prevent="handleUpdate">
+            <AppField
+              :id="`edit-${item._id}`"
+              v-model="editingName"
+              trim
+              hide-label
+              class="entity-row__edit-field"
+              :label="`Novo nome de ${item.nome}`"
+              :disabled="isUpdating"
+              :maxlength="60"
+              autocomplete="off"
+              @keydown.escape="cancelEdit"
+            />
+            <AppButton
+              type="submit"
+              variant="primary"
+              size="md"
+              :disabled="isUpdating || !editingName.trim() || editingName.trim() === item.nome"
+            >
+              Salvar<span class="visually-hidden">{{ ' ' }}o novo nome de {{ item.nome }}</span>
+            </AppButton>
+            <AppButton size="md" :disabled="isUpdating" @click="cancelEdit">Cancelar</AppButton>
+          </form>
 
-      <p v-if="filteredItems.length === 0 && searchQuery" class="entity-empty">
-        Nenhum resultado para "{{ searchQuery }}".
-      </p>
+          <template v-else>
+            <span class="entity-row__name">{{ item.nome }}</span>
+            <div class="entity-row__actions">
+              <AppButton v-if="canEdit" size="md" :disabled="!!editingId" @click="startEdit(item)">
+                <BaseIcon name="pencil" aria-hidden="true" />
+                Editar<span class="visually-hidden">{{ ' ' }}{{ item.nome }}</span>
+              </AppButton>
+              <AppButton v-if="canDelete" size="md" :disabled="!!editingId" @click="confirmDelete(item)">
+                <BaseIcon name="trash" aria-hidden="true" />
+                Remover<span class="visually-hidden">{{ ' ' }}{{ item.nome }}</span>
+              </AppButton>
+            </div>
+          </template>
+        </li>
+      </ul>
 
-      <!-- Pagination -->
-      <PaginationNav ref="paginationNav" :items="filteredItems" />
+      <ListFooter
+        v-if="filteredItems.length"
+        :shown="pageItems.length"
+        :total="filteredItems.length"
+        :next-batch="nextBatch"
+        @more="more(list)"
+      />
     </template>
 
-    <!-- Delete confirmation -->
     <ConfirmModal
       v-model="deleteModal.open"
-      title="Remover item"
-      :description="deleteModal.description"
+      :title="deleteModal.title"
+      :description="removeHint"
       confirm-label="Remover"
-      :danger="true"
-      :loading="!!deletingId"
+      busy-label="Removendo…"
+      :error="deleteModal.error"
+      :loading="isDeleting"
+      :return-focus="() => list?.querySelector<HTMLElement>('[data-list-item]')"
       @confirm="handleDelete"
       @cancel="deleteModal.open = false"
     />
@@ -155,39 +136,58 @@
 </template>
 
 <script lang="ts" setup>
+import { errorText } from '@/composables/apiError'
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, reactive } from 'vue'
 
-import { useEntityCrud, useErrorReporter } from '@/composables'
-import ConfirmModal from '@/components/admin/ConfirmModal.vue'
-import PaginationNav from '@/components/PaginationNav.vue'
-import type { SupportEntity } from '@/types'
+import { useApi, useEntityCrud, useErrorReporter, useToast } from '@/composables'
+import { counted } from '@/data/words'
+import { useLoadMore } from '@/composables/useLoadMore'
+import { useBooksStore, usePermissionsStore } from '@/stores'
+import AppButton from '@/components/AppButton.vue'
+import AppField from '@/components/AppField.vue'
+import EmptyState from '@/components/EmptyState.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
+import AppNotice from '@/components/AppNotice.vue'
+import ListFooter from '@/components/ListFooter.vue'
+import type { SupportEntity, TabConfig } from '@/types'
 
 const props = defineProps<{
-  resource: string
+  resource: TabConfig['resource']
   title: string
+  singular: string
   description?: string
 }>()
 
 const crud = useEntityCrud({ resource: props.resource })
+const toast = useToast()
+const permissions = usePermissionsStore()
 
-const inputRef = ref<HTMLInputElement | null>(null)
-const editInputRef = ref<HTMLInputElement | null>(null)
-const paginationNav = ref<InstanceType<typeof PaginationNav> | null>(null)
+// The server decides; this only hides what it would refuse for this level (users/me).
+const canCreate = computed(() => permissions.can(props.resource, 'create'))
+const canEdit = computed(() => permissions.can(props.resource, 'update'))
+const canDelete = computed(() => permissions.can(props.resource, 'delete'))
+
+const list = ref<HTMLElement | null>(null)
 const isFormOpen = ref(false)
 const isCreating = ref(false)
 const isUpdating = ref(false)
+const isDeleting = ref(false)
 const editingId = ref<string | null>(null)
 const editingName = ref('')
-const deletingId = ref<string | null>(null)
 const newName = ref('')
 const searchQuery = ref('')
-const feedback = ref('')
-const feedbackType = ref<'success' | 'error'>('success')
+// Stays until the next action: an error that vanishes on a timer can be missed.
+const actionError = ref('')
 
-const deleteModal = reactive({
-  open: false,
-  description: '',
-  targetId: '',
+const deleteModal = reactive({ open: false, title: '', error: '', targetId: '', usage: 0 })
+
+// The API refuses to remove an author, format or genre in use; a subgenre it removes without that check.
+const removeHint = computed(() => {
+  if (props.resource !== 'subgeneros') return `Só dá pra remover se nenhum livro usar este ${props.singular}.`
+  // A subgenre is only a tag: removing it is allowed, but the person hears how many books lose it (dono).
+  if (!deleteModal.usage) return 'Nenhum livro usa este subgênero. Não dá pra desfazer.'
+  return `Está em ${counted(deleteModal.usage, 'livro', 'livros')}, que perdem este subgênero. Não dá pra desfazer.`
 })
 
 const filteredItems = computed(() => {
@@ -196,16 +196,23 @@ const filteredItems = computed(() => {
   return crud.items.value.filter((item) => item.nome.toLowerCase().includes(q))
 })
 
-const paginatedEntities = computed(() => {
-  return (paginationNav.value?.paginatedItems ?? []) as SupportEntity[]
+const { visible: pageItems, nextBatch, more, reset } = useLoadMore(filteredItems, { name: `painel-${props.resource}` })
+// The search is not in the URL, so a new term starts the list from the top here.
+watch(searchQuery, () => reset())
+
+const focusField = async (id: string) => {
+  await nextTick()
+  document.getElementById(id)?.focus()
+}
+
+watch(isFormOpen, (open) => {
+  if (open) focusField(`new-${props.resource}`)
 })
 
-watch(isFormOpen, async (open) => {
-  if (open) {
-    await nextTick()
-    inputRef.value?.focus()
-  }
-})
+const closeForm = () => {
+  isFormOpen.value = false
+  newName.value = ''
+}
 
 const onDocumentClick = (e: MouseEvent) => {
   if (!editingId.value) return
@@ -232,36 +239,29 @@ onBeforeUnmount(() => {
   if (clickOutsideTimer) clearTimeout(clickOutsideTimer)
 })
 
-const showFeedback = (message: string, type: 'success' | 'error') => {
-  feedback.value = message
-  feedbackType.value = type
-  setTimeout(() => {
-    feedback.value = ''
-  }, 4000)
-}
-
 const handleCreate = async () => {
-  if (newName.value.length < 2) return
+  const name = newName.value.trim()
+  if (!name) return
   isCreating.value = true
+  actionError.value = ''
 
   try {
-    const created = await crud.create(newName.value)
+    const created = await crud.create(name)
     newName.value = ''
-    showFeedback(`"${created.nome}" criado com sucesso.`, 'success')
+    toast.show(`"${created.nome}" adicionado.`)
   } catch (e) {
-    showFeedback(e instanceof Error ? e.message : 'Não deu pra criar. Tente de novo.', 'error')
+    actionError.value = errorText(e, `Não deu pra adicionar o ${props.singular}. Tente de novo.`)
     useErrorReporter().captureException(e, { context: 'EntityTab.createItem' })
   } finally {
     isCreating.value = false
   }
 }
 
-const startEdit = async (item: SupportEntity) => {
+const startEdit = (item: SupportEntity) => {
+  actionError.value = ''
   editingId.value = item._id
   editingName.value = item.nome
-  await nextTick()
-  const el = Array.isArray(editInputRef.value) ? editInputRef.value[0] : editInputRef.value
-  el?.focus()
+  focusField(`edit-${item._id}`)
 }
 
 const cancelEdit = () => {
@@ -270,41 +270,53 @@ const cancelEdit = () => {
 }
 
 const handleUpdate = async () => {
-  if (!editingId.value || editingName.value.length < 2) return
+  const name = editingName.value.trim()
+  if (!editingId.value || !name) return
   isUpdating.value = true
+  actionError.value = ''
 
   try {
-    const updated = await crud.update(editingId.value, editingName.value)
-    showFeedback(`Renomeado para "${updated.nome}".`, 'success')
+    const updated = await crud.update(editingId.value, name)
+    toast.show(`Renomeado para "${updated.nome}".`)
     cancelEdit()
   } catch (e) {
-    showFeedback(e instanceof Error ? e.message : 'Não deu pra salvar. Tente de novo.', 'error')
+    actionError.value = errorText(e, `Não deu pra renomear o ${props.singular}. Tente de novo.`)
     useErrorReporter().captureException(e, { context: 'EntityTab.updateItem' })
   } finally {
     isUpdating.value = false
   }
 }
 
-const confirmDelete = (item: SupportEntity) => {
-  deleteModal.open = true
-  deleteModal.description = `Remover "${item.nome}"? Itens em uso por livros existentes não podem ser removidos.`
-  deleteModal.targetId = item._id
+const booksUsing = async (name: string) => {
+  const store = useBooksStore()
+  if (!store.books.length) await useApi().fetchBooks()
+  return store.books.filter((book) => (book.subgenerosArr ?? []).includes(name.toLowerCase())).length
 }
 
+const confirmDelete = async (item: SupportEntity) => {
+  actionError.value = ''
+  deleteModal.usage = props.resource === 'subgeneros' ? await booksUsing(item.nome) : 0
+  deleteModal.title = `Remover "${item.nome}"?`
+  deleteModal.error = ''
+  deleteModal.targetId = item._id
+  deleteModal.open = true
+}
+
+// A refused removal (in use) stays in the dialog, where the admin acted.
 const handleDelete = async () => {
-  const id = deleteModal.targetId
-  deletingId.value = id
+  const removed = crud.items.value.find((item) => item._id === deleteModal.targetId)
+  isDeleting.value = true
+  deleteModal.error = ''
 
   try {
-    await crud.remove(id)
+    await crud.remove(deleteModal.targetId)
     deleteModal.open = false
-    showFeedback('Item removido.', 'success')
+    toast.show(`"${removed?.nome}" removido.`)
   } catch (e) {
-    deleteModal.open = false
-    showFeedback(e instanceof Error ? e.message : 'Não deu pra remover. Tente de novo.', 'error')
+    deleteModal.error = errorText(e, `Não deu pra remover o ${props.singular}. Tente de novo.`)
     useErrorReporter().captureException(e, { context: 'EntityTab.deleteItem' })
   } finally {
-    deletingId.value = null
+    isDeleting.value = false
   }
 }
 
@@ -313,408 +325,115 @@ onMounted(() => crud.fetchAll())
 
 <style lang="scss" scoped>
 .entity-tab {
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--border-radius-default);
-  background: var(--color-surface-default);
   overflow: hidden;
 
   &__header {
     display: flex;
-    align-items: flex-start;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem 1.25rem;
+    gap: var(--space-3) var(--space-4);
+    padding: var(--space-3) var(--space-4);
     border-bottom: 1px solid var(--color-border-default);
-    background: var(--color-background-subtle);
-  }
-
-  &__title {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-text-default);
   }
 
   &__desc {
-    margin: 0.25rem 0 0;
-    font-size: 0.82rem;
-    color: var(--color-text-subtle);
-    line-height: 1.4;
-  }
-
-  &__add-btn {
-    border: none;
-    border-radius: var(--border-radius-sm);
-    min-height: 36px;
-    padding: 0 0.75rem;
-    font-family: var(--font-family-body);
-    font-size: 0.82rem;
-    font-weight: 500;
-    cursor: pointer;
-    background: var(--color-action-default);
-    color: #fff;
-    flex-shrink: 0;
-    transition: opacity var(--motion-transition-default);
-
-    &:hover:not(:disabled) {
-      opacity: 0.85;
-    }
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    margin: 0;
+    font-size: var(--font-size-ui);
+    color: var(--color-text-secondary);
   }
 }
 
 .entity-form {
   display: flex;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4);
   border-bottom: 1px solid var(--color-border-default);
-  background: var(--color-action-background-subtle);
+  background: var(--color-background-subtle);
 
-  &__input {
-    flex: 1;
-    min-height: 40px;
-    padding: 0 0.75rem;
-    border: 1.5px solid var(--color-border-default);
-    border-radius: var(--border-radius-sm);
-    background: var(--color-surface-default);
-    font-family: var(--font-family-body);
-    font-size: 0.9rem;
-    color: var(--color-text-default);
-    outline: none;
-    transition:
-      border-color var(--motion-transition-default),
-      box-shadow var(--motion-transition-default);
-
-    &:focus {
-      border-color: var(--color-action-default);
-      box-shadow: 0 0 0 3px var(--color-action-background-subtle);
-    }
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+  &__field {
+    flex: 1 1 var(--field-basis);
   }
 
-  &__submit {
-    min-height: 40px;
-    padding: 0 1rem;
-    border: none;
-    border-radius: var(--border-radius-sm);
-    background: var(--color-action-default);
-    color: #fff;
-    font-family: var(--font-family-body);
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: opacity var(--motion-transition-default);
-
-    &:hover:not(:disabled) {
-      opacity: 0.85;
-    }
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+  &__actions {
+    display: flex;
+    gap: var(--space-2);
   }
 }
 
-.entity-feedback {
-  margin: 0;
-  padding: 0.5rem 1.25rem;
-  font-size: 0.82rem;
-  border-bottom: 1px solid var(--color-border-default);
-
-  &--success {
-    color: #2e7d32;
-    background: rgba(46, 125, 50, 0.06);
-  }
-  &--error {
-    color: #c0392b;
-    background: rgba(192, 57, 43, 0.06);
-  }
+.entity-notice {
+  margin: var(--space-4);
 }
 
-.entity-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 2.5rem 1.5rem;
-  text-align: center;
-  color: var(--color-text-subtle);
-
-  svg {
-    width: 28px;
-    height: 28px;
-    opacity: 0.6;
-  }
-  p {
-    margin: 0;
-    font-size: 0.9rem;
-  }
-
-  &--error {
-    color: var(--color-action-default);
-    svg {
-      opacity: 1;
-    }
-  }
-}
-
-.entity-retry {
-  border: none;
-  padding: 6px 14px;
-  min-height: 36px;
-  border-radius: var(--border-radius-sm);
-  background: var(--color-action-default);
-  color: #fff;
-  font-family: var(--font-family-body);
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: opacity var(--motion-transition-default);
-  &:hover {
-    opacity: 0.85;
-  }
-}
-
-.entity-empty {
-  margin: 0;
-  padding: 2rem 1.25rem;
-  text-align: center;
-  font-size: 0.9rem;
-  color: var(--color-text-subtle);
-}
-
-.entity-search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0.5rem 1.25rem;
-  border-bottom: 1px solid var(--color-border-default);
-
-  &__icon {
-    width: 14px;
-    height: 14px;
-    color: var(--color-text-subtle);
-    flex-shrink: 0;
-  }
-
-  &__input {
-    flex: 1;
-    border: none;
-    outline: none;
-    background: none;
-    font-family: var(--font-family-body);
-    font-size: 0.875rem;
-    color: var(--color-text-default);
-    min-height: 36px;
-    &::placeholder {
-      color: var(--color-text-subtle);
-    }
-  }
+// SearchBar is width: 100%; with side margins that overflows the card, so here the width is the block's own.
+.entity-tab .entity-search {
+  width: auto;
+  margin: var(--space-3) var(--space-4);
 }
 
 .entity-items {
-  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--color-border-default);
 }
 
 .entity-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 0.65rem 1.25rem;
-  border-bottom: 1px solid var(--color-border-default);
-  transition: background var(--motion-transition-default);
+  gap: var(--space-3);
+  min-height: var(--row-min);
+  padding-block: var(--space-1);
 
-  &--content {
-    overflow-y: auto;
-    max-height: 400px;
-  }
-
-  &:last-child {
-    border-bottom: none;
-  }
-  &:hover {
-    background: var(--color-background-subtle);
-  }
-
-  &__info {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    min-width: 0;
-    flex: 1;
-  }
   &__name {
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: var(--font-size-ui);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-default);
-    cursor: pointer;
-  }
-  &__slug {
-    font-size: 0.72rem;
-    color: var(--color-text-subtle);
-    font-family: monospace;
   }
 
-  &__actions {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    flex-shrink: 0;
-  }
-
-  &__action {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: var(--color-text-subtle);
-    flex-shrink: 0;
-    transition:
-      background var(--motion-transition-default),
-      color var(--motion-transition-default);
-
-    &:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-    }
-
-    &--edit:hover:not(:disabled) {
-      background: var(--color-action-background-subtle);
-      color: var(--color-action-default);
-    }
-
-    &--delete:hover:not(:disabled) {
-      background: rgba(192, 57, 43, 0.08);
-      color: #c0392b;
-    }
-
-    &--save {
-      color: #2e7d32;
-      &:hover:not(:disabled) {
-        background: rgba(46, 125, 50, 0.08);
-      }
-    }
-
-    &--cancel:hover:not(:disabled) {
-      background: var(--color-background-subtle);
-      color: var(--color-text-default);
-    }
-  }
-
+  &__actions,
   &__edit-form {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: var(--space-1);
+  }
+
+  &__edit-form {
     flex: 1;
-    min-width: 0;
   }
 
-  &__edit-input {
+  &__edit-field {
     flex: 1;
-    min-height: 36px;
-    padding: 0 0.65rem;
-    border: 1.5px solid var(--color-action-default);
-    border-radius: var(--border-radius-sm);
-    background: var(--color-surface-default);
-    box-shadow: 0 0 0 3px var(--color-action-background-subtle);
-    font-family: var(--font-family-body);
-    font-size: 0.9rem;
-    color: var(--color-text-default);
-    outline: none;
-    min-width: 0;
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-  }
-}
-
-// ── Transitions ───────────────────────────────────────────────────
-.slide-enter-active,
-.slide-leave-active {
-  transition: all var(--motion-transition-default);
-  overflow: hidden;
-}
-.slide-enter-from,
-.slide-leave-to {
-  opacity: 0;
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-.slide-enter-to,
-.slide-leave-from {
-  max-height: 80px;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity var(--motion-transition-default);
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.entity-item-enter-active,
-.entity-item-leave-active {
-  transition: all var(--motion-transition-default);
-}
-.entity-item-enter-from,
-.entity-item-leave-to {
-  opacity: 0;
-  transform: translateX(-8px);
-}
-
-@media (max-width: 767px) {
-  .entity-tab__header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-    padding: 0.85rem 1rem;
   }
 
-  .entity-tab__add-btn {
-    min-height: 44px;
-  }
-
-  .entity-form {
-    flex-direction: column;
-    padding: 0.75rem 1rem;
-
-    &__submit {
-      min-height: 44px;
-    }
-  }
-
-  .entity-search {
-    padding: 0.5rem 1rem;
-  }
-
-  .entity-row {
-    padding: 0.75rem 1rem;
+  // Phone: the name takes its line and the two worded actions sit under it, instead of squeezing it.
+  @media (max-width: $bp-phone-max) {
+    flex-wrap: wrap;
+    padding-block: var(--space-2);
 
     &__name {
-      word-break: break-word;
+      flex: 1 1 100%;
     }
 
-    &__action {
-      width: 36px;
-      height: 36px;
+    &__actions {
+      margin-left: auto;
     }
+  }
+}
+
+@media (max-width: $bp-phone-max) {
+  .entity-tab__header,
+  .entity-form,
+  .entity-row {
+    padding-inline: var(--space-4);
+  }
+
+  .entity-tab .entity-search,
+  .entity-notice {
+    margin-inline: var(--space-4);
   }
 }
 </style>

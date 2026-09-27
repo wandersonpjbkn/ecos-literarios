@@ -23,8 +23,8 @@ withDefaults(
 .app-check {
   position: relative;
   display: inline-flex;
-  width: 20px;
-  height: 20px;
+  width: var(--control-box);
+  height: var(--control-box);
   flex-shrink: 0;
 
   &__input {
@@ -57,13 +57,13 @@ withDefaults(
   }
 
   &__tick {
-    width: 14px;
-    height: 14px;
-    color: var(--color-surface-default);
+    width: var(--icon-xs);
+    height: var(--icon-xs);
+    color: var(--color-on-action);
     visibility: hidden;
   }
 
-  &__input:hover + &__mark {
+  &__input:hover:not(:disabled) + &__mark {
     border-color: var(--color-action-default);
   }
 
@@ -79,10 +79,25 @@ withDefaults(
   // Radio: a white dot inside the filled circle.
   &--radio &__input:checked + &__mark::after {
     content: '';
-    width: 8px;
-    height: 8px;
+    width: var(--mark);
+    height: var(--mark);
     border-radius: var(--radius-pill);
-    background: var(--color-surface-default);
+    background: var(--color-on-action);
+  }
+
+  // The disabled family of the app (BasePill): sunken grey, subtle ink, no pointer.
+  &__input:disabled {
+    cursor: not-allowed;
+  }
+
+  &__input:disabled + &__mark {
+    background: var(--color-background-subtle);
+    border-color: var(--color-border-default);
+  }
+
+  &__input:disabled:checked + &__mark {
+    background: var(--color-text-subtle);
+    border-color: var(--color-text-subtle);
   }
 
   &__input:focus-visible + &__mark {

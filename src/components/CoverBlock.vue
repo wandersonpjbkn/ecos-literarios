@@ -48,7 +48,7 @@ const badge = computed(() => (props.format && BADGED_FORMATS.includes(props.form
   position: relative;
 
   display: flex;
-  height: 206px;
+  height: var(--cover-h);
   padding: var(--space-5) var(--space-3);
   overflow: hidden;
 
@@ -60,26 +60,24 @@ const badge = computed(() => (props.format && BADGED_FORMATS.includes(props.form
   border: 1px solid var(--tint-line);
   border-radius: var(--radius-md);
 
-  @media (min-width: 768px) {
-    height: 212px;
+  @media (min-width: $bp-tablet-min) {
+    height: var(--cover-h-lg);
   }
 
   &__title {
     display: -webkit-box;
     overflow: hidden;
 
-    font: {
-      size: 0.875rem;
-      weight: 600;
-    }
-    line-height: 1.3;
+    font-size: var(--font-size-meta);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-title);
     color: var(--tint-ink);
 
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
 
-    @media (min-width: 768px) {
-      font-size: 0.9375rem;
+    @media (min-width: $bp-tablet-min) {
+      font-size: var(--font-size-ui);
     }
   }
 
@@ -87,13 +85,13 @@ const badge = computed(() => (props.format && BADGED_FORMATS.includes(props.form
     height: auto;
     aspect-ratio: 2 / 3;
 
-    @media (min-width: 768px) {
+    @media (min-width: $bp-tablet-min) {
       height: auto;
     }
   }
 
   &--page &__title {
-    font-size: 1.25rem;
+    font-size: var(--font-size-section);
     -webkit-line-clamp: 5;
   }
 
@@ -103,8 +101,8 @@ const badge = computed(() => (props.format && BADGED_FORMATS.includes(props.form
     left: 50%;
     transform: translateX(-50%);
 
-    font-size: 0.6875rem;
-    letter-spacing: 0.02em;
+    font-size: var(--font-size-micro);
+    letter-spacing: var(--letter-spacing-micro);
     color: var(--tint-ink);
     white-space: nowrap;
   }
@@ -125,11 +123,9 @@ const badge = computed(() => (props.format && BADGED_FORMATS.includes(props.form
 
     padding: var(--space-1) var(--space-2);
 
-    font: {
-      size: 0.6875rem;
-      weight: 600;
-    }
-    line-height: 1;
+    font-size: var(--font-size-micro);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-ui);
     color: var(--color-text-default);
 
     background: var(--color-surface-default);

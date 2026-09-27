@@ -4,19 +4,17 @@
     {{ loadingText }}
   </BaseSpinner>
 
-  <!-- Error -->
-  <div v-else-if="error" class="state-screen state-error" role="alert">
-    <BaseIcon name="error" aria-hidden="true" />
-    <p>{{ friendlyError }}</p>
-    <AppButton v-if="onRetry" class="retry-btn" @click="onRetry">Tentar de novo</AppButton>
-    <p v-if="errorHint" class="error-hint">{{ errorHint }}</p>
-  </div>
+  <!-- Error: the same centred message as every other screen that has nothing to show. -->
+  <EmptyState v-else-if="error" class="state-error" role="alert" title-tag="h1" :title="friendlyError" :text="errorHint || undefined">
+    <AppButton v-if="onRetry" variant="primary" @click="onRetry">Tentar de novo</AppButton>
+  </EmptyState>
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue'
 
 import AppButton from '@/components/AppButton.vue'
+import EmptyState from '@/components/EmptyState.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -25,6 +23,8 @@ const props = withDefaults(
     onRetry?: (() => void) | null
     loadingText?: string
     errorHint?: string
+    // What failed to open, in the sentence: "o catálogo", "o livro".
+    what?: string
   }>(),
   {
     loading: false,
@@ -32,39 +32,15 @@ const props = withDefaults(
     onRetry: null,
     loadingText: 'Carregando…',
     errorHint: '',
+    what: 'o catálogo',
   },
 )
 
 const friendlyError = computed(() => {
   const raw = props.error ?? ''
-  if (!raw) return 'Algo deu errado.'
-  if (/network|fetch|failed to fetch/i.test(raw)) return 'Não deu pra abrir o catálogo. Confira sua internet.'
-  if (/http 4\d\d/i.test(raw)) return 'Não deu pra abrir o catálogo.'
-  if (/http 5\d\d/i.test(raw)) return 'A plataforma está fora do ar agora. Tente daqui a pouco.'
-  if (/timeout/i.test(raw)) return 'Demorou demais pra responder. Confira sua internet.'
-  return 'Não deu pra abrir o catálogo.'
+  // Online and still no answer means the platform is down, not the reader's connection (COPY.md).
+  if (/network|fetch|failed to fetch|http 5\d\d/i.test(raw))
+    return navigator.onLine ? 'A plataforma está fora do ar agora. Tente daqui a pouco.' : 'Você está sem internet.'
+  return `Não deu pra abrir ${props.what}. Tente de novo.`
 })
 </script>
-
-<style lang="scss" scoped>
-.state-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 80px 24px;
-  color: var(--color-text-subtle);
-  text-align: center;
-
-  &.state-error {
-    color: var(--color-action-default);
-  }
-}
-
-.error-hint {
-  max-width: 440px;
-  font-size: 0.82rem;
-  color: var(--color-text-subtle);
-}
-</style>

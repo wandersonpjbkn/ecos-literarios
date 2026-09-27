@@ -4,9 +4,6 @@
 
 $config: (
   'badges': (
-      'livro': ('bg': #F4F6F8, 'ink': #47525C),
-      'manga': ('bg': #F4F6F8, 'ink': #47525C),
-      'hq':    ('bg': #F4F6F8, 'ink': #47525C),
       'tag':   ('bg': #F4F6F8, 'ink': #47525C),
     ),
 
@@ -89,6 +86,22 @@ $config: (
     --space-14: 56px;
     --space-24: 96px;
 
+    // Type scale from design/tokens/tokens.css; micro is for an isolated word only, sentences start at caption.
+    --font-size-micro: 0.6875rem;
+    --font-size-caption: 0.8125rem;
+    --font-size-meta: 0.875rem;
+    --font-size-ui: 0.9375rem;
+    --font-size-body: 1rem;
+    --font-size-body-l: 1.1875rem;
+    --font-size-section: 1.25rem;
+    --font-size-title: 1.375rem;
+    --font-size-display-m: 1.875rem;
+    --font-size-display-l: 2.375rem;
+
+    --font-weight-regular: 400;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 12px;
@@ -101,4 +114,112 @@ $config: (
     --rail-width: 96px;
     --drawer-width: 388px;
     --text-column: 760px;
+
+    // Line height by role, not by size: a 15px sentence reads at 1.5, a 15px label at 1.2 (estudo-tokens.md).
+    --line-height-display: 1.1;
+    --line-height-title: 1.25;
+    --line-height-ui: 1.2;
+    --line-height-text: 1.5;
+    --line-height-reading: 1.6;
+
+    --letter-spacing-display: -0.02em;
+    --letter-spacing-title: -0.01em;
+    --letter-spacing-micro: 0.07em;
+
+    --icon-xs: 14px;
+    --icon-sm: 16px;
+    --icon-md: 18px;
+    --icon-lg: 22px;
+    --mark: 8px;
+    --control-box: 20px;
+    --scrollbar: 6px;
+
+    --avatar-sm: 24px;
+    --avatar-md: 32px;
+    --avatar-lg: 40px;
+    --brand-mark: 40px;
+    --brand-mark-sm: 32px;
+    --spinner: 2.25rem;
+    --feature-icon: 48px;
+
+    --row-min: 56px;
+    --row-tall: 64px;
+    --rail-item: 66px;
+    --tab-item: 58px;
+    // What floats over the phone's bottom bar (toast, version notice, back to top) sits this far up.
+    --tab-bar-h: var(--tab-item);
+    --above-tab-bar: calc(var(--tab-bar-h) + var(--space-4) + env(safe-area-inset-bottom));
+
+    --cover-h: 206px;
+    --cover-h-lg: 212px;
+    --cover-column: 280px;
+    --cover-w-phone: 180px;
+    --mini-cover-w: 44px;
+    --mini-cover-h: 64px;
+
+    --page-max: 1200px;
+    --area-side: 264px;
+    --area-side-narrow: 220px;
+    --form-max: 480px;
+    --measure: 65ch;
+    --dialog-max: 420px;
+    --message-max: 380px;
+    --popover-min: 240px;
+    --tip-max: 240px;
+    --field-basis: 240px;
+    --field-basis-sm: 200px;
+    --panel-search: 360px;
+    --button-min: 88px;
+    --popover-max-h: 260px;
+    --toast-min: 280px;
+    --header-search-max: 540px;
+    // Height of the app frame around a centred screen: top bar on desktop, top and bottom bars on phones.
+    --chrome-h: 4rem;
+    --chrome-h-phone: 6rem;
+
+    --card-min: 140px;
+    --card-min-lg: 160px;
+    --shelf-min: 220px;
+    --stat-min: 160px;
+    --panel-card-min: 300px;
+    --col-sm: 60px;
+    --col-md: 90px;
+    --col-lg: 120px;
+    --col-xl: 180px;
+    --col-date: 130px;
+    // Two worded row actions (Editar + Remover) side by side; every row of a table shares it, so columns line up.
+    --col-actions: 232px;
+
+    // Loading shapes: the 3:1 field grey, so they read on any screen brightness; the shine is the sunken grey.
+    --color-skeleton: var(--color-border-strong);
+    --color-skeleton-shine: var(--color-background-subtle);
+    --skeleton-shimmer: 1.4s;
+    --skeleton-gradient: linear-gradient(
+      90deg,
+      var(--color-skeleton) 0%,
+      var(--color-skeleton-shine) 50%,
+      var(--color-skeleton) 100%
+    );
+
+    --skeleton-short: 96px;
+    --skeleton-long: 120px;
+
+    // Stacking order, lowest first: page floats, the frame, the drawer, then what must sit over it.
+    --layer-float: 30;
+    --layer-back-top: 40;
+    --layer-header: 50;
+    --layer-nav: 60;
+    --layer-skip-link: 70;
+    --layer-drawer: 100;
+    --layer-popover: 200;
+    --layer-notice: 200;
+    --layer-drawer-popover: 300;
+    --layer-modal: 500;
+
+    --focus-offset: 2px;
+    --focus-offset-tight: 1px;
+    --focus-offset-inset: -2px;
+    --underline-offset: 3px;
+    --underline-offset-dotted: 4px;
+    --motion-spin: 0.7s;
 }

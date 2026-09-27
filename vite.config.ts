@@ -97,6 +97,11 @@ export default defineConfig({
       disable: process.env.NODE_ENV !== 'production',
     }),
   ],
+  css: {
+    preprocessorOptions: {
+      scss: { additionalData: '@use "@/assets/scss/abstracts/breakpoints" as *;\n@use "@/assets/scss/abstracts/a11y" as *;\n' },
+    },
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

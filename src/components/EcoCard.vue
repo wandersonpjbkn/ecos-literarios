@@ -41,7 +41,7 @@ defineProps<{
   &__panel {
     display: flex;
     height: 100%;
-    min-height: 212px;
+    min-height: var(--cover-h-lg);
     margin: 0;
     padding: var(--space-4);
     flex-direction: column;
@@ -58,8 +58,8 @@ defineProps<{
   }
 
   &__label {
-    font-size: 0.875rem;
-    font-weight: 600;
+    font-size: var(--font-size-meta);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-subtle);
   }
 
@@ -68,8 +68,8 @@ defineProps<{
     margin: 0;
     overflow: hidden;
 
-    font-size: 1rem;
-    line-height: 1.5;
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-text);
     color: var(--color-text-default);
 
     -webkit-line-clamp: 6;
@@ -82,14 +82,14 @@ defineProps<{
     margin: auto 0 0;
     flex-direction: column;
     gap: var(--space-1);
-    line-height: 1.35;
+    line-height: var(--line-height-title);
   }
 
   &__book {
     display: -webkit-box;
     overflow: hidden;
-    font-size: 0.875rem;
-    font-weight: 600;
+    font-size: var(--font-size-meta);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-default);
 
     -webkit-line-clamp: 2;
@@ -100,14 +100,14 @@ defineProps<{
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    font-size: 0.8125rem;
+    font-size: var(--font-size-caption);
     color: var(--color-text-subtle);
   }
 
   &__avatar {
-    width: 24px;
-    height: 24px;
-    font-size: 0.75rem;
+    width: var(--avatar-sm);
+    height: var(--avatar-sm);
+    font-size: var(--font-size-micro);
   }
 }
 </style>

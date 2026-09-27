@@ -10,7 +10,7 @@
 }
 
 html {
-  font-size: 16px;
+  font-size: var(--font-size-body);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -18,9 +18,9 @@ body {
   background: var(--color-background-default);
   min-height: 100vh;
   font-family: var(--font-family-body);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: var(--color-text-default);
-  line-height: 1.6;
+  line-height: var(--line-height-reading);
 }
 
 a {
@@ -39,33 +39,88 @@ h2,
 h3,
 h4 {
   font-family: var(--font-family-display);
-  line-height: 1.2;
+  line-height: var(--line-height-title);
 }
 
 /* ── Utilities ───────────────────────────────── */
+// A title that took the focus on a new screen (useRouteFocus) is not a control: no ring around it.
+:is(h1, h2)[tabindex='-1']:focus {
+  outline: none;
+}
+
 .visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+  @include visually-hidden;
+}
+
+// Every list, table and card of the panel: the same box, and rows the same distance from its edge.
+.panel-box {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-default);
+}
+
+.panel-row {
+  padding-inline: var(--space-4);
+  border-bottom: 1px solid var(--color-border-default);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: var(--focus-offset-inset);
+  }
+}
+
+// The book cards' grid: catalog, Meus livros and the loading skeleton, so a card reads the same everywhere.
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-min), 1fr));
+  gap: var(--space-5) var(--space-3);
+
+  @media (min-width: $bp-tablet-min) {
+    grid-template-columns: repeat(auto-fill, minmax(var(--card-min-lg), 1fr));
+    gap: calc(var(--space-5) + var(--space-2)) var(--space-5);
+  }
+}
+
+// A row of chips: one line that scrolls sideways on phones, wrapping from tablet up (catalog, Meus livros, panel).
+.chip-strip {
+  display: flex;
+  // A chip reached with Tab scrolls fully into view, not cut at the edge of the strip.
+  scroll-padding-inline: var(--space-4);
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  > * {
+    flex-shrink: 0;
+  }
+
+  @media (min-width: $bp-tablet-min) {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
 }
 
 /* ── Scrollbar ───────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: var(--scrollbar);
+  height: var(--scrollbar);
 }
 ::-webkit-scrollbar-track {
   background: var(--color-background-subtle);
 }
 ::-webkit-scrollbar-thumb {
   background: var(--color-border-default);
-  border-radius: 3px;
+  border-radius: calc(var(--scrollbar) / 2);
 }
 
 /* ── Transitions de rota ─────────────────────── */
@@ -76,14 +131,4 @@ h4 {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-}
-
-.slide-up-enter-active {
-  transition:
-    opacity var(--motion-transition-default),
-    transform var(--motion-transition-default);
-}
-.slide-up-enter-from {
-  opacity: 0;
-  transform: translateY(16px);
 }

@@ -71,7 +71,8 @@ export function useAuth() {
       },
     })
 
-    if (error) throw new Error(error.message)
+    // Supabase's text is English and technical; the status is what the login screen needs.
+    if (error) throw Object.assign(new Error(error.message), { status: error.status })
   }
 
   // "platform" = valid session but the API did not answer (network or 5xx): a new link would not help.

@@ -2,11 +2,11 @@
   <dl class="facts">
     <div class="facts__item">
       <dt>Publicado em</dt>
-      <dd :class="{ 'is-missing': !book.published_year }">{{ book.published_year ?? 'não sabemos' }}</dd>
+      <dd :class="{ 'is-missing': !book.published_year }">{{ book.published_year || 'não sabemos' }}</dd>
     </div>
     <div class="facts__item">
       <dt>Páginas</dt>
-      <dd :class="{ 'is-missing': !book.page_count }">{{ book.page_count ?? 'ninguém anotou' }}</dd>
+      <dd :class="{ 'is-missing': !book.page_count }">{{ book.page_count || 'ninguém anotou' }}</dd>
     </div>
     <div v-if="book.categoria" class="facts__item">
       <dt>Gênero</dt>
@@ -15,7 +15,7 @@
       </dd>
     </div>
     <div v-if="book.midia" class="facts__item">
-      <dt>Mídia</dt>
+      <dt>Formato</dt>
       <dd>
         <RouterLink :to="catalogLink('midia', book.midia)" class="facts__link">{{ book.midia }}</RouterLink>
       </dd>
@@ -49,7 +49,7 @@ const genre = computed(() => props.book.categoria.replace(/-/g, ' '))
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
 
-  @media (min-width: 768px) {
+  @media (min-width: $bp-tablet-min) {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
@@ -57,7 +57,7 @@ const genre = computed(() => props.book.categoria.replace(/-/g, ' '))
     min-width: 0;
 
     dt {
-      font-size: 0.8125rem;
+      font-size: var(--font-size-caption);
       color: var(--color-text-subtle);
     }
 
@@ -67,12 +67,12 @@ const genre = computed(() => props.book.categoria.replace(/-/g, ' '))
       min-height: var(--touch-min);
       margin: 0;
       align-items: center;
-      font-size: 1rem;
-      font-weight: 600;
+      font-size: var(--font-size-body);
+      font-weight: var(--font-weight-semibold);
       color: var(--color-text-default);
 
       &.is-missing {
-        font-weight: 400;
+        font-weight: var(--font-weight-regular);
         color: var(--color-text-secondary);
       }
     }
@@ -84,11 +84,11 @@ const genre = computed(() => props.book.categoria.replace(/-/g, ' '))
     align-items: center;
     color: var(--color-action-default);
     text-decoration: underline;
-    text-underline-offset: 3px;
+    text-underline-offset: var(--underline-offset);
 
     &:focus-visible {
       outline: 2px solid var(--color-border-focus);
-      outline-offset: 2px;
+      outline-offset: var(--focus-offset);
       border-radius: var(--radius-sm);
     }
   }

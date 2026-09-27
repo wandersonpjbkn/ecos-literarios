@@ -40,8 +40,8 @@ const label = computed(() =>
     margin-top: var(--space-2);
     overflow: hidden;
 
-    font-size: 0.875rem;
-    line-height: 1.35;
+    font-size: var(--font-size-meta);
+    line-height: var(--line-height-title);
     color: var(--color-text-secondary);
 
     white-space: nowrap;
@@ -49,7 +49,7 @@ const label = computed(() =>
   }
 
   &__mention {
-    font-size: 0.8125rem;
+    font-size: var(--font-size-caption);
     color: var(--color-text-subtle);
   }
 }

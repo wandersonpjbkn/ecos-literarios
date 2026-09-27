@@ -1,69 +1,78 @@
-import type { RouteRecordRaw } from 'vue-router'
+import type { RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores'
 
-const editorGuard = () => {
+// Signed out goes to the login and back here; signed in without the level sees why (AdminForbidden).
+const editorGuard = (to: RouteLocationNormalized) => {
   const auth = useAuthStore()
+  if (!auth.isLoggedIn) return { name: 'auth-login', query: { voltar: to.fullPath } }
   if (!auth.isEditor) return { name: 'admin-forbidden' }
 }
 
-const adminGuard = () => {
+const adminGuard = (to: RouteLocationNormalized) => {
   const auth = useAuthStore()
+  if (!auth.isLoggedIn) return { name: 'auth-login', query: { voltar: to.fullPath } }
   if (!auth.isAdmin) return { name: 'admin-forbidden' }
 }
+
+// The one place that says a section is admin only: the guard and the panel menu both read it.
+const adminRoute = (route: RouteRecordRaw): RouteRecordRaw => ({
+  ...route,
+  beforeEnter: adminGuard,
+  meta: { ...route.meta, adminOnly: true },
+})
 
 export const routes: RouteRecordRaw[] = [
   {
     path: '/admin/forbidden',
     name: 'admin-forbidden',
     component: () => import('@/views/admin/AdminForbidden.vue'),
-    meta: { title: 'Sem permissão — Ecos Literários', pageClass: 'page-admin' },
+    meta: { title: 'Sem permissão', pageClass: 'page-admin' },
   },
   {
     path: '/admin',
-    component: () => import('@/views/admin/AdminLayout.vue'),
+    component: () => import('@/layouts/ClubPanelLayout.vue'),
     beforeEnter: editorGuard,
     redirect: { name: 'admin-books' },
+    // The panel is a tool, not part of the catalog: it brings its own bar and leaves the app's header and rail out.
+    meta: { frame: 'area' },
     children: [
       {
         path: 'livros',
         name: 'admin-books',
         component: () => import('@/views/admin/AdminBooks.vue'),
-        meta: { title: 'Livros — Painel do clube', pageClass: 'page-admin' },
+        meta: { title: 'Livros · Painel do clube', pageClass: 'page-admin' },
       },
-      {
+      adminRoute({
         path: 'membros',
         name: 'admin-members',
-        beforeEnter: adminGuard,
         component: () => import('@/views/admin/AdminMembers.vue'),
-        meta: { title: 'Membros — Painel do clube', pageClass: 'page-admin' },
-      },
-      {
+        meta: { title: 'Membros · Painel do clube', pageClass: 'page-admin' },
+      }),
+      adminRoute({
         path: 'permissoes',
         name: 'admin-permissions',
-        beforeEnter: adminGuard,
         component: () => import('@/views/admin/AdminPermissions.vue'),
-        meta: { title: 'Permissões — Painel do clube', pageClass: 'page-admin' },
-      },
+        meta: { title: 'Permissões · Painel do clube', pageClass: 'page-admin' },
+      }),
       {
         path: 'dados',
         name: 'admin-entities',
         component: () => import('@/views/admin/AdminEntities.vue'),
-        meta: { title: 'Dados — Painel do clube', pageClass: 'page-admin' },
+        meta: { title: 'Autores e gêneros · Painel do clube', pageClass: 'page-admin' },
       },
-      {
-        path: 'enriquecimento',
+      adminRoute({
+        path: 'capas',
         name: 'admin-enrichment',
-        beforeEnter: adminGuard,
+        alias: 'enriquecimento',
         component: () => import('@/views/admin/AdminEnrichment.vue'),
-        meta: { title: 'Enriquecimento — Painel do clube', pageClass: 'page-admin' },
-      },
-      {
+        meta: { title: 'Capas e sinopses · Painel do clube', pageClass: 'page-admin' },
+      }),
+      adminRoute({
         path: 'vinculos',
         name: 'admin-claims',
-        beforeEnter: adminGuard,
         component: () => import('@/views/admin/AdminClaimHistory.vue'),
-        meta: { title: 'Vínculos — Painel do clube', pageClass: 'page-admin' },
-      },
+        meta: { title: 'Histórico de vínculos · Painel do clube', pageClass: 'page-admin' },
+      }),
     ],
   },
 ]

@@ -7,7 +7,7 @@
 <script lang="ts" setup>
 import type { Component } from 'vue'
 
-export type PillTone = 'primary' | 'neutral' | 'quiet' | 'soft' | 'ghost'
+export type PillTone = 'primary' | 'neutral' | 'quiet' | 'soft' | 'outline' | 'ghost'
 
 withDefaults(
   defineProps<{
@@ -31,8 +31,8 @@ withDefaults(
   gap: var(--space-2);
 
   font-family: var(--font-family-body);
-  font-weight: 600;
-  line-height: 1.2;
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-ui);
   text-decoration: none;
   white-space: nowrap;
 
@@ -58,24 +58,24 @@ withDefaults(
   }
 
   :deep(.base-icon) {
-    width: 16px;
-    height: 16px;
+    width: var(--icon-sm);
+    height: var(--icon-sm);
   }
 
   &--md {
     min-height: var(--touch-min);
     padding: 0 var(--space-4);
-    font-size: 0.9375rem;
+    font-size: var(--font-size-ui);
   }
 
   &--lg {
     min-height: var(--touch-cta);
     padding: 0 var(--space-5);
-    font-size: 1rem;
+    font-size: var(--font-size-body);
   }
 
   &--primary:not(:disabled) {
-    color: var(--color-surface-default);
+    color: var(--color-on-action);
     background: var(--color-action-default);
 
     &:hover {
@@ -90,7 +90,7 @@ withDefaults(
 
     &:hover {
       color: var(--color-text-default);
-      border-color: var(--color-action-text-subtle);
+      border-color: var(--color-action-border-subtle);
     }
   }
 
@@ -100,16 +100,28 @@ withDefaults(
     border-color: var(--color-border-default);
 
     &:hover {
-      border-color: var(--color-action-text-subtle);
+      border-color: var(--color-action-border-subtle);
     }
   }
 
   &--soft:not(:disabled) {
     color: var(--color-action-default-hover);
     background: var(--color-action-background-subtle);
-    border-color: var(--color-action-text-subtle);
+    border-color: var(--color-action-border-subtle);
 
     &:hover {
+      border-color: var(--color-action-default);
+    }
+  }
+
+  // "De ação, contornado" (Button.md): action-soft is a selected chip's fill, never a button's.
+  &--outline:not(:disabled) {
+    color: var(--color-action-default);
+    background: var(--color-surface-default);
+    border-color: var(--color-action-border-subtle);
+
+    &:hover {
+      color: var(--color-action-default-hover);
       border-color: var(--color-action-default);
     }
   }

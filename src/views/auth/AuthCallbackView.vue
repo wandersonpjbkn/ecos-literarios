@@ -2,45 +2,42 @@
   <div class="callback-page">
     <div class="callback-card">
       <BaseSpinner v-if="status === 'loading'">
-        <p class="callback-msg">Entrando…</p>
+        <p class="callback-loading">Entrando…</p>
       </BaseSpinner>
 
-      <template v-else-if="status === 'platform'">
-        <p class="callback-title">A plataforma está fora do ar agora.</p>
-        <p class="callback-msg">
-          Seu link funcionou, só a plataforma que não respondeu. Dá pra olhar os livros enquanto isso.
-        </p>
-        <div class="callback-actions">
-          <AppButton variant="primary" @click="enter">Tentar de novo</AppButton>
-          <AppButton @click="continueWithoutAccount">Continuar sem entrar</AppButton>
-        </div>
-      </template>
+      <EmptyState
+        v-else-if="status === 'platform'"
+        title="A plataforma está fora do ar agora."
+        text="Seu link funcionou, só a plataforma que não respondeu. Dá pra olhar os livros enquanto isso."
+      >
+        <AppButton variant="primary" @click="enter">Tentar de novo</AppButton>
+        <AppButton @click="continueWithoutAccount">Continuar sem entrar</AppButton>
+      </EmptyState>
 
-      <template v-else-if="status === 'resent'">
-        <p ref="resentTitle" class="callback-title" tabindex="-1">Mandamos outro link</p>
-        <p class="callback-msg">Foi para {{ resentTo }}. Veja seu e-mail e toque no link pra entrar.</p>
-      </template>
+      <EmptyState v-else-if="status === 'resent'" ref="resentMessage" title="Enviamos outro link">
+        <template #text>Foi para <strong>{{ resentTo }}</strong>. Veja seu e-mail e toque no link pra entrar.</template>
+      </EmptyState>
 
-      <template v-else>
-        <BaseIcon name="error" class="callback-error-icon" aria-hidden="true" />
-        <p class="callback-msg callback-msg--error">Não deu pra entrar com esse link. Ele pode ter vencido.</p>
+      <EmptyState v-else title="Não deu pra entrar com esse link.">
+        <!-- The address wraps in the text; a long one inside a pill would run off a phone screen. -->
+        <template #text>
+          Ele pode ter vencido.<template v-if="lastEmail"> O link foi pedido para <strong>{{ lastEmail }}</strong>.</template>
+        </template>
         <template v-if="lastEmail">
-          <!-- The address wraps in the text; a long one inside a pill would run off a phone screen. -->
-          <p class="callback-msg">O link foi pedido para {{ lastEmail }}.</p>
-          <div class="callback-actions">
-            <AppButton variant="primary" :disabled="sending" @click="resend">Mandar outro link</AppButton>
-            <AppButton :to="{ name: 'auth-login' }">Usar outro e-mail</AppButton>
-          </div>
+          <AppButton variant="primary" :disabled="sending" @click="resend">Enviar outro link</AppButton>
+          <AppButton :to="{ name: 'auth-login' }">Usar outro e-mail</AppButton>
         </template>
         <AppButton v-else :to="{ name: 'auth-login' }" variant="primary">Pedir outro link</AppButton>
-        <p v-if="resendError" class="callback-msg" role="status">{{ resendError }}</p>
-      </template>
+      </EmptyState>
+      <AppNotice v-if="status === 'link' && resendError" :text="resendError" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import AppButton from '@/components/AppButton.vue'
+import AppNotice from '@/components/AppNotice.vue'
+import EmptyState from '@/components/EmptyState.vue'
 import { nextTick, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -57,7 +54,7 @@ const status = ref<'loading' | 'link' | 'platform' | 'resent'>('loading')
 // Expired link: resend to the e-mail that asked for it (same browser, within the hour) instead of retyping it.
 const lastEmail = ref(recallEmail())
 const resentTo = ref('')
-const resentTitle = ref<HTMLElement | null>(null)
+const resentMessage = ref<InstanceType<typeof EmptyState> | null>(null)
 const sending = ref(false)
 const resendError = ref('')
 
@@ -72,9 +69,9 @@ const resend = async () => {
     status.value = 'resent'
     // The pressed button is gone; move focus to the news so it is not lost on the page.
     await nextTick()
-    resentTitle.value?.focus()
+    resentMessage.value?.focus()
   } catch (err) {
-    resendError.value = 'Não deu pra mandar agora. Tente de novo daqui a pouco.'
+    resendError.value = 'Não deu pra enviar agora. Tente de novo daqui a pouco.'
     useErrorReporter().captureException(err, { context: 'AuthCallback.resend' })
   } finally {
     sending.value = false
@@ -107,55 +104,21 @@ onMounted(enter)
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100dvh - 4rem);
+  // The auth frame gives the whole height under its bar: the message sits in the middle of it.
+  min-height: 100%;
   background: var(--color-background-default);
-
-  @media (max-width: 767px) {
-    min-height: calc(100dvh - 6rem);
-  }
 }
 
 .callback-card {
   display: flex;
+  max-width: var(--message-max);
   flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  text-align: center;
-  padding: 2rem;
+  align-items: stretch;
 }
 
-.callback-msg {
+.callback-loading {
   margin: 0;
-  overflow-wrap: anywhere;
-  font-size: 1rem;
+  font-size: var(--font-size-body);
   color: var(--color-text-subtle);
-
-  max-width: 360px;
-  line-height: 1.5;
-
-  &--error {
-    color: var(--color-text-default);
-  }
-}
-
-.callback-error-icon {
-  width: 40px;
-  height: 40px;
-  color: var(--color-text-subtle);
-}
-
-.callback-title {
-  margin: 0;
-  max-width: 360px;
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--color-text-default);
-}
-
-.callback-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-3);
 }
 </style>

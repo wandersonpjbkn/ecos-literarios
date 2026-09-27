@@ -2,6 +2,7 @@
   <div class="list-footer">
     <p class="list-footer__count" aria-live="polite">
       <template v-if="shown < total">Você está vendo {{ shown }} de {{ total }}</template>
+      <template v-else-if="capped">Estes são os {{ total }} mais recentes</template>
       <template v-else-if="total === 1">Este é o único</template>
       <template v-else>Estes são todos os {{ total }}</template>
     </p>
@@ -17,6 +18,8 @@ defineProps<{
   shown: number
   total: number
   nextBatch: number
+  // The server sent only the most recent part of the list, so "todos" would not be true.
+  capped?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -33,14 +36,14 @@ const emit = defineEmits<{
   padding: var(--space-10) 0 var(--space-6);
 
   &__count {
-    font-size: 0.875rem;
+    font-size: var(--font-size-meta);
     color: var(--color-text-subtle);
   }
 
   &__more {
     width: 100%;
 
-    @media (min-width: 768px) {
+    @media (min-width: $bp-tablet-min) {
       width: auto;
     }
   }

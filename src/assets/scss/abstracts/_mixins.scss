@@ -36,8 +36,11 @@
     --color-action-default: #{map.get($actions, 'primary')};
     --color-action-default-hover: #{map.get($actions, 'primary-hover')};
     --color-action-background-subtle: #{map.get($actions, 'primary-light')};
-    --color-action-text-subtle: #{map.get($actions, 'primary-muted')};
+    --color-action-border-subtle: #{map.get($actions, 'primary-muted')};
     --color-action-default-rgb: #{get-rgb(map.get($actions, 'primary'))};
+    // Text and icons over an action fill, and over the dark toast.
+    --color-on-action: #{map.get($semantics, 'surface')};
+    --color-on-inverse: #{map.get($semantics, 'surface')};
 
     // Ações Secundárias
     --color-secondary-default: #{map.get($actions, 'secondary')};
@@ -53,11 +56,6 @@
     // Header e Globais
     --color-header-bg: #{map.get($config, 'header-bg')};
 
-    // Categorias
-    @each $category, $color in $categories {
-      --category-color-#{$category}: #{$color};
-    }
-
     // ── context: — (global)  ──────────────────────────────────────
     // object: shadow  ·  modifier: sm | default | lg | xl (scale)
     --shadow-sm: #{$shadow-sm};
@@ -68,11 +66,6 @@
     // object: font  ·  type: family  ·  scale: display | body
     --font-family-display: #{$font-display};
     --font-family-body: #{$font-body};
-
-    // object: border  ·  type: radius  ·  scale: sm | default | lg | xl
-    --border-radius-sm: #{$radius-sm};
-    --border-radius-default: #{$radius};
-    --border-radius-lg: #{$radius-lg};
 
     // object: motion  ·  type: transition  ·  scale: default
     --motion-transition-default: #{$transition};

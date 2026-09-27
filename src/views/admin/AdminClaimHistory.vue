@@ -1,74 +1,90 @@
 <template>
-  <div class="admin-section">
+  <div class="area-section">
     <SectionHeader title="Histórico de vínculos">
-      <span>Registro de todos os vínculos realizados pelos membros. Carregue sob demanda para auditar alterações.</span>
-      <template #actions>
-        <button class="load-btn" :disabled="loading" @click="loadHistory">
-          <span v-if="loading">Carregando…</span>
-          <span v-else>{{ history.length ? 'Recarregar' : 'Carregar histórico' }}</span>
-        </button>
+      <span>Quem vinculou a conta a um nome dos livros ou desfez o vínculo, e quantos livros isso mudou.</span>
+      <template v-if="loaded" #actions>
+        <AppButton size="md" :disabled="loading" @click="loadHistory">
+          {{ loading ? 'Atualizando…' : 'Atualizar' }}
+        </AppButton>
       </template>
     </SectionHeader>
 
-    <!-- Idle — ainda não carregou -->
-    <div v-if="!loaded && !loading" class="admin-state admin-state--idle">
-      <BaseIcon name="reload" aria-hidden="true" />
-      <p>Toque em "Carregar histórico" para ver quem vinculou qual nome.</p>
-    </div>
+    <AppNotice v-if="error" :text="error" retry @retry="loadHistory" />
 
-    <!-- Loading -->
-    <BaseSpinner v-else-if="loading" class="admin-state">
-      <p>Buscando histórico…</p>
+    <BaseSpinner v-if="loading && !loaded">
+      <p>Carregando o histórico…</p>
     </BaseSpinner>
 
-    <!-- Error -->
-    <div v-else-if="error" class="admin-state admin-state--error">
-      <BaseIcon name="error" aria-hidden="true" />
-      <p>{{ error }}</p>
-    </div>
+    <EmptyState
+      v-else-if="loaded && history.length === 0"
+      title="Ninguém vinculou um nome ainda"
+      text="Quando alguém vincula a conta ao nome que aparece nos livros, fica registrado aqui."
+    />
 
-    <!-- Empty -->
-    <p v-else-if="history.length === 0" class="admin-empty">Nenhuma alteração registrada ainda.</p>
-
-    <!-- Lista -->
-    <div v-else class="history-list">
-      <div class="history-row history-row--header">
-        <span>Membro</span>
-        <span>Ação</span>
-        <span>Nome vinculado</span>
-        <span>Livros afetados</span>
-        <span>Data</span>
+    <div v-else-if="history.length" ref="table" class="history-table panel-box" role="table" aria-label="Vínculos">
+      <div class="history-table__row history-table__row--head panel-row" role="row">
+        <span role="columnheader">Membro</span>
+        <span role="columnheader">O que fez</span>
+        <span role="columnheader">Nome</span>
+        <span role="columnheader">Livros</span>
+        <span role="columnheader">Quando</span>
       </div>
 
-      <div v-for="item in history" :key="item.id" class="history-row" :class="`is-${item.action}`">
-        <span class="history-row__email">{{ item.user_email }}</span>
-        <span class="history-row__action">
-          <span class="action-badge" :class="`action-badge--${item.action}`">
-            {{ item.action === 'claim' ? 'Vinculou' : 'Desvinculou' }}
-          </span>
+      <div
+        v-for="item in visibleHistory"
+        :key="item._id"
+        class="history-table__row panel-row"
+        role="row"
+        tabindex="-1"
+        data-list-item
+      >
+        <span role="cell" class="history-table__who">
+          <span v-if="item.user_name" class="history-table__name">{{ item.user_name }}</span>
+          <span class="history-table__email">{{ item.user_email }}</span>
         </span>
-        <span class="history-row__name">{{ item.claim_name ?? item.previous_claim_names?.join(', ') ?? '—' }}</span>
-        <span class="history-row__books">{{ item.affected_books }}</span>
-        <span class="history-row__date">{{ formatDateTime(item.performed_at) }}</span>
+        <span role="cell" data-label="O que fez">{{ item.action === 'claim' ? 'Vinculou' : 'Desfez o vínculo' }}</span>
+        <span role="cell" data-label="Nome">{{ item.claim_name || joinWords(item.previous_claim_names ?? []) || 'sem nome' }}</span>
+        <span role="cell" data-label="Livros">{{ item.affected_books }}</span>
+        <span role="cell" data-label="Quando">{{ formatDateTime(item.performed_at) }}</span>
       </div>
     </div>
+
+    <ListFooter
+      v-if="history.length"
+      :shown="visibleHistory.length"
+      :total="history.length"
+      :next-batch="nextBatch"
+      :capped="serverTotal > history.length"
+      @more="more(table)"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { toApiError } from '@/composables/apiError'
-import { ref } from 'vue'
+import { errorText } from '@/composables/apiError'
+import { onMounted, ref } from 'vue'
 
 import { useErrorReporter } from '@/composables'
-import { buildHeaders } from '@/composables/useApi'
-import SectionHeader from '@/components/admin/SectionHeader.vue'
+import { joinWords } from '@/data/words'
+import { useLoadMore } from '@/composables/useLoadMore'
+import { getClaimHistory } from '@/composables/useApi'
+import SectionHeader from '@/components/SectionHeader.vue'
+import AppButton from '@/components/AppButton.vue'
+import EmptyState from '@/components/EmptyState.vue'
+import AppNotice from '@/components/AppNotice.vue'
+import ListFooter from '@/components/ListFooter.vue'
 import type { AdminClaimHistoryEntry } from '@/types'
-import { API_BASE } from '@/data/config'
+
+// The API's ceiling for this list; older records stay in the database, and the footer says the list is the recent part.
+const HISTORY_LIMIT = 500
 
 const loading = ref(false)
 const loaded = ref(false)
 const error = ref('')
 const history = ref<AdminClaimHistoryEntry[]>([])
+const serverTotal = ref(0)
+const table = ref<HTMLElement | null>(null)
+const { visible: visibleHistory, nextBatch, more } = useLoadMore(history, { name: 'painel-vinculos' })
 
 const formatDateTime = (iso: string) =>
   new Date(iso).toLocaleString('pt-BR', {
@@ -81,220 +97,77 @@ const loadHistory = async () => {
   error.value = ''
 
   try {
-    const res = await fetch(`${API_BASE}/admin/users/claims/history?limit=50`, {
-      headers: buildHeaders(),
-    })
-
-    if (!res.ok) throw await toApiError(res, 'Não deu pra carregar o histórico. Tente de novo.')
-
-    const payload = (await res.json()) as { total: number; history: AdminClaimHistoryEntry[] }
+    const payload = await getClaimHistory(HISTORY_LIMIT)
     history.value = payload.history
+    serverTotal.value = payload.total
     loaded.value = true
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Não deu pra carregar o histórico. Tente de novo.'
+    error.value = errorText(e, 'Não deu pra carregar o histórico. Tente de novo.')
     useErrorReporter().captureException(e, { context: 'AdminClaimHistory.load' })
     console.error('[AdminClaimHistory]', e)
   } finally {
     loading.value = false
   }
 }
+
+onMounted(loadHistory)
 </script>
 
 <style lang="scss" scoped>
-.load-btn {
-  border: none;
-  border-radius: var(--border-radius-sm);
-  min-height: 40px;
-  padding: 0.5rem 0.9rem;
-  font-size: 0.88rem;
-  font-family: var(--font-family-body);
-  cursor: pointer;
-  background: var(--color-action-default);
-  color: #fff;
-  flex-shrink: 0;
-  transition: opacity var(--motion-transition-default);
+.history-table {
+  overflow: hidden;
 
-  &:disabled {
-    opacity: 0.6;
-    cursor: wait;
-  }
+  &__row {
+    display: grid;
+    grid-template-columns: minmax(var(--col-xl), 2fr) minmax(var(--col-lg), 1.2fr) minmax(var(--col-lg), 1.4fr) minmax(var(--col-sm), 0.6fr) minmax(var(--col-date), 1fr);
+    align-items: center;
+    gap: var(--space-3);
+    min-height: var(--row-min);
+    padding-block: var(--space-2);
+    font-size: var(--font-size-meta);
+    color: var(--color-text-secondary);
 
-  &:hover:not(:disabled) {
-    opacity: 0.85;
-  }
-}
-
-.admin-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 48px 24px;
-  text-align: center;
-  color: var(--color-text-subtle);
-
-  svg {
-    width: 36px;
-    height: 36px;
-    opacity: 0.5;
-  }
-
-  &--error {
-    color: var(--color-action-default);
-
-    svg {
-      opacity: 1;
+    &--head {
+      min-height: var(--touch-min);
+      background: var(--color-background-subtle);
+      font-size: var(--font-size-caption);
+      font-weight: var(--font-weight-semibold);
     }
   }
 
-  &--idle {
-    border: 1px dashed var(--color-border-default);
-    border-radius: var(--border-radius-default);
-  }
-}
-
-.admin-empty {
-  padding: 2rem;
-  text-align: center;
-  color: var(--color-text-subtle);
-  border: 1px dashed var(--color-border-default);
-  border-radius: var(--border-radius-default);
-}
-
-// ── Tabela ────────────────────────────────────────────────────────
-.history-list {
-  background: var(--color-surface-default);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--border-radius-default);
-  overflow: hidden;
-  overflow-x: auto;
-}
-
-.history-row {
-  display: grid;
-  grid-template-columns: minmax(160px, 2fr) auto minmax(120px, 1.5fr) 100px 1fr;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--color-border-default);
-  font-size: 0.875rem;
-  align-items: center;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &--header {
-    background: var(--color-background-subtle);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--color-text-subtle);
-  }
-
-  &__email {
-    color: var(--color-text-default);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  // Name over e-mail, the same pair as a row in Membros.
+  &__who {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
   }
 
   &__name {
+    font-size: var(--font-size-ui);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-default);
-    font-weight: 500;
   }
 
-  &__books {
+  &__email {
+    font-size: var(--font-size-meta);
     color: var(--color-text-subtle);
-    text-align: center;
-  }
-
-  &__date {
-    color: var(--color-text-subtle);
-    white-space: nowrap;
+    overflow-wrap: anywhere;
   }
 }
 
-.action-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
+@media (max-width: $bp-phone-max) {
+  .history-table__row {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+    padding-block: var(--space-3);
 
-  &--claim {
-    background: var(--badge-livro-background-color, #e9f2f5);
-    color: var(--badge-livro-text-color, #18576e);
-  }
-
-  &--unclaim {
-    background: var(--color-background-subtle);
-    color: var(--color-text-subtle);
-  }
-}
-
-@media (max-width: 767px) {
-  .load-btn {
-    min-height: 44px;
-    align-self: flex-start;
-  }
-
-  .history-list {
-    overflow-x: visible;
-  }
-
-  .history-row {
-    grid-template-columns: auto 1fr;
-    gap: 0.5rem 0.75rem;
-    padding: 0.75rem 0.9rem;
-
-    &--header {
+    &--head {
       display: none;
     }
 
-    &__email {
-      grid-column: 1 / -1;
-      font-weight: 600;
-      white-space: normal;
-      word-break: break-all;
-    }
-
-    &__action {
-      grid-column: 1;
-    }
-
-    &__name {
-      grid-column: 2;
-      text-align: right;
-      word-break: break-word;
-    }
-
-    &__books,
-    &__date {
-      grid-column: 1 / -1;
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.78rem;
-
-      &::before {
-        color: var(--color-text-subtle);
-        font-weight: 500;
-      }
-    }
-
-    &__books::before {
-      content: 'Livros afetados:';
-    }
-
-    &__date::before {
-      content: 'Data:';
-    }
-
-    &__books {
-      text-align: left;
+    [data-label]::before {
+      content: attr(data-label) ': ';
+      color: var(--color-text-subtle);
     }
   }
 }

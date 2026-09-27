@@ -1,11 +1,15 @@
 <template>
   <p class="fix-line">
-    <AppButton v-if="canEdit" variant="ghost" size="md" :disabled="!canWrite" @click="emit('edit')">
-      <BaseIcon name="pencil" aria-hidden="true" />
-      {{ label }}
-    </AppButton>
-    <AppButton v-else variant="ghost" size="md" :href="askLink(question)">{{ askLabel }}</AppButton>
-    <span v-if="book.origem === 'conversa'" class="fix-line__origin">Veio da conversa do grupo no WhatsApp</span>
+    <template v-if="canEdit">
+      <AppButton size="md" :disabled="!canWrite" @click="emit('edit')">
+        <BaseIcon name="pencil" aria-hidden="true" />
+        Editar
+      </AppButton>
+      <span v-if="missing.length" class="fix-line__gap">{{ gap }}</span>
+    </template>
+    <AppButton v-else variant="ghost" size="md" class="app-button--ask" :href="askLink(question)">{{
+      askLabel
+    }}</AppButton>
   </p>
 </template>
 
@@ -17,7 +21,7 @@ import type { Book } from '@/types'
 
 const props = defineProps<{
   book: Book
-  // Who may edit the book (API): the person who mentioned it, once linked, or an admin. Others ask the group.
+  // Who may edit the book (API): its owner, or whoever may edit any book. The same "Editar" as Meus livros.
   canEdit: boolean
   canWrite: boolean
   askLink: (message: string) => string
@@ -33,8 +37,6 @@ const missing = computed(() =>
 const gap = computed(() =>
   missing.value.length > 1 ? `Faltam ${missing.value.join(' e ')}.` : `Falta ${missing.value[0]}.`,
 )
-
-const label = computed(() => (missing.value.length ? `${gap.value} Você sabe?` : 'Corrigir algo neste livro'))
 
 // Readers who cannot edit are sent to WhatsApp; the label says so instead of promising an edit.
 const askLabel = computed(() =>
@@ -56,7 +58,7 @@ const question = computed(() =>
   column-gap: var(--space-3);
 
   // A question, not a label: it may wrap on phones instead of running off the screen.
-  .app-button {
+  .app-button--ask {
     margin-left: calc(-1 * var(--space-2));
     max-width: 100%;
     flex-shrink: 1;
@@ -64,9 +66,10 @@ const question = computed(() =>
     text-align: left;
   }
 
-  &__origin {
-    font-size: 0.875rem;
-    color: var(--color-text-subtle);
+  &__gap {
+    font-size: var(--font-size-ui);
+    color: var(--color-text-secondary);
   }
+
 }
 </style>

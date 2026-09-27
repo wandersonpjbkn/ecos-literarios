@@ -18,7 +18,9 @@ const router = createRouter({
   },
 })
 
-router.afterEach((to) => {
+router.afterEach((to, from) => {
+  // Same page with another query ("Ver mais", a chip, the search) is not another page view.
+  if (from.matched.length && to.path === from.path) return
   useUtils().sendGtmEvent({
     event: 'content_view',
     content_name: to.fullPath,

@@ -4,23 +4,6 @@ $shadow: 0 4px 12px rgba(6, 21, 27, 0.09);
 $shadow-lg: 0 12px 32px rgba(6, 21, 27, 0.13);
 $shadow-xl: 0 20px 48px rgba(6, 21, 27, 0.18);
 
-/** radius */
-$radius-sm: 0.25rem;
-$radius: 0.5rem;
-$radius-lg: 1rem;
-
 /** transition */
 $transition: 180ms ease;
 
-/** categories */
-$categories: (
-  'suspense': #6f42c1,
-  'terror': #3a0f1f,
-  'fantasia': #7b61ff,
-  'ficcao': #2563eb,
-  'drama': #d9485f,
-  'romance': #ff4d8d,
-  'poesia': #e6a700,
-  'nao-ficcao': #c05621,
-  'infantil': #00acc1,
-);

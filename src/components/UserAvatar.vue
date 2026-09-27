@@ -16,16 +16,16 @@ const initial = computed(() => props.alt?.trim().charAt(0).toUpperCase() || '?')
 // Neutral circle with one initial (Main): the name, not a color, identifies the person.
 .avatar {
   display: inline-flex;
-  width: 40px;
-  height: 40px;
+  width: var(--avatar-lg);
+  height: var(--avatar-lg);
   flex-shrink: 0;
 
   align-items: center;
   justify-content: center;
 
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1;
+  font-size: var(--font-size-meta);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-ui);
   color: var(--color-text-secondary);
 
   background: var(--color-background-subtle);

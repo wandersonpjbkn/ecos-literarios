@@ -1,3 +1,4 @@
+import { errorText } from '@/composables/apiError'
 import { computed, ref, watch, type Ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -60,7 +61,7 @@ export function useReading(bookId: Ref<string | undefined>) {
       store.set(bookId.value, next)
       await loadCounts()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Não deu pra salvar. Tente de novo.'
+      error.value = errorText(err, 'Não deu pra salvar. Tente de novo.')
     } finally {
       pending.value = false
     }

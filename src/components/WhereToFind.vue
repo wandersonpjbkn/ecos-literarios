@@ -69,8 +69,8 @@ const track = (origin: string) =>
 <style lang="scss" scoped>
 .where {
   &__title {
-    font-size: 0.9375rem;
-    font-weight: 700;
+    font-size: var(--font-size-ui);
+    font-weight: var(--font-weight-bold);
     color: var(--color-text-default);
   }
 
@@ -85,7 +85,7 @@ const track = (origin: string) =>
     align-items: center;
     gap: var(--space-3);
 
-    font-size: 0.9375rem;
+    font-size: var(--font-size-ui);
     color: var(--color-text-default);
     text-decoration: none;
     border-radius: var(--radius-md);
@@ -96,20 +96,20 @@ const track = (origin: string) =>
 
     &:focus-visible {
       outline: 2px solid var(--color-border-focus);
-      outline-offset: 2px;
+      outline-offset: var(--focus-offset);
     }
   }
 
   &__icon {
-    width: 18px;
-    height: 18px;
+    width: var(--icon-md);
+    height: var(--icon-md);
     flex-shrink: 0;
     color: var(--color-text-subtle);
   }
 
   &__arrow {
-    width: 14px;
-    height: 14px;
+    width: var(--icon-xs);
+    height: var(--icon-xs);
     margin-left: auto;
     color: var(--color-text-subtle);
   }

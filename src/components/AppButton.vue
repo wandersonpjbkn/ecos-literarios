@@ -20,13 +20,13 @@ import { RouterLink, type RouteLocationRaw } from 'vue-router'
 
 import BasePill, { type PillTone } from '@/components/BasePill.vue'
 
-type Variant = 'primary' | 'secondary' | 'soft' | 'ghost'
+type Variant = 'primary' | 'secondary' | 'outline' | 'ghost'
 
-// Button.md weights on the shared pill; "soft" is the action that opens more (Filtrar).
+// Button.md weights on the shared pill; "outline" is a second action on a screen that spent its primary (Filtrar).
 const TONE: Record<Variant, PillTone> = {
   primary: 'primary',
   secondary: 'neutral',
-  soft: 'soft',
+  outline: 'outline',
   ghost: 'ghost',
 }
 
@@ -53,3 +53,12 @@ const externalAttrs = computed(() =>
 // Leading space: without it a screen reader hears the label and the note as one word.
 const EXTERNAL_NOTE = ' (abre em outra aba)'
 </script>
+
+<style lang="scss" scoped>
+// Button.md: on a phone every button is at least touch-cta; chips keep touch-min (FilterChip.md).
+@media (max-width: $bp-phone-max) {
+  .app-button.pill--md {
+    min-height: var(--touch-cta);
+  }
+}
+</style>

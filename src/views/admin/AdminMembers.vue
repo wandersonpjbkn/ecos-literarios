@@ -1,66 +1,65 @@
 <template>
-  <div class="admin-section">
-    <SectionHeader title="Membros"> Quem entrou na plataforma e o que cada pessoa pode fazer. </SectionHeader>
+  <div class="area-section">
+    <SectionHeader title="Membros">{{ summary }}</SectionHeader>
 
-    <!-- Loading -->
+    <AppNotice v-if="error" :text="error" retry @retry="fetchUsers" />
+
     <BaseSpinner v-if="loading">
       <p>Carregando membros…</p>
     </BaseSpinner>
 
-    <!-- Error -->
-    <div v-else-if="error" class="admin-state admin-state--error">
-      <BaseIcon name="error" aria-hidden="true" />
-      <p>{{ error }}</p>
-      <button class="retry-btn" @click="fetchUsers">Tentar de novo</button>
-    </div>
+    <EmptyState
+      v-else-if="!error && users.length === 0"
+      title="Ninguém entrou ainda"
+      text="Quem entra pelo link do e-mail aparece aqui, como Membro."
+    />
 
-    <!-- Lista -->
-    <div v-else class="members-list">
-      <div
-        v-for="user in users"
-        :key="user._id"
-        class="member-row"
-        :class="{ 'is-self': user._id === authStore.user?._id }"
-      >
-        <UserAvatar :alt="user.name" class="member-avatar" />
-
+    <ul v-else-if="users.length" ref="list" class="members-list panel-box">
+      <li v-for="user in visibleUsers" :key="user._id" class="member-row panel-row" tabindex="-1" data-list-item>
         <div class="member-info">
           <span class="member-name">
             {{ user.name }}
-            <span v-if="user._id === authStore.user?._id" class="member-you">você</span>
+            <AppBadge v-if="user._id === authStore.user?._id">você</AppBadge>
           </span>
           <span class="member-email">{{ user.email }}</span>
         </div>
 
-        <div class="member-meta">
-          <span class="member-since"> Desde {{ formatDate(user.created_at) }} </span>
-        </div>
+        <span class="member-since">Desde {{ formatDate(user.created_at) }}</span>
 
-        <!-- Role select -->
         <div class="member-role">
-          <select
-            class="role-select"
-            :value="user.role"
-            :disabled="user._id === authStore.user?._id"
-            :title="user._id === authStore.user?._id ? 'Você não pode mudar o seu próprio nível de permissão' : ''"
-            @change="onRoleChange(user, ($event.target as HTMLSelectElement).value)"
+          <InfoTip
+            v-if="user._id === authStore.user?._id"
+            class="member-role__self"
+            text="Só outro Administrador muda o seu nível."
           >
-            <option value="viewer">Membro</option>
-            <option value="editor">Editor</option>
-            <option value="admin">Administrador</option>
-          </select>
+            <span class="visually-hidden">Seu nível: </span>{{ roleLabel(user.role) }}
+          </InfoTip>
+          <AppSelect
+            v-else
+            :model-value="user.role"
+            :options="ROLE_OPTIONS"
+            :label="`Nível de permissão de ${user.name}`"
+            @update:model-value="onRoleChange(user, $event)"
+          />
         </div>
-      </div>
+      </li>
+    </ul>
 
-      <p v-if="users.length === 0" class="admin-empty">Nenhum membro encontrado.</p>
-    </div>
+    <ListFooter
+      v-if="users.length"
+      :shown="visibleUsers.length"
+      :total="users.length"
+      :next-batch="nextBatch"
+      @more="more(list)"
+    />
 
-    <!-- Modal de confirmação -->
     <ConfirmModal
       v-model="confirm.open"
-      title="Alterar permissão"
+      :title="confirm.title"
       :description="confirm.description"
-      confirm-label="Confirmar alteração"
+      :confirm-label="`Mudar para ${roleLabel(confirm.newRole)}`"
+      busy-label="Mudando…"
+      :error="confirm.error"
       :loading="confirm.loading"
       @confirm="applyRoleChange"
       @cancel="cancelRoleChange"
@@ -69,31 +68,53 @@
 </template>
 
 <script lang="ts" setup>
-import { toApiError } from '@/composables/apiError'
+import { errorText } from '@/composables/apiError'
 import { roleLabel } from '@/data/roles'
-import { ref, onMounted, reactive } from 'vue'
+import { computed, ref, onMounted, reactive } from 'vue'
 
 import { useAuthStore } from '@/stores'
-import { useErrorReporter } from '@/composables'
-import { buildHeaders } from '@/composables/useApi'
-import SectionHeader from '@/components/admin/SectionHeader.vue'
-import UserAvatar from '@/components/UserAvatar.vue'
-import ConfirmModal from '@/components/admin/ConfirmModal.vue'
+import { useErrorReporter, useToast } from '@/composables'
+import { getMembers, setMemberRole } from '@/composables/useApi'
+import { useLoadMore } from '@/composables/useLoadMore'
+import ListFooter from '@/components/ListFooter.vue'
+import SectionHeader from '@/components/SectionHeader.vue'
+import AppSelect from '@/components/AppSelect.vue'
+import InfoTip from '@/components/InfoTip.vue'
+import AppBadge from '@/components/AppBadge.vue'
+import EmptyState from '@/components/EmptyState.vue'
+import AppNotice from '@/components/AppNotice.vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 import type { ApiUser } from '@/types'
-import { API_BASE } from '@/data/config'
 
 const authStore = useAuthStore()
 const users = ref<ApiUser[]>([])
+const list = ref<HTMLElement | null>(null)
+const { visible: visibleUsers, nextBatch, more } = useLoadMore(users, { name: 'painel-membros' })
 const loading = ref(false)
 const error = ref('')
+
+// The select stays on the current level until the change is confirmed: it only shows what the server holds.
+const ROLE_OPTIONS: { label: string; value: ApiUser['role'] }[] = [
+  { label: roleLabel('viewer'), value: 'viewer' },
+  { label: roleLabel('editor'), value: 'editor' },
+  { label: roleLabel('admin'), value: 'admin' },
+]
+
+const summary = computed(() => {
+  const intro = 'Quem entrou na plataforma e o que cada pessoa pode fazer.'
+  const count = users.value.length
+  if (!count) return intro
+  return `${intro} ${count === 1 ? '1 pessoa entrou' : `${count} pessoas entraram`} até agora.`
+})
 
 const confirm = reactive({
   open: false,
   loading: false,
+  title: '',
   description: '',
+  error: '',
   userId: '',
   newRole: '' as ApiUser['role'],
-  previousRole: '' as ApiUser['role'],
 })
 
 const formatDate = (iso: string) => {
@@ -105,13 +126,9 @@ const fetchUsers = async () => {
   error.value = ''
 
   try {
-    const res = await fetch(`${API_BASE}/users`, {
-      headers: buildHeaders(),
-    })
-    if (!res.ok) throw await toApiError(res, 'Não deu pra carregar os membros. Tente de novo.')
-    users.value = await res.json()
+    users.value = await getMembers()
   } catch (e) {
-    error.value = 'Não deu pra carregar os membros. Tente de novo.'
+    error.value = errorText(e, 'Não deu pra carregar os membros. Tente de novo.')
     useErrorReporter().captureException(e, { context: 'AdminMembers.fetchUsers' })
     console.error('[AdminMembers]', e)
   } finally {
@@ -120,38 +137,31 @@ const fetchUsers = async () => {
 }
 
 const onRoleChange = (user: ApiUser, newRole: string) => {
-  // Reverte visualmente — o select não muda até confirmação
-  const el = document.querySelector(`[data-user-id="${user._id}"] select`) as HTMLSelectElement | null
-  if (el) el.value = user.role
-
+  if (newRole === user.role) return
   confirm.userId = user._id
   confirm.newRole = newRole as ApiUser['role']
-  confirm.previousRole = user.role
-  confirm.description = `Alterar permissão de "${user.name}" de ${roleLabel(user.role)} para ${roleLabel(newRole)}?`
+  confirm.title = `Mudar o nível de ${user.name}?`
+  confirm.description = `De ${roleLabel(user.role)} para ${roleLabel(newRole)}.`
+  confirm.error = ''
   confirm.open = true
 }
 
+// A refused change stays in the dialog, where the admin acted; confirming again retries it.
 const applyRoleChange = async () => {
   confirm.loading = true
+  confirm.error = ''
 
   try {
-    const res = await fetch(`${API_BASE}/users/${confirm.userId}/role`, {
-      method: 'PATCH',
-      headers: buildHeaders(),
-      body: JSON.stringify({ role: confirm.newRole }),
-    })
+    await setMemberRole(confirm.userId, confirm.newRole)
 
-    if (!res.ok) throw await toApiError(res, 'Não deu pra mudar a permissão. Tente de novo.', 'PATCH')
-
-    // Atualiza localmente
     const idx = users.value.findIndex((u) => u._id === confirm.userId)
     if (idx !== -1) users.value[idx]!.role = confirm.newRole
+    useToast().show(`O nível de ${users.value[idx]?.name} agora é ${roleLabel(confirm.newRole)}.`)
 
     confirm.open = false
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Não deu pra mudar a permissão. Tente de novo.'
+    confirm.error = errorText(e, 'Não deu pra mudar o nível. Tente de novo.')
     useErrorReporter().captureException(e, { context: 'AdminMembers.applyRoleChange', userId: confirm.userId })
-    confirm.open = false
   } finally {
     confirm.loading = false
   }
@@ -165,188 +175,68 @@ onMounted(fetchUsers)
 </script>
 
 <style lang="scss" scoped>
-// ── States ────────────────────────────────────────────────────────
-.admin-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 60px 24px;
-  text-align: center;
-  color: var(--color-text-subtle);
-
-  &--error {
-    color: var(--color-action-default);
-  }
-
-  svg {
-    width: 40px;
-    height: 40px;
-  }
-}
-
-.retry-btn {
-  border: none;
-  padding: 8px 16px;
-  min-height: 40px;
-  border-radius: var(--border-radius-sm);
-  background: var(--color-action-default);
-  color: var(--color-surface-default);
-  font-family: var(--font-family-body);
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: opacity var(--motion-transition-default);
-
-  &:hover {
-    opacity: 0.85;
-  }
-}
-
-// ── Lista de membros ──────────────────────────────────────────────
 .members-list {
-  background: var(--color-surface-default);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--border-radius-default);
-  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .member-row {
   display: grid;
-  grid-template-columns: 2.5rem 1fr auto auto;
+  grid-template-columns: 1fr auto minmax(var(--col-xl), auto);
   align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--color-border-default);
-  transition: background var(--motion-transition-default);
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:hover {
-    background: var(--color-background-subtle);
-  }
-
-  &.is-self {
-    background: var(--color-action-background-subtle);
-  }
-}
-
-.member-avatar {
-  width: 2.25rem !important;
-  height: 2.25rem !important;
+  gap: var(--space-4);
+  min-height: var(--row-tall);
+  padding-block: var(--space-3);
 }
 
 .member-info {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
   min-width: 0;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .member-name {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--color-text-default);
   display: flex;
   align-items: center;
-  gap: 6px;
-}
-
-.member-you {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: var(--color-action-background-subtle);
-  color: var(--color-action-default);
-}
-
-.member-email {
-  font-size: 0.82rem;
-  color: var(--color-text-subtle);
-}
-
-.member-meta {
-  text-align: right;
-}
-
-.member-since {
-  font-size: 0.78rem;
-  color: var(--color-text-subtle);
-}
-
-.role-select {
-  height: 36px;
-  padding: 0 10px;
-  border: 1.5px solid var(--color-border-default);
-  border-radius: var(--border-radius-sm);
-  background: var(--color-surface-default);
-  font-family: var(--font-family-body);
-  font-size: 0.875rem;
+  gap: var(--space-2);
+  font-size: var(--font-size-ui);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-default);
-  cursor: pointer;
-  transition: border-color var(--motion-transition-default);
-
-  &:focus {
-    outline: none;
-    border-color: var(--color-action-default);
-    box-shadow: 0 0 0 3px var(--color-action-background-subtle);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 }
 
-.admin-empty {
-  padding: 2rem;
-  text-align: center;
+.member-email,
+.member-since {
+  font-size: var(--font-size-meta);
   color: var(--color-text-subtle);
-  font-size: 0.9rem;
+  overflow-wrap: anywhere;
 }
 
-@media (max-width: 767px) {
+.member-role {
+  justify-self: end;
+
+  &__self {
+    font-size: var(--font-size-ui);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-default);
+  }
+}
+
+@media (max-width: $bp-phone-max) {
   .member-row {
-    grid-template-columns: 2rem 1fr;
-    grid-template-rows: auto auto;
-    gap: 0.5rem 0.75rem;
-    padding: 0.75rem 0.9rem;
-
-    .member-avatar {
-      grid-row: 1 / 3;
-    }
-
-    .member-info {
-      grid-column: 2;
-    }
-
-    .member-meta {
-      display: none;
-    }
-
-    .member-role {
-      grid-column: 2;
-      width: 100%;
-    }
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+    padding-block: var(--space-4);
   }
 
-  .member-name {
-    font-size: 0.9rem;
-    flex-wrap: wrap;
-  }
+  .member-role {
+    justify-self: start;
 
-  .member-email {
-    font-size: 0.78rem;
-    word-break: break-all;
-  }
-
-  .role-select {
-    width: 100%;
-    min-height: 40px;
+    :deep(.info-tip__bubble) {
+      right: auto;
+      left: 0;
+    }
   }
 }
 </style>

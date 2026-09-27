@@ -1,114 +1,97 @@
 <template>
-  <div class="profile-section">
-    <SectionHeader title="Meus livros">
-      Os livros que você mencionou, ligados ao seu nome. Dá pra corrigir título, autor, gênero, mídia, subgêneros,
-      sinopse e o que você escreveu.
-    </SectionHeader>
+  <div class="my-books">
+    <header class="my-books__head">
+      <div>
+        <h1 class="my-books__title">Meus livros</h1>
+        <p class="my-books__subtitle">Os livros que você mencionou no grupo e os que você adicionou aqui.</p>
+      </div>
+      <LiveStatus :text="announced" />
+      <p v-if="myBooks.length" class="my-books__count">
+        <strong>{{ myBooks.length }}</strong> {{ myBooks.length === 1 ? 'livro' : 'livros' }}
+      </p>
+    </header>
 
-    <!-- loading -->
-    <BaseSpinner v-if="loading">
-      <p>Carregando livros…</p>
+    <AppNotice v-if="editor.error.value" :text="editor.error.value" />
+
+    <BaseSpinner v-if="loading && !myBooks.length">
+      <p>Carregando seus livros…</p>
     </BaseSpinner>
 
-    <!-- error -->
-    <p v-else-if="fetchError" class="feedback feedback--error">{{ fetchError }}</p>
+    <AppNotice
+      v-else-if="booksStore.error && !booksStore.books.length"
+      text="Não deu pra carregar os livros. Tente de novo."
+      retry
+      @retry="useApi().fetchBooks()"
+    />
 
-    <!-- content -->
+    <EmptyState
+      v-else-if="!myBooks.length"
+      title="Nenhum livro com o seu nome ainda"
+      text="Aqui aparecem os livros que você mencionou no grupo, depois que você vincula a sua conta ao nome que aparece neles."
+    >
+      <AppButton variant="primary" :to="claimLink">Vincular meu nome</AppButton>
+    </EmptyState>
+
     <template v-else>
-      <!-- data -->
-      <div class="status-grid">
-        <article class="status-card">
-          <p class="status-card__label">Livros vinculados</p>
-          <p class="status-card__value">{{ myBooks.length }}</p>
-        </article>
-        <article class="status-card">
-          <p class="status-card__label">Com sinopse</p>
-          <p class="status-card__value">{{ withSynopsis }}</p>
-        </article>
-        <article class="status-card">
-          <p class="status-card__label">Com capa</p>
-          <p class="status-card__value">{{ withCover }}</p>
-        </article>
+      <p v-if="hasClaim === false" class="my-books__hint">
+        Faltou algum livro seu? Os livros da conversa do grupo aparecem aqui quando você vincula o seu nome.
+        <RouterLink :to="claimLink" class="my-books__hint-link">Vincular meu nome</RouterLink>
+      </p>
+
+      <div class="my-books__toolbar">
+        <div class="my-books__segments chip-strip" role="group" aria-label="Mostrar">
+          <FilterChip
+            v-for="option in SEGMENTS"
+            :key="option.value"
+            :label="option.label"
+            :count="segmentCounts[option.value]"
+            :selected="segment.value === option.value"
+            :to="segmentLink(option.value)"
+          />
+        </div>
+        <div class="my-books__controls">
+          <AppSelect v-model="sortOrder" label="Ordenar" :options="sortOptionsForMe" />
+        </div>
       </div>
 
-      <!-- Search -->
-      <div class="book-segmentation">
-        <SearchBar
-          v-if="myBooks.length !== 0"
-          v-model="searchQuery"
-          class="books-search"
-          :suggestions="searchSuggestions"
-          :total="myBooks.length"
-          :filtered="filteredBooks.length"
-          @select="onSelectSuggestion"
-        />
-      </div>
-
-      <!-- empty -->
       <EmptyState
-        v-if="myBooks.length === 0"
-        title="Nenhum livro com o seu nome ainda"
-        text="Aqui aparecem os livros que você mencionou no grupo, depois que você vincula a sua conta ao nome que aparece neles."
+        v-if="!filteredBooks.length && searchQuery"
+        :title="`Nada com &quot;${searchQuery}&quot;`"
+        text="Procuramos no título e no autor dos seus livros."
       >
-        <AppButton :to="{ name: 'profile-claim' }">Vincular meu nome</AppButton>
+        <AppButton :to="{ query: { ...route.query, busca: undefined } }">Apagar a busca</AppButton>
       </EmptyState>
 
-      <!-- list -->
-      <div v-else class="books-list">
-        <div class="books-row books-row--header" aria-hidden="true">
-          <span>Título</span>
-          <span class="hide-mobile">Autor</span>
-          <span class="hide-mobile">Categoria</span>
-          <span class="books-row__actions-col">Editar</span>
-        </div>
+      <EmptyState v-else-if="!filteredBooks.length" :title="segment.empty.title" :text="segment.empty.text">
+        <AppButton :to="segmentLink('all')">Ver todos os seus livros</AppButton>
+      </EmptyState>
 
-        <!-- content -->
-        <div class="books-row--content">
-          <div v-for="book in paginatedBooks" :key="book.id" class="books-row">
-            <span
-              class="books-row__title"
-              role="button"
-              tabindex="0"
-              @click="openEdit(book)"
-              @keydown.enter="openEdit(book)"
-            >
-              {{ book.titulo }}
-            </span>
-            <span class="books-row__field hide-mobile">{{ book.autor }}</span>
-            <span class="books-row__field hide-mobile">{{ book.categoria }}</span>
-            <div class="books-row__actions books-row__actions-col">
-              <button
-                class="row-action"
-                type="button"
-                :aria-label="`Editar ${book.titulo}`"
-                :disabled="editingLoadingId !== null"
-                @click="openEdit(book)"
-              >
-                <span v-if="editingLoadingId === book.id" class="spinner spinner--sm" aria-hidden="true" />
-                <BaseIcon v-else name="pencil" aria-hidden="true" />
-              </button>
-            </div>
+      <ul v-else ref="grid" class="my-books__grid book-grid">
+        <li v-for="book in visibleBooks" :key="book.id" class="my-book">
+          <BookCard :book="book" data-list-item />
+          <div class="my-book__foot">
+            <!-- Not disabled while loading: open() already refuses a second click, and a disabled button drops the focus. -->
+            <AppButton size="md" @click="editor.open(book.id)">
+              <BaseIcon name="pencil" aria-hidden="true" />
+              {{ editor.loadingId.value === book.id ? 'Abrindo…' : 'Editar' }}
+              <span class="visually-hidden">{{ book.titulo }}</span>
+            </AppButton>
           </div>
-        </div>
+        </li>
+      </ul>
 
-        <!-- No results -->
-        <EmptyState
-          v-if="filteredBooks.length === 0 && searchQuery"
-          :title="`Nada com &quot;${searchQuery}&quot;`"
-          text="Procuramos no título e no autor dos seus livros."
-        >
-          <AppButton @click="searchQuery = ''">Apagar a busca</AppButton>
-        </EmptyState>
-
-        <!-- Pagination -->
-        <PaginationNav ref="paginationNav" :items="filteredBooks" />
-      </div>
+      <ListFooter
+        v-if="filteredBooks.length"
+        :shown="visibleBooks.length"
+        :total="filteredBooks.length"
+        :next-batch="nextBatch"
+        @more="more(grid)"
+      />
     </template>
 
-    <!-- Book form drawer -->
     <BookFormDrawer
-      :book="editingBook"
-      :is-open="isDrawerOpen"
+      :book="editor.editingBook.value"
+      :is-open="editor.isOpen.value"
       scope="member"
       @close="editor.close"
       @saved="editor.onSaved"
@@ -117,263 +100,214 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, type RouteLocationRaw } from 'vue-router'
 
+import { rememberMyBooks, useApi, useBookEditor, useBookSort, usePageMeta } from '@/composables'
+import { getMyClaimStatus } from '@/composables/useApi'
+import { useLoadMore } from '@/composables/useLoadMore'
+import { useSegments, type SegmentOption } from '@/composables/useSegments'
 import { useAuthStore, useBooksStore } from '@/stores'
-import { useApi, useBookEditor } from '@/composables'
-import SectionHeader from '@/components/admin/SectionHeader.vue'
 import AppButton from '@/components/AppButton.vue'
+import AppNotice from '@/components/AppNotice.vue'
+import AppSelect from '@/components/AppSelect.vue'
+import BookCard from '@/components/BookCard.vue'
+import BookFormDrawer from '@/components/BookFormDrawer.vue'
 import EmptyState from '@/components/EmptyState.vue'
-import SearchBar from '@/components/SearchBar.vue'
-import PaginationNav from '@/components/PaginationNav.vue'
-import BookFormDrawer from '@/components/admin/BookFormDrawer.vue'
-import type { Book, Suggestion } from '@/types'
+import FilterChip from '@/components/FilterChip.vue'
+import LiveStatus from '@/components/LiveStatus.vue'
+import ListFooter from '@/components/ListFooter.vue'
+import type { Book } from '@/types'
 
+usePageMeta({ title: 'Meus livros', description: 'Os livros que você mencionou no grupo e os que você adicionou.' })
+
+type Segment = 'all' | 'no-cover' | 'no-synopsis'
+
+// The segment lives in the URL (FilterChip.md).
+const SEGMENTS: SegmentOption<Segment, Book>[] = [
+  { value: 'all', label: 'Todos', test: () => true, empty: { title: 'Nenhum livro com o seu nome ainda' } },
+  {
+    value: 'no-cover',
+    label: 'Sem capa',
+    query: 'sem-capa',
+    test: (b) => !b.cover_url,
+    empty: { title: 'Todos os seus livros têm capa' },
+  },
+  {
+    value: 'no-synopsis',
+    label: 'Sem sinopse',
+    query: 'sem-sinopse',
+    test: (b) => !b.synopsis,
+    empty: { title: 'Todos os seus livros têm sinopse' },
+  },
+]
+
+
+const route = useRoute()
 const authStore = useAuthStore()
 const booksStore = useBooksStore()
-
-const paginationNav = ref<InstanceType<typeof PaginationNav> | null>(null)
-
-const searchQuery = ref('')
-const loading = computed(() => booksStore.loading)
 const editor = useBookEditor()
-const { editingBook, isOpen: isDrawerOpen, loadingId: editingLoadingId, error: fetchError } = editor
+
+const claimLink: RouteLocationRaw = { name: 'account-claim' }
+const grid = ref<HTMLElement | null>(null)
+// The header search writes ?busca= here on Meus livros.
+const searchQuery = computed(() => String(route.query.busca ?? ''))
+// Only someone who has not linked a name can be missing books; after linking there is none left to claim.
+const hasClaim = ref<boolean | null>(null)
+const loading = computed(() => booksStore.loading)
 
 const myBooks = computed(() => booksStore.books.filter((b) => b.quem_user_id === authStore.user?._id))
 
-const filteredBooks = computed(() => {
-  if (!searchQuery.value.trim()) return myBooks.value
+const {
+  current: segment,
+  counts: segmentCounts,
+  link: segmentLink,
+  inCurrent: segmentBooks,
+} = useSegments(SEGMENTS, myBooks)
 
-  const q = searchQuery.value.toLowerCase()
-  return myBooks.value.filter(
-    (b) => b.titulo.toLowerCase().includes(q) || resolveName(b.autor).toLowerCase().includes(q),
-  )
+const searched = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return segmentBooks.value
+  return segmentBooks.value.filter((b) => b.titulo.toLowerCase().includes(q) || b.autor.toLowerCase().includes(q))
 })
 
-const paginatedBooks = computed(() => {
-  return (paginationNav.value?.paginatedItems ?? []) as Book[]
+// Everything here is the reader's own, so "Por quem mencionou" would sort nothing.
+const { sortOrder, sortOptions, sortedBooks: filteredBooks } = useBookSort(searched)
+const sortOptionsForMe = sortOptions.filter((option) => option.value !== 'pessoa')
+
+const { visible: visibleBooks, nextBatch, more } = useLoadMore(filteredBooks, { name: 'meus-livros' })
+
+// What a screen reader hears after a search or a chip: how many of the reader's books are on screen.
+const announced = computed(() => {
+  if (searchQuery.value && !filteredBooks.value.length) return `Nada com "${searchQuery.value}"`
+  const n = filteredBooks.value.length
+  return `${n} de ${myBooks.value.length} ${myBooks.value.length === 1 ? 'livro' : 'livros'}`
 })
 
-const withSynopsis = computed(() => myBooks.value.filter((b) => !!b.synopsis).length)
-const withCover = computed(() => myBooks.value.filter((b) => !!b.cover_url).length)
+// A book opened from here comes back here, with the same chip and search.
+watch(
+  () => route.fullPath,
+  (path) => {
+    if (route.name === 'profile-books') rememberMyBooks(path)
+  },
+  { immediate: true },
+)
 
-const resolveName = (field: string | { nome: string }): string => (typeof field === 'string' ? field : field.nome)
-
-const openEdit = (book: Book) => editor.open(book.id)
-
-// ── Autocomplete ──────────────────────────────────────────────────
-const searchSuggestions = computed(() => {
-  if (!searchQuery.value.trim() || searchQuery.value.length < 2) return []
-
-  const q = searchQuery.value.toLowerCase()
-
-  return filteredBooks.value
-    .filter((b) => b.titulo?.toLowerCase().includes(q))
-    .map((b) => ({ id: b.id, main: b.titulo, sub: b.autor }))
-    .slice(0, 8)
-})
-
-const onSelectSuggestion = (suggestion: Suggestion) => {
-  searchQuery.value = suggestion.main
-}
-
-onMounted(() => {
+onMounted(async () => {
   if (booksStore.books.length === 0) useApi().fetchBooks()
+  hasClaim.value = await getMyClaimStatus()
+    .then((status) => status.has_claim)
+    .catch(() => null)
 })
 </script>
 
 <style lang="scss" scoped>
-// ── Search ────────────────────────────────────────────────────────
-.book-segmentation {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
+.my-books {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4) var(--space-10);
 
-// ── Loading state ─────────────────────────────────────────────────
-.profile-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 48px 24px;
-  text-align: center;
-  color: var(--color-text-subtle);
-}
-
-// ── Status cards ──────────────────────────────────────────────────
-.status-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr 1fr;
-
-    .status-card:last-child {
-      grid-column: 1 / -1;
-    }
-  }
-}
-
-.status-card {
-  padding: 0.9rem;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--border-radius-default);
-  background: var(--color-surface-default);
-
-  &__label {
-    margin: 0;
-    font-size: 0.78rem;
-    color: var(--color-text-subtle);
+  @media (min-width: $bp-tablet-min) {
+    padding-top: var(--space-8);
   }
 
-  &__value {
-    margin-top: 0.25rem;
-    display: block;
-    font-size: 1.1rem;
-    color: var(--color-text-default);
-    font-weight: 600;
-
-    @media (max-width: 767px) {
-      font-size: 0.95rem;
-    }
-  }
-}
-
-// ── Empty state ───────────────────────────────────────────────────
-
-// ── Books list ────────────────────────────────────────────────────
-.books-list {
-  background: var(--color-surface-default);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--border-radius-default);
-  overflow: auto;
-  overflow-x: auto;
-}
-
-.books-row {
-  display: grid;
-  grid-template-columns: minmax(160px, 2fr) minmax(120px, 1.5fr) minmax(100px, 1fr) 60px;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--color-border-default);
-  font-size: 0.875rem;
-  align-items: center;
-  transition: background var(--motion-transition-default);
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:not(.books-row--header):hover {
-    background: var(--color-background-subtle);
-  }
-
-  &--header {
-    background: var(--color-background-subtle);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--color-text-subtle);
-    padding: 0.6rem 1rem;
-  }
-
-  &--content {
-    overflow-y: auto;
-    max-height: 400px;
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-4);
+    margin-bottom: var(--space-5);
   }
 
   &__title {
+    margin: 0;
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-title);
     color: var(--color-text-default);
-    font-weight: 500;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: color var(--motion-transition-default);
+  }
 
-    &:hover {
-      color: var(--color-action-default);
+  &__subtitle {
+    margin: var(--space-1) 0 0;
+    font-size: var(--font-size-body);
+    color: var(--color-text-secondary);
+  }
+
+  &__count {
+    margin: 0;
+    font-size: var(--font-size-body);
+    color: var(--color-text-secondary);
+
+    strong {
+      color: var(--color-text-default);
     }
   }
 
-  &__field {
-    color: var(--color-text-subtle);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  &__hint {
+    margin: 0 0 var(--space-5);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    background: var(--color-background-subtle);
+    font-size: var(--font-size-ui);
+    color: var(--color-text-secondary);
   }
 
-  &__actions {
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  &__actions-col {
-    text-align: right;
-  }
-}
-
-.row-action {
-  width: 34px;
-  height: 34px;
-  border: none;
-  background: none;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--color-text-subtle);
-  flex-shrink: 0;
-  transition:
-    background var(--motion-transition-default),
-    color var(--motion-transition-default);
-
-  &:hover:not(:disabled) {
-    background: var(--color-action-background-subtle);
+  &__hint-link {
+    display: inline-flex;
+    min-height: var(--touch-min);
+    align-items: center;
+    font-weight: var(--font-weight-semibold);
     color: var(--color-action-default);
-  }
 
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-}
-
-// ── Feedback ──────────────────────────────────────────────────────
-.feedback {
-  margin: 0.75rem 0 0;
-  font-size: 0.88rem;
-
-  &--error {
-    color: #c0392b;
-  }
-}
-
-// ── Responsive ────────────────────────────────────────────────────
-.hide-mobile {
-  @media (max-width: 600px) {
-    display: none;
-  }
-}
-
-@media (max-width: 600px) {
-  .books-row {
-    grid-template-columns: 1fr 44px;
-
-    &--header {
-      display: none;
+    &:focus-visible {
+      outline: 2px solid var(--color-border-focus);
+      outline-offset: var(--focus-offset);
     }
+  }
 
-    &__title {
-      white-space: normal;
-      word-break: break-word;
-    }
+  &__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+  }
+
+  &__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+
+  &__grid {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
+
+.my-book {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-2);
+
+  &__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-2);
+  }
+
+}
+
+@media (max-width: $bp-phone-max) {
+  .my-books__controls {
+    width: 100%;
   }
 }
 </style>

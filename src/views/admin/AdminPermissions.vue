@@ -1,83 +1,86 @@
 <template>
-  <div class="admin-section">
-    <SectionHeader title="Permissões">
-      Toque em "Editar" para mudar o que cada nível de permissão pode fazer. Nada muda até você confirmar.
-    </SectionHeader>
+  <div class="area-section">
+    <SectionHeader title="Permissões"> O que cada nível pode fazer. Nada muda até você salvar. </SectionHeader>
+
+    <AppNotice v-if="error" :text="error" retry @retry="fetchPermissions()" />
 
     <BaseSpinner v-if="loading">
       <p>Carregando permissões…</p>
     </BaseSpinner>
 
-    <div v-else-if="error" class="admin-state admin-state--error">
-      <BaseIcon name="error" aria-hidden="true" />
-      <p>{{ error }}</p>
-      <button class="retry-btn" @click="fetchPermissions">Tentar de novo</button>
-    </div>
-
-    <div v-else class="permissions-grid">
-      <div v-for="role in ROLES" :key="role" class="role-card" :class="{ 'is-editing': editingRole === role }">
-        <div class="role-card__header">
-          <div>
-            <span class="role-card__title">{{ roleLabel(role) }}</span>
-          </div>
+    <div v-else-if="permissions.length" class="permissions-grid">
+      <section
+        v-for="role in ROLES"
+        :key="role"
+        class="role-card panel-box"
+        :class="{ 'is-editing': editingRole === role }"
+        :aria-labelledby="`role-${role}`"
+        :data-role="role"
+      >
+        <header class="role-card__header">
+          <h3 :id="`role-${role}`" class="role-card__title">{{ roleLabel(role) }}</h3>
 
           <div class="role-card__actions">
-            <template v-if="editingRole !== role">
-              <button
-                class="card-btn card-btn--edit"
-                :disabled="editingRole !== null && editingRole !== role"
-                @click="startEditing(role)"
-              >
-                Editar
-              </button>
-            </template>
+            <AppButton
+              v-if="editingRole !== role"
+              size="md"
+              data-edit
+              :disabled="editingRole !== null"
+              @click="startEditing(role)"
+            >
+              Editar<span class="visually-hidden">{{ ' ' }}{{ roleLabel(role) }}</span>
+            </AppButton>
             <template v-else>
-              <button class="card-btn card-btn--cancel" @click="cancelEditing">Cancelar</button>
-              <button class="card-btn card-btn--save" :disabled="!hasPendingChanges" @click="confirm.open = true">
-                Atualizar
-              </button>
+              <AppButton size="md" @click="cancelEditing">Cancelar</AppButton>
+              <AppButton variant="primary" size="md" :disabled="!hasPendingChanges" @click="openConfirm">
+                Salvar
+              </AppButton>
             </template>
           </div>
-        </div>
+        </header>
 
         <div class="role-card__body">
-          <div v-for="resource in RESOURCES" :key="resource" class="resource-row">
-            <span class="resource-name">{{ resourceLabel(resource) }}</span>
-
-            <div class="actions-group">
-              <label
-                v-for="action in ACTIONS"
-                :key="action"
-                class="action-check"
-                :class="{
-                  'is-checked': hasActionDraft(role, resource, action),
-                  'is-editable': editingRole === role && !isLocked(role, resource, action),
-                }"
-                :title="actionLabel(action)"
-              >
-                <input
-                  type="checkbox"
-                  :checked="hasActionDraft(role, resource, action)"
-                  :disabled="editingRole !== role || isLocked(role, resource, action)"
-                  @change="toggleDraft(resource, action)"
-                />
-                <span class="action-check__box">
-                  <BaseIcon v-if="hasActionDraft(role, resource, action)" name="check" />
-                </span>
-                <span class="action-check__label">{{ actionLabel(action) }}</span>
-              </label>
-            </div>
+          <div v-for="resource in shownResources" :key="resource" class="resource-row panel-row">
+            <template v-if="editingRole === role">
+              <fieldset class="resource-row__edit">
+                <legend class="resource-row__name">{{ resourceLabel(resource) }}</legend>
+                <div class="resource-row__checks">
+                  <CheckRow
+                    v-for="action in actionsOf(resource)"
+                    :key="action"
+                    class="action-check"
+                    :label="actionLabel(action)"
+                    :checked="hasActionDraft(role, resource, action)"
+                    :disabled="action === 'read' && readLocked(resource)"
+                    @change="toggleDraft(resource, action)"
+                  />
+                </div>
+                <p v-if="readLocked(resource)" class="resource-row__note">Quem cria, edita ou remove também vê.</p>
+              </fieldset>
+            </template>
+            <template v-else>
+              <span class="resource-row__name">{{ resourceLabel(resource) }}</span>
+              <span class="resource-row__allowed" :class="{ 'is-none': allowedText(role, resource) === 'Nada' }">
+                {{ allowedText(role, resource) }}
+              </span>
+            </template>
           </div>
         </div>
-      </div>
+      </section>
     </div>
+
+    <EmptyState v-else-if="!error" title="Não deu pra ver as permissões agora">
+      <AppButton @click="fetchPermissions()">Tentar de novo</AppButton>
+    </EmptyState>
 
     <ConfirmModal
       v-model="confirm.open"
-      title="Confirmar alteração?"
-      :description="`As permissões de ${roleLabel(editingRole ?? '')} vão mudar.`"
-      confirm-label="Salvar alterações"
+      :title="`Salvar as permissões de ${roleLabel(editingRole ?? '')}?`"
+      :description="`Vale para todo mundo que é ${roleLabel(editingRole ?? '')}.`"
+      confirm-label="Salvar"
+      :error="confirm.error"
       :loading="confirm.loading"
+      :return-focus="() => editButtonOf(savedRole)"
       @confirm="applyChanges"
       @cancel="confirm.open = false"
     />
@@ -85,35 +88,55 @@
 </template>
 
 <script lang="ts" setup>
-import { toApiError } from '@/composables/apiError'
+import { errorText } from '@/composables/apiError'
 import { roleLabel } from '@/data/roles'
-import { ref, computed, onMounted, reactive } from 'vue'
+import { ref, computed, nextTick, onMounted, reactive } from 'vue'
 
-import { useErrorReporter } from '@/composables'
-import { buildHeaders } from '@/composables/useApi'
-import SectionHeader from '@/components/admin/SectionHeader.vue'
-import ConfirmModal from '@/components/admin/ConfirmModal.vue'
+import { useErrorReporter, useToast } from '@/composables'
+import { getPermissions, savePermission } from '@/composables/useApi'
+import SectionHeader from '@/components/SectionHeader.vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
+import AppButton from '@/components/AppButton.vue'
+import CheckRow from '@/components/CheckRow.vue'
+import AppNotice from '@/components/AppNotice.vue'
+import EmptyState from '@/components/EmptyState.vue'
+import { joinWords } from '@/data/words'
 import type { Role, Resource, Action, Permission } from '@/types'
-import { API_BASE } from '@/data/config'
+import { useAuthStore, usePermissionsStore } from '@/stores'
 
 const ROLES: Role[] = ['admin', 'editor', 'viewer']
 const RESOURCES: Resource[] = ['books', 'users', 'autores', 'midias', 'categorias', 'subgeneros', 'permissions']
 const ACTIONS: Action[] = ['create', 'read', 'update', 'delete']
+const WRITES: Action[] = ['create', 'update', 'delete']
 
 const resourceLabel = (r: string) =>
   ({
     books: 'Livros',
     users: 'Membros',
     autores: 'Autores',
-    midias: 'Mídias',
+    midias: 'Formatos',
     categorias: 'Gêneros',
     subgeneros: 'Subgêneros',
     permissions: 'Permissões',
   })[r] ?? r
 
-const actionLabel = (a: string) => ({ create: 'Criar', read: 'Ver', update: 'Editar', delete: 'Excluir' })[a] ?? a
+const actionLabel = (a: string) => ({ create: 'Criar', read: 'Ver', update: 'Editar', delete: 'Remover' })[a] ?? a
 
+const auth = useAuthStore()
+const permissionsStore = usePermissionsStore()
 const permissions = ref<Permission[]>([])
+// What the API's routes really obey, per resource: a box outside it would change nothing, so it is not shown.
+const configurable = ref<Partial<Record<Resource, Action[]>>>({})
+const actionsOf = (resource: Resource) => ACTIONS.filter((action) => configurable.value[resource]?.includes(action))
+const shownResources = computed(() => RESOURCES.filter((resource) => actionsOf(resource).length > 0))
+const stored = (role: Role, resource: Resource) =>
+  (permissions.value.find((p) => p.role === role && p.resource === resource)?.actions ?? []).filter((action) =>
+    actionsOf(resource).includes(action),
+  )
+
+// The level's saved rows, in the shape users/me returns, so your own screens follow the edit now.
+const matrixOf = (role: Role) =>
+  Object.fromEntries(permissions.value.filter((p) => p.role === role).map((p) => [p.resource, [...p.actions]]))
 const loading = ref(false)
 const error = ref('')
 
@@ -123,9 +146,8 @@ const draft = ref<Map<Resource, Set<Action>>>(new Map())
 const hasPendingChanges = computed(() => {
   if (!editingRole.value) return false
 
-  for (const resource of RESOURCES) {
-    const original =
-      permissions.value.find((p) => p.role === editingRole.value && p.resource === resource)?.actions ?? []
+  for (const resource of shownResources.value) {
+    const original = stored(editingRole.value, resource)
     const draftActions = [...(draft.value.get(resource) ?? [])]
 
     if (original.length !== draftActions.length) return true
@@ -135,93 +157,120 @@ const hasPendingChanges = computed(() => {
   return false
 })
 
-const hasAction = (role: Role, resource: Resource, action: Action) =>
-  permissions.value.find((p) => p.role === role && p.resource === resource)?.actions.includes(action) ?? false
+const hasAction = (role: Role, resource: Resource, action: Action) => stored(role, resource).includes(action)
 
 const hasActionDraft = (role: Role, resource: Resource, action: Action) => {
   if (editingRole.value !== role) return hasAction(role, resource, action)
   return draft.value.get(resource)?.has(action) ?? false
 }
 
-// Admin must always keep read on permissions
-const isLocked = (role: Role, resource: Resource, action: Action) =>
-  role === 'admin' && resource === 'permissions' && action === 'read'
+// Same rule as the API: creating, editing or removing brings "Ver" along, and it stays while any of them does.
+const readLocked = (resource: Resource) =>
+  actionsOf(resource).includes('read') && WRITES.some((action) => draft.value.get(resource)?.has(action))
 
-const startEditing = (role: Role) => {
+// Entering and leaving edit swaps the buttons under the focus: it moves in to the first box and back to "Editar".
+const cardOf = (role: Role | null) => document.querySelector<HTMLElement>(`[data-role="${role}"]`)
+const editButtonOf = (role: Role | null) => cardOf(role)?.querySelector<HTMLElement>('[data-edit]')
+const savedRole = ref<Role | null>(null)
+
+const startEditing = async (role: Role) => {
   editingRole.value = role
 
   const newDraft = new Map<Resource, Set<Action>>()
-  for (const resource of RESOURCES) {
-    const actions = permissions.value.find((p) => p.role === role && p.resource === resource)?.actions ?? []
-    newDraft.set(resource, new Set(actions))
-  }
+  for (const resource of shownResources.value) newDraft.set(resource, new Set(stored(role, resource)))
   draft.value = newDraft
+  await nextTick()
+  cardOf(role)?.querySelector<HTMLElement>('input:not(:disabled)')?.focus()
 }
 
-const cancelEditing = () => {
+const cancelEditing = async () => {
+  const role = editingRole.value
   editingRole.value = null
   draft.value = new Map()
+  await nextTick()
+  editButtonOf(role)?.focus()
 }
 
 const toggleDraft = (resource: Resource, action: Action) => {
   const set = draft.value.get(resource)
   if (!set) return
 
-  if (set.has(action)) set.delete(action)
-  else set.add(action)
+  if (set.has(action)) {
+    if (action === 'read' && readLocked(resource)) return
+    set.delete(action)
+  } else {
+    set.add(action)
+    if (WRITES.includes(action) && actionsOf(resource).includes('read')) set.add('read')
+  }
 
   // Force reactivity (Set is not deeply reactive)
   draft.value = new Map(draft.value)
 }
 
-const confirm = reactive({ open: false, loading: false })
+// Read mode says it in words ("Criar, ver e editar"); the boxes appear only while that level is being edited.
+const allowedText = (role: Role, resource: Resource) => {
+  const labels = actionsOf(resource).filter((action) => hasAction(role, resource, action)).map((action, i) =>
+    i === 0 ? actionLabel(action) : actionLabel(action).toLowerCase(),
+  )
+  return labels.length ? joinWords(labels) : 'Nada'
+}
 
+const confirm = reactive({ open: false, loading: false, error: '' })
+
+const openConfirm = () => {
+  confirm.error = ''
+  confirm.open = true
+}
+
+// A failed save stays in the dialog, where the admin acted; confirming again retries it.
 const applyChanges = async () => {
   if (!editingRole.value) return
   confirm.loading = true
+  confirm.error = ''
 
   const role = editingRole.value
+  savedRole.value = role
+
+  // Only what changed goes out: seven writes per save ran into the API's rate limit and saved half.
+  const changed = shownResources.value.filter((resource) => {
+    const before = stored(role, resource)
+    const after = [...(draft.value.get(resource) ?? [])]
+    return before.length !== after.length || before.some((action) => !after.includes(action))
+  })
 
   try {
-    const promises = RESOURCES.map(async (resource) => {
-      const newActions = [...(draft.value.get(resource) ?? [])]
-
-      const res = await fetch(`${API_BASE}/permissions/${role}/${resource}`, {
-        method: 'PUT',
-        headers: buildHeaders(),
-        body: JSON.stringify({ actions: newActions }),
-      })
-
-      if (!res.ok) throw await toApiError(res, 'Não deu pra salvar as permissões. Tente de novo.', 'PUT')
-
-      const perm = permissions.value.find((p) => p.role === role && p.resource === resource)
-      if (perm) perm.actions = newActions
-    })
-
-    await Promise.all(promises)
+    await Promise.all(
+      changed.map(async (resource) => {
+        const newActions = [...(draft.value.get(resource) ?? [])]
+        await savePermission(role, resource, newActions)
+        const perm = permissions.value.find((p) => p.role === role && p.resource === resource)
+        if (perm) perm.actions = newActions
+      }),
+    )
+    if (role === auth.user?.role) permissionsStore.set(matrixOf(role))
 
     confirm.open = false
     editingRole.value = null
     draft.value = new Map()
+    useToast().show(`Permissões de ${roleLabel(role)} salvas.`)
   } catch (e) {
     useErrorReporter().captureException(e, { context: 'AdminPermissions.applyChanges', role: editingRole.value })
-    error.value = e instanceof Error ? e.message : 'Não deu pra salvar as permissões. Tente de novo.'
-    confirm.open = false
+    confirm.error = errorText(e, 'Não deu pra salvar as permissões. Tente de novo.')
+    // Part of it may have been saved: the screen shows what the server holds, not what was sent.
+    await fetchPermissions(true)
   } finally {
     confirm.loading = false
   }
 }
 
-const fetchPermissions = async () => {
-  loading.value = true
+const fetchPermissions = async (quiet = false) => {
+  if (!quiet) loading.value = true
   error.value = ''
 
   try {
-    const res = await fetch(`${API_BASE}/permissions`, {
-      headers: buildHeaders(),
-    })
-    if (!res.ok) throw await toApiError(res, 'Não deu pra carregar as permissões. Tente de novo.')
-    permissions.value = await res.json()
+    const matrix = await getPermissions()
+    permissions.value = matrix.permissions
+    configurable.value = matrix.configurable
   } catch (e) {
     error.value = 'Não deu pra carregar as permissões. Tente de novo.'
     useErrorReporter().captureException(e, { context: 'AdminPermissions.fetchPermissions' })
@@ -235,264 +284,86 @@ onMounted(fetchPermissions)
 </script>
 
 <style lang="scss" scoped>
-.admin-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 60px 24px;
-  text-align: center;
-  color: var(--color-text-subtle);
-
-  &--error {
-    color: var(--color-action-default);
-  }
-
-  svg {
-    width: 40px;
-    height: 40px;
-  }
-}
-
-.retry-btn {
-  border: none;
-  padding: 8px 16px;
-  min-height: 40px;
-  border-radius: var(--border-radius-sm);
-  background: var(--color-action-default);
-  color: var(--color-surface-default);
-  font-family: var(--font-family-body);
-  font-size: 0.9rem;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.85;
-  }
-}
-
-// ── Grid ──────────────────────────────────────────────────────────
 .permissions-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-
-  @media (max-width: 1023px) {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: repeat(auto-fit, minmax(var(--panel-card-min), 1fr));
+  gap: var(--space-4);
 }
 
 .role-card {
-  background: var(--color-surface-default);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--border-radius-default);
   overflow: hidden;
-  transition:
-    border-color var(--motion-transition-default),
-    box-shadow var(--motion-transition-default);
 
   &.is-editing {
-    border-color: var(--color-action-default);
-    box-shadow: 0 0 0 3px var(--color-action-background-subtle);
+    border-color: var(--color-action-border-subtle);
   }
 
   &__header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem 1.25rem;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
     border-bottom: 1px solid var(--color-border-default);
-    background: var(--color-background-subtle);
   }
 
   &__title {
-    display: block;
-    font-size: 0.95rem;
-    font-weight: 600;
+    margin: 0;
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-default);
-    margin-bottom: 2px;
-  }
-
-  &__badge {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: var(--color-action-background-subtle);
-    color: var(--color-action-default);
   }
 
   &__actions {
     display: flex;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-
-  &__body {
-    padding: 0.5rem 0;
-  }
-}
-
-.card-btn {
-  height: 32px;
-  padding: 0 12px;
-  border-radius: var(--border-radius-sm);
-  border: none;
-  font-family: var(--font-family-body);
-  font-size: 0.82rem;
-  cursor: pointer;
-  transition:
-    opacity var(--motion-transition-default),
-    background var(--motion-transition-default);
-
-  &--edit {
-    background: var(--color-action-background-subtle);
-    color: var(--color-action-default);
-    font-weight: 500;
-
-    &:hover:not(:disabled) {
-      opacity: 0.8;
-    }
-    &:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-    }
-  }
-
-  &--cancel {
-    background: var(--color-surface-default);
-    border: 1px solid var(--color-border-default);
-    color: var(--color-text-subtle);
-
-    &:hover {
-      background: var(--color-background-subtle);
-    }
-  }
-
-  &--save {
-    background: var(--color-action-default);
-    color: var(--color-surface-default);
-    font-weight: 500;
-
-    &:hover:not(:disabled) {
-      opacity: 0.85;
-    }
-    &:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
+    gap: var(--space-2);
   }
 }
 
 .resource-row {
-  padding: 0.75rem 1.25rem;
-  border-bottom: 1px solid var(--color-border-default);
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.resource-name {
-  display: block;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--color-text-subtle);
-  margin-bottom: 0.5rem;
-}
-
-.actions-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-}
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  padding-block: var(--space-3);
 
-.action-check {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 8px;
-  border-radius: var(--border-radius-sm);
-  user-select: none;
-  cursor: default;
-  transition: background var(--motion-transition-default);
-
-  &.is-editable {
-    cursor: pointer;
-
-    &:hover {
-      background: var(--color-background-subtle);
-    }
-  }
-
-  &.is-checked {
-    background: var(--color-action-background-subtle);
-  }
-
-  input {
-    display: none;
-  }
-
-  &__box {
-    width: 16px;
-    height: 16px;
-    border: 1.5px solid var(--color-border-default);
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all var(--motion-transition-default);
-    background: var(--color-surface-default);
-
-    svg {
-      width: 10px;
-      height: 10px;
-    }
-  }
-
-  &.is-checked &__box {
-    background: var(--color-action-default);
-    border-color: var(--color-action-default);
-    color: #fff;
-  }
-
-  input:disabled ~ &__box {
-    opacity: 0.5;
-  }
-
-  &__label {
-    font-size: 0.8rem;
+  &__name {
+    padding: 0;
+    font-size: var(--font-size-ui);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-default);
   }
-}
 
-@media (max-width: 767px) {
-  .role-card {
-    &__header {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0.75rem;
-      padding: 0.85rem 1rem;
-    }
+  &__allowed {
+    font-size: var(--font-size-meta);
+    color: var(--color-text-secondary);
+    text-align: right;
 
-    &__actions {
-      width: 100%;
-      justify-content: flex-end;
+    &.is-none {
+      color: var(--color-text-subtle);
     }
   }
 
-  .card-btn {
-    height: 36px;
-    flex: 1;
+  &__note {
+    margin: var(--space-1) 0 0;
+    font-size: var(--font-size-meta);
+    color: var(--color-text-subtle);
   }
 
-  .resource-row {
-    padding: 0.75rem 1rem;
+  &__edit {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+
+  &__checks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--space-3);
+    margin-top: var(--space-1);
   }
 }
+
 </style>
