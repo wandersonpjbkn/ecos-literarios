@@ -10,11 +10,11 @@ O app tem cinco superfícies de navegação, duas interfaces de filtro e dois de
 | --- | --- | --- |
 | Catálogo | `/` | A raiz. A grade de livros abre a página; abaixo dela, na mesma rolagem, vêm as prateleiras. **Não existe uma "home" separada.** |
 | Meus livros | `/perfil/livros` | O que a pessoa mencionou e o que ela guardou. |
-| Adicionar | painel sobre o catálogo | Não é página: é um painel. Ao salvar, abre o livro recém-criado. |
+| Adicionar | `/admin/livros` | Leva quem pode criar livro (Administrador e Editor) à lista de livros do painel, onde o formulário abre na gaveta. O Membro vai para "Sem permissão", que diz por quê; quem não entrou vai para Entrar. |
 
 A conta (`/perfil/conta`, **Minha conta**) fica no avatar, no fim do trilho. Ela reúne "Você", "O que você quer ver" (a mesma preferência da gaveta), "Seu nome no grupo" e "Este aparelho", cada um com seu endereço. O antigo `/perfil/vinculos` abre direto nessa parte.
 
-O painel do clube (`/admin`) fica dentro da conta, para Administrador e Editor. Um grupo pequeno não precisa de um item de administração fixo na navegação. Do painel, "Minha conta" leva de volta.
+O painel do clube (`/admin`) é para Administrador e Editor. Eles o acham no trilho ("Painel do clube", do tablet para cima) e no pé de Minha conta; para quem não pode entrar, nenhum dos dois aparece. Do painel, "Minha conta" leva de volta.
 
 ## As três superfícies
 

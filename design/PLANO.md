@@ -62,6 +62,17 @@ Entrega: nenhum texto do produto afirmando intenção de ninguém.
 
 O painel Adicionar, as prateleiras, a nova Meus livros e a Conta entram na fatia em que fizerem mais sentido ou numa fatia final depois da 7. O que cada fatia deixa pendente se decide no começo dela, não antes.
 
+**Onde cada uma entrou (2026-09-27):**
+- **Meus livros e Conta:** fatia 7.
+- **Prateleiras:** fatia 4, ajustadas na 7; só na vista sem filtro, com a contagem da lista que abrem.
+- **Adicionar:** não virou painel sobre o catálogo. Por decisão do dono na triagem 2 da fatia 7, ele leva ao painel do clube (Membro vai para "Sem permissão"). O `IA.md` foi alinhado.
+
+**Artboards atrás do código.** Eles ficam como estão até o dono refazê-los no Claude Design:
+- `MeusLivros.html` ainda mostra a origem do livro, que saiu do app;
+- `Conta.html` ainda mostra uma página única, sem "Este aparelho" e com "Desfazer" sem confirmação;
+- `Indicar.desktop.html` ainda mostra o fluxo em duas etapas e usa "Indicar";
+- `Main.html` ainda mostra as notas antigas das prateleiras.
+
 ---
 
 ## Fora do plano, de propósito
@@ -69,5 +80,7 @@ O painel Adicionar, as prateleiras, a nova Meus livros e a Conta entram na fatia
 **Tema escuro.** Não foi desenhado. Se for preciso, é trabalho novo — não uma inversão automática destas cores.
 
 **Tablet, detalhe no celular e folha de filtro do celular.** Os artboards existem mas só foram repintados, não refeitos: ainda têm livros inventados e o cartão com título duplicado. Refaça o desenho antes de codar essas três telas.
+
+As três já foram codadas (fatias 3 a 5), a partir das regras em texto e não desses artboards. Refazer o desenho agora serve para conferir o código, não para liberar a construção.
 
 **Rotação das prateleiras.** A ideia é boa e não tem regra ainda. Prateleira que muda sozinha faz o membro procurar na semana seguinte o recorte que viu e não achar. Só entra com um critério que o recorte possa dizer em voz alta.
