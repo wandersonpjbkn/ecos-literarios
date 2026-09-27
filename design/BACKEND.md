@@ -14,6 +14,8 @@ quem_user_id?: { _id: string; name: string; avatar_url?: string }
 
 Tire o campo do tipo. Onde havia avatar, a interface mostra o **nome**, que é verdade. Se um dia houver foto, o campo volta junto com o upload que o preenche.
 
+**Feito na fatia 7:** saiu do tipo no front, do model `User` e dos dois `populate` de `/books`. Documentos antigos que ainda tenham o campo não vazam na resposta.
+
 ## 2. Preferência de formato em `users/me`
 
 A pessoa desmarca "Mangá" em **O que você quer ver** e isso vale em todos os aparelhos, sem remarcar:
@@ -26,6 +28,21 @@ PATCH /users/me       ← { hidden_midias: ["Mangá"] }
 O `PATCH /users/me` já existe no `ecos-api`, mas hoje só aceita `name` e responde 400 sem ele. A mudança é estender a rota: `hidden_midias` opcional, validado contra os formatos que existem, e `name` deixa de ser obrigatório. O campo também entra no model `User`.
 
 Até a fatia 7 a preferência fica guardada no aparelho (fatia 4); na fatia 7 ela passa a ir para `users/me`, levando junto o que já estava salvo localmente.
+
+**Como ficou (fatia 7):**
+
+```
+POST  /auth/verify   → { user: { …, hidden_midias? } }
+GET   /users/me      → { user: { …, hidden_midias? }, permissions: { books: ["create", "read", …], … } }
+PATCH /users/me      ← { name?, hidden_midias? }   → o usuário, com a lista guardada
+```
+
+- **Ausente não é vazio.** Sem `hidden_midias`, a conta nunca escolheu. `[]` quer dizer "não escondo nada", e isso também é uma escolha.
+- **Formato que não existe mais** (renomeado ou removido) é descartado, não recusado. A resposta traz a lista guardada, e o aparelho adota essa lista. Assim uma escolha antiga nunca trava a sincronia.
+- **Ao entrar,** a conta que nunca escolheu herda a escolha do aparelho; senão, a conta vale. A exceção é uma mudança feita neste aparelho que ainda não chegou à conta: ela fica guardada com a conta a que pertence e sobe primeiro. Pendência de outra conta nunca é mandada para esta.
+- **Ao sair,** a escolha fica no aparelho.
+- **Salvar:** vários cliques seguidos viram um save só, e os saves vão um de cada vez.
+- **`permissions`** é a matriz do próprio nível, lida da coleção `Permission`. O painel esconde o que o nível não pode fazer; quem decide cada pedido continua sendo o servidor.
 
 Aplicado no cliente, sobre a lista já carregada. O servidor guarda, não filtra — filtrar no servidor quebraria o cache do Pinia e obrigaria a recarregar a cada mudança de preferência.
 
@@ -48,10 +65,6 @@ GET    /books/:id/reading         → { quero_ler: N, lido: M }            (púb
 - Apagar um livro apaga as marcações dele.
 - A tela Meus livros mostrando essas listas fica para depois (tela sem fatia).
 
-## 2c. De onde veio o livro
-
-`GET /books` e `GET /books/:id` trazem `origem: "conversa" | "site"`, calculado no servidor pelo usuário da migração do CSV. A tela do livro diz "Veio da conversa do grupo no WhatsApp" só quando é verdade; o cliente não adivinha por data nem por id.
-
 ## 3. O que **não** precisa de migração
 
 Eu tinha previsto no inventário um script para tirar "Mangá" e "HQ" de `categoria`, supondo que `midia` e `categoria` estivessem brigando. **O catálogo real não tem essa colisão**: os livros usam os dois eixos direito — `midia` é Livro (67), Mangá (15) ou HQ (5), e `categoria` é um dos nove gêneros. Não rode migração nenhuma. Se aparecer um registro fora disso no futuro, é validação de entrada, não migração.
@@ -65,8 +78,8 @@ A tela de permissões continua, e é para ela existir que o painel existe: a alt
 Entrada por link mágico (Supabase), sem senha. Um link vencido é o caso normal, não uma falha do sistema (fatia 6):
 
 - O callback não sabe se o link venceu ou se é inválido, então diz "Não deu pra entrar com esse link. Ele pode ter vencido." em vez de afirmar "expirou".
-- O e-mail que pediu o link fica guardado no aparelho (`localStorage`, porque o link abre numa aba nova) por no máximo 1 hora, a validade do link. Ele é apagado quando o login dá certo ou quando o reenvio é usado. Com ele, a tela oferece **Mandar outro link para fulano@…** e **Usar outro e-mail**; sem ele, **Pedir outro link**.
-- "Mandamos outro link" só aparece depois que o reenvio foi feito de verdade. O sistema não manda sozinho.
+- O e-mail que pediu o link fica guardado no aparelho (`localStorage`, porque o link abre numa aba nova) por no máximo 1 hora, a validade do link. Ele é apagado quando o login dá certo ou quando o reenvio é usado. Com ele, a tela oferece **Enviar outro link para fulano@…** e **Usar outro e-mail**; sem ele, **Pedir outro link**.
+- "Enviamos outro link" só aparece depois que o reenvio foi feito de verdade. O sistema não envia sozinho.
 - Quando o link funcionou mas a plataforma não respondeu, o callback diz isso e não pede outro link (veja `COPY.md`).
 - Mensagens do servidor que chegam à tela seguem o `COPY.md`: sessão vencida é "Sua sessão venceu. Entre de novo.", falta de permissão é "Você não tem permissão para isso."
 

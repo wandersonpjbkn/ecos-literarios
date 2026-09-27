@@ -2,13 +2,13 @@
 
 Uma gaveta que abre **sobre** o catálogo, com véu por baixo. Não é coluna fixa: coluna fixa cobra largura da grade em toda tela para servir uma ação que acontece de vez em quando.
 
-Largura `drawer-width` (388px no desktop). No celular é uma folha que sobe de baixo, com alça e cantos arredondados, deixando o topo da página visível (como no `FilterSheet.mobile`); o botão de fechar diz "Fechar". No celular a ordenação mora dentro da folha, como primeiro grupo, porque a página mostra só a contagem, o botão Filtrar e os chips rápidos.
+Largura `drawer-width` (388px no desktop). No celular é uma folha que sobe de baixo, com alça e cantos arredondados, deixando o topo da página visível (como no `FilterSheet.mobile`); o botão de fechar diz "Fechar". A alça não é enfeite: arrastar a alça ou o cabeçalho para baixo fecha a folha, se passar de 1/4 da altura ou num peteleco. Um arrasto curto volta ao lugar, e arrastar o corpo só rola a lista. No celular a ordenação mora dentro da folha, como primeiro grupo, porque a página mostra só a contagem, o botão Filtrar e os chips rápidos.
 
 O botão do rodapé diz o resultado antes de fechar — **"Ver 25 livros"** —, então ninguém aplica um filtro e descobre o vazio depois.
 
 ## Ao vivo
 
-Não existe passo de "aplicar". Cada marcação muda a URL e a lista na hora; o botão do rodapé só fecha, e o número nele é o retorno visível enquanto a folha cobre a lista. Esc e "Fechar" mantêm o que foi marcado.
+Não existe passo de "aplicar". Cada marcação muda a URL e a lista na hora; o botão do rodapé só fecha, e o número nele é o retorno visível enquanto a folha cobre a lista. Esc, "Fechar" e o arrasto mantêm o que foi marcado.
 
 No histórico, a primeira mudança de cada abertura entra como passo novo e as seguintes substituem esse passo, então **um Voltar desfaz a visita inteira à gaveta**. Voltar com a gaveta aberta também a fecha; aberta, ela continuaria substituindo o passo para onde o Voltar levou.
 

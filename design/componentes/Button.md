@@ -2,9 +2,9 @@
 
 Quatro pesos, e a tela escolhe no máximo um primário.
 
-**Primário** — fundo `action`, texto `on-action`. É a ação que a tela existe para oferecer, e há **uma** por tela. Quando o catálogo tinha "Adicionar um livro" no topo e "Sortear" ao lado, os dois em azul cheio, o olho não sabia qual era a saída.
+**Primário** — fundo `action`, texto `on-action` (`--color-on-action` no código). É a ação que a tela existe para oferecer, e há **uma** por tela. Quando o catálogo tinha "Adicionar um livro" no topo e "Sortear" ao lado, os dois em azul cheio, o olho não sabia qual era a saída.
 
-**Secundário** — fundo `bg-surface`, borda `border-strong`, texto `ink`. A alternativa de mesmo peso semântico ("Marcar como lido" ao lado de "Guardar em Quero ler").
+**Secundário** — fundo `bg-surface`, borda `border-strong`, texto `ink-2` (`ink` ao passar o mouse). A alternativa de mesmo peso semântico ("Marcar como lido" ao lado de "Guardar em Quero ler").
 
 **De ação, contornado** — borda `action-line`, texto `action`. Uma segunda ação que ainda é ação, numa tela que já gastou o primário.
 

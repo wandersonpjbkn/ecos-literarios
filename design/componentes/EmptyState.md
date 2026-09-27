@@ -20,6 +20,16 @@ A saída é sempre um botão de verdade, nunca um conselho em texto. "Tente outr
 
 Sem ilustração e sem emoji. Texto centralizado numa coluna de no máximo 380px. Nunca vermelho: o acervo não ter resultado não é erro de ninguém.
 
+A saída em botão só falta em dois casos, e só neles:
+- quando não há ação possível (Membros sem ninguém, Histórico de vínculos vazio);
+- quando a única ação já está na tela, logo acima ("Buscar capas e dados", sobre o histórico de buscas vazio).
+
+Um botão repetido ao lado do original dá duas escolhas para uma decisão só.
+
+## Onde mais aparece
+
+É a mensagem centrada do app inteiro, não só do resultado vazio: página não encontrada, sem permissão, catálogo fora do ar (`PageStatus`), link recusado ou reenviado (callback) e "Enviamos o link" (login). O texto aceita um trecho em negrito pelo slot `text` (o e-mail), e o componente expõe `focus()` para levar o leitor de tela até a mensagem quando ela troca o que a pessoa tinha na frente.
+
 ## O que o consumidor fornece
 
 O termo ou os filtros aplicados, em texto, para o componente poder repeti-los.

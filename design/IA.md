@@ -12,7 +12,9 @@ O app tem cinco superfícies de navegação, duas interfaces de filtro e dois de
 | Meus livros | `/perfil/livros` | O que a pessoa mencionou e o que ela guardou. |
 | Adicionar | painel sobre o catálogo | Não é página: é um painel. Ao salvar, abre o livro recém-criado. |
 
-A conta (`/perfil/conta`) fica no avatar, no fim do trilho. O painel do clube (`/admin`) fica dentro da conta: um grupo pequeno não precisa de um item de administração fixo na navegação.
+A conta (`/perfil/conta`, **Minha conta**) fica no avatar, no fim do trilho. Ela reúne "Você", "O que você quer ver" (a mesma preferência da gaveta), "Seu nome no grupo" e "Este aparelho", cada um com seu endereço. O antigo `/perfil/vinculos` abre direto nessa parte.
+
+O painel do clube (`/admin`) fica dentro da conta, para Administrador e Editor. Um grupo pequeno não precisa de um item de administração fixo na navegação. Do painel, "Minha conta" leva de volta.
 
 ## As três superfícies
 
@@ -41,7 +43,7 @@ A conta (`/perfil/conta`) fica no avatar, no fim do trilho. O painel do clube (`
 
 `autor` e `subgenero` entraram depois do estudo: `/autor/:slug` precisava de destino para o redirect, e o filtro de subgênero que o app já tinha continua valendo. Os valores da query casam com o dado pelo mesmo slug que a `FilterView` usa hoje, senão `/categoria/nao-ficcao` não encontra "Não Ficção".
 
-`?midia=` convive com a preferência "O que você quer ver", guardada no aparelho: quando o link pede um formato, o link vence e a preferência não se aplica àquela vista. Link compartilhado nunca abre vazio.
+`?midia=` convive com a preferência "O que você quer ver", guardada na conta (e no aparelho, para quem não entrou): quando o link pede um formato, o link vence e a preferência não se aplica àquela vista. Link compartilhado nunca abre vazio.
 
 Motivos para ser query e não rota: o filtro é combinável (gênero + pessoa + tamanho ao mesmo tempo, o que a rota por slug nunca permitiu), continua compartilhável por URL, e some a duplicação de tela.
 
@@ -51,7 +53,7 @@ Motivos para ser query e não rota: o filtro é combinável (gênero + pessoa + 
 
 ## Rotas que ficam
 
-`/livro/:id` continua. Foi a decisão consciente: um livro tem endereço próprio, é o que se manda no WhatsApp, e o painel lateral sozinho não dava isso.
+`/livro/:id` continua. Foi a decisão consciente: um livro tem endereço próprio, é o que se envia no WhatsApp, e o painel lateral sozinho não dava isso.
 
 ## O que muda na ordenação
 

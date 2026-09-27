@@ -8,7 +8,7 @@ Não há avatar de quem mencionou. O campo `avatar_url` existe no tipo do projet
 
 ## Regras
 
-Largura da coluna pela grade (seis colunas no desktop, duas no celular), capa em 212px de altura no desktop. `space-5` de gutter horizontal, `space-5 + 10px` de vertical — a linha extra é para o texto abaixo da capa não colar na capa de baixo.
+Largura da coluna pela grade (`.book-grid`: seis colunas no desktop, duas no celular), capa em 212px de altura no desktop. Vão de 28px na vertical (`space-5 + space-2`) e 20px na horizontal (`space-5`) do tablet para cima; 20 × 12px no celular. O vão vertical maior é para o texto abaixo da capa não colar na capa de baixo.
 
 O cartão inteiro é um `<a>` único, com `aria-label` trazendo o título completo. Dois links dentro do mesmo cartão (um no título, outro na pessoa) dobram o número de paradas do Tab sem dobrar a utilidade.
 

@@ -6,6 +6,6 @@ A conta sai da barra e vira o avatar no canto superior direito, junto do nome do
 
 ## Regras
 
-Altura mínima 58px por aba mais o respiro da área inferior do aparelho. Rótulo em 13px — 11px foi testado e some.
+É o mesmo `AppSidebar` do NavRail, em outra disposição. Altura mínima `tab-item` (58px) por aba mais o respiro da área inferior do aparelho. O que flutua sobre a barra (toast, aviso de versão, "Voltar ao topo") fica à mesma distância dela (`--above-tab-bar`). Rótulo em 13px — 11px foi testado e some.
 
-Nada de aba ativa só por cor de ícone: o rótulo também muda para `action` e para peso 600.
+Nada de aba ativa só por cor de ícone: a aba ativa tem o mesmo fundo com borda do NavRail, e o rótulo muda para `action` e para peso 600.

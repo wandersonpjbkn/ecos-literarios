@@ -22,12 +22,10 @@ Vale na interface, nos títulos de página, nos textos de estado vazio, nos e-ma
 | Guardar para ler | Guardar em "Quero ler" → depois do clique: **Guardado em Quero ler · Tirar da lista** |
 | Marcar lido | Marcar como lido → depois: **Lido · Desmarcar** |
 | Abrir o filtro | Filtrar |
-| Chip que abre o resto | Filtrar por tamanho, pessoa e formato |
-| Fechar filtro aplicando | Ver 25 livros *(o número real)* |
+| Fechar filtro aplicando | Ver 25 livros *(o número real)* · sem nenhum: **Fechar**, com **Nenhum livro com esses filtros.** acima |
 | Limpar | **Limpar os filtros** — nunca "Limpar tudo", que soa como apagar a conta |
 | Ver mais da lista | Ver mais 24 |
-| Sorteio | Sortear um livro pra mim |
-| Corrigir ficha (quem pode editar: quem mencionou, com o nome vinculado, ou admin) | ✎ **Corrigir algo neste livro** · ou, quando falta um campo: **Falta o ano. Você sabe?** / **Faltam o ano e o número de páginas. Você sabe?** |
+| Corrigir ficha (quem pode editar: o dono do livro, ou quem pode editar qualquer livro) | ✎ **Editar**, o mesmo de Meus livros, e ao lado o que falta: **Falta o ano.** / **Faltam o ano e o número de páginas.** |
 | Corrigir ficha (os outros: abre o WhatsApp) | **Avisar no grupo sobre um erro** · ou **Falta o ano. Perguntar no grupo** |
 | Compartilhar | Celular: a folha de compartilhar do aparelho. Desktop: copia e avisa **Link copiado. É só colar na conversa.** (some sozinho) |
 | Quem marcou o livro | **3 pessoas querem ler · 1 pessoa já leu** · ninguém: **Ninguém guardou nem marcou como lido ainda.** Só totais, nunca nomes. |
@@ -51,7 +49,6 @@ Os chips aplicados de pessoa e de autor levam só a preposição: **"por Brenda"
 
 **Livro sem comentário** (no levantamento do estudo, 18 de 87)
 > Brenda não escreveu nada sobre este livro
-> O livro apareceu na conversa do grupo, sem comentário junto. *(só nos que vieram da conversa)*
 > `[Perguntar pra Brenda]` + *Abre o WhatsApp com a pergunta pronta.* — ou, para quem mencionou: `[✎ Escrever o que achei]`
 
 O bloco se chama **Comentário**, não "O que a Fulana escreveu": parte dos textos está em terceira pessoa ("Favorito da Brenda."), e depois de editado o texto pode ser de outra pessoa. O rótulo não afirma autoria.
@@ -70,10 +67,15 @@ Um campo só, na linha de baixo da ficha, pergunta pelo que falta (veja "Corrigi
 
 **Filtro sem resultado**
 > Nenhum livro com esses filtros
-> Nada de terror mencionado por Natália.
+> Nenhum livro de terror mencionado por Natália.
 > `[Limpar os filtros]`
 
-A frase monta a combinação aplicada: gênero ou subgênero, formato ("em mangá"), tamanho ("com menos de 200 páginas"), autor ("de Junji Ito") e pessoa ("mencionado por Natália"). Sem artigo de gênero ("pela"): o dado não diz o gênero de ninguém.
+A frase monta a combinação aplicada a partir de "Nenhum livro": gênero ou subgênero ("de fantasia"), formato ("em mangá"), tamanho ("com menos de 200 páginas"), autor ("de Junji Ito") e pessoa ("mencionado por Natália"). "Mencionado" concorda com "livro", nunca com a pessoa: o dado não diz o gênero de ninguém. Na dúvida, redação neutra; se pesar para um lado, o feminino (dono, 2026-09-27).
+
+**Catálogo vazio** (nenhum livro no acervo, sem busca nem filtro)
+> Nenhum livro no catálogo ainda
+> Os livros que o clube adicionar aparecem aqui.
+> `[Adicionar um livro]` só para quem pode criar livro
 
 **Lista própria vazia** (Meus livros)
 > Nenhum livro com o seu nome ainda
@@ -82,8 +84,8 @@ A frase monta a combinação aplicada: gênero ou subgênero, formato ("em mang�
 
 **Link mágico que não funcionou** (pode ter vencido; o sistema não sabe qual dos dois)
 > Não deu pra entrar com esse link. Ele pode ter vencido.
-> `[Mandar outro link para fulano@…]` `[Usar outro e-mail]` quando o e-mail foi pedido neste aparelho na última hora; senão `[Pedir outro link]`
-> Depois do reenvio: `Mandamos outro link` / `Foi para fulano@…. Veja seu e-mail e toque no link pra entrar.`
+> `[Enviar outro link para fulano@…]` `[Usar outro e-mail]` quando o e-mail foi pedido neste aparelho na última hora; senão `[Pedir outro link]`
+> Depois do reenvio: `Enviamos outro link` / `Foi para fulano@…. Veja seu e-mail e toque no link pra entrar.`
 
 **Sem internet / servidor fora** — mostra a lista salva com a data ("a lista de ontem") e desliga só a escrita, em todo lugar onde dá para adicionar (topo, trilho e barra de baixo juntos). Nunca tela em branco.
 
@@ -107,9 +109,15 @@ Na tela, inclusive no painel do clube e nas mensagens que vêm do servidor:
 - "Painel admin" vira **"Painel do clube"**; "Segmentações" vira **"Autores e gêneros"**;
 - os níveis de permissão aparecem como **Administrador, Editor, Membro**, nunca `admin`, `editor`, `viewer`;
 - "Resetar cache" vira **"Limpar os dados deste aparelho"**, com o que acontece: "Limpar sai da conta e baixa o catálogo de novo. Sua escolha de formatos fica."
+- "Mídia" vira **"Formato"** (coluna, aba e permissão no painel, campo do livro); "Enriquecimento" e "Executar" viram **"Capas e sinopses"** e **"Buscar capas e dados"**;
+- "cadastrei" vira **"adicionei"**; os códigos da busca de capas (`manual_edit`, `not_found`, `isbn`…) aparecem como frase ("Alguém corrigiu à mão, então não mexemos"), nunca crus.
+
+## Acervo e catálogo
+
+**Catálogo** é a página onde se olha os livros. **Acervo** é o conjunto de livros do clube, a palavra do painel ("Livros do acervo", o grupo "Acervo" na lateral). Estado vazio segue a tela: "Nenhum livro no catálogo ainda" no catálogo, "Nenhum livro no acervo ainda" no painel.
 
 ## Tom
 
 Texto de tela é placa: orienta quem chega, onde está. O texto dos artboards é ponto de partida; o que não orienta foi reescrito ("Recortes que saem do próprio acervo" saiu: são quatro palavras de leitura de máquina juntas). Frases curtas. Nada de "explore", "descubra", "gerencie", "otimize". Sem emoji. O leitor é um amigo do grupo, não um usuário de SaaS — e não é nativo digital, então nenhum rótulo depende de reconhecer um ícone.
 
-"Importação" e "cadastrado" são palavras de sistema: escreva **"veio da conversa do grupo no WhatsApp"**.
+"Importação" e "cadastrado" são palavras de sistema. O app não diz de onde o livro veio (conversa do grupo ou cadastro aqui): a informação não muda nada para quem lê (dono, 2026-09-27).
