@@ -131,17 +131,17 @@ import {
   usePageMeta,
 } from '@/composables'
 
-import AppSelect from '@/components/AppSelect.vue'
-import FilterChip from '@/components/FilterChip.vue'
-import FilterDrawer from '@/components/FilterDrawer.vue'
-import PageStatus from '@/components/PageStatus.vue'
-import AppButton from '@/components/AppButton.vue'
-import AppNotice from '@/components/AppNotice.vue'
-import CatalogSkeleton from '@/components/CatalogSkeleton.vue'
-import CatalogShelves from '@/components/CatalogShelves.vue'
-import BooksGrid from '@/components/BooksGrid.vue'
-import LiveStatus from '@/components/LiveStatus.vue'
-import EmptyState from '@/components/EmptyState.vue'
+import AppSelect from '@/components/ui/AppSelect.vue'
+import FilterChip from '@/components/ui/FilterChip.vue'
+import FilterDrawer from '@/components/catalog/FilterDrawer.vue'
+import PageStatus from '@/components/ui/PageStatus.vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import AppNotice from '@/components/ui/AppNotice.vue'
+import CatalogSkeleton from '@/components/catalog/CatalogSkeleton.vue'
+import CatalogShelves from '@/components/catalog/CatalogShelves.vue'
+import BooksGrid from '@/components/catalog/BooksGrid.vue'
+import LiveStatus from '@/components/ui/LiveStatus.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 
 import type { FilterKey } from '@/types'
 

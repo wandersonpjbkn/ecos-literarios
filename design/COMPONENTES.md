@@ -46,6 +46,16 @@ Todo campo de formulário (`AppField`, `MultiSelect`, o campo do `ComboSelect`) 
 
 `PanelPagination` saiu na fatia 7, e o "Ver mais" passou a valer no app inteiro ([ListFooter](componentes/ListFooter.md)).
 
+## Pastas (`src/components/`)
+
+Cada componente mora na pasta de quem o usa, como em `views/`:
+
+- `ui/`: peças sem assunto, usadas por mais de uma área (botão, campo, aviso, estado vazio, chip, diálogo).
+- `books/`: peças de livro que mais de uma área usa (cartão, capa, formulário do livro).
+- `catalog/`, `admin/`: o que só as telas daquela área usam, inclusive as peças da página do livro em `catalog/`.
+
+Quando um componente passa a servir outra área, ele sobe para `books/` ou `ui/`.
+
 ## Molduras (`src/layouts/`)
 
 Cada pasta do `src` guarda uma coleção só. Os esqueletos de tela e as peças que só eles usam

@@ -55,7 +55,7 @@
 <script lang="ts" setup generic="T extends string">
 import { computed, nextTick, ref, useId } from 'vue'
 
-import BasePill from '@/components/BasePill.vue'
+import BasePill from '@/components/ui/BasePill.vue'
 
 const props = defineProps<{
   options: { label: string; value: T }[]

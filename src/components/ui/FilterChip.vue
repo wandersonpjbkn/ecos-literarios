@@ -18,7 +18,7 @@
 <script lang="ts" setup>
 import { RouterLink, type RouteLocationRaw } from 'vue-router'
 
-import BasePill from '@/components/BasePill.vue'
+import BasePill from '@/components/ui/BasePill.vue'
 
 defineProps<{
   label: string

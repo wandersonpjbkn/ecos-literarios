@@ -18,7 +18,7 @@
 import { computed } from 'vue'
 import { RouterLink, type RouteLocationRaw } from 'vue-router'
 
-import BasePill, { type PillTone } from '@/components/BasePill.vue'
+import BasePill, { type PillTone } from '@/components/ui/BasePill.vue'
 
 type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
 

@@ -41,15 +41,15 @@
 
 <script lang="ts" setup>
 import { errorText } from '@/composables/apiError'
-import SectionHeader from '@/components/SectionHeader.vue'
+import SectionHeader from '@/components/ui/SectionHeader.vue'
 import { computed, ref } from 'vue'
 
 import { useErrorReporter, useToast } from '@/composables'
 import { saveMyName } from '@/composables/useApi'
 import { roleLabel } from '@/data/roles'
 import { useAuthStore } from '@/stores'
-import AppButton from '@/components/AppButton.vue'
-import AppField from '@/components/AppField.vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import AppField from '@/components/ui/AppField.vue'
 
 const authStore = useAuthStore()
 const toast = useToast()

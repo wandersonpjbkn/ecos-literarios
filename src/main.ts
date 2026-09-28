@@ -8,8 +8,8 @@ import router from '@/router'
 import { setupSentry } from '@/plugins/sentry'
 
 import App from '@/App.vue'
-import BaseIcon from '@/components/BaseIcon.vue'
-import BaseSpinner from '@/components/BaseSpinner.vue'
+import BaseIcon from '@/components/ui/BaseIcon.vue'
+import BaseSpinner from '@/components/ui/BaseSpinner.vue'
 
 import '@/assets/scss/main.scss'
 

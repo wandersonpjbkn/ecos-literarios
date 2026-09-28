@@ -30,9 +30,9 @@ import { useMediaQuery } from '@vueuse/core'
 
 import { useBooksStore } from '@/stores'
 import { useAddTarget, useBreakpoints, useCanWrite, useCatalogSearch } from '@/composables'
-import AppButton from '@/components/AppButton.vue'
+import AppButton from '@/components/ui/AppButton.vue'
 import BrandLogo from '@/layouts/BrandLogo.vue'
-import SearchBar from '@/components/SearchBar.vue'
+import SearchBar from '@/components/ui/SearchBar.vue'
 import UserMenu from '@/layouts/UserMenu.vue'
 import type { Suggestion } from '@/types'
 

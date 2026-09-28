@@ -8,8 +8,8 @@
 </template>
 
 <script lang="ts" setup>
-import AppButton from '@/components/AppButton.vue'
-import EmptyState from '@/components/EmptyState.vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 

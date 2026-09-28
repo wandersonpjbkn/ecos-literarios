@@ -54,7 +54,7 @@
 import { computed, inject, onBeforeUnmount, ref, useId, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
-import AppButton from '@/components/AppButton.vue'
+import AppButton from '@/components/ui/AppButton.vue'
 
 import { FRAME_HAS_RAIL } from '@/layouts/frame'
 import { useBackCloses } from '@/composables/useBackCloses'

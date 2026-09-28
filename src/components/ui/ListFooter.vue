@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts" setup>
-import AppButton from '@/components/AppButton.vue'
+import AppButton from '@/components/ui/AppButton.vue'
 
 defineProps<{
   shown: number

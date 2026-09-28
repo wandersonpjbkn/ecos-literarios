@@ -35,9 +35,9 @@
 
 <script lang="ts" setup>
 import { useBookEnrichment } from '@/composables/useBookEnrichment'
-import CheckRow from '@/components/CheckRow.vue'
-import AppButton from '@/components/AppButton.vue'
-import AppNotice from '@/components/AppNotice.vue'
+import CheckRow from '@/components/ui/CheckRow.vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import AppNotice from '@/components/ui/AppNotice.vue'
 import type { BookPayload } from '@/types'
 
 const props = defineProps<{

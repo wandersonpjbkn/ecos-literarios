@@ -83,11 +83,11 @@ import { useMediaQuery } from '@vueuse/core'
 
 import { useAuthStore, usePreferencesStore } from '@/stores'
 import { useBreakpoints, useFilters } from '@/composables'
-import LiveStatus from '@/components/LiveStatus.vue'
-import AppButton from '@/components/AppButton.vue'
-import AppDrawer from '@/components/AppDrawer.vue'
-import CheckRow from '@/components/CheckRow.vue'
-import ComboSelect from '@/components/ComboSelect.vue'
+import LiveStatus from '@/components/ui/LiveStatus.vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import AppDrawer from '@/components/ui/AppDrawer.vue'
+import CheckRow from '@/components/ui/CheckRow.vue'
+import ComboSelect from '@/components/ui/ComboSelect.vue'
 import type { BookSortOrder, FilterKey, Options } from '@/types'
 
 type Group = {

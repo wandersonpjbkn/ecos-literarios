@@ -13,8 +13,8 @@
 import { ref } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
-import AppButton from '@/components/AppButton.vue'
-import AppNotice from '@/components/AppNotice.vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import AppNotice from '@/components/ui/AppNotice.vue'
 import { useBreakpoints, useToast } from '@/composables'
 
 const props = defineProps<{

@@ -65,7 +65,7 @@
 import { computed, nextTick, ref, useId } from 'vue'
 
 import { useUtils } from '@/composables'
-import FilterChip from '@/components/FilterChip.vue'
+import FilterChip from '@/components/ui/FilterChip.vue'
 
 const props = defineProps<{
   options: string[]

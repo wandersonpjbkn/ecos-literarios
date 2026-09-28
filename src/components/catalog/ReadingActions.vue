@@ -32,8 +32,8 @@
 <script lang="ts" setup>
 import { computed, nextTick, ref, toRef } from 'vue'
 
-import AppButton from '@/components/AppButton.vue'
-import AppNotice from '@/components/AppNotice.vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import AppNotice from '@/components/ui/AppNotice.vue'
 import { useReading } from '@/composables'
 import type { ReadingStatus } from '@/types'
 

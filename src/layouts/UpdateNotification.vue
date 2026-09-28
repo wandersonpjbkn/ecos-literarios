@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-import AppButton from '@/components/AppButton.vue'
+import AppButton from '@/components/ui/AppButton.vue'
 import { ref, onMounted } from 'vue'
 
 const isVisible = ref(false)

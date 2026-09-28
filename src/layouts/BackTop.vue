@@ -11,7 +11,7 @@
 import { computed } from 'vue'
 import { useScroll } from '@vueuse/core'
 
-import AppButton from '@/components/AppButton.vue'
+import AppButton from '@/components/ui/AppButton.vue'
 
 const props = defineProps<{
   target: HTMLElement | null

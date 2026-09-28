@@ -10,7 +10,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import CoverBlock from '@/components/CoverBlock.vue'
+import CoverBlock from '@/components/books/CoverBlock.vue'
 import type { Book } from '@/types'
 
 const props = defineProps<{

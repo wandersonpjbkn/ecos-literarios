@@ -101,7 +101,7 @@
 import { computed, ref, useId, watch } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 
-import AppBadge from '@/components/AppBadge.vue'
+import AppBadge from '@/components/ui/AppBadge.vue'
 import type { OptionMultiSelect } from '@/types'
 
 const props = withDefaults(

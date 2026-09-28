@@ -12,7 +12,7 @@
 <script lang="ts" setup>
 import { computed, useAttrs, type StyleValue } from 'vue'
 
-import AppCheck from '@/components/AppCheck.vue'
+import AppCheck from '@/components/ui/AppCheck.vue'
 
 defineOptions({ inheritAttrs: false })
 

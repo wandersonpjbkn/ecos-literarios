@@ -50,10 +50,10 @@
 </template>
 
 <script lang="ts" setup>
-import AppButton from '@/components/AppButton.vue'
-import AppField from '@/components/AppField.vue'
-import AppNotice from '@/components/AppNotice.vue'
-import EmptyState from '@/components/EmptyState.vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import AppField from '@/components/ui/AppField.vue'
+import AppNotice from '@/components/ui/AppNotice.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import { usePageMeta } from '@/composables/usePageMeta'
 import { useLastCatalog } from '@/composables/useLastCatalog'
 import { nextTick, ref, onBeforeUnmount, onMounted } from 'vue'

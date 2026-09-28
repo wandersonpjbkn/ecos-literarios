@@ -35,9 +35,9 @@
 </template>
 
 <script lang="ts" setup>
-import AppButton from '@/components/AppButton.vue'
-import AppNotice from '@/components/AppNotice.vue'
-import EmptyState from '@/components/EmptyState.vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import AppNotice from '@/components/ui/AppNotice.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import { nextTick, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 

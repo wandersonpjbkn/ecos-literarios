@@ -19,7 +19,7 @@ import { useRouter } from 'vue-router'
 
 import { retryAccountSync } from '@/composables/accountSync'
 import { useAuthStore, usePermissionsStore } from '@/stores'
-import AppNotice from '@/components/AppNotice.vue'
+import AppNotice from '@/components/ui/AppNotice.vue'
 import AreaLayout from '@/layouts/AreaLayout.vue'
 import { mayOpen } from '@/router/modules/admin'
 import type { AreaGroup } from '@/layouts/AreaSections.vue'

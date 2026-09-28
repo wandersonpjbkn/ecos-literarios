@@ -8,7 +8,7 @@
 <script lang="ts" setup>
 import { roleLabel } from '@/data/roles'
 import { useAuthStore } from '@/stores'
-import AppBadge from '@/components/AppBadge.vue'
+import AppBadge from '@/components/ui/AppBadge.vue'
 
 const auth = useAuthStore()
 </script>

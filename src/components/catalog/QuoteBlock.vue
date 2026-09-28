@@ -38,7 +38,7 @@
 <script lang="ts" setup>
 import { computed, ref, useId } from 'vue'
 
-import AppButton from '@/components/AppButton.vue'
+import AppButton from '@/components/ui/AppButton.vue'
 
 const props = defineProps<{
   text: string

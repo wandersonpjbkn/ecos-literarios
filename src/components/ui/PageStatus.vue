@@ -13,8 +13,8 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import AppButton from '@/components/AppButton.vue'
-import EmptyState from '@/components/EmptyState.vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 
 const props = withDefaults(
   defineProps<{

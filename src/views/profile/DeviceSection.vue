@@ -36,10 +36,10 @@ import { useRoute, useRouter } from 'vue-router'
 
 import { useApi, useAuth, useToast, useUtils } from '@/composables'
 import { PREFERENCES_STORE_ID, useBooksStore } from '@/stores'
-import AppButton from '@/components/AppButton.vue'
-import AppNotice from '@/components/AppNotice.vue'
-import ConfirmModal from '@/components/ConfirmModal.vue'
-import SectionHeader from '@/components/SectionHeader.vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import AppNotice from '@/components/ui/AppNotice.vue'
+import ConfirmModal from '@/components/ui/ConfirmModal.vue'
+import SectionHeader from '@/components/ui/SectionHeader.vue'
 
 const route = useRoute()
 const router = useRouter()

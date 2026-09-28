@@ -10,8 +10,8 @@
 
 <script lang="ts" setup>
 import { useLastCatalog, usePageMeta } from '@/composables'
-import AppButton from '@/components/AppButton.vue'
-import EmptyState from '@/components/EmptyState.vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 
 const lastCatalog = useLastCatalog()
 

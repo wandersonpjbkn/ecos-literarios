@@ -26,9 +26,9 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 
-import BookCard from '@/components/BookCard.vue'
-import EcoCard from '@/components/EcoCard.vue'
-import ListFooter from '@/components/ListFooter.vue'
+import BookCard from '@/components/books/BookCard.vue'
+import EcoCard from '@/components/catalog/EcoCard.vue'
+import ListFooter from '@/components/ui/ListFooter.vue'
 import { useLoadMore } from '@/composables/useLoadMore'
 import type { Book } from '@/types'
 
