@@ -35,6 +35,7 @@ export function startFormatsSync(): FormatsSync {
     accountList = [...list]
     adopting = true
     preferences.hiddenMidias = [...list]
+    preferences.owner = auth.user?._id ?? null
     adopting = false
   }
 
@@ -72,6 +73,8 @@ export function startFormatsSync(): FormatsSync {
     if (auth.user?._id !== userId) return
     if (preferences.pending?.userId === userId) return save()
     if (server === undefined) {
+      // Another account's list, or one chosen signed out, would leak into this one: it starts empty instead.
+      if (preferences.owner !== userId) return adopt([])
       if (!preferences.hiddenMidias.length) return
       preferences.pending = { userId, list: [...preferences.hiddenMidias] }
       return save()
@@ -83,8 +86,10 @@ export function startFormatsSync(): FormatsSync {
   const stopList = watch(
     () => preferences.hiddenMidias,
     (list) => {
+      if (adopting) return
       const userId = auth.user?._id
-      if (adopting || !userId) return
+      preferences.owner = userId ?? null
+      if (!userId) return
       clearTimeout(timer)
       if (!saving && accountList && sameList(list, accountList)) {
         preferences.pending = null

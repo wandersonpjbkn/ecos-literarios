@@ -8,6 +8,8 @@ export const usePreferencesStore = defineStore(
   PREFERENCES_STORE_ID,
   () => {
     const hiddenMidias = ref<string[]>([])
+    // Whose list this is: null when chosen signed out. Only the owner's own account ever receives it.
+    const owner = ref<string | null>(null)
     // A change made here that has not reached that account yet (offline, server down), with the list itself.
     const pending = ref<{ userId: string; list: string[] } | null>(null)
 
@@ -17,7 +19,7 @@ export const usePreferencesStore = defineStore(
         : [...hiddenMidias.value, midia]
     }
 
-    return { hiddenMidias, pending, toggleMidia }
+    return { hiddenMidias, owner, pending, toggleMidia }
   },
   {
     persist: {
