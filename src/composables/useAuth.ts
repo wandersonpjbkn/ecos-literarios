@@ -51,6 +51,9 @@ const resolveSessionFromUrl = async (): Promise<string> => {
   throw new Error('Link de acesso inválido ou expirado.')
 }
 
+// On /auth/callback both App (restoreSession) and the callback sync the same fresh session: one request serves both.
+let inFlightSync: { token: string; promise: Promise<void> } | null = null
+
 export class CallbackError extends Error {
   constructor(
     readonly reason: 'link' | 'platform',
@@ -93,7 +96,16 @@ export function useAuth() {
     }
   }
 
-  const syncWithApi = async (accessToken: string): Promise<void> => {
+  const syncWithApi = (accessToken: string): Promise<void> => {
+    if (inFlightSync?.token === accessToken) return inFlightSync.promise
+    const promise = verifyAndStore(accessToken).finally(() => {
+      if (inFlightSync?.promise === promise) inFlightSync = null
+    })
+    inFlightSync = { token: accessToken, promise }
+    return promise
+  }
+
+  const verifyAndStore = async (accessToken: string): Promise<void> => {
     const { user: apiUser } = await verifyAuth(accessToken)
 
     store.setSession(
