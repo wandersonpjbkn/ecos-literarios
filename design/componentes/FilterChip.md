@@ -17,3 +17,7 @@ Rótulo na afirmativa. "Sem mangá" é um estado do resultado; "Esconder mangá"
 ## O que o consumidor fornece
 
 `<a href>` quando o filtro muda a URL — e ele deve mudar, para o membro poder voltar. `<button>` quando não muda.
+
+## Contagem com busca (fatia 8)
+
+A contagem do chip é a da lista que o clique vai mostrar. Com busca ativa, ela é calculada sobre o resultado da busca; chip com zero some, e sem nenhum resultado a fileira some junto. "Drama 16" sobre "0 de 87" promete o que não entrega.

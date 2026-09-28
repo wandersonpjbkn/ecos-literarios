@@ -10,7 +10,7 @@ O app tem cinco superfícies de navegação, duas interfaces de filtro e dois de
 | --- | --- | --- |
 | Catálogo | `/` | A raiz. A grade de livros abre a página; abaixo dela, na mesma rolagem, vêm as prateleiras. **Não existe uma "home" separada.** |
 | Meus livros | `/perfil/livros` | O que a pessoa mencionou e o que ela guardou. |
-| Adicionar | `/admin/livros` | Leva quem pode criar livro (Administrador e Editor) à lista de livros do painel, onde o formulário abre na gaveta. O Membro vai para "Sem permissão", que diz por quê; quem não entrou vai para Entrar. |
+| Adicionar | `/admin/livros` | Leva quem pode criar livro (Administrador e Editor) à lista de livros do painel, onde o formulário abre na gaveta. **O Visitante não vê o botão** (topo, trilho e barra de baixo): estranho não é convidado a adicionar. Quem não entrou vê, e vai para Entrar com volta ao formulário, porque quase sempre é alguém do clube num aparelho novo. "Sem permissão" fica para quem digita o endereço do painel (fatia 8a). |
 
 A conta (`/perfil/conta`, **Minha conta**) fica no avatar, no fim do trilho. Ela reúne "Você", "O que você quer ver" (a mesma preferência da gaveta), "Seu nome no grupo" e "Este aparelho", cada um com seu endereço. O antigo `/perfil/vinculos` abre direto nessa parte.
 

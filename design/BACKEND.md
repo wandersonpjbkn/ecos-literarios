@@ -71,14 +71,14 @@ Eu tinha previsto no inventário um script para tirar "Mangá" e "HQ" de `catego
 
 ## 4. Painel do clube: fica e melhora
 
-A tela de permissões continua, e é para ela existir que o painel existe: a alternativa é editar papel de membro direto no banco, às cegas. O painel ganha o visual novo e mantém paginação numerada — é o único lugar do produto que conta páginas, porque quem administra conta e quem lê não.
+A tela de permissões continua, e é para ela existir que o painel existe: a alternativa é editar papel de membro direto no banco, às cegas. O painel ganha o visual novo. A paginação numerada, prevista aqui, saiu na fatia 7: o painel usa o mesmo "Ver mais" do resto do app (`componentes/ListFooter.md`).
 
 ## 5. Autenticação
 
 Entrada por link mágico (Supabase), sem senha. Um link vencido é o caso normal, não uma falha do sistema (fatia 6):
 
-- O callback não sabe se o link venceu ou se é inválido, então diz "Não deu pra entrar com esse link. Ele pode ter vencido." em vez de afirmar "expirou".
-- O e-mail que pediu o link fica guardado no aparelho (`localStorage`, porque o link abre numa aba nova) por no máximo 1 hora, a validade do link. Ele é apagado quando o login dá certo ou quando o reenvio é usado. Com ele, a tela oferece **Enviar outro link para fulano@…** e **Usar outro e-mail**; sem ele, **Pedir outro link**.
+- O callback não sabe se o link venceu ou se é inválido, então diz "Não foi possível entrar com esse link. Ele pode ter vencido." em vez de afirmar "expirou".
+- O e-mail que pediu o link fica guardado no aparelho (`localStorage`, porque o link abre em uma aba nova) por no máximo 1 hora, a validade do link. Ele é apagado quando o login dá certo ou quando o reenvio é usado. Com ele, a tela oferece **Enviar outro link para fulano@…** e **Usar outro e-mail**; sem ele, **Pedir outro link**.
 - "Enviamos outro link" só aparece depois que o reenvio foi feito de verdade. O sistema não envia sozinho.
 - Quando o link funcionou mas a plataforma não respondeu, o callback diz isso e não pede outro link (veja `COPY.md`).
 - Mensagens do servidor que chegam à tela seguem o `COPY.md`: sessão vencida é "Sua sessão venceu. Entre de novo.", falta de permissão é "Você não tem permissão para isso."
@@ -92,3 +92,17 @@ Nada disso é bug e nada disso deve ser preenchido com valor inventado. O servid
 ## 7. Filtro por URL
 
 Os filtros viram query no catálogo (veja `IA.md`). As rotas `/midia/:slug`, `/categoria/:slug`, `/autor/:slug` e `/mencao/:slug` ganham redirect permanente para a query equivalente: elas já circularam no grupo e não podem quebrar.
+
+## 8. Níveis e pessoas do clube (fatia 8)
+
+- **Rótulo, não chave.** `viewer` passa a aparecer como **Visitante**. A chave da API, o enum e a coleção `Permission` não mudam.
+- **Vínculo vira permissão.** Recurso novo `claim` em `RESOURCES` e em `CONFIGURABLE` (`create`, `update`). Semente padrão: `update` para Administrador e Editor, `create` só para Administrador, nada para Visitante. `POST` e `DELETE /users/me/claim` exigem `claim: update`. A semente do boot insere as linhas novas sem tocar nas que já existem.
+- **Quem mencionou, sem coleção nova.** Um livro é creditado a uma conta (`quem_user_id`) ou a um marcador sem dono (`quem_nome`). Livro novo sem escolha sai creditado a quem cadastra, e `quem_nome` deixa de ser obrigatório. `utils/bookPerson.ts` decide:
+  - marcador existente (pela normalização dos slugs) mantém a grafia e o dono;
+  - grafia quase igual é recusada (409);
+  - nome novo exige `claim: create` e não pode repetir um marcador nem um nome de conta.
+- **`GET /books/people`** (`books: create`) devolve as contas e os marcadores sem dono, para o campo do formulário.
+- **`GET /users/me`** devolve `claim_match`: o marcador sem dono com o nome da conta, para o "É você?" do formulário. Só vem para quem tem `claim: update`.
+- **Desfazer o vínculo** solta só os livros do marcador reivindicado; livro creditado direto à conta continua dela.
+- **Capas e sinopses vira permissão.** Recurso novo `enrichment` (`update`), padrão Administrador e Editor. `/admin/books/enrich`, `/status` e `/history` saem do `adminOnly` do router de admin e passam a exigir `authorize('enrichment', 'update')`. O `/books/:id/enrich` do formulário continua em `books: update`, e o histórico de vínculos continua só do Administrador.
+- **Remover um livro** apaga as marcações de leitura dele (já é assim, §2b); o texto da confirmação passa a dizer isso.

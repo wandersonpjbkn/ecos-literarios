@@ -17,3 +17,7 @@ Autor em `ink-2`, uma linha, com reticências. Quem mencionou em `ink-muted`, `c
 ## O que o consumidor fornece
 
 Título, autor, gênero, formato, nome de quem mencionou e a URL da capa quando existir. Todos os quatro últimos podem faltar, e o cartão continua correto.
+
+## Em Meus livros (fatia 8)
+
+Sem "mencionado por": a lista é da própria pessoa, e a linha repetiria o mesmo nome em todos os cartões. O cartão fica com título (na capa), autor e a ação Editar.

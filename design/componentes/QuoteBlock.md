@@ -12,7 +12,7 @@ Fundo `bg-sunken` com uma régua de 3px à esquerda — `action-line` quando há
 
 O texto usa `body-l` (19px), o único corpo grande do sistema. Ele é a coisa mais humana da tela e merece o tamanho.
 
-Vazio, o bloco nomeia quem não escreveu e oferece a saída certa para cada leitor: **Escrever o que achei** para quem mencionou o livro (abre o formulário de edição), **Perguntar pra Fulana** para os outros (abre o WhatsApp com a pergunta pronta, e diz isso embaixo). Texto longo fica recolhido com **Ler o resto**.
+Vazio, o bloco nomeia quem não escreveu e oferece a saída certa para cada leitor: **Escrever o que achei** para quem mencionou o livro (abre o formulário de edição), **Perguntar para Fulana** para os outros (abre o WhatsApp com a pergunta pronta, e diz isso embaixo). Texto longo fica recolhido com **Ler o resto**.
 
 ## O que o consumidor fornece
 

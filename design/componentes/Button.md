@@ -1,12 +1,12 @@
 # Button
 
-Quatro pesos, e a tela escolhe no máximo um primário.
+Quatro pesos mais o destrutivo, e a tela escolhe no máximo um primário.
 
 **Primário** — fundo `action`, texto `on-action` (`--color-on-action` no código). É a ação que a tela existe para oferecer, e há **uma** por tela. Quando o catálogo tinha "Adicionar um livro" no topo e "Sortear" ao lado, os dois em azul cheio, o olho não sabia qual era a saída.
 
 **Secundário** — fundo `bg-surface`, borda `border-strong`, texto `ink-2` (`ink` ao passar o mouse). A alternativa de mesmo peso semântico ("Marcar como lido" ao lado de "Guardar em Quero ler").
 
-**De ação, contornado** — borda `action-line`, texto `action`. Uma segunda ação que ainda é ação, numa tela que já gastou o primário.
+**De ação, contornado** — borda `action-line`, texto `action`. Uma segunda ação que ainda é ação, em uma tela que já gastou o primário.
 
 **Fantasma** — só texto `action`. Ação terciária, dentro de um bloco.
 
@@ -21,3 +21,7 @@ Nunca dois primários na mesma dobra, e nunca `action` como fundo de algo que n�
 ## O que o consumidor fornece
 
 Elemento `<button>` ou `<a href>` de verdade. Um `div` com `onClick` é pulado pelo Tab, e metade do clube navega assim.
+
+## Destrutivo (fatia 8)
+
+Fundo `bg-surface`, borda `danger-line`, texto `danger-ink`. Para toda ação sem volta. O verbo é completo ("Remover o livro", não "Remover") e ele nunca é o primário: num diálogo destrutivo não existe botão azul, e "Cancelar" tem o foco inicial.

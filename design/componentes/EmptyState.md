@@ -18,7 +18,7 @@ A saída é sempre um botão de verdade, nunca um conselho em texto. "Tente outr
 
 ## Regras
 
-Sem ilustração e sem emoji. Texto centralizado numa coluna de no máximo 380px. Nunca vermelho: o acervo não ter resultado não é erro de ninguém.
+Sem ilustração e sem emoji. Texto centralizado em uma coluna de no máximo 380px. Nunca vermelho: o acervo não ter resultado não é erro de ninguém.
 
 A saída em botão só falta em dois casos, e só neles:
 - quando não há ação possível (Membros sem ninguém, Histórico de vínculos vazio);

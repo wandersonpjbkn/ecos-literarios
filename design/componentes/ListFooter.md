@@ -13,7 +13,7 @@ O mesmo componente no desktop, no tablet e no celular — no celular o botão oc
 Um padrão só no app inteiro: catálogo, Meus livros e painel do clube usam este rodapé, com lote de 24. Não existe paginação numerada. A decisão está no estudo da fatia 7 (`rca/…-fatia-7-servidor/estudo-paginacao.md`):
 - a paginação fez as pessoas verem menos da lista (Baymard);
 - quase ninguém usa o número da página;
-- numa lista de trabalho, como "Faltando algo" no painel, cada item corrigido faz a página andar.
+- em uma lista de trabalho, como "Faltando algo" no painel, cada item corrigido faz a página andar.
 
 Quantos itens estão abertos fica na URL (`?ver=48`): voltar de um livro, recarregar e enviar o link mantêm o lugar. Mudar filtro, busca, ordem ou aba recomeça a lista do topo.
 

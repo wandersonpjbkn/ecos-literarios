@@ -22,7 +22,7 @@ O grupo de formato hoje se chama **"O que você quer ver"**, com Livro, Mangá e
 
 ## Regras
 
-Grupos na ordem: Gênero, Subgênero, Tamanho, O que você quer ver, Quem mencionou. Subgênero entrou depois do estudo e fica junto do eixo que refina. Tamanho tem quatro faixas: menos de 200, de 200 a 500, mais de 500 e "Não sabemos quantas páginas". Cada linha tem `touch-min` de altura e a contagem em `ink-muted`. Listas longas mostram os seis primeiros e um link "Mostrar as outras 6 pessoas". Subgênero (100 opções) é um campo com autocompletar: ao focar mostra a lista inteira numa caixa com rolagem, e digitar filtra por início de palavra ("ro" acha "romântico", não "horror"); o que foi escolhido vira chip acima do campo.
+Grupos na ordem: Gênero, Subgênero, Tamanho, O que você quer ver, Quem mencionou. Subgênero entrou depois do estudo e fica junto do eixo que refina. Tamanho tem quatro faixas: menos de 200, de 200 a 500, mais de 500 e "Não sabemos quantas páginas". Cada linha tem `touch-min` de altura e a contagem em `ink-muted`. Listas longas mostram os seis primeiros e um link "Mostrar as outras 6 pessoas". Subgênero (100 opções) é um campo com autocompletar: ao focar mostra a lista inteira em uma caixa com rolagem, e digitar filtra por início de palavra ("ro" acha "romântico", não "horror"); o que foi escolhido vira chip acima do campo.
 
 Com algum filtro aplicado, os chips aplicados tomam o lugar dos chips rápidos na página; as duas fileiras nunca aparecem juntas.
 

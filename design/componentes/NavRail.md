@@ -12,8 +12,12 @@ Largura `rail-width`. Destino ativo com o estado selecionado do app inteiro: fun
 
 Rótulo em 13px, não 12px. Cada destino tem no mínimo 66px de altura.
 
-O estado ativo tem que corresponder à página. Na página de um livro, fica marcada a lista de onde ele foi aberto (Catálogo ou Meus livros). Um trilho marcando "Catálogo" numa tela que não é o catálogo desfaz a única pista de lugar que existe.
+O estado ativo tem que corresponder à página. Na página de um livro, fica marcada a lista de onde ele foi aberto (Catálogo ou Meus livros). Um trilho marcando "Catálogo" em uma tela que não é o catálogo desfaz a única pista de lugar que existe.
 
 ## O que o consumidor fornece
 
 A rota atual. No celular, o mesmo `AppSidebar` vira TabBar.
+
+## Quem vê "Adicionar" (fatia 8)
+
+Administrador e Editor, e quem não entrou (vai para Entrar e volta ao formulário). O Visitante não vê o item, nem no topo, nem no trilho, nem na barra de baixo.

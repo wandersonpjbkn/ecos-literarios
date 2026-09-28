@@ -68,7 +68,7 @@ conta, a conta nunca desloga.
 
 ## Aviso rápido
 
-`AppToast`, montado uma vez no `App.vue`, e `useToast().show(texto)` para qualquer tela. Um aviso por vez (o novo substitui o anterior), some sozinho em 3,5 s e fica numa região `aria-live` que já existe antes da mensagem, para o leitor de tela anunciar. Aviso com ação (como "Recarregar" na versão nova) continua sendo banner, não toast.
+`AppToast`, montado uma vez no `App.vue`, e `useToast().show(texto)` para qualquer tela. Um aviso por vez (o novo substitui o anterior), some sozinho em 3,5 s e fica em uma região `aria-live` que já existe antes da mensagem, para o leitor de tela anunciar. Aviso com ação (como "Recarregar" na versão nova) continua sendo banner, não toast.
 
 O toast é só para sucesso. Os usos de hoje:
 - "Link copiado. É só colar na conversa." (Compartilhar);
@@ -113,3 +113,31 @@ da checagem. O que precisa de valor cru por natureza mora nos abstracts, como o 
 Toda chamada passa por uma função do `useApi` (`src/composables/useApi.ts`), que monta endereço e
 cabeçalho, marca o erro para o Sentry e devolve a mensagem da API. O ESLint recusa `fetch` em qualquer
 outro arquivo. A tela chama a função e mostra o erro com `errorText`.
+
+## Revisão de 2026-09-27 (fatia 8)
+
+**Peso destrutivo.** `AppButton variant="danger"`: fundo `bg-surface`, borda `danger-line`, texto `danger-ink`; hover com fundo `danger-soft`. Nunca fundo cheio. Tokens novos no tema:
+
+```
+--danger-ink:  #A3322B;  /* 6,9:1 sobre branco, 6,0:1 sobre danger-soft */
+--danger-soft: #FBEDEC;
+--danger-line: #C98078;  /* 3,1:1 sobre branco: limite de contorno de controle */
+```
+
+É o peso de toda ação sem volta: remover livro, autor, gênero, formato ou subgênero; desfazer vínculo; limpar os dados do aparelho. No `ConfirmModal` destrutivo não existe primário azul.
+
+**"Fechar" de gaveta e folha.** Tom `neutral` do `BasePill` (branco, borda `border-strong`), não `bg-sunken` sem borda: aquele é o visual de desabilitado.
+
+**Sombra é para o que flutua.** Separação entre áreas no fluxo continua sendo borda fina, nunca sombra. O que fica **sobre** o conteúdo usa elevação, porque é assim que se lê "está por cima":
+
+| Token | Onde |
+| --- | --- |
+| `--shadow-default` | Voltar ao topo |
+| `--shadow-lg` | listas suspensas, `InfoTip`, busca, toast |
+| `--shadow-xl` | `ConfirmModal`, aviso de versão nova |
+
+`--shadow-sm` não tem uso e não deve ganhar um: se algo no fluxo parece pedir sombra, o que falta é borda.
+
+**Caixa de marcar: exceção documentada.** Marcada, a caixa (e o rádio) é preenchida com `action` e tique branco. É a única exceção à regra "azul cheio só em botão", e é de propósito: é a convenção de todo celular e navegador, e para quem não é nativo digital reconhecer vale mais que a pureza da regra. A regra continua valendo para áreas: chip, linha e item selecionados usam `action-soft` com borda.
+
+**Largura nas áreas.** Em Minha conta e nas seções de formulário do painel, o conteúdo tem largura máxima: `--form-max` para campos, `--text-column` para linhas de escolha com contagem ou ação à direita. Tabela de várias colunas usa a largura toda.

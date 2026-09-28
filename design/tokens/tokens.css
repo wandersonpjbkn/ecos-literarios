@@ -39,9 +39,13 @@
   --tint-poesia-bg: #EEF1ED; /* Fundo da capa de Poesia. Quase acromática de propósito: 9 gêneros na mesma grade não podem competir. */
   --tint-poesia-line: #DFE5DC; /* Borda da capa de Poesia. */
   --tint-poesia-ink: #2E362C; /* Título sobre a capa de Poesia. Passa de 7:1 sobre a própria tinta. */
-  --alert-bg: #FBF3E2; /* Fundo do aviso de sem internet ou plataforma fora do ar. Âmbar: atenção, não erro. */
-  --alert-line: #EDDAB0; /* Borda do aviso. */
-  --alert-ink: #5A4210; /* Texto do aviso. 8,56:1 sobre alert-bg. */
+  --danger-ink: #A3322B; /* Texto e borda do botão destrutivo. 6,9:1 sobre branco, 6,0:1 sobre danger-soft. Só em ação sem volta. */
+  --danger-soft: #FBEDEC; /* Fundo do botão destrutivo sob o cursor. Nunca fundo em repouso: destrutivo não tem fundo cheio. */
+  --danger-line: #C98078; /* Borda do botão destrutivo. 3,1:1 sobre branco, o limite de contorno de controle. */
+  --alert-bg: #FBF3E2; /* Fundo do aviso âmbar (sem internet, plataforma fora, ação que falhou). Atenção, não erro: dá pra continuar. */
+  --alert-line: #EDDAB0; /* Borda do aviso âmbar. */
+  --alert-ink: #5A4210; /* Texto do aviso âmbar. 8,6:1 sobre alert-bg. */
+  --on-inverse: #FFFFFF; /* Texto sobre fundo ink: só o toast usa. */
 
   --space-1: 4px;
   --space-2: 8px;
@@ -66,6 +70,14 @@
   --rail-width: 96px;
   --drawer-width: 388px;
   --text-column: 760px;
+  --form-max: 480px;
+  --page-max: 1200px;
+  --area-side: 264px;
+  --dialog-max: 420px;
+
+  --shadow-default: 0 4px 12px rgba(6, 21, 27, 0.09);
+  --shadow-lg: 0 12px 32px rgba(6, 21, 27, 0.13);
+  --shadow-xl: 0 20px 48px rgba(6, 21, 27, 0.18);
 
   --font-sans: "Figtree", system-ui, -apple-system, sans-serif;
 }

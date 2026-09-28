@@ -2,7 +2,7 @@
 
 ## A regra que manda em todas as outras
 
-**O sistema nunca afirma intenção.** O acervo começou numa conversa de WhatsApp. Em alguns casos a pessoa recomendou; em outros só citou. Um membro leu "indicado por Brenda" e respondeu *"mas eu não indiquei esse livro"*.
+**O sistema nunca afirma intenção.** O acervo começou em uma conversa de WhatsApp. Em alguns casos a pessoa recomendou; em outros só citou. Um membro leu "indicado por Brenda" e respondeu *"mas eu não indiquei esse livro"*.
 
 | Nunca | Sempre |
 | --- | --- |
@@ -49,11 +49,11 @@ Os chips aplicados de pessoa e de autor levam só a preposição: **"por Brenda"
 
 **Livro sem comentário** (no levantamento do estudo, 18 de 87)
 > Brenda não escreveu nada sobre este livro
-> `[Perguntar pra Brenda]` + *Abre o WhatsApp com a pergunta pronta.* — ou, para quem mencionou: `[✎ Escrever o que achei]`
+> `[Perguntar para Brenda]` + *Abre o WhatsApp com a pergunta pronta.* — ou, para quem mencionou: `[✎ Escrever o que achei]`
 
 O bloco se chama **Comentário**, não "O que a Fulana escreveu": parte dos textos está em terceira pessoa ("Favorito da Brenda."), e depois de editado o texto pode ser de outra pessoa. O rótulo não afirma autoria.
 
-"Perguntar pra" e as perguntas de dado faltando abrem o WhatsApp com a mensagem pronta (`Brenda, o que você acha de "X"?`, `Alguém sabe o ano de "X"?`): ninguém tem contato guardado, e a pessoa escolhe o grupo.
+"Perguntar para" e as perguntas de dado faltando abrem o WhatsApp com a mensagem pronta (`Brenda, o que você acha de "X"?`, `Alguém sabe o ano de "X"?`): ninguém tem contato guardado, e a pessoa escolhe o grupo.
 
 **Sem número de páginas** (23) — `Páginas / ninguém anotou`
 **Sem ano** (10) — `Publicado em / não sabemos`
@@ -83,32 +83,71 @@ A frase monta a combinação aplicada a partir de "Nenhum livro": gênero ou sub
 > `[Vincular meu nome]`
 
 **Link mágico que não funcionou** (pode ter vencido; o sistema não sabe qual dos dois)
-> Não deu pra entrar com esse link. Ele pode ter vencido.
+> Não foi possível entrar com esse link. Ele pode ter vencido.
 > `[Enviar outro link para fulano@…]` `[Usar outro e-mail]` quando o e-mail foi pedido neste aparelho na última hora; senão `[Pedir outro link]`
-> Depois do reenvio: `Enviamos outro link` / `Foi para fulano@…. Veja seu e-mail e toque no link pra entrar.`
+> Depois do reenvio: `Enviamos outro link` / `Foi para fulano@…. Abra seu e-mail e toque no link para entrar.`
 
 **Sem internet / servidor fora** — mostra a lista salva com a data ("a lista de ontem") e desliga só a escrita, em todo lugar onde dá para adicionar (topo, trilho e barra de baixo juntos). Nunca tela em branco.
 
-> Sem internet: `Você está sem internet. Dá pra olhar, mas não pra adicionar.`
-> Servidor fora: `A plataforma está fora do ar agora. Você está vendo a lista de ontem: dá pra olhar, mas não pra adicionar.` `[Tentar de novo]`
+> Sem internet: `Você está sem internet. Os livros continuam visíveis, mas não é possível adicionar.`
+> Servidor fora: `A plataforma está fora do ar agora. Você está vendo a lista de ontem: os livros continuam visíveis, mas não é possível adicionar.` `[Tentar de novo]`
 > Sem lista salva e servidor fora: `A plataforma está fora do ar agora. Tente daqui a pouco.` / `Se não voltar, avise no grupo.`
 
 **Volta do link mágico com a plataforma fora** — o link funcionou; quem não respondeu foi a plataforma. Nunca "Pedir outro link" nesse caso, e nunca o erro do navegador ("Failed to fetch").
-> `A plataforma está fora do ar agora.` / `Seu link funcionou, só a plataforma que não respondeu. Dá pra olhar os livros enquanto isso.` `[Tentar de novo]` `[Continuar sem entrar]`
+> `A plataforma está fora do ar agora.` / `Seu link funcionou; quem não respondeu foi a plataforma. Enquanto isso, você pode olhar os livros.` `[Tentar de novo]` `[Continuar sem entrar]`
 
-Link recusado ou sem sessão: `Não deu pra entrar com esse link. Ele pode ter vencido.` `[Pedir outro link]`.
+Link recusado ou sem sessão: `Não foi possível entrar com esse link. Ele pode ter vencido.` `[Pedir outro link]`.
 
-O banner diz por que "Adicionar" está desligado; sem isso o botão cinza não se explica. "Servidor" não aparece: é palavra de quem fez o sistema. O nome é **plataforma**: "o Ecos" se confunde com o clube, e "site" lembra site institucional. O banner usa as tintas `alert-*` (âmbar): atenção, não erro, porque dá pra continuar olhando.
+O banner diz por que "Adicionar" está desligado; sem isso o botão cinza não se explica. "Servidor" não aparece: é palavra de quem fez o sistema. O nome é **plataforma**: "o Ecos" se confunde com o clube, e "site" lembra site institucional. O banner usa as tintas `alert-*` (âmbar): atenção, não erro, porque dá para continuar olhando.
+
+## Entrar
+
+Antes de enviar:
+> Entrar
+> Coloque seu e-mail e nós enviamos um link para você entrar. Não é preciso senha.
+
+"A gente" vira "nós" e "mandar" vira "enviar" em todo o produto (dono, 2026-09-27).
+
+Depois de enviar, a introdução some e fica só:
+> Enviamos o link
+> Foi para **fulano@…**. Abra seu e-mail e toque no link para entrar.
+> `[Usar outro e-mail]` · durante a espera, texto: *Você pode pedir outro link em 59 segundos* · depois: `[Enviar outro link]`
+
+Espera não é botão desabilitado: botão cinza parece quebrado, e o texto diz quando vai dar.
+
+## Seu nome no grupo
+
+A seção aparece para toda conta. Vincular segue a matriz (Vínculo · Editar; por padrão Editor e Administrador); sem essa permissão, no lugar do formulário:
+> Vincular um nome do grupo não está liberado para a sua conta. Se você é do clube, fale com um Administrador.
+
+Ninguém precisa vincular antes de adicionar: o livro sai com quem cadastra como "mencionado por". Mas, se existe um nome da carga sem dono igual ao da conta, o formulário pergunta primeiro:
+> O nome "Wanderson" já está no catálogo. É você? Se for, vincule esse nome e esses livros passam a ser seus.
+> `[Vincular este nome]` `[Não sou eu, continuar]`
+
+"Mencionado por" é escolha em uma lista (as contas e os nomes da carga sem dono), com quem cadastra já escolhido. Nome digitado só pela última opção, **"Outro nome: {o que foi digitado}"**, que segue a matriz (Vínculo · Criar; por padrão só Administrador). O nome novo não pode repetir um que já existe, nem com outro acento ou outra caixa: "Natalia" não entra se há "Natália"; "Natalia C." entra.
+
+As linhas novas da matriz de Permissões, em frase: **"Vincular a própria conta a um nome do grupo"** (Vínculo · Editar), **"Incluir um nome novo de pessoa do clube"** (Vínculo · Criar) e **"Buscar capas e dados para o acervo inteiro"**.
+
+## Confirmar o que não tem volta
+
+Título com o item entre aspas, uma frase do que acontece e do que vai junto, e o verbo completo no botão:
+> Remover "Circe"?
+> O livro sai do catálogo e das listas de quem guardou. Não é possível desfazer.
+> `[Cancelar]` `[Remover o livro]` ← peso destrutivo, nunca o azul
+
+## Permissões
+
+Cada linha é uma frase sobre o que ela controla ("Ver a lista de membros"), nunca o nome do recurso seguido de um verbo ("Membros: Ver"). O que o painel não configura aparece como linha fixa: **"Mudar o nível de alguém: só Administrador (não muda aqui)"**.
 
 ## Palavras de sistema que não aparecem
 
 Na tela, inclusive no painel do clube e nas mensagens que vêm do servidor:
 - "role", "claim", "reivindicar", "batch", "token", "cache", "cadastrado", "importação", "Qtd.", "livro(s)";
-- "Erro ao …" e "Não foi possível …" viram **"Não deu pra … Tente de novo."**; "Tentar novamente" vira **"Tentar de novo"**;
+- "Erro ao …" vira **"Não foi possível … Tente de novo."**, e "Tentar novamente" vira **"Tentar de novo"**. Nada de "para", "pro", "em uma", "dá para" ou "não foi possível": o registro pode ser leve, mas não chega nesse ponto (dono, 2026-09-28);
 - "Categoria" vira **"Gênero"** e "Sub-gêneros", **"Subgêneros"**, como na tela pública; "Email" vira **"E-mail"**;
 - "Painel admin" vira **"Painel do clube"**; "Segmentações" vira **"Autores e gêneros"**;
-- os níveis de permissão aparecem como **Administrador, Editor, Membro**, nunca `admin`, `editor`, `viewer`;
-- "Resetar cache" vira **"Limpar os dados deste aparelho"**, com o que acontece: "Limpar sai da conta e baixa o catálogo de novo. Sua escolha de formatos fica."
+- os níveis de permissão aparecem como **Administrador, Editor, Visitante**, nunca `admin`, `editor`, `viewer`. "Membro" não é nível: os membros do clube são Editores, e o nível mais baixo é de quem entrou por um link sem ser do clube (fatia 8a);
+- "Resetar cache" vira **"Limpar os dados deste aparelho"**, com o que acontece: "Sai da conta e baixa o catálogo de novo. Sua escolha de formatos fica." Ao lado, **"Recarregar o catálogo"**: "Baixa o catálogo de novo. Você continua na conta." Cada ação na sua linha, com a consequência embaixo (fatia 8e);
 - "Mídia" vira **"Formato"** (coluna, aba e permissão no painel, campo do livro); "Enriquecimento" e "Executar" viram **"Capas e sinopses"** e **"Buscar capas e dados"**;
 - "cadastrei" vira **"adicionei"**; os códigos da busca de capas (`manual_edit`, `not_found`, `isbn`…) aparecem como frase ("Alguém corrigiu à mão, então não mexemos"), nunca crus.
 
