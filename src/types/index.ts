@@ -30,6 +30,8 @@ export interface Book {
   porque: string
   subgenerosArr: string[]
   quem_user_id?: string
+  // The placeholder from the first load, when the book has one; `quem` is the name shown.
+  quem_nome?: string
 
   cover_url?: string
   synopsis?: string
@@ -76,7 +78,8 @@ export interface BookPayload {
   midia: string | { _id: string; nome: string }
   categoria: string | { _id: string; nome: string }
   subgeneros: Array<string | { _id: string; nome: string }>
-  quem_nome: string
+  quem_nome?: string | null
+  quem_user_id?: { _id: string; name: string } | null
   porque: string
   isbn?: string
   cover_url?: string
@@ -123,8 +126,8 @@ export interface ApiBook {
   autor: ApiPopulated | string
   midia: ApiPopulated | string
   categoria: ApiPopulated | string
-  quem_nome: string
-  quem_user_id?: { _id: string; name: string }
+  quem_nome?: string | null
+  quem_user_id?: { _id: string; name: string } | null
   porque: string
   cover_url?: string
   synopsis?: string
@@ -190,7 +193,7 @@ export interface AdminBook {
   midia: string | { _id: string; nome: string }
   categoria: string | { _id: string; nome: string }
   subgeneros: Array<string | { _id: string; nome: string }>
-  quem_nome: string
+  quem_nome?: string | null
   quem_user_id?: { _id: string; name: string } | null
   porque: string
   isbn?: string
@@ -243,7 +246,16 @@ export interface EnrichmentRun {
 
 export type Role = 'admin' | 'editor' | 'viewer'
 
-export type Resource = 'books' | 'users' | 'autores' | 'midias' | 'categorias' | 'subgeneros' | 'permissions'
+export type Resource =
+  | 'books'
+  | 'users'
+  | 'autores'
+  | 'midias'
+  | 'categorias'
+  | 'subgeneros'
+  | 'permissions'
+  | 'claim'
+  | 'enrichment'
 
 export type Action = 'create' | 'read' | 'update' | 'delete'
 
@@ -293,7 +305,8 @@ export interface BookForEdit {
   midia: string | { _id: string; nome: string }
   categoria: string | { _id: string; nome: string }
   subgeneros: Array<string | { _id: string; nome: string }>
-  quem_nome: string
+  quem_nome?: string | null
+  quem_user_id?: { _id: string; name: string } | null
   porque: string
   synopsis?: string
   isbn?: string

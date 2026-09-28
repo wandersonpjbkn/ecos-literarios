@@ -1,5 +1,7 @@
 import 'vue-router'
 
+import type { Action, Resource } from '@/types'
+
 declare module 'vue-router' {
   interface RouteMeta {
     title?: string
@@ -8,5 +10,7 @@ declare module 'vue-router' {
     frame?: 'area' | 'auth'
     // Set only by adminRoute() in router/modules/admin.ts; the guard and the panel menu read it.
     adminOnly?: boolean
+    // Set only by permissionRoute(): the section follows this entry of the matrix.
+    permission?: { resource: Resource; action: Action }
   }
 }

@@ -20,7 +20,7 @@ export function useBookEditor() {
       editingBook.value = await getBookForEdit(bookId)
       isOpen.value = true
     } catch (err) {
-      error.value = errorText(err, 'Não deu pra abrir este livro pra editar. Tente de novo.')
+      error.value = errorText(err, 'Não foi possível abrir este livro para editar. Tente de novo.')
       useErrorReporter().captureException(err, { context: 'useBookEditor.open' })
     } finally {
       loadingId.value = null

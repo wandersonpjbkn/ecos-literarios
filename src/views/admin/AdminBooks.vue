@@ -77,16 +77,12 @@
             resolveName(book.categoria) || 'sem gênero'
           }}</span>
           <span role="cell" class="books-table__field" data-label="Formato">{{ resolveName(book.midia) || 'sem formato' }}</span>
-          <span role="cell" class="books-table__field" data-label="Quem mencionou">{{ book.quem_nome || 'ninguém' }}</span>
+          <span role="cell" class="books-table__field" data-label="Quem mencionou">{{ personName(book) || 'ninguém' }}</span>
           <span role="cell" class="books-table__missing" data-label="Faltando">{{ missingLabel(book) }}</span>
           <span role="cell" class="books-table__actions">
             <AppButton v-if="permissions.canEditBook(book.quem_user_id?._id)" size="md" @click="openEdit(book)">
               <BaseIcon name="pencil" aria-hidden="true" />
               Editar<span class="visually-hidden">{{ ' ' }}{{ book.titulo }}</span>
-            </AppButton>
-            <AppButton v-if="canDelete" size="md" @click="confirmDelete(book)">
-              <BaseIcon name="trash" aria-hidden="true" />
-              Remover<span class="visually-hidden">{{ ' ' }}{{ book.titulo }}</span>
             </AppButton>
           </span>
         </div>
@@ -105,33 +101,24 @@
       :book="editingBook"
       :title="newTitle"
       :is-open="isDrawerOpen"
+      :return-focus="() => table?.querySelector<HTMLElement>('[data-list-item]')"
       @close="closeDrawer"
       @saved="onBookSaved"
-    />
-
-    <ConfirmModal
-      v-model="deleteModal.open"
-      :title="deleteModal.title"
-      description="O livro sai do catálogo. Não dá pra desfazer."
-      confirm-label="Remover"
-      busy-label="Removendo…"
-      :error="deleteModal.error"
-      :loading="isDeleting"
-      :return-focus="() => table?.querySelector<HTMLElement>('[data-list-item]')"
-      @confirm="handleDelete"
-      @cancel="deleteModal.open = false"
+      @removed="onBookRemoved"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { errorText } from '@/composables/apiError'
-import { ref, computed, reactive, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
-import { useErrorReporter, useToast } from '@/composables'
-import { getPanelBooks, removeBook } from '@/composables/useApi'
+import { useErrorReporter } from '@/composables'
+import { getPanelBooks } from '@/composables/useApi'
 import { useLoadMore } from '@/composables/useLoadMore'
 import { useSegments, type SegmentOption } from '@/composables/useSegments'
+import { personName } from '@/data/person'
 import { joinWords } from '@/data/words'
 import { usePermissionsStore } from '@/stores'
 import AppButton from '@/components/AppButton.vue'
@@ -142,7 +129,6 @@ import SectionHeader from '@/components/SectionHeader.vue'
 import AppNotice from '@/components/AppNotice.vue'
 import ListFooter from '@/components/ListFooter.vue'
 import BookFormDrawer from '@/components/BookFormDrawer.vue'
-import ConfirmModal from '@/components/ConfirmModal.vue'
 import type { Suggestion, SegmentFilter, AdminBook } from '@/types'
 
 // Segment and how many are open live in the URL (FilterChip.md), so going back keeps the list the admin was fixing.
@@ -150,7 +136,6 @@ const permissions = usePermissionsStore()
 
 // The server decides; this only hides what it would refuse for this level (users/me).
 const canCreate = computed(() => permissions.can('books', 'create'))
-const canDelete = computed(() => permissions.can('books', 'delete'))
 
 const table = ref<HTMLElement | null>(null)
 const books = ref<AdminBook[]>([])
@@ -161,14 +146,6 @@ const searchQuery = ref('')
 const isDrawerOpen = ref(false)
 const editingBook = ref<AdminBook | null>(null)
 const newTitle = ref('')
-const isDeleting = ref(false)
-
-const deleteModal = reactive({
-  open: false,
-  title: '',
-  error: '',
-  targetId: '',
-})
 
 const resolveName = (field: string | { nome: string } | undefined): string =>
   !field ? '' : typeof field === 'string' ? field : field.nome
@@ -267,7 +244,7 @@ const fetchBooks = async (quiet = false) => {
   try {
     books.value = await getPanelBooks()
   } catch (e) {
-    loadError.value = errorText(e, 'Não deu pra carregar os livros. Tente de novo.')
+    loadError.value = errorText(e, 'Não foi possível carregar os livros. Tente de novo.')
     useErrorReporter().captureException(e, { context: 'AdminBooks.fetchBooks' })
     console.error('[AdminBooks]', e)
   } finally {
@@ -318,38 +295,28 @@ const onBookSaved = () => {
   fetchBooks(true)
 }
 
-// ── Delete ────────────────────────────────────────────────────────
-const confirmDelete = (book: AdminBook) => {
-  deleteModal.title = `Remover "${book.titulo}"?`
-  deleteModal.error = ''
-  deleteModal.targetId = book._id
-  deleteModal.open = true
-}
-
-// A failed removal stays in the dialog, where the admin acted; confirming again retries it.
-const handleDelete = async () => {
-  isDeleting.value = true
-  deleteModal.error = ''
-
-  try {
-    await removeBook(deleteModal.targetId)
-
-    const removed = books.value.find((b) => b._id === deleteModal.targetId)
-    books.value = books.value.filter((b) => b._id !== deleteModal.targetId)
-    useToast().show(`"${removed?.titulo}" removido.`)
-    deleteModal.open = false
-  } catch (e) {
-    deleteModal.error = errorText(e, 'Não deu pra remover o livro. Tente de novo.')
-    useErrorReporter().captureException(e, { context: 'AdminBooks.delete' })
-  } finally {
-    isDeleting.value = false
-  }
+// Removing lives in the edit form (slice 8b); the row only leaves the list.
+const onBookRemoved = (id: string) => {
+  books.value = books.value.filter((b) => b._id !== id)
 }
 
 // The search is not in the URL, so a new term starts the list from the top here.
 watch(searchQuery, () => reset())
 
 onMounted(() => fetchBooks())
+
+// "Adicionar" from anywhere lands here with ?adicionar=1 and opens the form; the matrix may still be on its way.
+const route = useRoute()
+const router = useRouter()
+watch(
+  [() => route.query.adicionar, canCreate],
+  ([asked, may]) => {
+    if (asked !== '1' || !may) return
+    openCreate()
+    router.replace({ query: { ...route.query, adicionar: undefined } })
+  },
+  { immediate: true },
+)
 </script>
 
 <style lang="scss" scoped>

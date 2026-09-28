@@ -59,17 +59,20 @@
               </fieldset>
             </template>
             <template v-else>
-              <span class="resource-row__name">{{ resourceLabel(resource) }}</span>
-              <span class="resource-row__allowed" :class="{ 'is-none': allowedText(role, resource) === 'Nada' }">
+              <span class="resource-row__allowed" :class="{ 'is-none': isNone(role, resource) }">
                 {{ allowedText(role, resource) }}
               </span>
             </template>
           </div>
+          <!-- Not in the matrix: said here so nobody reads the list as complete. -->
+          <p class="resource-row resource-row--fixed panel-row">
+            Mudar o nível de alguém: só Administrador (não muda aqui)
+          </p>
         </div>
       </section>
     </div>
 
-    <EmptyState v-else-if="!error" title="Não deu pra ver as permissões agora">
+    <EmptyState v-else-if="!error" title="Não foi possível ver as permissões agora">
       <AppButton @click="fetchPermissions()">Tentar de novo</AppButton>
     </EmptyState>
 
@@ -105,7 +108,17 @@ import type { Role, Resource, Action, Permission } from '@/types'
 import { useAuthStore, usePermissionsStore } from '@/stores'
 
 const ROLES: Role[] = ['admin', 'editor', 'viewer']
-const RESOURCES: Resource[] = ['books', 'users', 'autores', 'midias', 'categorias', 'subgeneros', 'permissions']
+const RESOURCES: Resource[] = [
+  'books',
+  'users',
+  'autores',
+  'midias',
+  'categorias',
+  'subgeneros',
+  'claim',
+  'enrichment',
+  'permissions',
+]
 const ACTIONS: Action[] = ['create', 'read', 'update', 'delete']
 const WRITES: Action[] = ['create', 'update', 'delete']
 
@@ -117,6 +130,8 @@ const resourceLabel = (r: string) =>
     midias: 'Formatos',
     categorias: 'Gêneros',
     subgeneros: 'Subgêneros',
+    claim: 'Vínculo',
+    enrichment: 'Capas e sinopses',
     permissions: 'Permissões',
   })[r] ?? r
 
@@ -208,12 +223,33 @@ const toggleDraft = (resource: Resource, action: Action) => {
 }
 
 // Read mode says it in words ("Criar, ver e editar"); the boxes appear only while that level is being edited.
-const allowedText = (role: Role, resource: Resource) => {
-  const labels = actionsOf(resource).filter((action) => hasAction(role, resource, action)).map((action, i) =>
-    i === 0 ? actionLabel(action) : actionLabel(action).toLowerCase(),
-  )
-  return labels.length ? joinWords(labels) : 'Nada'
+// Each row says, as a sentence, what the level may do there (slice 8d): "Ver a lista de membros".
+const NOUN: Partial<Record<Resource, string>> = {
+  books: 'livros',
+  autores: 'autores',
+  midias: 'formatos',
+  categorias: 'gêneros',
+  subgeneros: 'subgêneros',
 }
+const VERB: Record<Action, string> = { create: 'adicionar', read: 'ver', update: 'editar', delete: 'remover' }
+const PHRASE: Partial<Record<Resource, Partial<Record<Action, string>>>> = {
+  users: { read: 'ver a lista de membros' },
+  claim: { update: 'vincular a própria conta a um nome do grupo', create: 'incluir um nome novo de pessoa do clube' },
+  enrichment: { update: 'buscar capas e dados para o acervo inteiro' },
+}
+const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
+
+const allowedText = (role: Role, resource: Resource) => {
+  const allowed = actionsOf(resource).filter((action) => hasAction(role, resource, action))
+  // A resource with no sentence of its own still names itself: "Adicionar e ver <recurso>".
+  const noun = NOUN[resource] ?? (PHRASE[resource] ? undefined : resourceLabel(resource).toLowerCase())
+  if (!allowed.length) return `Nada em ${noun ?? resourceLabel(resource).toLowerCase()}`
+  if (noun) return `${capitalize(joinWords(allowed.map((action) => VERB[action])))} ${noun}`
+  // Phrases name their own object, so they join whole: "Vincular … e incluir …".
+  const phrases = PHRASE[resource] ?? {}
+  return capitalize(joinWords(allowed.map((action) => phrases[action] ?? VERB[action])))
+}
+const isNone = (role: Role, resource: Resource) => !actionsOf(resource).some((action) => hasAction(role, resource, action))
 
 const confirm = reactive({ open: false, loading: false, error: '' })
 
@@ -255,7 +291,7 @@ const applyChanges = async () => {
     useToast().show(`Permissões de ${roleLabel(role)} salvas.`)
   } catch (e) {
     useErrorReporter().captureException(e, { context: 'AdminPermissions.applyChanges', role: editingRole.value })
-    confirm.error = errorText(e, 'Não deu pra salvar as permissões. Tente de novo.')
+    confirm.error = errorText(e, 'Não foi possível salvar as permissões. Tente de novo.')
     // Part of it may have been saved: the screen shows what the server holds, not what was sent.
     await fetchPermissions(true)
   } finally {
@@ -272,7 +308,7 @@ const fetchPermissions = async (quiet = false) => {
     permissions.value = matrix.permissions
     configurable.value = matrix.configurable
   } catch (e) {
-    error.value = 'Não deu pra carregar as permissões. Tente de novo.'
+    error.value = 'Não foi possível carregar as permissões. Tente de novo.'
     useErrorReporter().captureException(e, { context: 'AdminPermissions.fetchPermissions' })
     console.error('[AdminPermissions]', e)
   } finally {
@@ -336,13 +372,18 @@ onMounted(fetchPermissions)
   }
 
   &__allowed {
-    font-size: var(--font-size-meta);
-    color: var(--color-text-secondary);
-    text-align: right;
+    font-size: var(--font-size-ui);
+    color: var(--color-text-default);
 
     &.is-none {
       color: var(--color-text-subtle);
     }
+  }
+
+  &--fixed {
+    margin: 0;
+    font-size: var(--font-size-meta);
+    color: var(--color-text-subtle);
   }
 
   &__note {

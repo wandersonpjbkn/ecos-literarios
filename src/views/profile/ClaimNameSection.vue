@@ -2,7 +2,7 @@
   <div class="area-section">
     <SectionHeader title="Seu nome no grupo">
       Os livros antigos vieram da conversa do WhatsApp, com o nome de quem falou deles. Vincule o nome que é seu e eles
-      passam a aparecer em Meus livros, pra você corrigir.
+      passam a aparecer em Meus livros, onde você pode corrigi-los.
     </SectionHeader>
 
     <BaseSpinner v-if="loading">
@@ -13,7 +13,7 @@
 
     <template v-else-if="status?.has_claim">
       <AppNotice v-if="status.warning" live="status" :text="status.warning" />
-      <div class="claim-card">
+      <div class="claim-card width-column">
         <UserAvatar :alt="status.claim_name ?? ''" />
         <div class="claim-card__who">
           <p class="claim-card__name">Você é "{{ status.claim_name }}" no catálogo</p>
@@ -26,7 +26,12 @@
       </div>
     </template>
 
-    <form v-else class="claim-form" @submit.prevent="submitClaim">
+    <!-- Linking follows the matrix (claim: update); a Visitante sees why instead of a form. -->
+    <p v-else-if="!canClaim" class="claim-locked">
+      Vincular um nome do grupo não está liberado para a sua conta. Se você é do clube, fale com um Administrador.
+    </p>
+
+    <form v-else class="claim-form width-form" @submit.prevent="submitClaim">
       <AppField label="Escolha o seu nome" hint="É o nome que aparece nos livros que você mencionou.">
         <template #default="{ labelId, describedBy }">
           <MultiSelect
@@ -48,15 +53,16 @@
     </form>
 
     <ul class="claim-rules">
-      <li>Um nome por vez: pra trocar, desfaça o vínculo e escolha outro.</li>
+      <li>Um nome por vez: para trocar, desfaça o vínculo e escolha outro.</li>
       <li>Um nome que outra pessoa já vinculou não aparece na lista.</li>
     </ul>
 
     <ConfirmModal
       v-model="undo.open"
       :title="`Desfazer o vínculo com &quot;${status?.claim_name}&quot;?`"
+      destructive
       description="Os livros saem de Meus livros e o nome volta a ficar livre."
-      confirm-label="Desfazer"
+      confirm-label="Desfazer o vínculo"
       busy-label="Desfazendo…"
       :error="undo.error"
       :loading="undo.loading"
@@ -72,8 +78,9 @@ import SectionHeader from '@/components/SectionHeader.vue'
 import { computed, onMounted, reactive, ref } from 'vue'
 
 import { useApi, useErrorReporter, useToast } from '@/composables'
+import { reloadAccount } from '@/composables/accountSync'
 import { claimRegister, getMyClaimStatus, unclaimRegister } from '@/composables/useApi'
-import { useAuthStore, useBooksStore } from '@/stores'
+import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
 import AppButton from '@/components/AppButton.vue'
 import AppField from '@/components/AppField.vue'
 import AppNotice from '@/components/AppNotice.vue'
@@ -84,6 +91,7 @@ import type { MyClaimStatus } from '@/types'
 
 const authStore = useAuthStore()
 const booksStore = useBooksStore()
+const permissions = usePermissionsStore()
 const toast = useToast()
 
 const status = ref<MyClaimStatus | null>(null)
@@ -94,11 +102,15 @@ const isSubmitting = ref(false)
 const chosenName = ref('')
 const undo = reactive({ open: false, loading: false, error: '' })
 
-// Names in books nobody has linked yet; the API refuses a name another account holds.
+// Placeholders no account has linked; a book added after a claim may lack its owner, so its name is not free.
 const availableNames = computed(() => {
-  const free = booksStore.books.filter((b) => !b.quem_user_id).map((b) => b.quem)
-  return [...new Set(free.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'))
+  const taken = new Set(booksStore.books.filter((b) => b.quem_user_id && b.quem_nome).map((b) => b.quem_nome))
+  const free = booksStore.books
+    .filter((b) => !b.quem_user_id && b.quem_nome && !taken.has(b.quem_nome))
+    .map((b) => b.quem_nome as string)
+  return [...new Set(free)].sort((a, b) => a.localeCompare(b, 'pt-BR'))
 })
+const canClaim = computed(() => permissions.can('claim', 'update'))
 
 const claimedText = computed(() => {
   const n = status.value?.claimed_books ?? 0
@@ -112,7 +124,7 @@ const load = async () => {
   try {
     status.value = await getMyClaimStatus()
   } catch (err) {
-    loadError.value = errorText(err, 'Não deu pra carregar seu nome no grupo. Tente de novo.')
+    loadError.value = errorText(err, 'Não foi possível carregar seu nome no grupo. Tente de novo.')
     useErrorReporter().captureException(err, { context: 'ClaimNameSection.load' })
   } finally {
     loading.value = false
@@ -137,10 +149,10 @@ const submitClaim = async () => {
         : 'Nome vinculado.',
     )
     chosenName.value = ''
-    await load()
+    await Promise.all([load(), reloadAccount()])
     useApi().fetchBooks(true)
   } catch (err) {
-    actionError.value = errorText(err, 'Não deu pra vincular o nome. Tente de novo.')
+    actionError.value = errorText(err, 'Não foi possível vincular o nome. Tente de novo.')
     useErrorReporter().captureException(err, { context: 'ClaimNameSection.submit', quemNome: chosenName.value })
   } finally {
     isSubmitting.value = false
@@ -160,10 +172,10 @@ const unclaim = async () => {
     await unclaimRegister()
     undo.open = false
     toast.show('Vínculo desfeito. Os livros saíram de Meus livros.')
-    await load()
+    await Promise.all([load(), reloadAccount()])
     useApi().fetchBooks(true)
   } catch (err) {
-    undo.error = errorText(err, 'Não deu pra desfazer o vínculo. Tente de novo.')
+    undo.error = errorText(err, 'Não foi possível desfazer o vínculo. Tente de novo.')
     useErrorReporter().captureException(err, { context: 'ClaimNameSection.unclaim' })
   } finally {
     undo.loading = false
@@ -177,6 +189,14 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.claim-locked {
+  max-width: var(--text-column);
+  margin: 0;
+  font-size: var(--font-size-ui);
+  line-height: var(--line-height-text);
+  color: var(--color-text-secondary);
+}
+
 .claim-card {
   display: flex;
   flex-wrap: wrap;

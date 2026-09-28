@@ -1,5 +1,6 @@
 import type { RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
-import { useAuthStore } from '@/stores'
+import { useAuthStore, usePermissionsStore } from '@/stores'
+import type { Action, Resource } from '@/types'
 
 // Signed out goes to the login and back here; signed in without the level sees why (AdminForbidden).
 const editorGuard = (to: RouteLocationNormalized) => {
@@ -19,6 +20,23 @@ const adminRoute = (route: RouteRecordRaw): RouteRecordRaw => ({
   ...route,
   beforeEnter: adminGuard,
   meta: { ...route.meta, adminOnly: true },
+})
+
+/** Whether this account may open a section the matrix controls; before users/me answers, the level stands in. */
+export const mayOpen = (permission: { resource: Resource; action: Action }): boolean => {
+  const permissions = usePermissionsStore()
+  return permissions.mine ? permissions.can(permission.resource, permission.action) : useAuthStore().isEditor
+}
+
+// A section that follows the matrix (Permissões), not a fixed level: the guard and the panel menu both read it.
+const permissionRoute = (route: RouteRecordRaw, resource: Resource, action: Action): RouteRecordRaw => ({
+  ...route,
+  beforeEnter: (to: RouteLocationNormalized) => {
+    const auth = useAuthStore()
+    if (!auth.isLoggedIn) return { name: 'auth-login', query: { voltar: to.fullPath } }
+    if (!mayOpen({ resource, action })) return { name: 'admin-forbidden' }
+  },
+  meta: { ...route.meta, permission: { resource, action } },
 })
 
 export const routes: RouteRecordRaw[] = [
@@ -60,13 +78,17 @@ export const routes: RouteRecordRaw[] = [
         component: () => import('@/views/admin/AdminEntities.vue'),
         meta: { title: 'Autores e gêneros · Painel do clube', pageClass: 'page-admin' },
       },
-      adminRoute({
-        path: 'capas',
-        name: 'admin-enrichment',
-        alias: 'enriquecimento',
-        component: () => import('@/views/admin/AdminEnrichment.vue'),
-        meta: { title: 'Capas e sinopses · Painel do clube', pageClass: 'page-admin' },
-      }),
+      permissionRoute(
+        {
+          path: 'capas',
+          name: 'admin-enrichment',
+          alias: 'enriquecimento',
+          component: () => import('@/views/admin/AdminEnrichment.vue'),
+          meta: { title: 'Capas e sinopses · Painel do clube', pageClass: 'page-admin' },
+        },
+        'enrichment',
+        'update',
+      ),
       adminRoute({
         path: 'vinculos',
         name: 'admin-claims',

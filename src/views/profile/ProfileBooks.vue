@@ -6,9 +6,6 @@
         <p class="my-books__subtitle">Os livros que você mencionou no grupo e os que você adicionou aqui.</p>
       </div>
       <LiveStatus :text="announced" />
-      <p v-if="myBooks.length" class="my-books__count">
-        <strong>{{ myBooks.length }}</strong> {{ myBooks.length === 1 ? 'livro' : 'livros' }}
-      </p>
     </header>
 
     <AppNotice v-if="editor.error.value" :text="editor.error.value" />
@@ -19,21 +16,26 @@
 
     <AppNotice
       v-else-if="booksStore.error && !booksStore.books.length"
-      text="Não deu pra carregar os livros. Tente de novo."
+      text="Não foi possível carregar os livros. Tente de novo."
       retry
       @retry="useApi().fetchBooks()"
     />
 
+    <!-- Linking follows the matrix (claim: update): without it, no way in that leads to a refusal. -->
     <EmptyState
       v-else-if="!myBooks.length"
       title="Nenhum livro com o seu nome ainda"
-      text="Aqui aparecem os livros que você mencionou no grupo, depois que você vincula a sua conta ao nome que aparece neles."
+      :text="
+        canClaim
+          ? 'Aqui aparecem os livros que você mencionou no grupo, depois que você vincula a sua conta ao nome que aparece neles.'
+          : 'Aqui aparecem os livros mencionados por você.'
+      "
     >
-      <AppButton variant="primary" :to="claimLink">Vincular meu nome</AppButton>
+      <AppButton v-if="canClaim" variant="primary" :to="claimLink">Vincular meu nome</AppButton>
     </EmptyState>
 
     <template v-else>
-      <p v-if="hasClaim === false" class="my-books__hint">
+      <p v-if="hasClaim === false && canClaim" class="my-books__hint">
         Faltou algum livro seu? Os livros da conversa do grupo aparecem aqui quando você vincula o seu nome.
         <RouterLink :to="claimLink" class="my-books__hint-link">Vincular meu nome</RouterLink>
       </p>
@@ -68,7 +70,7 @@
 
       <ul v-else ref="grid" class="my-books__grid book-grid">
         <li v-for="book in visibleBooks" :key="book.id" class="my-book">
-          <BookCard :book="book" data-list-item />
+          <BookCard :book="book" hide-mention data-list-item />
           <div class="my-book__foot">
             <!-- Not disabled while loading: open() already refuses a second click, and a disabled button drops the focus. -->
             <AppButton size="md" @click="editor.open(book.id)">
@@ -95,6 +97,7 @@
       scope="member"
       @close="editor.close"
       @saved="editor.onSaved"
+      @removed="editor.onSaved"
     />
   </div>
 </template>
@@ -107,7 +110,7 @@ import { rememberMyBooks, useApi, useBookEditor, useBookSort, usePageMeta } from
 import { getMyClaimStatus } from '@/composables/useApi'
 import { useLoadMore } from '@/composables/useLoadMore'
 import { useSegments, type SegmentOption } from '@/composables/useSegments'
-import { useAuthStore, useBooksStore } from '@/stores'
+import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
 import AppButton from '@/components/AppButton.vue'
 import AppNotice from '@/components/AppNotice.vue'
 import AppSelect from '@/components/AppSelect.vue'
@@ -146,6 +149,7 @@ const SEGMENTS: SegmentOption<Segment, Book>[] = [
 const route = useRoute()
 const authStore = useAuthStore()
 const booksStore = useBooksStore()
+const canClaim = computed(() => usePermissionsStore().can('claim', 'update'))
 const editor = useBookEditor()
 
 const claimLink: RouteLocationRaw = { name: 'account-claim' }
@@ -232,16 +236,6 @@ onMounted(async () => {
     margin: var(--space-1) 0 0;
     font-size: var(--font-size-body);
     color: var(--color-text-secondary);
-  }
-
-  &__count {
-    margin: 0;
-    font-size: var(--font-size-body);
-    color: var(--color-text-secondary);
-
-    strong {
-      color: var(--color-text-default);
-    }
   }
 
   &__hint {

@@ -132,6 +132,7 @@
         scope="member"
         @close="closeEditor"
         @saved="onSaved"
+        @removed="onRemoved"
       />
     </template>
   </div>
@@ -196,6 +197,11 @@ const { catalogLink } = useFilters()
 
 onMounted(() => useApi().fetchBooks())
 const retry = () => useApi().fetchBooks(true)
+// The book no longer exists: back to the list it was opened from, which no longer shows it.
+const onRemoved = () => {
+  useApi().fetchBooks(true)
+  router.push(lastList.value.path)
+}
 
 const book = computed((): Book | undefined => booksStore.books.find((b) => String(b.id) === String(route.params.id)))
 const bookPath = computed(() =>
@@ -298,10 +304,19 @@ usePageMeta(
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
+
+    // Phone: the same links sit in the facts right below; up here they only push the book down (8e).
+    @media (max-width: $bp-phone-max) {
+      display: none;
+    }
   }
 
   &__title {
     margin-top: var(--space-3);
+
+    @media (max-width: $bp-phone-max) {
+      margin-top: 0;
+    }
     font-size: var(--font-size-display-m);
     line-height: var(--line-height-display);
     font-weight: var(--font-weight-bold);

@@ -29,10 +29,11 @@
 
             <div class="app-drawer__header">
               <h2 :id="titleId" class="app-drawer__title">{{ title }}</h2>
-              <button ref="closeButton" type="button" class="app-drawer__close" @click="emit('close')">
+              <!-- The secondary weight, not a borderless grey: that is how a disabled button looks (8e). -->
+              <AppButton ref="closeButton" size="md" class="app-drawer__close" @click="emit('close')">
                 <BaseIcon name="times" aria-hidden="true" />
-                <span>Fechar</span>
-              </button>
+                Fechar
+              </AppButton>
             </div>
           </div>
 
@@ -53,6 +54,8 @@
 import { computed, inject, onBeforeUnmount, ref, useId, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
+import AppButton from '@/components/AppButton.vue'
+
 import { FRAME_HAS_RAIL } from '@/layouts/frame'
 import { useBackCloses } from '@/composables/useBackCloses'
 import { useBreakpoints } from '@/composables/useBreakpoints'
@@ -72,6 +75,8 @@ const props = defineProps<{
   wide?: boolean
   // Selector of the first field to focus; without it focus starts on "Fechar".
   initialFocus?: string
+  // Where focus goes when the button that opened the panel is gone (the book removed from its row).
+  returnFocus?: () => HTMLElement | null | undefined
 }>()
 
 const emit = defineEmits<{ close: [] }>()
@@ -81,7 +86,7 @@ const titleId = computed(() => props.titleId ?? generatedId)
 // The frame says whether a rail sits beside the drawer; outside any frame there is none.
 const hasRail = inject(FRAME_HAS_RAIL, false)
 const panel = ref<HTMLElement | null>(null)
-const closeButton = ref<HTMLButtonElement | null>(null)
+const closeButton = ref<{ $el: HTMLElement } | null>(null)
 // Only the phone's bottom sheet drags; the desktop side panel does not.
 const isPhone = useMediaQuery(useBreakpoints.isPhone)
 const drag = useSheetDrag(panel, () => isPhone.value, () => emit('close'))
@@ -103,8 +108,9 @@ useDialogFocus({
   open: () => props.open,
   panel,
   initial: () =>
-    (props.initialFocus ? panel.value?.querySelector<HTMLElement>(props.initialFocus) : null) ?? closeButton.value,
+    (props.initialFocus ? panel.value?.querySelector<HTMLElement>(props.initialFocus) : null) ?? closeButton.value?.$el,
   onClose: () => emit('close'),
+  fallback: () => props.returnFocus?.(),
 })
 </script>
 
@@ -185,31 +191,7 @@ useDialogFocus({
   }
 
   &__close {
-    display: inline-flex;
-    min-width: var(--touch-min);
-    height: var(--touch-min);
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: 0 var(--space-4);
-    border: none;
-    border-radius: var(--radius-pill);
-    background: var(--color-background-subtle);
-    font-family: var(--font-family-body);
-    font-size: var(--font-size-ui);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-default);
-    cursor: pointer;
-
-    &:focus-visible {
-      outline: 2px solid var(--color-border-focus);
-      outline-offset: var(--space-1);
-    }
-
-    :deep(.base-icon) {
-      width: var(--icon-md);
-      height: var(--icon-md);
-    }
+    flex-shrink: 0;
   }
 
   &__body {

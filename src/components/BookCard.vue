@@ -3,7 +3,7 @@
     <CoverBlock :title="book.titulo" :genre="book.categoria" :format="book.midia" :cover-url="book.cover_url" />
 
     <p class="book-card__author">{{ book.autor }}</p>
-    <p v-if="book.quem" class="book-card__mention">mencionado por {{ book.quem }}</p>
+    <p v-if="book.quem && !hideMention" class="book-card__mention">mencionado por {{ book.quem }}</p>
   </RouterLink>
 </template>
 
@@ -15,10 +15,12 @@ import type { Book } from '@/types'
 
 const props = defineProps<{
   book: Book
+  // Meus livros: every card is the same person's, so the line would repeat one name (BookCard.md).
+  hideMention?: boolean
 }>()
 
 const label = computed(() =>
-  [props.book.titulo, props.book.autor, props.book.quem && `mencionado por ${props.book.quem}`]
+  [props.book.titulo, props.book.autor, !props.hideMention && props.book.quem && `mencionado por ${props.book.quem}`]
     .filter(Boolean)
     .join(', '),
 )

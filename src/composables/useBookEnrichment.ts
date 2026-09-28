@@ -70,7 +70,7 @@ export function useBookEnrichment(bookId: () => string | undefined) {
       preview.value = { sourceLabel, items }
       selectedFields.value = items.filter((i) => i.hasValue).map((i) => i.field)
     } catch (e) {
-      error.value = errorText(e, 'Não deu pra buscar os dados do livro. Tente de novo.')
+      error.value = errorText(e, 'Não foi possível buscar os dados do livro. Tente de novo.')
       if (import.meta.env.DEV) console.error('[useBookEnrichment] fetchPreview', e)
       useErrorReporter().captureException(e, { context: 'useBookEnrichment.preview' })
     } finally {
@@ -91,7 +91,7 @@ export function useBookEnrichment(bookId: () => string | undefined) {
       await fetchPreview()
       return data.book
     } catch (e) {
-      error.value = errorText(e, 'Não deu pra salvar os dados no livro. Tente de novo.')
+      error.value = errorText(e, 'Não foi possível salvar os dados no livro. Tente de novo.')
       if (import.meta.env.DEV) console.error('[useBookEnrichment] applySelected', e)
       useErrorReporter().captureException(e, { context: 'useBookEnrichment.apply' })
       return null

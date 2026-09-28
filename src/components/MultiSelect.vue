@@ -113,8 +113,11 @@ const props = withDefaults(
     searchable?: boolean
     // Id of the visible label outside the control (a form field's label), so the button is named by it.
     labelledby?: string
+    // Offers the typed text as a last option ("Outro nome: Joana"); choosing it emits `create` instead of `toggle`.
+    createLabel?: (typed: string) => string
   }>(),
   {
+    createLabel: undefined,
     multiple: true,
     searchable: true,
     labelledby: undefined,
@@ -126,7 +129,11 @@ const id = useId()
 const emit = defineEmits<{
   toggle: [value: string]
   clear: []
+  create: [typed: string]
 }>()
+
+// Never a real option value: the option list is built from ids and names.
+const CREATE = '\u0000create'
 
 const wrapRef = ref<HTMLDivElement | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
@@ -152,7 +159,10 @@ const normalizedOptions = computed(() => {
   if (!searchable.value || !query.value.trim()) return base
 
   const q = query.value.toLowerCase()
-  return base.filter((opt) => opt.label.toLowerCase().includes(q))
+  const found = base.filter((opt) => opt.label.toLowerCase().includes(q))
+  const typed = query.value.trim()
+  if (!props.createLabel || base.some((opt) => opt.label.toLowerCase() === typed.toLowerCase())) return found
+  return [...found, { label: props.createLabel(typed), value: CREATE }]
 })
 
 const hasValue = computed(() => {
@@ -166,7 +176,12 @@ const selectedCount = computed(() => {
 
 const selectedOption = computed(() => {
   if (multiple.value || typeof props.selected !== 'string') return null
-  return normalizedOptions.value.find((opt) => opt.value === props.selected) ?? null
+  // From every option, not the filtered ones: typing in the search must not blank the chosen label.
+  return (
+    props.options
+      .map((opt) => (typeof opt === 'string' ? { label: opt, value: opt } : opt))
+      .find((opt) => opt.value === props.selected) ?? null
+  )
 })
 
 const isSelected = (value: string): boolean => {
@@ -178,6 +193,11 @@ const isSelected = (value: string): boolean => {
 }
 
 const handleSelect = (value: string) => {
+  if (value === CREATE) {
+    emit('create', query.value.trim())
+    close()
+    return
+  }
   emit('toggle', value)
 
   if (!multiple.value) close()

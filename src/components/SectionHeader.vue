@@ -2,7 +2,7 @@
   <div class="section__header">
     <div>
       <h2 class="section__title">{{ title }}</h2>
-      <p class="section__desc">
+      <p v-if="$slots.default" class="section__desc">
         <slot />
       </p>
     </div>

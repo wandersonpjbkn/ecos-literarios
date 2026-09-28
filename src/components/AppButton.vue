@@ -20,7 +20,7 @@ import { RouterLink, type RouteLocationRaw } from 'vue-router'
 
 import BasePill, { type PillTone } from '@/components/BasePill.vue'
 
-type Variant = 'primary' | 'secondary' | 'outline' | 'ghost'
+type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
 
 // Button.md weights on the shared pill; "outline" is a second action on a screen that spent its primary (Filtrar).
 const TONE: Record<Variant, PillTone> = {
@@ -28,6 +28,7 @@ const TONE: Record<Variant, PillTone> = {
   secondary: 'neutral',
   outline: 'outline',
   ghost: 'ghost',
+  danger: 'danger',
 }
 
 const props = withDefaults(

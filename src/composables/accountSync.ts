@@ -7,9 +7,13 @@ import type { FormatsSync } from '@/composables/formatsSync'
 import { useAuthStore, usePermissionsStore } from '@/stores'
 
 let retryLoad: (() => void) | null = null
+let reloadNow: (() => Promise<void>) | null = null
 
 /** Reads users/me again after a failed load ("Tentar de novo"). */
 export const retryAccountSync = () => retryLoad?.()
+
+/** Reads users/me again after something it reports changed (linking or unlinking a name). */
+export const reloadAccount = () => reloadNow?.() ?? Promise.resolve()
 
 /** One users/me read per session: the level's permissions to the store, the hidden formats to formatsSync. */
 export function startAccountSync(formats: FormatsSync): () => void {
@@ -20,7 +24,7 @@ export function startAccountSync(formats: FormatsSync): () => void {
     try {
       const me = await getMe()
       if (auth.user?._id !== userId) return
-      permissions.set(me.permissions)
+      permissions.set(me.permissions, me.claim_match ?? null)
       await formats.reconcile(userId, me.user.hidden_midias)
     } catch (err) {
       if (auth.user?._id !== userId) return
@@ -38,6 +42,10 @@ export function startAccountSync(formats: FormatsSync): () => void {
     { immediate: true },
   )
 
+  reloadNow = async () => {
+    const userId = auth.user?._id
+    if (userId) await load(userId)
+  }
   retryLoad = () => {
     const userId = auth.user?._id
     if (userId && permissions.failed) load(userId)
@@ -48,6 +56,7 @@ export function startAccountSync(formats: FormatsSync): () => void {
 
   return () => {
     retryLoad = null
+    reloadNow = null
     stopUser()
     stopOnline()
     stopToken()

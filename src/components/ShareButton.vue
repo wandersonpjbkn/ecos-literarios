@@ -5,7 +5,7 @@
       Compartilhar
     </AppButton>
     <!-- Stays until the next try: a toast would take the link away before anyone could select it. -->
-    <AppNotice v-if="uncopied" :text="`Não deu pra copiar. O link é ${uncopied}`" />
+    <AppNotice v-if="uncopied" :text="`Não foi possível copiar. O link é ${uncopied}`" />
   </div>
 </template>
 

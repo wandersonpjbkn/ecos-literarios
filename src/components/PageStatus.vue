@@ -41,6 +41,6 @@ const friendlyError = computed(() => {
   // Online and still no answer means the platform is down, not the reader's connection (COPY.md).
   if (/network|fetch|failed to fetch|http 5\d\d/i.test(raw))
     return navigator.onLine ? 'A plataforma está fora do ar agora. Tente daqui a pouco.' : 'Você está sem internet.'
-  return `Não deu pra abrir ${props.what}. Tente de novo.`
+  return `Não foi possível abrir ${props.what}. Tente de novo.`
 })
 </script>

@@ -24,7 +24,12 @@
             <AppButton ref="cancelButton" class="modal-btn" :disabled="loading" @click="emit('cancel')">
               Cancelar
             </AppButton>
-            <AppButton variant="primary" class="modal-btn" :disabled="loading" @click="emit('confirm')">
+            <AppButton
+              :variant="destructive ? 'danger' : 'primary'"
+              class="modal-btn"
+              :disabled="loading"
+              @click="emit('confirm')"
+            >
               {{ loading ? busyLabel : confirmLabel }}
             </AppButton>
           </div>
@@ -54,6 +59,8 @@ const props = withDefaults(
     loading?: boolean
     // Where focus goes when the button that opened the dialog is gone (the removed row).
     returnFocus?: () => HTMLElement | null | undefined
+    // No way back: the action takes the danger weight and the dialog has no blue button at all.
+    destructive?: boolean
   }>(),
   {
     description: '',
@@ -62,6 +69,7 @@ const props = withDefaults(
     error: '',
     loading: false,
     returnFocus: undefined,
+    destructive: false,
   },
 )
 
@@ -140,7 +148,6 @@ useDialogFocus({
   background: var(--color-background-subtle);
 }
 
-// One action colour (Button.md): removing is still the primary of this dialog, its label says what happens.
 .modal-btn {
   min-width: var(--button-min);
 }

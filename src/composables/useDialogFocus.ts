@@ -12,12 +12,21 @@ type Options = {
 
 const FOCUSABLE = 'button, input, textarea, select, a[href], [tabindex]:not([tabindex="-1"])'
 
+// Open dialogs, oldest first: only the last one opened answers the keyboard (a confirmation over the edit form).
+const stack: symbol[] = []
+
 /** Modal focus: moves in on open, Tab stays inside, Esc closes, and focus returns to what opened it. */
 export function useDialogFocus({ open, panel, initial, onClose, fallback }: Options) {
   let opener: HTMLElement | null = null
   let active = false
+  const token = Symbol('dialog')
+  const leaveStack = () => {
+    const at = stack.indexOf(token)
+    if (at !== -1) stack.splice(at, 1)
+  }
 
   const onKeydown = (event: KeyboardEvent) => {
+    if (stack[stack.length - 1] !== token) return
     // A control inside that already handled the key (preventDefault) keeps it: Esc closes that list, not the dialog.
     if (event.defaultPrevented) return
     if (event.key === 'Escape') return onClose()
@@ -45,12 +54,14 @@ export function useDialogFocus({ open, panel, initial, onClose, fallback }: Opti
     async (isOpen) => {
       if (isOpen) {
         active = true
+        stack.push(token)
         opener = document.activeElement as HTMLElement | null
         document.addEventListener('keydown', onKeydown)
         await nextTick()
         initial()?.focus()
       } else if (active) {
         active = false
+        leaveStack()
         document.removeEventListener('keydown', onKeydown)
         await nextTick()
         const target = opener?.isConnected ? opener : fallback?.()
@@ -61,5 +72,8 @@ export function useDialogFocus({ open, panel, initial, onClose, fallback }: Opti
     { immediate: true },
   )
 
-  onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
+  onBeforeUnmount(() => {
+    leaveStack()
+    document.removeEventListener('keydown', onKeydown)
+  })
 }

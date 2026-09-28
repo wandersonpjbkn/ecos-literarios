@@ -64,12 +64,12 @@
                 >Limpar os filtros</AppButton
               >
             </div>
-            <div v-else class="catalog-bar__chips chip-strip">
+            <div v-else-if="quickGenres.length" class="catalog-bar__chips chip-strip">
               <FilterChip
                 v-for="genre in quickGenres"
                 :key="genre"
                 :label="genre"
-                :count="optionCounts.categoria[genre]"
+                :count="quickCounts[genre]"
                 :to="hrefToggling('categoria', genre)"
               />
             </div>
@@ -83,14 +83,14 @@
             <EmptyState v-if="searchTerm" :title="`Nada com &quot;${searchTerm}&quot;`" :text="searchWhere">
               <AppButton @click="search = ''">Apagar a busca</AppButton>
               <AppButton v-if="hasFilters" @click="clearAll">Limpar os filtros</AppButton>
-              <AppButton v-if="canAddBooks" :to="addTarget" :disabled="!canWrite"> Adicionar esse livro </AppButton>
+              <AppButton v-if="canAddBooks && addTarget" :to="addTarget" :disabled="!canWrite"> Adicionar esse livro </AppButton>
             </EmptyState>
             <EmptyState
               v-else-if="!booksStore.books.length"
               title="Nenhum livro no catálogo ainda"
               text="Os livros que o clube adicionar aparecem aqui."
             >
-              <AppButton v-if="canAddBooks" :to="addTarget" :disabled="!canWrite"> Adicionar um livro </AppButton>
+              <AppButton v-if="canAddBooks && addTarget" :to="addTarget" :disabled="!canWrite"> Adicionar um livro </AppButton>
             </EmptyState>
             <EmptyState v-else title="Nenhum livro com esses filtros" :text="describeSelection(selected)">
               <AppButton @click="clearAll">Limpar os filtros</AppButton>
@@ -193,9 +193,9 @@ const savedWhen = computed(() => {
 })
 
 const banner = computed(() => {
-  if (!online.value) return 'Você está sem internet. Dá pra olhar, mas não pra adicionar.'
+  if (!online.value) return 'Você está sem internet. Os livros continuam visíveis, mas não é possível adicionar.'
   if (booksStore.error)
-    return `A plataforma está fora do ar agora. Você está vendo ${savedWhen.value}: dá pra olhar, mas não pra adicionar.`
+    return `A plataforma está fora do ar agora. Você está vendo ${savedWhen.value}: os livros continuam visíveis, mas não é possível adicionar.`
   return ''
 })
 
@@ -232,8 +232,17 @@ const preferenceChips = computed(() => (selected.value.midia.length ? [] : prefe
 
 const showApplied = computed(() => hasFilters.value || preferenceChips.value.length > 0)
 
+// A chip counts what its click will show: with a search on, the search's result; a zero chip is left out (slice 8d).
+const quickCounts = computed<Record<string, number>>(() => {
+  if (!searchTerm.value) return optionCounts.value.categoria
+  const counts: Record<string, number> = {}
+  for (const book of filtered.value) if (book.categoria) counts[book.categoria] = (counts[book.categoria] ?? 0) + 1
+  return counts
+})
+
 const quickGenres = computed(() =>
-  Object.entries(optionCounts.value.categoria)
+  Object.entries(quickCounts.value)
+    .filter(([, n]) => n > 0)
     .sort(([a, x], [b, y]) => y - x || a.localeCompare(b, 'pt-BR'))
     .slice(0, QUICK_GENRES)
     .map(([genre]) => genre),

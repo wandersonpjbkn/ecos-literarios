@@ -9,13 +9,13 @@
     </BaseSpinner>
     <AppNotice
       v-else-if="formats.length === 0 && booksStore.error"
-      text="Não deu pra carregar os livros. Tente de novo."
+      text="Não foi possível carregar os livros. Tente de novo."
       retry
       @retry="useApi().fetchBooks()"
     />
     <EmptyState v-else-if="formats.length === 0" title="Nenhum livro no catálogo ainda" />
 
-    <fieldset v-else class="formats">
+    <fieldset v-else class="formats width-column">
       <legend class="visually-hidden">Formatos que você quer ver</legend>
       <CheckRow
         v-for="format in formats"
@@ -28,7 +28,7 @@
       />
     </fieldset>
 
-    <div v-if="formats.length" class="formats__result">
+    <div v-if="formats.length" class="formats__result width-column">
       <p class="formats__result-text" aria-live="polite">{{ resultText }}</p>
       <AppButton size="md" :to="lastCatalog">Ver o catálogo</AppButton>
     </div>

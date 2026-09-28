@@ -102,7 +102,7 @@ const loadHistory = async () => {
     serverTotal.value = payload.total
     loaded.value = true
   } catch (e) {
-    error.value = errorText(e, 'Não deu pra carregar o histórico. Tente de novo.')
+    error.value = errorText(e, 'Não foi possível carregar o histórico. Tente de novo.')
     useErrorReporter().captureException(e, { context: 'AdminClaimHistory.load' })
     console.error('[AdminClaimHistory]', e)
   } finally {

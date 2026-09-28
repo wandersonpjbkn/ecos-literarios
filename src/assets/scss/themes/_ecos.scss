@@ -75,6 +75,11 @@ $config: (
     --alert-line: #EDDAB0;
     --alert-ink: #5A4210; // 8.56:1 on alert-bg
 
+    // Only for an action with no way back (design/tokens/tokens.css): never a full fill.
+    --danger-ink: #A3322B; // 6.9:1 on white, 6.0:1 on danger-soft
+    --danger-soft: #FBEDEC;
+    --danger-line: #C98078; // 3.1:1 on white, the floor for a control's outline
+
     --space-1: 4px;
     --space-2: 8px;
     --space-3: 12px;

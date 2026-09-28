@@ -2,7 +2,7 @@
   <div class="area-section">
     <SectionHeader title="Você">O seu nome, o e-mail com que você entra e o seu nível.</SectionHeader>
 
-    <form class="you" @submit.prevent="submit">
+    <form class="you width-form" @submit.prevent="submit">
       <AppField
         id="account-name"
         v-model="name"
@@ -19,7 +19,7 @@
         id="account-email"
         :model-value="authStore.user?.email"
         label="E-mail de acesso"
-        hint="Você entra sempre por um link enviado pra esse e-mail. Não há senha pra esquecer."
+        hint="Você entra sempre por um link enviado para esse e-mail, sem senha."
         type="email"
         disabled
       />
@@ -82,7 +82,7 @@ const submit = async () => {
     name.value = updated.name
     toast.show('Nome salvo.')
   } catch (err) {
-    error.value = errorText(err, 'Não deu pra salvar o nome. Tente de novo.')
+    error.value = errorText(err, 'Não foi possível salvar o nome. Tente de novo.')
     useErrorReporter().captureException(err, { context: 'AccountNameSection.submit' })
   } finally {
     isSubmitting.value = false

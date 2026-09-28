@@ -9,12 +9,11 @@
         class="app-header__search"
         :suggestions="suggestions"
         :total="useBooksStore().size"
-        :filtered="filteredCount"
         :placeholder="placeholder"
         @select="(suggestion: Suggestion) => (model = suggestion.main)"
       />
 
-      <AppButton :to="addTarget" class="app-header__add" :variant="addVariant" :disabled="!canWrite">
+      <AppButton v-if="addTarget" :to="addTarget" class="app-header__add" :variant="addVariant" :disabled="!canWrite">
         <BaseIcon name="plus" aria-hidden="true" />
         Adicionar um livro
       </AppButton>
@@ -39,7 +38,7 @@ import type { Suggestion } from '@/types'
 
 const isPhone = useMediaQuery(useBreakpoints.isPhone)
 const addTarget = useAddTarget()
-const { model, suggestions, filteredCount, searchesMyBooks } = useCatalogSearch()
+const { model, suggestions, searchesMyBooks } = useCatalogSearch()
 const placeholder = computed(() =>
   searchesMyBooks.value
     ? 'Buscar nos meus livros'

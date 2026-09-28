@@ -11,7 +11,7 @@
     <EmptyState
       v-else-if="!error && users.length === 0"
       title="Ninguém entrou ainda"
-      text="Quem entra pelo link do e-mail aparece aqui, como Membro."
+      text="Quem entra pelo link do e-mail aparece aqui, como Visitante."
     />
 
     <ul v-else-if="users.length" ref="list" class="members-list panel-box">
@@ -128,7 +128,7 @@ const fetchUsers = async () => {
   try {
     users.value = await getMembers()
   } catch (e) {
-    error.value = errorText(e, 'Não deu pra carregar os membros. Tente de novo.')
+    error.value = errorText(e, 'Não foi possível carregar os membros. Tente de novo.')
     useErrorReporter().captureException(e, { context: 'AdminMembers.fetchUsers' })
     console.error('[AdminMembers]', e)
   } finally {
@@ -160,7 +160,7 @@ const applyRoleChange = async () => {
 
     confirm.open = false
   } catch (e) {
-    confirm.error = errorText(e, 'Não deu pra mudar o nível. Tente de novo.')
+    confirm.error = errorText(e, 'Não foi possível mudar o nível. Tente de novo.')
     useErrorReporter().captureException(e, { context: 'AdminMembers.applyRoleChange', userId: confirm.userId })
   } finally {
     confirm.loading = false

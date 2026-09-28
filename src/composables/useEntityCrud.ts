@@ -17,7 +17,7 @@ export function useEntityCrud({ resource }: EntityCrudOptions) {
     try {
       items.value = await listEntities(resource)
     } catch (e) {
-      error.value = errorText(e, 'Não deu pra carregar a lista. Tente de novo.')
+      error.value = errorText(e, 'Não foi possível carregar a lista. Tente de novo.')
       if (import.meta.env.DEV) console.error(`[useEntityCrud][${resource}]`, e)
       useErrorReporter().captureException(e, { context: 'useEntityCrud.fetchAll' })
     } finally {

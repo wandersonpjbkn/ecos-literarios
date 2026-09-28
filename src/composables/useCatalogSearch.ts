@@ -12,7 +12,7 @@ export function useCatalogSearch() {
   const route = useRoute()
   const router = useRouter()
   const lastList = useLastList()
-  const { search, searchSuggestions, filtered } = useFilters()
+  const { search, searchSuggestions } = useFilters()
 
   const onCatalog = computed(() => route.name === CATALOG_ROUTE)
   const onMyBooks = computed(() => route.name === MY_BOOKS_ROUTE)
@@ -39,6 +39,5 @@ export function useCatalogSearch() {
     // The placeholder names where the next letter will search, on the book page too.
     searchesMyBooks: computed(() => onMyBooks.value || (!onCatalog.value && fromMyBooks.value)),
     suggestions: computed(() => (onCatalog.value ? searchSuggestions.value : [])),
-    filteredCount: computed(() => (onCatalog.value ? filtered.value.length : undefined)),
   }
 }

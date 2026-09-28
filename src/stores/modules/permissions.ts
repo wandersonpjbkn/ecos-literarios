@@ -9,6 +9,8 @@ import type { Action, Resource } from '@/types'
 export const usePermissionsStore = defineStore('permissions', () => {
   const mine = ref<Partial<Record<Resource, Action[]>> | null>(null)
   const failed = ref(false)
+  // A free placeholder with this account's name (users/me): the add form asks "is this you?" first.
+  const claimMatch = ref<string | null>(null)
 
   // Only hides what the server would refuse; the server still decides every request.
   const can = (resource: Resource, action: Action) => mine.value?.[resource]?.includes(action) ?? false
@@ -17,13 +19,15 @@ export const usePermissionsStore = defineStore('permissions', () => {
   const canEditBook = (ownerUserId?: string) =>
     can('books', 'update') || (!!ownerUserId && ownerUserId === useAuthStore().user?._id)
 
-  const set = (permissions: Partial<Record<Resource, Action[]>>) => {
+  const set = (permissions: Partial<Record<Resource, Action[]>>, match: string | null = null) => {
     mine.value = permissions
+    claimMatch.value = match
     failed.value = false
   }
 
   const clear = () => {
     mine.value = null
+    claimMatch.value = null
     failed.value = false
   }
 
@@ -31,5 +35,5 @@ export const usePermissionsStore = defineStore('permissions', () => {
     failed.value = true
   }
 
-  return { mine, failed, can, canEditBook, set, clear, markFailed }
+  return { mine, failed, claimMatch, can, canEditBook, set, clear, markFailed }
 })

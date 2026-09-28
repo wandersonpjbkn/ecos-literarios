@@ -61,7 +61,7 @@ export function useReading(bookId: Ref<string | undefined>) {
       store.set(bookId.value, next)
       await loadCounts()
     } catch (err) {
-      error.value = errorText(err, 'Não deu pra salvar. Tente de novo.')
+      error.value = errorText(err, 'Não foi possível salvar. Tente de novo.')
     } finally {
       pending.value = false
     }

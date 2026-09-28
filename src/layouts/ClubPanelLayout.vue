@@ -2,7 +2,7 @@
   <AreaLayout title="Painel do clube" nav-label="Seções do painel" :groups="visibleGroups">
     <template v-if="permissions.failed" #notice>
       <AppNotice
-        text="Não deu pra carregar o que você pode fazer no painel. Tente de novo."
+        text="Não foi possível carregar o que você pode fazer no painel. Tente de novo."
         retry
         @retry="retryAccountSync"
       />
@@ -21,6 +21,7 @@ import { retryAccountSync } from '@/composables/accountSync'
 import { useAuthStore, usePermissionsStore } from '@/stores'
 import AppNotice from '@/components/AppNotice.vue'
 import AreaLayout from '@/layouts/AreaLayout.vue'
+import { mayOpen } from '@/router/modules/admin'
 import type { AreaGroup } from '@/layouts/AreaSections.vue'
 
 const GROUPS: AreaGroup[] = [
@@ -46,8 +47,12 @@ const router = useRouter()
 const authStore = useAuthStore()
 const permissions = usePermissionsStore()
 
-// Admin-only comes from the route (adminRoute), so the menu never offers what the guard would refuse.
-const isOpenToMe = (name: string) => !router.resolve({ name }).meta.adminOnly || authStore.isAdmin
+// The route says who may enter (adminRoute, permissionRoute), so the menu never offers what the guard refuses.
+const isOpenToMe = (name: string) => {
+  const { adminOnly, permission } = router.resolve({ name }).meta
+  if (permission) return mayOpen(permission)
+  return !adminOnly || authStore.isAdmin
+}
 
 const visibleGroups = computed(() =>
   GROUPS.map((group) => ({ ...group, links: group.links.filter((link) => isOpenToMe(link.name)) })).filter(

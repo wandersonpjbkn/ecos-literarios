@@ -26,7 +26,7 @@ export function useErrorReporter() {
     Sentry.captureException(error, {
       extra: context,
       tags: tagsFor(error, context),
-      // Screen texts repeat on purpose ("Não deu pra salvar."); the place, not the text, tells issues apart.
+      // Screen texts repeat on purpose ("Não foi possível salvar."); the place, not the text, tells issues apart.
       fingerprint: context?.context ? ['{{ default }}', String(context.context)] : undefined,
     })
   }

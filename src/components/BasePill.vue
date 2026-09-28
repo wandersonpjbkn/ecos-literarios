@@ -7,7 +7,7 @@
 <script lang="ts" setup>
 import type { Component } from 'vue'
 
-export type PillTone = 'primary' | 'neutral' | 'quiet' | 'soft' | 'outline' | 'ghost'
+export type PillTone = 'primary' | 'neutral' | 'quiet' | 'soft' | 'outline' | 'ghost' | 'danger'
 
 withDefaults(
   defineProps<{
@@ -123,6 +123,18 @@ withDefaults(
     &:hover {
       color: var(--color-action-default-hover);
       border-color: var(--color-action-default);
+    }
+  }
+
+  // An action with no way back: outlined in red, never filled, so neither the eye nor Enter lands on it first.
+  &--danger:not(:disabled) {
+    color: var(--danger-ink);
+    background: var(--color-surface-default);
+    border-color: var(--danger-line);
+
+    &:hover {
+      background: var(--danger-soft);
+      border-color: var(--danger-ink);
     }
   }
 

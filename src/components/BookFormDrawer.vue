@@ -5,12 +5,29 @@
     wide
     :initial-focus="focus === 'porque' ? '#bf-porque' : '#bf-titulo'"
     class="book-form-drawer"
+    :return-focus="returnFocus"
     @close="close"
   >
     <form class="book-form" @submit.prevent="handleSubmit">
       <section class="form-section" aria-labelledby="bf-essential">
         <h3 id="bf-essential" class="form-section__title">O essencial</h3>
         <p class="form-section__text">Só isto é preciso para o livro entrar no catálogo.</p>
+
+        <!-- A free placeholder with this account's name: linking first makes those books this person's too. -->
+        <div v-if="claimOffer" class="claim-offer" role="status">
+          <p class="claim-offer__text">
+            O nome "{{ claimOffer }}" já está no catálogo. É você? Se for, vincule esse nome e esses livros passam a ser seus.
+          </p>
+          <AppNotice v-if="claimError" :text="claimError" />
+          <div class="claim-offer__actions">
+            <AppButton size="md" :disabled="claiming" @click="claimOfferedName">
+              {{ claiming ? 'Vinculando…' : 'Vincular este nome' }}
+            </AppButton>
+            <AppButton variant="ghost" size="md" :disabled="claiming" @click="dismissClaimOffer">
+              Não sou eu, continuar
+            </AppButton>
+          </div>
+        </div>
         <div class="form-grid">
           <AppField
             id="bf-titulo"
@@ -60,15 +77,33 @@
               />
             </template>
           </AppField>
+          <AppField v-if="!isMemberScope" label="Mencionado por" hint="Quem falou do livro no grupo.">
+            <template #default="{ labelId, describedBy }">
+              <MultiSelect
+                label="Escolher quem mencionou"
+                :labelledby="labelId"
+                :aria-describedby="describedBy"
+                :options="personOptions"
+                :selected="form.person"
+                :multiple="false"
+                :searchable="true"
+                :create-label="canAddName ? newNameLabel : undefined"
+                @toggle="(v) => (form.person = v)"
+                @create="(typed) => (form.person = `${NEW_NAME}${typed}`)"
+              />
+            </template>
+          </AppField>
+          <AppNotice v-if="peopleError" class="form-grid__full" :text="peopleError" retry @retry="loadPeople" />
           <AppField
-            v-if="!isMemberScope"
-            v-model="form.quem_nome"
+            id="bf-porque"
+            v-model="form.porque"
             trim
-            label="Mencionado por"
-            hint="O nome de quem falou do livro no grupo."
-            placeholder="Nome de quem mencionou"
+            class="form-grid__full"
+            label="Comentário"
+            hint="Os comentários aparecem no eco da semana, no catálogo."
+            multiline
+            :rows="3"
             :disabled="isSaving"
-            autocomplete="off"
           />
         </div>
       </section>
@@ -115,16 +150,6 @@
                 />
               </template>
             </AppField>
-            <AppField
-              id="bf-porque"
-              v-model="form.porque"
-              trim
-              class="form-grid__full"
-              label="Comentário"
-              multiline
-              :rows="3"
-              :disabled="isSaving"
-            />
             <AppField
               v-model="form.synopsis"
               trim
@@ -197,24 +222,47 @@
           </AppButton>
         </div>
         <p v-if="missingText" class="drawer-footer__missing" aria-live="polite">{{ missingText }}</p>
+
+        <!-- Apart from saving, with the book open in front of whoever decides (slice 8b). -->
+        <div v-if="canRemove" class="drawer-footer__remove">
+          <AppButton variant="danger" size="md" :disabled="isSaving" @click="openRemove">
+            <BaseIcon name="trash" aria-hidden="true" />
+            Remover este livro do acervo
+          </AppButton>
+        </div>
       </div>
     </template>
   </AppDrawer>
+
+  <ConfirmModal
+    v-model="removal.open"
+    destructive
+    :title="`Remover &quot;${book?.titulo}&quot;?`"
+    description="O livro sai do catálogo e das listas de quem guardou. Não é possível desfazer."
+    confirm-label="Remover o livro"
+    busy-label="Removendo…"
+    :error="removal.error"
+    :loading="removal.loading"
+    @confirm="remove"
+    @cancel="removal.open = false"
+  />
 </template>
 
 <script lang="ts" setup>
 import { errorText } from '@/composables/apiError'
-import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 
-import { useEntityCrud, useErrorReporter } from '@/composables'
-import { saveBook } from '@/composables/useApi'
+import { useEntityCrud, useErrorReporter, useToast } from '@/composables'
+import { reloadAccount } from '@/composables/accountSync'
+import { claimRegister, getPeople, removeBook, saveBook, useApi } from '@/composables/useApi'
 import { joinWords } from '@/data/words'
-import { usePermissionsStore } from '@/stores'
+import { useAuthStore, usePermissionsStore } from '@/stores'
 import MultiSelect from '@/components/MultiSelect.vue'
 import AppButton from '@/components/AppButton.vue'
 import AppDrawer from '@/components/AppDrawer.vue'
 import AppField from '@/components/AppField.vue'
 import AppNotice from '@/components/AppNotice.vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 import BookEnrichmentPanel from '@/components/BookEnrichmentPanel.vue'
 import type { BookPayload } from '@/types'
 
@@ -224,13 +272,16 @@ const props = defineProps<{
   scope?: 'admin' | 'member'
   // A new book can start with a title, e.g. the search that found nothing.
   title?: string
-  // Opened to write the comment ("Escrever o que achei"): the optional part opens with focus on it.
+  // Opened to write the comment ("Escrever o que achei"): focus starts on it.
   focus?: 'porque'
+  // Where focus goes when the button that opened the form is gone (after removing the book).
+  returnFocus?: () => HTMLElement | null | undefined
 }>()
 
 const emit = defineEmits<{
   close: []
   saved: []
+  removed: [id: string]
 }>()
 
 const isSaving = ref(false)
@@ -243,7 +294,8 @@ const form = reactive({
   midia: '',
   categoria: '',
   subgeneros: [] as string[],
-  quem_nome: '',
+  // 'user:<id>' for an account, 'name:<placeholder>' for a free placeholder, 'new:<typed>' for a new name.
+  person: '',
   porque: '',
   isbn: '',
   cover_url: '',
@@ -262,6 +314,35 @@ const canSearchData = computed(() => permissions.can('books', 'update'))
 // Open when editing a book that already has any of the optional data; closed when adding (cadastro-de-livro-essencial).
 const showMore = ref(false)
 const isEditMode = computed(() => !!props.book)
+const canRemove = computed(() => isEditMode.value && !isMemberScope.value && permissions.can('books', 'delete'))
+
+// A refused removal stays in the dialog, where the decision was made; confirming again retries it.
+const removal = reactive({ open: false, loading: false, error: '' })
+const openRemove = () => {
+  removal.error = ''
+  removal.open = true
+}
+const remove = async () => {
+  const book = props.book
+  if (!book) return
+  removal.loading = true
+  removal.error = ''
+  try {
+    await removeBook(book._id)
+    removal.open = false
+    useToast().show(`"${book.titulo}" removido.`)
+    // The dialog hands focus back first; then the form closes and sends it to the list, not to a leaving button.
+    await nextTick()
+    await nextTick()
+    emit('removed', book._id)
+    close()
+  } catch (e) {
+    removal.error = errorText(e, 'Não foi possível remover o livro. Tente de novo.')
+    useErrorReporter().captureException(e, { context: 'BookFormDrawer.remove' })
+  } finally {
+    removal.loading = false
+  }
+}
 
 // Says what is missing instead of a silent grey button.
 const missingText = computed(() => {
@@ -270,7 +351,6 @@ const missingText = computed(() => {
     !form.autor && 'o autor',
     !form.midia && 'o formato',
     !form.categoria && 'o gênero',
-    !isMemberScope.value && !form.quem_nome.trim() && 'quem mencionou',
   ].filter(Boolean) as string[]
   if (!missing.length) return ''
   return `${missing.length === 1 ? 'Falta' : 'Faltam'} ${joinWords(missing)}.`
@@ -281,9 +361,73 @@ const isValid = computed(
     form.titulo.trim().length > 0 &&
     form.autor.length > 0 &&
     form.midia.length > 0 &&
-    form.categoria.length > 0 &&
-    (isMemberScope.value || form.quem_nome.length >= 1),
+    form.categoria.length > 0,
 )
+
+// ── Who mentioned the book ──
+const USER = 'user:'
+const NAME = 'name:'
+const NEW_NAME = 'new:'
+const auth = useAuthStore()
+const people = ref<{ user_id: string | null; name: string }[]>([])
+const initialPerson = ref('')
+// "Outro nome" follows the matrix (claim: create), by default only the Administrador.
+const canAddName = computed(() => permissions.can('claim', 'create'))
+const newNameLabel = (typed: string) => `Outro nome: ${typed}`
+const personOptions = computed(() => {
+  const options = people.value.map((p) => ({ label: p.name, value: p.user_id ? `${USER}${p.user_id}` : `${NAME}${p.name}` }))
+  if (form.person.startsWith(NEW_NAME)) options.push({ label: `${form.person.slice(NEW_NAME.length)} (nome novo)`, value: form.person })
+  return options
+})
+const personPayload = (): Record<string, string> => {
+  if (form.person.startsWith(USER)) return { quem_user_id: form.person.slice(USER.length) }
+  if (form.person.startsWith(NAME)) return { quem_nome: form.person.slice(NAME.length) }
+  if (form.person.startsWith(NEW_NAME)) return { quem_nome: form.person.slice(NEW_NAME.length) }
+  return {}
+}
+const peopleError = ref('')
+const loadPeople = async () => {
+  peopleError.value = ''
+  try {
+    people.value = await getPeople()
+  } catch (e) {
+    peopleError.value = errorText(e, 'Não foi possível carregar a lista de pessoas. Tente de novo.')
+    useErrorReporter().captureException(e, { context: 'BookFormDrawer.people' })
+  }
+}
+
+// ── "Is this you?" before adding (claim_match in users/me) ──
+const claimDismissed = ref(false)
+const claiming = ref(false)
+const claimError = ref('')
+// The box leaves with the button that had focus: the next field takes it.
+const focusTitle = () => nextTick(() => document.querySelector<HTMLElement>('#bf-titulo')?.focus())
+const dismissClaimOffer = () => {
+  claimDismissed.value = true
+  focusTitle()
+}
+const claimOffer = computed(() =>
+  !isEditMode.value && !isMemberScope.value && !claimDismissed.value ? permissions.claimMatch : null,
+)
+const claimOfferedName = async () => {
+  const name = permissions.claimMatch
+  if (!name) return
+  claiming.value = true
+  claimError.value = ''
+  try {
+    await claimRegister(name)
+    useToast().show(`Pronto: "${name}" é você no catálogo.`)
+    await reloadAccount()
+    useApi().fetchBooks(true)
+    loadPeople()
+    focusTitle()
+  } catch (e) {
+    claimError.value = errorText(e, 'Não foi possível vincular o nome. Tente de novo.')
+    useErrorReporter().captureException(e, { context: 'BookFormDrawer.claim' })
+  } finally {
+    claiming.value = false
+  }
+}
 
 // ── Support entity options ──
 const autores = useEntityCrud({ resource: 'autores' })
@@ -313,7 +457,7 @@ const resetForm = (): void => {
   form.midia = ''
   form.categoria = ''
   form.subgeneros = []
-  form.quem_nome = ''
+  form.person = auth.user ? `${USER}${auth.user._id}` : ''
   form.porque = ''
   form.isbn = ''
   form.cover_url = ''
@@ -338,7 +482,7 @@ const populateForm = (book: BookPayload): void => {
   form.midia = extractId(book.midia)
   form.categoria = extractId(book.categoria)
   form.subgeneros = book.subgeneros.map(extractId)
-  form.quem_nome = book.quem_nome
+  form.person = book.quem_user_id ? `${USER}${book.quem_user_id._id}` : book.quem_nome ? `${NAME}${book.quem_nome}` : ''
   form.porque = book.porque ?? ''
   adoptOptional(book)
 }
@@ -356,11 +500,13 @@ watch(
       resetForm()
       form.titulo = props.title?.trim() ?? ''
     }
+    initialPerson.value = form.person
+    claimDismissed.value = false
+    claimError.value = ''
+    if (!isMemberScope.value) loadPeople()
     showMore.value =
-      props.focus === 'porque' ||
       (!!props.book &&
         [
-          form.porque,
           form.synopsis,
           form.isbn,
           form.cover_url,
@@ -370,6 +516,8 @@ watch(
         ].some(Boolean)) ||
       (!!props.book && form.subgeneros.length > 0)
   },
+  // Opened on arrival (?adicionar=1): the form must be prepared on the first render too.
+  { immediate: true },
 )
 
 let closeTimer: ReturnType<typeof setTimeout> | undefined
@@ -419,7 +567,9 @@ const handleSubmit = async () => {
       porque: form.porque,
       ...optionalFields(),
     }
-    const payload = isMemberScope.value ? shared : { ...shared, quem_nome: form.quem_nome }
+    // Who mentioned goes only when it changed: the API keeps the book's history for real changes.
+    const person = !isMemberScope.value && form.person !== initialPerson.value ? personPayload() : {}
+    const payload = { ...shared, ...person }
     await saveBook(payload, { id: props.book?._id, asOwner: isMemberScope.value })
 
     success.value = isEditMode.value ? 'Livro atualizado.' : 'Livro adicionado.'
@@ -429,7 +579,7 @@ const handleSubmit = async () => {
       closeTimer = setTimeout(close, 800)
     }
   } catch (e) {
-    error.value = errorText(e, 'Não deu pra salvar. Tente de novo.')
+    error.value = errorText(e, 'Não foi possível salvar. Tente de novo.')
     useErrorReporter().captureException(e, { context: 'BookFormDrawer.submit' })
   } finally {
     isSaving.value = false
@@ -531,6 +681,30 @@ onMounted(() => {
   }
 }
 
+// A question, not a warning: the neutral box, with both ways on.
+.claim-offer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-background-subtle);
+
+  &__text {
+    margin: 0;
+    font-size: var(--font-size-ui);
+    color: var(--color-text-default);
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+}
+
 .drawer-footer {
   display: flex;
   flex-direction: column;
@@ -558,6 +732,13 @@ onMounted(() => {
     justify-content: flex-end;
     gap: var(--space-2);
   }
+
+  // Set apart from saving by a line, so it is never the next button the hand reaches for.
+  &__remove {
+    display: flex;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border-default);
+  }
 }
 
 @media (max-width: $bp-phone-max) {
@@ -576,6 +757,10 @@ onMounted(() => {
     .app-button {
       width: 100%;
     }
+  }
+
+  .drawer-footer__remove .app-button {
+    width: 100%;
   }
 }
 </style>

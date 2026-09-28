@@ -52,7 +52,8 @@ const lastList = useLastList()
 const onBook = computed(() => route.name === 'catalog-book-details')
 const fromMine = computed(() => lastList.value.path.startsWith('/perfil/livros'))
 
-const items = computed(() => [
+const items = computed(() =>
+  [
   {
     label: 'Catálogo',
     icon: 'home',
@@ -65,13 +66,11 @@ const items = computed(() => [
     to: { name: 'profile-books' },
     active: route.name === 'profile-books' || (onBook.value && fromMine.value),
   },
-  {
-    label: 'Adicionar',
-    icon: 'plus',
-    to: addTarget.value,
-    disabled: !canWrite.value,
-  },
-])
+  // No "Adicionar" for a Visitante (useAddTarget answers null).
+  ...(addTarget.value
+    ? [{ label: 'Adicionar', icon: 'plus', to: addTarget.value, disabled: !canWrite.value, active: false }]
+    : []),
+  ])
 </script>
 
 <style lang="scss" scoped>

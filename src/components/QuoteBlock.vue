@@ -27,7 +27,7 @@
           Escrever o que achei
         </AppButton>
         <template v-else>
-          <AppButton size="md" :href="askLink">Perguntar pra {{ person }}</AppButton>
+          <AppButton size="md" :href="askLink">Perguntar para {{ person }}</AppButton>
           <p class="quote-block__hint">Abre o WhatsApp com a pergunta pronta.</p>
         </template>
       </div>

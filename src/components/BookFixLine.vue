@@ -46,7 +46,7 @@ const askLabel = computed(() =>
 const question = computed(() =>
   missing.value.length
     ? `Alguém sabe ${missing.value.join(' e ')} de "${props.book.titulo}"?`
-    : `Achei algo pra corrigir em "${props.book.titulo}".`,
+    : `Achei algo para corrigir em "${props.book.titulo}".`,
 )
 </script>
 

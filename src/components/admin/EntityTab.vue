@@ -1,5 +1,5 @@
 <template>
-  <div class="entity-tab panel-box">
+  <div class="entity-tab panel-box width-column">
     <div class="entity-tab__header">
       <p v-if="description" class="entity-tab__desc">{{ description }}</p>
       <AppButton v-if="canCreate && !isFormOpen" size="md" :disabled="crud.loading.value" @click="isFormOpen = true">
@@ -72,7 +72,9 @@
       <ul v-else ref="list" class="entity-items" :aria-label="title">
         <li v-for="item in pageItems" :key="item._id" class="entity-row panel-row" tabindex="-1" data-list-item>
           <form v-if="editingId === item._id" class="entity-row__edit-form" @submit.prevent="handleUpdate">
+            <span v-if="!canEdit" class="entity-row__name entity-row__edit-field">{{ item.nome }}</span>
             <AppField
+              v-else
               :id="`edit-${item._id}`"
               v-model="editingName"
               trim
@@ -85,6 +87,7 @@
               @keydown.escape="cancelEdit"
             />
             <AppButton
+              v-if="canEdit"
               type="submit"
               variant="primary"
               size="md"
@@ -93,18 +96,21 @@
               Salvar<span class="visually-hidden">{{ ' ' }}o novo nome de {{ item.nome }}</span>
             </AppButton>
             <AppButton size="md" :disabled="isUpdating" @click="cancelEdit">Cancelar</AppButton>
+            <!-- Apart from saving, decided with the item open (slice 8b). -->
+            <span v-if="canDelete" class="entity-row__remove">
+              <AppButton variant="danger" size="md" :disabled="isUpdating" @click="confirmDelete(item)">
+                <BaseIcon name="trash" aria-hidden="true" />
+                Remover este {{ singular }}
+              </AppButton>
+            </span>
           </form>
 
           <template v-else>
             <span class="entity-row__name">{{ item.nome }}</span>
             <div class="entity-row__actions">
-              <AppButton v-if="canEdit" size="md" :disabled="!!editingId" @click="startEdit(item)">
+              <AppButton v-if="canEdit || canDelete" size="md" :disabled="!!editingId" @click="startEdit(item)">
                 <BaseIcon name="pencil" aria-hidden="true" />
                 Editar<span class="visually-hidden">{{ ' ' }}{{ item.nome }}</span>
-              </AppButton>
-              <AppButton v-if="canDelete" size="md" :disabled="!!editingId" @click="confirmDelete(item)">
-                <BaseIcon name="trash" aria-hidden="true" />
-                Remover<span class="visually-hidden">{{ ' ' }}{{ item.nome }}</span>
               </AppButton>
             </div>
           </template>
@@ -123,8 +129,9 @@
     <ConfirmModal
       v-model="deleteModal.open"
       :title="deleteModal.title"
+      destructive
       :description="removeHint"
-      confirm-label="Remover"
+      :confirm-label="`Remover o ${singular}`"
       busy-label="Removendo…"
       :error="deleteModal.error"
       :loading="isDeleting"
@@ -184,10 +191,10 @@ const deleteModal = reactive({ open: false, title: '', error: '', targetId: '', 
 
 // The API refuses to remove an author, format or genre in use; a subgenre it removes without that check.
 const removeHint = computed(() => {
-  if (props.resource !== 'subgeneros') return `Só dá pra remover se nenhum livro usar este ${props.singular}.`
+  if (props.resource !== 'subgeneros') return `Só é possível remover se nenhum livro usar este ${props.singular}.`
   // A subgenre is only a tag: removing it is allowed, but the person hears how many books lose it (dono).
-  if (!deleteModal.usage) return 'Nenhum livro usa este subgênero. Não dá pra desfazer.'
-  return `Está em ${counted(deleteModal.usage, 'livro', 'livros')}, que perdem este subgênero. Não dá pra desfazer.`
+  if (!deleteModal.usage) return 'Nenhum livro usa este subgênero. Não é possível desfazer.'
+  return `Está em ${counted(deleteModal.usage, 'livro', 'livros')}, que perdem este subgênero. Não é possível desfazer.`
 })
 
 const filteredItems = computed(() => {
@@ -250,7 +257,7 @@ const handleCreate = async () => {
     newName.value = ''
     toast.show(`"${created.nome}" adicionado.`)
   } catch (e) {
-    actionError.value = errorText(e, `Não deu pra adicionar o ${props.singular}. Tente de novo.`)
+    actionError.value = errorText(e, `Não foi possível adicionar o ${props.singular}. Tente de novo.`)
     useErrorReporter().captureException(e, { context: 'EntityTab.createItem' })
   } finally {
     isCreating.value = false
@@ -280,7 +287,7 @@ const handleUpdate = async () => {
     toast.show(`Renomeado para "${updated.nome}".`)
     cancelEdit()
   } catch (e) {
-    actionError.value = errorText(e, `Não deu pra renomear o ${props.singular}. Tente de novo.`)
+    actionError.value = errorText(e, `Não foi possível renomear o ${props.singular}. Tente de novo.`)
     useErrorReporter().captureException(e, { context: 'EntityTab.updateItem' })
   } finally {
     isUpdating.value = false
@@ -311,9 +318,10 @@ const handleDelete = async () => {
   try {
     await crud.remove(deleteModal.targetId)
     deleteModal.open = false
+    cancelEdit()
     toast.show(`"${removed?.nome}" removido.`)
   } catch (e) {
-    deleteModal.error = errorText(e, `Não deu pra remover o ${props.singular}. Tente de novo.`)
+    deleteModal.error = errorText(e, `Não foi possível remover o ${props.singular}. Tente de novo.`)
     useErrorReporter().captureException(e, { context: 'EntityTab.deleteItem' })
   } finally {
     isDeleting.value = false
@@ -397,6 +405,7 @@ onMounted(() => crud.fetchAll())
   &__actions,
   &__edit-form {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--space-1);
   }
@@ -407,6 +416,14 @@ onMounted(() => crud.fetchAll())
 
   &__edit-field {
     flex: 1;
+  }
+
+  // On its own line under saving, as in the book form: never the next button the hand reaches for.
+  &__remove {
+    display: flex;
+    flex: 1 1 100%;
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-border-default);
   }
 
   // Phone: the name takes its line and the two worded actions sit under it, instead of squeezing it.
@@ -421,6 +438,7 @@ onMounted(() => crud.fetchAll())
     &__actions {
       margin-left: auto;
     }
+
   }
 }
 

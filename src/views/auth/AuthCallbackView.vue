@@ -8,17 +8,17 @@
       <EmptyState
         v-else-if="status === 'platform'"
         title="A plataforma está fora do ar agora."
-        text="Seu link funcionou, só a plataforma que não respondeu. Dá pra olhar os livros enquanto isso."
+        text="Seu link funcionou; quem não respondeu foi a plataforma. Enquanto isso, você pode olhar os livros."
       >
         <AppButton variant="primary" @click="enter">Tentar de novo</AppButton>
         <AppButton @click="continueWithoutAccount">Continuar sem entrar</AppButton>
       </EmptyState>
 
       <EmptyState v-else-if="status === 'resent'" ref="resentMessage" title="Enviamos outro link">
-        <template #text>Foi para <strong>{{ resentTo }}</strong>. Veja seu e-mail e toque no link pra entrar.</template>
+        <template #text>Foi para <strong>{{ resentTo }}</strong>. Abra seu e-mail e toque no link para entrar.</template>
       </EmptyState>
 
-      <EmptyState v-else title="Não deu pra entrar com esse link.">
+      <EmptyState v-else title="Não foi possível entrar com esse link.">
         <!-- The address wraps in the text; a long one inside a pill would run off a phone screen. -->
         <template #text>
           Ele pode ter vencido.<template v-if="lastEmail"> O link foi pedido para <strong>{{ lastEmail }}</strong>.</template>
@@ -71,7 +71,7 @@ const resend = async () => {
     await nextTick()
     resentMessage.value?.focus()
   } catch (err) {
-    resendError.value = 'Não deu pra enviar agora. Tente de novo daqui a pouco.'
+    resendError.value = 'Não foi possível enviar agora. Tente de novo daqui a pouco.'
     useErrorReporter().captureException(err, { context: 'AuthCallback.resend' })
   } finally {
     sending.value = false

@@ -4,7 +4,7 @@
       <AppButton v-if="bookId" size="md" :disabled="disabled || isLoading" @click="fetchPreview">
         {{ isLoading ? 'Buscando…' : 'Buscar capa e dados' }}
       </AppButton>
-      <p v-else class="enrichment-hint">Depois de salvar o livro, dá pra buscar a capa e os dados dele.</p>
+      <p v-else class="enrichment-hint">Depois de salvar o livro, você pode buscar a capa e os dados dele.</p>
     </div>
 
     <AppNotice v-if="error" :text="error" />

@@ -211,7 +211,7 @@ const DETAILS: Record<string, string> = {
 const detailOf = (row: { strategy?: unknown; reason?: unknown; error?: unknown }) => {
   if (typeof row.strategy === 'string' && row.strategy) return DETAILS[row.strategy] ?? 'Achado em outra fonte'
   if (typeof row.reason === 'string' && row.reason) return DETAILS[row.reason] ?? 'Pulado por outro motivo'
-  return row.error ? 'Não deu pra buscar este livro' : ''
+  return row.error ? 'Não foi possível buscar este livro' : ''
 }
 
 const parseResultStatus = (raw: unknown): ResultStatus => {
@@ -292,7 +292,7 @@ const fetchStatusAndHistory = async () => {
     loadedOnce.value = true
   } catch (e) {
     useErrorReporter().captureException(e, { context: 'AdminEnrichment.fetchStatus' })
-    historyError.value = errorText(e, 'Não deu pra carregar o que já foi feito. Tente de novo.')
+    historyError.value = errorText(e, 'Não foi possível carregar o que já foi feito. Tente de novo.')
     console.error('[AdminEnrichment][status/history]', e)
   } finally {
     loadingStatus.value = false
@@ -312,7 +312,7 @@ const runEnrichment = async () => {
 
     await fetchStatusAndHistory()
   } catch (e) {
-    runError.value = errorText(e, 'Não deu pra buscar os dados. Tente de novo.')
+    runError.value = errorText(e, 'Não foi possível buscar os dados. Tente de novo.')
     useErrorReporter().captureException(e, { context: 'AdminEnrichment.run' })
     console.error('[AdminEnrichment][run]', e)
   } finally {

@@ -32,9 +32,9 @@ import { useCategoryColors, useFilters } from '@/composables'
 import type { FilterKey } from '@/types'
 
 const SHELVES: { title: string; key: FilterKey; value: string; note: string }[] = [
-  { title: 'Menos de 200 páginas', key: 'tamanho', value: 'Menos de 200 páginas', note: 'dá pra ler em uma semana' },
-  { title: 'Mais de 500 páginas', key: 'tamanho', value: 'Mais de 500 páginas', note: 'pra quem tem fôlego' },
-  { title: 'Mangás', key: 'midia', value: 'Mangá', note: 'pra curtir e acompanhar' },
+  { title: 'Menos de 200 páginas', key: 'tamanho', value: 'Menos de 200 páginas', note: 'para ler em uma semana' },
+  { title: 'Mais de 500 páginas', key: 'tamanho', value: 'Mais de 500 páginas', note: 'para quem tem fôlego' },
+  { title: 'Mangás', key: 'midia', value: 'Mangá', note: 'para curtir e acompanhar' },
   { title: 'HQs', key: 'midia', value: 'HQ', note: 'termina em uma tarde só' },
 ]
 
