@@ -16,7 +16,7 @@ export const retryAccountSync = () => retryLoad?.()
 /** Reads users/me again after something it reports changed (linking or unlinking a name). */
 export const reloadAccount = () => reloadNow?.() ?? Promise.resolve()
 
-/** One users/me read per session: the level's permissions to the store, the hidden formats to formatsSync. */
+/** One users/me read per session: the account and its level's permissions to the stores, the hidden formats to formatsSync. */
 export function startAccountSync(formats: FormatsSync): () => void {
   const auth = useAuthStore()
   const permissions = usePermissionsStore()
@@ -25,6 +25,8 @@ export function startAccountSync(formats: FormatsSync): () => void {
     try {
       const me = await getMe()
       if (auth.user?._id !== userId) return
+      const { _id, email, name, role } = me.user
+      auth.refreshUser({ _id, email, name, role })
       permissions.set(me.permissions, me.claim_match ?? null)
       await formats.reconcile(userId, me.user.hidden_midias)
     } catch (err) {

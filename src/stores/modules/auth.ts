@@ -18,6 +18,11 @@ export const useAuthStore = defineStore(
       token.value = accessToken
     }
 
+    // What login saved goes stale (a new level, an account recreated with another id): users/me brings the current one.
+    const refreshUser = (current: AuthUser) => {
+      if (user.value) user.value = current
+    }
+
     const clearSession = () => {
       user.value = null
       token.value = null
@@ -30,6 +35,7 @@ export const useAuthStore = defineStore(
       isAdmin,
       isEditor,
       setSession,
+      refreshUser,
       clearSession,
     }
   },

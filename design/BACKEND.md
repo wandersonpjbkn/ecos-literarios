@@ -41,6 +41,7 @@ PATCH /users/me      ← { name?, hidden_midias? }   → o usuário, com a lista
 - **Formato que não existe mais** (renomeado ou removido) é descartado, não recusado. A resposta traz a lista guardada, e o aparelho adota essa lista. Assim uma escolha antiga nunca trava a sincronia.
 - **Ao entrar,** a conta que nunca escolheu herda a escolha do aparelho; senão, a conta vale. A exceção é uma mudança feita neste aparelho que ainda não chegou à conta: ela fica guardada com a conta a que pertence e sobe primeiro. Pendência de outra conta nunca é mandada para esta.
 - **Ao sair,** a escolha fica no aparelho.
+- **Nível e identidade** (`_id`, nome, e-mail, nível) vêm do `users/me` a cada sessão, não só do login: uma promoção vale na próxima visita, e uma conta recriada com outro `_id` não fica com o antigo.
 - **Salvar:** vários cliques seguidos viram um save só, e os saves vão um de cada vez.
 - **`permissions`** é a matriz do próprio nível, lida da coleção `Permission`. O painel esconde o que o nível não pode fazer; quem decide cada pedido continua sendo o servidor.
 

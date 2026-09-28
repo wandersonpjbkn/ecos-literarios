@@ -5,6 +5,7 @@ import type {
   AdminBook,
   AdminClaimHistoryEntry,
   ApiUser,
+  AuthUser,
   BookForEdit,
   BookPayload,
   EnrichmentApiResponse,
@@ -219,7 +220,7 @@ export const getReadingCounts = (bookId: string) =>
 // ── Conta: formatos escondidos e permissões do próprio nível ──
 export const getMe = () =>
   authedRequest<{
-    user: { hidden_midias?: string[] }
+    user: AuthUser & { hidden_midias?: string[] }
     permissions: Partial<Record<Resource, Action[]>>
     claim_match?: string | null
   }>(
