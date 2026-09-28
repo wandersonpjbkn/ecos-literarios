@@ -29,14 +29,18 @@
       <!-- Confirmação -->
       <div v-else class="login-sent">
         <AppNotice v-if="errorMsg" :text="errorMsg" />
-        <EmptyState title="Enviamos o link" title-tag="h1">
-          <template #text>Foi para <strong>{{ email }}</strong>. Abra seu e-mail e toque no link para entrar.</template>
+        <EmptyState ref="sentMessage" title="Enviamos o link" title-tag="h1">
+          <template #text
+            >Foi para <strong>{{ email }}</strong
+            >. Abra seu e-mail e toque no link para entrar.</template
+          >
           <!-- Waiting is text, not a grey button: a disabled button looks broken, the text says when. -->
           <p v-if="resendCooldown > 0" class="resend-wait" aria-live="polite">
             Você pode pedir outro link em {{ resendCooldown === 1 ? '1 segundo' : `${resendCooldown} segundos` }}
           </p>
           <AppButton v-else class="resend-btn" @click="submit">Enviar outro link</AppButton>
           <AppButton variant="ghost" @click="retypeEmail">Usar outro e-mail</AppButton>
+          <SupportLink pill :email="email.trim()" />
         </EmptyState>
       </div>
 
@@ -65,6 +69,7 @@ import AppButton from '@/components/ui/AppButton.vue'
 import AppField from '@/components/ui/AppField.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import SupportLink from '@/components/ui/SupportLink.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -81,6 +86,7 @@ const email = ref('')
 const loading = ref(false)
 const errorMsg = ref('')
 const step = ref<'form' | 'sent'>('form')
+const sentMessage = ref<InstanceType<typeof EmptyState> | null>(null)
 
 const resendCooldown = ref(0)
 
@@ -115,6 +121,8 @@ const submit = async () => {
     await sendMagicLink(email.value.trim())
     rememberEmail(email.value.trim())
     step.value = 'sent'
+    // The form that had the focus is gone: the news takes it, so a screen reader hears it.
+    nextTick(() => sentMessage.value?.focus())
     startCooldown()
   } catch (err) {
     const tooSoon = (err as { status?: number }).status === 429

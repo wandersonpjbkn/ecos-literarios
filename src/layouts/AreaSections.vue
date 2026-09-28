@@ -121,6 +121,7 @@ const route = useRoute()
     width: 100%;
     min-height: var(--touch-cta);
     align-items: center;
+    gap: var(--space-2);
     padding: 0 var(--space-3);
     border: none;
     border-radius: var(--radius-md);
@@ -144,10 +145,6 @@ const route = useRoute()
   }
 
   // Leaving the account is set apart from the area links, so it never reads as one more place to go.
-  :deep(.area-link--leave) {
-    gap: var(--space-2);
-  }
-
   :deep(.area-link--leave + .area-link) {
     position: relative;
     margin-top: var(--space-2);

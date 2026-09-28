@@ -8,6 +8,7 @@
       />
     </template>
     <template #foot>
+      <SupportLink class="area-link" />
       <RouterLink :to="{ name: 'profile-account' }" class="area-link">Minha conta</RouterLink>
     </template>
   </AreaLayout>
@@ -27,6 +28,7 @@ import AreaLayout from '@/layouts/AreaLayout.vue'
 import type { AreaGroup } from '@/layouts/AreaSections.vue'
 
 import AppNotice from '@/components/ui/AppNotice.vue'
+import SupportLink from '@/components/ui/SupportLink.vue'
 
 const GROUPS: AreaGroup[] = [
   {

@@ -1,6 +1,6 @@
 <template>
   <div class="area-section">
-    <SectionHeader title="Você">O seu nome, o e-mail com que você entra e o seu nível.</SectionHeader>
+    <SectionHeader title="Perfil">O seu nome, o e-mail com que você entra e o seu nível.</SectionHeader>
 
     <form class="you width-form" @submit.prevent="submit">
       <AppField

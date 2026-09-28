@@ -69,7 +69,7 @@ O painel Adicionar, as prateleiras, a nova Meus livros e a Conta entram na fatia
 
 **Artboards atrás do código.** Eles ficam como estão até o dono refazê-los no Claude Design:
 - `MeusLivros.html` ainda mostra a origem do livro, que saiu do app;
-- `Conta.html` ainda mostra uma página única, sem "Este aparelho" e com "Desfazer" sem confirmação;
+- `Conta.html` ainda mostra uma página única, sem "Dados salvos" e com "Desfazer" sem confirmação;
 - `Indicar.desktop.html` ainda mostra o fluxo em duas etapas e usa "Indicar";
 - `Main.html` ainda mostra as notas antigas das prateleiras.
 
@@ -113,7 +113,7 @@ Aceite: nenhum botão azul cheio em diálogo destrutivo; nenhuma linha de tabela
 
 **O que muda.**
 
-1. **Vincular vira permissão.** `POST` e `DELETE /users/me/claim` exigem `claim: update`. A seção "Seu nome no grupo" continua aparecendo para toda conta; sem a permissão, no lugar do formulário, ela diz por quê.
+1. **Vincular vira permissão.** `POST` e `DELETE /users/me/claim` exigem `claim: update`. A seção "Vincular meu nome" continua aparecendo para toda conta; sem a permissão, no lugar do formulário, ela diz por quê.
 2. **"Mencionado por" é uma lista** (`GET /books/people`): todas as contas e os marcadores sem dono, com quem cadastra já escolhido. Sai do texto livre. A última opção, **"Outro nome: {o que foi digitado}"**, só aparece com `claim: create`, e o nome novo não pode repetir um que existe (marcador ou conta), pela mesma normalização dos slugs: "Natalia" não entra se há "Natália"; "Natalia C." entra.
 3. **Adicionar não trava ninguém.** O livro sai com quem cadastra. Se existe um marcador sem dono com o nome da conta, o formulário pergunta antes ("É você?"), com **Vincular este nome** e **Não sou eu, continuar**.
 4. **Desfazer o vínculo** solta só os livros do marcador; um livro creditado direto à conta continua dela.
@@ -139,9 +139,9 @@ Aceite:
 
 ### 8e · Molduras e formas
 
-**Largura das áreas.** O conteúdo de Minha conta e das seções de formulário do painel ganha largura máxima (`--form-max`, 480px, para campos; `--text-column`, 760px, para linhas de escolha como "O que você quer ver" e "Seu nome no grupo"). Tabelas de várias colunas continuam na largura toda. "Livro" e "67 no catálogo" não podem ficar a 1000px um do outro.
+**Largura das áreas.** O conteúdo de Minha conta e das seções de formulário do painel ganha largura máxima (`--form-max`, 480px, para campos; `--text-column`, 760px, para linhas de escolha como "O que você quer ver" e "Vincular meu nome"). Tabelas de várias colunas continuam na largura toda. "Livro" e "67 no catálogo" não podem ficar a 1000px um do outro.
 
-**Este aparelho.** Cada ação vira uma linha com a sua consequência, e "Limpar" deixa de ter o peso de "Recarregar":
+**Dados salvos.** Cada ação vira uma linha com a sua consequência, e "Limpar" deixa de ter o peso de "Recarregar":
 - **Recarregar o catálogo** (secundário) · "Baixa o catálogo de novo. Você continua na conta."
 - **Limpar os dados deste aparelho** (destrutivo, com confirmação) · "Sai da conta e baixa o catálogo de novo. Sua escolha de formatos fica."
 

@@ -12,7 +12,7 @@ O app tem cinco superfícies de navegação, duas interfaces de filtro e dois de
 | Meus livros | `/perfil/livros` | O que a pessoa mencionou e o que ela guardou. |
 | Adicionar | `/admin/livros` | Leva quem pode criar livro (Administrador e Editor) à lista de livros do painel, onde o formulário abre na gaveta. **O Visitante não vê o botão** (topo, trilho e barra de baixo): estranho não é convidado a adicionar. Quem não entrou vê, e vai para Entrar com volta ao formulário, porque quase sempre é alguém do clube num aparelho novo. "Sem permissão" fica para quem digita o endereço do painel (fatia 8a). |
 
-A conta (`/perfil/conta`, **Minha conta**) fica no avatar, no fim do trilho. Ela reúne "Você", "O que você quer ver" (a mesma preferência da gaveta), "Seu nome no grupo" e "Este aparelho", cada um com seu endereço. O antigo `/perfil/vinculos` abre direto nessa parte.
+A conta (`/perfil/conta`, **Minha conta**) fica no avatar, no fim do trilho. Ela reúne "Perfil", "O que você quer ver" (a mesma preferência da gaveta), "Vincular meu nome" e "Dados salvos", cada um com seu endereço (os endereços continuam `voce`, `nome-no-grupo` e `aparelho`). No pé, "Falar com o suporte" abre o WhatsApp do suporte com a mensagem pronta; o Painel do clube tem o mesmo pé, e o trilho do desktop tem "Ajuda" no pé, acima do Painel e da conta, na navegação "Conta" do pé, separada da principal. O antigo `/perfil/vinculos` abre direto nessa parte.
 
 O painel do clube (`/admin`) é para Administrador e Editor. Eles o acham no trilho ("Painel do clube", do tablet para cima) e no pé de Minha conta; para quem não pode entrar, nenhum dos dois aparece. Do painel, "Minha conta" leva de volta.
 

@@ -33,6 +33,7 @@ const props = defineProps<{
     // brands
     | 'amazon'
     | 'chrome'
+    | 'whatsapp'
     | 'youtube'
 }>()
 

@@ -4,6 +4,10 @@
     <AppButton :to="lastCatalog" variant="primary">Voltar ao catálogo</AppButton>
     <!-- An Editor who opened an admin-only section by link keeps a way back to the panel they can use. -->
     <AppButton v-if="auth.isEditor" :to="{ name: 'admin-books' }">Voltar ao painel</AppButton>
+    <AppButton v-else-if="accessRequest" :href="accessRequest">
+      <BaseIcon name="whatsapp" aria-hidden="true" />
+      Pedir a liberação
+    </AppButton>
   </EmptyState>
 </template>
 
@@ -13,7 +17,7 @@ import { useRoute } from 'vue-router'
 
 import { useAuthStore } from '@/stores'
 
-import { useLastCatalog, usePageMeta } from '@/composables'
+import { accessRequestLink, useLastCatalog, usePageMeta } from '@/composables'
 
 import AppButton from '@/components/ui/AppButton.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
@@ -24,7 +28,14 @@ const auth = useAuthStore()
 
 const lastCatalog = useLastCatalog()
 
-usePageMeta({ title: 'Sem permissão', description: 'Esta parte do painel não está aberta para o seu nível.' })
+const accessRequest = computed(() =>
+  auth.user
+    ? accessRequestLink(
+        auth.user.email,
+        route.query.motivo === 'adicionar' ? 'adicionar livros' : 'usar o painel do clube',
+      )
+    : null,
+)
 
 // Why this person is here: "Adicionar" as a Membro, an admin-only section as an Editor, or the panel itself.
 const reason = computed(() => {
@@ -33,4 +44,6 @@ const reason = computed(() => {
     ? 'Esta parte do painel é só para Administrador.'
     : 'O painel do clube é para Administrador e Editor.'
 })
+
+usePageMeta({ title: 'Sem permissão', description: 'Esta parte do painel não está aberta para o seu nível.' })
 </script>

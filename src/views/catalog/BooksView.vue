@@ -6,7 +6,6 @@
       <PageStatus
         v-else-if="booksStore.error && !booksStore.books.length"
         :error="booksStore.error"
-        error-hint="Se não voltar, avise no grupo."
         :on-retry="retry"
       />
       <template v-else>
@@ -83,14 +82,18 @@
             <EmptyState v-if="searchTerm" :title="`Nada com &quot;${searchTerm}&quot;`" :text="searchWhere">
               <AppButton @click="search = ''">Apagar a busca</AppButton>
               <AppButton v-if="hasFilters" @click="clearAll">Limpar os filtros</AppButton>
-              <AppButton v-if="canAddBooks && addTarget" :to="addTarget" :disabled="!canWrite"> Adicionar esse livro </AppButton>
+              <AppButton v-if="canAddBooks && addTarget" :to="addTarget" :disabled="!canWrite">
+                Adicionar esse livro
+              </AppButton>
             </EmptyState>
             <EmptyState
               v-else-if="!booksStore.books.length"
               title="Nenhum livro no catálogo ainda"
               text="Os livros que o clube adicionar aparecem aqui."
             >
-              <AppButton v-if="canAddBooks && addTarget" :to="addTarget" :disabled="!canWrite"> Adicionar um livro </AppButton>
+              <AppButton v-if="canAddBooks && addTarget" :to="addTarget" :disabled="!canWrite">
+                Adicionar um livro
+              </AppButton>
             </EmptyState>
             <EmptyState v-else title="Nenhum livro com esses filtros" :text="describeSelection(selected)">
               <AppButton @click="clearAll">Limpar os filtros</AppButton>

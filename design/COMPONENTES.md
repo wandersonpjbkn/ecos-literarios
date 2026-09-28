@@ -35,6 +35,7 @@ Todo campo de formulário (`AppField`, `MultiSelect`, o campo do `ComboSelect`) 
 
 - Ação de linha (Editar, Remover, Salvar, Cancelar): `AppButton` `md` com ícone **e** texto, e o item só para o leitor de tela ("Editar" + "Circe"). É o mesmo "Editar" em Livros do painel, Autores e gêneros, Meus livros e na página do livro: nenhum rótulo depende de reconhecer um ícone (COPY.md).
 - `AppBadge`: etiqueta que não é controle ("você", "Incluiu os que já tinham capa"). Canto reto e sem borda, para não ser lida como chip.
+- `SupportLink`: o link para o WhatsApp do suporte, com o ícone e a mensagem pronta. Sozinho é um link que quem usa veste (pé das áreas, trilho); com `pill`, é o botão ghost entre outras ações (entrar, volta do link, erro de carregamento). Sem número configurado, não aparece.
 - `InfoTip`: ajuda que abre ao passar o mouse, ao focar e ao tocar ("Só outro Administrador muda o seu nível.").
 - `AppNotice`: o aviso âmbar, com "Tentar de novo" quando repetir resolve. É o erro de toda ação que não passou por diálogo: abrir a edição, a lista de leitura, recarregar o catálogo, reenviar o link, copiar o link (o aviso guarda o link para a pessoa selecionar). Um erro de ação que a pessoa confirmou aparece dentro do diálogo, não aqui.
 - `.panel-box` e `.panel-row` (`main.scss`): a caixa de toda lista, tabela e cartão do painel, e as linhas à mesma distância da borda (`space-4`).

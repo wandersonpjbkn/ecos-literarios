@@ -27,7 +27,10 @@
           Escrever o que achei
         </AppButton>
         <template v-else>
-          <AppButton size="md" :href="askLink">Perguntar para {{ person }}</AppButton>
+          <AppButton size="md" :href="askLink">
+            <BaseIcon name="whatsapp" aria-hidden="true" />
+            Perguntar para {{ person }}
+          </AppButton>
           <p class="quote-block__hint">Abre o WhatsApp com a pergunta pronta.</p>
         </template>
       </div>
@@ -106,7 +109,6 @@ const isLong = computed(() => props.text.length > COLLAPSE_CHARS)
     font-weight: var(--font-weight-semibold);
     color: var(--color-text-default);
   }
-
 
   &__actions {
     margin-top: var(--space-4);

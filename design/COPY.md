@@ -26,7 +26,7 @@ Vale na interface, nos títulos de página, nos textos de estado vazio, nos e-ma
 | Limpar | **Limpar os filtros** — nunca "Limpar tudo", que soa como apagar a conta |
 | Ver mais da lista | Ver mais 24 |
 | Corrigir ficha (quem pode editar: o dono do livro, ou quem pode editar qualquer livro) | ✎ **Editar**, o mesmo de Meus livros, e ao lado o que falta: **Falta o ano.** / **Faltam o ano e o número de páginas.** |
-| Corrigir ficha (os outros: abre o WhatsApp) | **Avisar no grupo sobre um erro** · ou **Falta o ano. Perguntar no grupo** |
+| Corrigir ficha (os outros: abre o WhatsApp do suporte) | **Avisar sobre um erro** · ou **Pedir para completar o ano** |
 | Compartilhar | Celular: a folha de compartilhar do aparelho. Desktop: copia e avisa **Link copiado. É só colar na conversa.** (some sozinho) |
 | Quem marcou o livro | **3 pessoas querem ler · 1 pessoa já leu** · ninguém: **Ninguém guardou nem marcou como lido ainda.** Só totais, nunca nomes. |
 | Texto longo (comentário, sinopse) | **Ler o resto** / **Mostrar menos** |
@@ -53,7 +53,7 @@ Os chips aplicados de pessoa e de autor levam só a preposição: **"por Brenda"
 
 O bloco se chama **Comentário**, não "O que a Fulana escreveu": parte dos textos está em terceira pessoa ("Favorito da Brenda."), e depois de editado o texto pode ser de outra pessoa. O rótulo não afirma autoria.
 
-"Perguntar para" e as perguntas de dado faltando abrem o WhatsApp com a mensagem pronta (`Brenda, o que você acha de "X"?`, `Alguém sabe o ano de "X"?`): ninguém tem contato guardado, e a pessoa escolhe o grupo.
+"Perguntar para" abre o WhatsApp com a mensagem pronta (`Brenda, o que você acha de "X"?`): ninguém tem contato guardado, e a pessoa escolhe a conversa. O WhatsApp não aceita mensagem pronta para um grupo específico. Erro e dado faltando na ficha vão para o número de suporte (`Achei algo para corrigir em "X".`, `Falta o ano em "X".`), porque é a administração que corrige; sem número configurado, a pessoa escolhe a conversa.
 
 **Sem número de páginas** (23) — `Páginas / ninguém anotou`
 **Sem ano** (10) — `Publicado em / não sabemos`
@@ -91,7 +91,7 @@ A frase monta a combinação aplicada a partir de "Nenhum livro": gênero ou sub
 
 > Sem internet: `Você está sem internet. Os livros continuam visíveis, mas não é possível adicionar.`
 > Servidor fora: `A plataforma está fora do ar agora. Você está vendo a lista de ontem: os livros continuam visíveis, mas não é possível adicionar.` `[Tentar de novo]`
-> Sem lista salva e servidor fora: `A plataforma está fora do ar agora. Tente daqui a pouco.` / `Se não voltar, avise no grupo.`
+> Sem lista salva e servidor fora: `A plataforma está fora do ar agora. Tente daqui a pouco.` `[Tentar de novo]` `[Falar com o suporte]`
 
 **Volta do link mágico com a plataforma fora** — o link funcionou; quem não respondeu foi a plataforma. Nunca "Pedir outro link" nesse caso, e nunca o erro do navegador ("Failed to fetch").
 > `A plataforma está fora do ar agora.` / `Seu link funcionou; quem não respondeu foi a plataforma. Enquanto isso, você pode olhar os livros.` `[Tentar de novo]` `[Continuar sem entrar]`
@@ -115,10 +115,18 @@ Depois de enviar, a introdução some e fica só:
 
 Espera não é botão desabilitado: botão cinza parece quebrado, e o texto diz quando vai dar.
 
-## Seu nome no grupo
+## Vincular meu nome
 
-A seção aparece para toda conta. Vincular segue a matriz (Vínculo · Editar; por padrão Editor e Administrador); sem essa permissão, no lugar do formulário:
-> Vincular um nome do grupo não está liberado para a sua conta. Se você é do clube, fale com um Administrador.
+A seção tem o mesmo nome do botão de Meus livros que leva a ela e aparece para toda conta. Vincular segue a matriz (Vínculo · Editar; por padrão Editor e Administrador); sem essa permissão, no lugar do formulário:
+> Vincular um nome do grupo não está liberado para a sua conta.
+> `[Pedir a liberação]` ← abre o WhatsApp do suporte com a mensagem pronta
+
+Em Meus livros, a mesma conta sem livros vê:
+> Nenhum livro com o seu nome ainda
+> Se você é do clube, peça a liberação para vincular o seu nome e ver aqui os livros que mencionou no grupo.
+> `[Pedir a liberação]`
+
+Sem permissão, o subtítulo da seção fica só com a origem dos livros ("Os livros antigos vieram da conversa do WhatsApp, com o nome de quem falou deles."), sem pedir para vincular. Sem número de suporte configurado (`VITE_PHONE_SUPPORT`), o botão não aparece: em Vincular meu nome o texto ganha "Se você é do clube, fale com um Administrador."; em Meus livros fica "Aqui aparecem os livros mencionados por você." A mensagem leva o e-mail da conta, que é como o Administrador a acha no painel.
 
 Ninguém precisa vincular antes de adicionar: o livro sai com quem cadastra como "mencionado por". Mas, se existe um nome da carga sem dono igual ao da conta, o formulário pergunta primeiro:
 > O nome "Wanderson" já está no catálogo. É você? Se for, vincule esse nome e esses livros passam a ser seus.
@@ -127,6 +135,18 @@ Ninguém precisa vincular antes de adicionar: o livro sai com quem cadastra como
 "Mencionado por" é escolha em uma lista (as contas e os nomes da carga sem dono), com quem cadastra já escolhido. Nome digitado só pela última opção, **"Outro nome: {o que foi digitado}"**, que segue a matriz (Vínculo · Criar; por padrão só Administrador). O nome novo não pode repetir um que já existe, nem com outro acento ou outra caixa: "Natalia" não entra se há "Natália"; "Natalia C." entra.
 
 As linhas novas da matriz de Permissões, em frase: **"Vincular a própria conta a um nome do grupo"** (Vínculo · Editar), **"Incluir um nome novo de pessoa do clube"** (Vínculo · Criar) e **"Buscar capas e dados para o acervo inteiro"**.
+
+## Suporte
+
+**Falar com o suporte** abre o WhatsApp do número de suporte com a mensagem pronta (com o e-mail, quando ele é conhecido). Fica na moldura e onde a pessoa trava:
+
+- **Ajuda** no pé do trilho (do tablet para cima), acima de Painel do clube e de Entrar ou Minha conta. O pé é uma navegação própria ("Conta"), separada da principal: ajuda, painel e conta não são destinos de leitura. No trilho o rótulo é curto, como os outros itens;
+- no pé de Minha conta e do Painel do clube;
+- em "Enviamos o link", em todo estado de erro ou aviso da volta do link e no erro de "não foi possível abrir" do catálogo e do livro.
+
+"Enviamos outro link" (volta do link) tem as mesmas saídas de "Enviamos o link": `[Usar outro e-mail]` `[Falar com o suporte]` e, fora da mensagem, `← Voltar ao catálogo`, como no Entrar. "Não foi possível entrar com esse link" também tem `← Voltar ao catálogo`; com a plataforma fora, a volta é "Continuar sem entrar". Sem internet, o erro de carregamento não oferece o suporte: o WhatsApp também não abriria.
+
+Todo botão que abre o WhatsApp leva o ícone do WhatsApp: é o sinal, na tela, de que sai do app. "Sem permissão" oferece **Pedir a liberação** a quem não é Editor, e a mensagem diz o que se pede (adicionar livros, usar o painel, vincular o nome), para a administração saber que nível liberar.
 
 ## Confirmar o que não tem volta
 
@@ -143,7 +163,7 @@ Cada linha é uma frase sobre o que ela controla ("Ver a lista de membros"), nun
 
 Na tela, inclusive no painel do clube e nas mensagens que vêm do servidor:
 - "role", "claim", "reivindicar", "batch", "token", "cache", "cadastrado", "importação", "Qtd.", "livro(s)";
-- "Erro ao …" vira **"Não foi possível … Tente de novo."**, e "Tentar novamente" vira **"Tentar de novo"**. Nada de "para", "pro", "em uma", "dá para" ou "não foi possível": o registro pode ser leve, mas não chega nesse ponto (dono, 2026-09-28);
+- "Erro ao …" vira **"Não foi possível … Tente de novo."**, e "Tentar novamente" vira **"Tentar de novo"**. Nada de "a gente", "mandar", "pra", "pro", "numa", "dá pra" ou "não deu pra": o registro pode ser leve, mas não chega nesse ponto (dono, 2026-09-28);
 - "Categoria" vira **"Gênero"** e "Sub-gêneros", **"Subgêneros"**, como na tela pública; "Email" vira **"E-mail"**;
 - "Painel admin" vira **"Painel do clube"**; "Segmentações" vira **"Autores e gêneros"**;
 - os níveis de permissão aparecem como **Administrador, Editor, Visitante**, nunca `admin`, `editor`, `viewer`. "Membro" não é nível: os membros do clube são Editores, e o nível mais baixo é de quem entrou por um link sem ser do clube (fatia 8a);

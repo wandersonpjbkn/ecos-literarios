@@ -6,7 +6,6 @@
       :on-retry="retry"
       loading-text="Carregando livro…"
       what="o livro"
-      error-hint="Se não voltar, avise no grupo."
     />
 
     <!-- Shown with an empty collection too: a link to a book that is not there never lands on a blank page. -->
@@ -71,7 +70,7 @@
               :book="book"
               :can-edit="canEdit"
               :can-write="canWrite"
-              :ask-link="ask"
+              :ask-link="report"
               @edit="openEditor(book.id)"
             />
             <AppNotice v-if="editError" :text="editError" retry @retry="openEditor(book.id, editFocus)" />
@@ -148,6 +147,7 @@ import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
 
 import {
   askGroupLink,
+  reportLink,
   useApi,
   useBookEditor,
   useCanWrite,
@@ -248,6 +248,7 @@ const onRemoved = () => {
 }
 
 const ask = (message: string) => askGroupLink(message, bookPath.value)
+const report = (message: string) => reportLink(message, bookPath.value)
 
 onMounted(() => useApi().fetchBooks())
 

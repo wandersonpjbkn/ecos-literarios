@@ -16,6 +16,7 @@ import { describeSelection, useFilters } from '@/composables/useFilters'
 import { rememberCatalog, rememberMyBooks, useLastCatalog, useLastList } from '@/composables/useLastCatalog'
 import { usePageMeta } from '@/composables/usePageMeta'
 import { useReading } from '@/composables/useReading'
+import { accessRequestLink, reportLink, useAccessRequest } from '@/composables/useSupport'
 import { useToast } from '@/composables/useToast'
 import { useUtils } from '@/composables/useUtils'
 
@@ -35,6 +36,9 @@ export {
   useLastCatalog,
   useLastList,
   askGroupLink,
+  useAccessRequest,
+  accessRequestLink,
+  reportLink,
   useToast,
   useEcoOfTheWeek,
   usePageMeta,

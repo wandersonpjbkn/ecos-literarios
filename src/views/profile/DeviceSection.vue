@@ -1,6 +1,6 @@
 <template>
   <div class="area-section">
-    <SectionHeader title="Este aparelho" />
+    <SectionHeader title="Dados salvos" />
     <AppNotice v-if="refreshFailed" text="Não foi possível recarregar o catálogo." retry @retry="refreshCatalog" />
     <!-- Each action with what it does; clearing signs out, so it takes the weight of what has no way back (8e). -->
     <ul class="device panel-box width-column">

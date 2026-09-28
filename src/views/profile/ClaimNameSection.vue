@@ -1,12 +1,14 @@
 <template>
   <div class="area-section">
-    <SectionHeader title="Seu nome no grupo">
-      Os livros antigos vieram da conversa do WhatsApp, com o nome de quem falou deles. Vincule o nome que é seu e eles
-      passam a aparecer em Meus livros, onde você pode corrigi-los.
+    <SectionHeader title="Vincular meu nome">
+      Os livros antigos vieram da conversa do WhatsApp, com o nome de quem falou deles.
+      <template v-if="!lockedOut">
+        Vincule o nome que é seu e eles passam a aparecer em Meus livros, onde você pode corrigi-los.
+      </template>
     </SectionHeader>
 
     <BaseSpinner v-if="loading">
-      <p>Carregando seu nome no grupo…</p>
+      <p>Carregando o vínculo…</p>
     </BaseSpinner>
 
     <AppNotice v-else-if="loadError" :text="loadError" retry @retry="load" />
@@ -27,9 +29,15 @@
     </template>
 
     <!-- Linking follows the matrix (claim: update); a Visitante sees why instead of a form. -->
-    <p v-else-if="!canClaim" class="claim-locked">
-      Vincular um nome do grupo não está liberado para a sua conta. Se você é do clube, fale com um Administrador.
-    </p>
+    <div v-else-if="!canClaim" class="claim-locked">
+      <p class="claim-locked__text">
+        Vincular um nome do grupo não está liberado para a sua conta.
+        <template v-if="!accessRequest">Se você é do clube, fale com um Administrador.</template>
+      </p>
+      <AppButton v-if="accessRequest" variant="primary" size="md" :href="accessRequest"
+        ><BaseIcon name="whatsapp" aria-hidden="true" />Pedir a liberação</AppButton
+      >
+    </div>
 
     <form v-else class="claim-form width-form" @submit.prevent="submitClaim">
       <AppField label="Escolha o seu nome" hint="É o nome que aparece nos livros que você mencionou.">
@@ -52,7 +60,7 @@
       </AppButton>
     </form>
 
-    <ul class="claim-rules">
+    <ul v-if="canClaim || status?.has_claim" class="claim-rules">
       <li>Um nome por vez: para trocar, desfaça o vínculo e escolha outro.</li>
       <li>Um nome que outra pessoa já vinculou não aparece na lista.</li>
     </ul>
@@ -79,7 +87,7 @@ import type { MyClaimStatus } from '@/types'
 
 import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
 
-import { useApi, useErrorReporter, useToast } from '@/composables'
+import { useAccessRequest, useApi, useErrorReporter, useToast } from '@/composables'
 import { reloadAccount } from '@/composables/accountSync'
 import { errorText } from '@/composables/apiError'
 import { claimRegister, getMyClaimStatus, unclaimRegister } from '@/composables/useApi'
@@ -114,6 +122,9 @@ const availableNames = computed(() => {
   return [...new Set(free)].sort((a, b) => a.localeCompare(b, 'pt-BR'))
 })
 const canClaim = computed(() => permissions.can('claim', 'update'))
+const accessRequest = useAccessRequest()
+// Known to lack the permission: the invitation to link would contradict the refusal below.
+const lockedOut = computed(() => !!permissions.mine && !canClaim.value && !status.value?.has_claim)
 
 const claimedText = computed(() => {
   const n = status.value?.claimed_books ?? 0
@@ -127,7 +138,7 @@ const load = async () => {
   try {
     status.value = await getMyClaimStatus()
   } catch (err) {
-    loadError.value = errorText(err, 'Não foi possível carregar seu nome no grupo. Tente de novo.')
+    loadError.value = errorText(err, 'Não foi possível carregar o vínculo. Tente de novo.')
     useErrorReporter().captureException(err, { context: 'ClaimNameSection.load' })
   } finally {
     loading.value = false
@@ -193,11 +204,18 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .claim-locked {
+  display: flex;
   max-width: var(--text-column);
-  margin: 0;
-  font-size: var(--font-size-ui);
-  line-height: var(--line-height-text);
-  color: var(--color-text-secondary);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+
+  &__text {
+    margin: 0;
+    font-size: var(--font-size-ui);
+    line-height: var(--line-height-text);
+    color: var(--color-text-secondary);
+  }
 }
 
 .claim-card {

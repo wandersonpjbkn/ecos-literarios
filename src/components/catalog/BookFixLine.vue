@@ -7,9 +7,10 @@
       </AppButton>
       <span v-if="missing.length" class="fix-line__gap">{{ gap }}</span>
     </template>
-    <AppButton v-else variant="ghost" size="md" class="app-button--ask" :href="askLink(question)">{{
-      askLabel
-    }}</AppButton>
+    <AppButton v-else variant="ghost" size="md" class="app-button--ask" :href="askLink(question)">
+      <BaseIcon name="whatsapp" aria-hidden="true" />
+      {{ askLabel }}
+    </AppButton>
   </p>
 </template>
 
@@ -35,18 +36,18 @@ const missing = computed(() =>
   [!props.book.published_year && 'o ano', !props.book.page_count && 'o número de páginas'].filter(Boolean),
 )
 
-const gap = computed(() =>
-  missing.value.length > 1 ? `Faltam ${missing.value.join(' e ')}.` : `Falta ${missing.value[0]}.`,
-)
+// "Falta o ano" / "Faltam o ano e o número de páginas": the screen and the message say it the same way.
+const lack = computed(() => `${missing.value.length > 1 ? 'Faltam' : 'Falta'} ${missing.value.join(' e ')}`)
+const gap = computed(() => `${lack.value}.`)
 
-// Readers who cannot edit are sent to WhatsApp; the label says so instead of promising an edit.
+// Readers who cannot edit report it on WhatsApp; the label does not promise an edit.
 const askLabel = computed(() =>
-  missing.value.length ? `${gap.value} Perguntar no grupo` : 'Avisar no grupo sobre um erro',
+  missing.value.length ? `Pedir para completar ${missing.value.join(' e ')}` : 'Avisar sobre um erro',
 )
 
 const question = computed(() =>
   missing.value.length
-    ? `Alguém sabe ${missing.value.join(' e ')} de "${props.book.titulo}"?`
+    ? `${lack.value} em "${props.book.titulo}".`
     : `Achei algo para corrigir em "${props.book.titulo}".`,
 )
 </script>
@@ -71,6 +72,5 @@ const question = computed(() =>
     font-size: var(--font-size-ui);
     color: var(--color-text-secondary);
   }
-
 }
 </style>

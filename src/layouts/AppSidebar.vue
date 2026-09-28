@@ -1,37 +1,48 @@
 <template>
-  <nav class="app-sidebar" aria-label="Principal">
-    <RouterLink :to="{ name: 'catalog-books' }" class="app-sidebar__logo" :aria-current="undefined" aria-label="Ecos Literários, catálogo">
-      <img src="/icons/icon-192x192.png" alt="" width="38" height="38" />
-    </RouterLink>
+  <div class="app-sidebar">
+    <nav class="app-sidebar__nav" aria-label="Principal">
+      <RouterLink
+        :to="{ name: 'catalog-books' }"
+        class="app-sidebar__logo"
+        :aria-current="undefined"
+        aria-label="Ecos Literários, catálogo"
+      >
+        <img src="/icons/icon-192x192.png" alt="" width="38" height="38" />
+      </RouterLink>
 
-    <ul class="app-sidebar__list">
-      <li v-for="item in items" :key="item.label">
-        <span v-if="item.disabled" class="app-sidebar__item is-disabled" role="link" aria-disabled="true">
-          <BaseIcon :name="item.icon" class="app-sidebar__icon" aria-hidden="true" />
-          <span class="app-sidebar__label">{{ item.label }}</span>
-        </span>
-        <RouterLink
-          v-else
-          :to="item.to"
-          class="app-sidebar__item"
-          :class="{ 'is-active': item.active }"
-          :aria-current="item.active ? 'page' : undefined"
-        >
-          <BaseIcon :name="item.icon" class="app-sidebar__icon" aria-hidden="true" />
-          <span class="app-sidebar__label">{{ item.label }}</span>
-        </RouterLink>
-      </li>
-    </ul>
+      <ul class="app-sidebar__list">
+        <li v-for="item in items" :key="item.label">
+          <span v-if="item.disabled" class="app-sidebar__item is-disabled" role="link" aria-disabled="true">
+            <BaseIcon :name="item.icon" class="app-sidebar__icon" aria-hidden="true" />
+            <span class="app-sidebar__label">{{ item.label }}</span>
+          </span>
+          <RouterLink
+            v-else
+            :to="item.to"
+            class="app-sidebar__item"
+            :class="{ 'is-active': item.active }"
+            :aria-current="item.active ? 'page' : undefined"
+          >
+            <BaseIcon :name="item.icon" class="app-sidebar__icon" aria-hidden="true" />
+            <span class="app-sidebar__label">{{ item.label }}</span>
+          </RouterLink>
+        </li>
+      </ul>
+    </nav>
 
-    <div class="app-sidebar__foot">
+    <!-- Its own landmark, apart from "Principal": help, the panel and the account are not reading destinations. -->
+    <nav class="app-sidebar__foot" aria-label="Conta">
+      <SupportLink class="app-sidebar__item">
+        <span class="app-sidebar__label">Ajuda</span>
+      </SupportLink>
       <!-- The panel's way in for who may enter it, between the destinations and the account (dono, 2026-09-27). -->
       <RouterLink v-if="auth.isEditor" :to="{ name: 'admin-books' }" class="app-sidebar__item">
         <BaseIcon name="panel" class="app-sidebar__icon" aria-hidden="true" />
         <span class="app-sidebar__label">Painel do clube</span>
       </RouterLink>
       <UserMenu class="app-sidebar__user" placement="rail" />
-    </div>
-  </nav>
+    </nav>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -44,6 +55,8 @@ import { useAddTarget, useCanWrite, useLastList } from '@/composables'
 
 import UserMenu from '@/layouts/UserMenu.vue'
 
+import SupportLink from '@/components/ui/SupportLink.vue'
+
 const route = useRoute()
 const auth = useAuthStore()
 const addTarget = useAddTarget()
@@ -54,8 +67,7 @@ const lastList = useLastList()
 const onBook = computed(() => route.name === 'catalog-book-details')
 const fromMine = computed(() => lastList.value.path.startsWith('/perfil/livros'))
 
-const items = computed(() =>
-  [
+const items = computed(() => [
   {
     label: 'Catálogo',
     icon: 'home',
@@ -72,7 +84,7 @@ const items = computed(() =>
   ...(addTarget.value
     ? [{ label: 'Adicionar', icon: 'plus', to: addTarget.value, disabled: !canWrite.value, active: false }]
     : []),
-  ])
+])
 </script>
 
 <style lang="scss" scoped>
@@ -161,7 +173,9 @@ const items = computed(() =>
     }
   }
 
-  &__icon {
+  // :deep reaches the icon a piece renders inside a rail item (the help link).
+  &__icon,
+  &__item :deep(.base-icon) {
     width: var(--icon-lg);
     height: var(--icon-lg);
   }
@@ -186,6 +200,12 @@ const items = computed(() =>
       margin-bottom: var(--space-6);
       align-items: center;
       justify-content: center;
+    }
+
+    &__nav {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
     }
 
     &__foot {

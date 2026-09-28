@@ -22,16 +22,11 @@
     />
 
     <!-- Linking follows the matrix (claim: update): without it, no way in that leads to a refusal. -->
-    <EmptyState
-      v-else-if="!myBooks.length"
-      title="Nenhum livro com o seu nome ainda"
-      :text="
-        canClaim
-          ? 'Aqui aparecem os livros que você mencionou no grupo, depois que você vincula a sua conta ao nome que aparece neles.'
-          : 'Aqui aparecem os livros mencionados por você.'
-      "
-    >
+    <EmptyState v-else-if="!myBooks.length" title="Nenhum livro com o seu nome ainda" :text="emptyText">
       <AppButton v-if="canClaim" variant="primary" :to="claimLink">Vincular meu nome</AppButton>
+      <AppButton v-else-if="accessRequest" variant="primary" :href="accessRequest"
+        ><BaseIcon name="whatsapp" aria-hidden="true" />Pedir a liberação</AppButton
+      >
     </EmptyState>
 
     <template v-else>
@@ -110,7 +105,7 @@ import type { Book } from '@/types'
 
 import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
 
-import { rememberMyBooks, useApi, useBookEditor, useBookSort, usePageMeta } from '@/composables'
+import { rememberMyBooks, useAccessRequest, useApi, useBookEditor, useBookSort, usePageMeta } from '@/composables'
 import { getMyClaimStatus } from '@/composables/useApi'
 import { useLoadMore } from '@/composables/useLoadMore'
 import { useSegments, type SegmentOption } from '@/composables/useSegments'
@@ -163,6 +158,14 @@ const grid = ref<HTMLElement | null>(null)
 const hasClaim = ref<boolean | null>(null)
 
 const canClaim = computed(() => usePermissionsStore().can('claim', 'update'))
+const accessRequest = useAccessRequest()
+const emptyText = computed(() => {
+  if (canClaim.value)
+    return 'Aqui aparecem os livros que você mencionou no grupo, depois que você vincula a sua conta ao nome que aparece neles.'
+  if (accessRequest.value)
+    return 'Se você é do clube, peça a liberação para vincular o seu nome e ver aqui os livros que mencionou no grupo.'
+  return 'Aqui aparecem os livros mencionados por você.'
+})
 
 // The header search writes ?busca= here on Meus livros.
 const searchQuery = computed(() => String(route.query.busca ?? ''))
@@ -286,7 +289,6 @@ onMounted(async () => {
     gap: var(--space-2);
   }
 
-
   &__grid {
     margin: 0;
     padding: 0;
@@ -306,7 +308,6 @@ onMounted(async () => {
     align-items: center;
     gap: var(--space-1) var(--space-2);
   }
-
 }
 
 @media (max-width: $bp-phone-max) {

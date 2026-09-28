@@ -5,16 +5,20 @@
   </BaseSpinner>
 
   <!-- Error: the same centred message as every other screen that has nothing to show. -->
-  <EmptyState v-else-if="error" class="state-error" role="alert" title-tag="h1" :title="friendlyError" :text="errorHint || undefined">
+  <EmptyState v-else-if="error" class="state-error" role="alert" title-tag="h1" :title="friendlyError">
     <AppButton v-if="onRetry" variant="primary" @click="onRetry">Tentar de novo</AppButton>
+    <!-- Offline, WhatsApp would not open either. -->
+    <SupportLink v-if="online" pill />
   </EmptyState>
 </template>
 
 <script lang="ts" setup>
+import { useOnline } from '@vueuse/core'
 import { computed } from 'vue'
 
 import AppButton from '@/components/ui/AppButton.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import SupportLink from '@/components/ui/SupportLink.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -22,7 +26,6 @@ const props = withDefaults(
     error?: string | null
     onRetry?: (() => void) | null
     loadingText?: string
-    errorHint?: string
     // What failed to open, in the sentence: "o catálogo", "o livro".
     what?: string
   }>(),
@@ -31,10 +34,11 @@ const props = withDefaults(
     error: null,
     onRetry: null,
     loadingText: 'Carregando…',
-    errorHint: '',
     what: 'o catálogo',
   },
 )
+
+const online = useOnline()
 
 const friendlyError = computed(() => {
   const raw = props.error ?? ''

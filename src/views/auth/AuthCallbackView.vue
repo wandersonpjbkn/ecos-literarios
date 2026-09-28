@@ -7,29 +7,53 @@
 
       <EmptyState
         v-else-if="status === 'platform'"
+        ref="message"
+        title-tag="h1"
         title="A plataforma está fora do ar agora."
         text="Seu link funcionou; quem não respondeu foi a plataforma. Enquanto isso, você pode olhar os livros."
       >
         <AppButton variant="primary" @click="enter">Tentar de novo</AppButton>
         <AppButton @click="continueWithoutAccount">Continuar sem entrar</AppButton>
+        <SupportLink pill :email="lastEmail" />
       </EmptyState>
 
-      <EmptyState v-else-if="status === 'resent'" ref="resentMessage" title="Enviamos outro link">
-        <template #text>Foi para <strong>{{ resentTo }}</strong>. Abra seu e-mail e toque no link para entrar.</template>
+      <EmptyState v-else-if="status === 'resent'" ref="message" title-tag="h1" title="Enviamos outro link">
+        <template #text
+          >Foi para <strong>{{ resentTo }}</strong
+          >. Abra seu e-mail e toque no link para entrar.</template
+        >
+        <AppButton variant="ghost" :to="{ name: 'auth-login' }">Usar outro e-mail</AppButton>
+        <SupportLink pill :email="lastEmail" />
       </EmptyState>
 
-      <EmptyState v-else title="Não foi possível entrar com esse link.">
+      <EmptyState v-else ref="message" title-tag="h1" title="Não foi possível entrar com esse link.">
         <!-- The address wraps in the text; a long one inside a pill would run off a phone screen. -->
         <template #text>
-          Ele pode ter vencido.<template v-if="lastEmail"> O link foi pedido para <strong>{{ lastEmail }}</strong>.</template>
+          Ele pode ter vencido.<template v-if="lastEmail">
+            O link foi pedido para <strong>{{ lastEmail }}</strong
+            >.</template
+          >
         </template>
         <template v-if="lastEmail">
           <AppButton variant="primary" :disabled="sending" @click="resend">Enviar outro link</AppButton>
           <AppButton :to="{ name: 'auth-login' }">Usar outro e-mail</AppButton>
         </template>
         <AppButton v-else :to="{ name: 'auth-login' }" variant="primary">Pedir outro link</AppButton>
+        <SupportLink pill :email="lastEmail" />
       </EmptyState>
       <AppNotice v-if="status === 'link' && resendError" :text="resendError" />
+
+      <!-- The same way back as the login page; "platform" already offers "Continuar sem entrar". -->
+      <AppButton
+        v-if="status === 'link' || status === 'resent'"
+        :to="lastCatalog"
+        variant="ghost"
+        size="md"
+        class="back-link"
+      >
+        <BaseIcon name="arrow-left" aria-hidden="true" />
+        Voltar ao catálogo
+      </AppButton>
     </div>
   </div>
 </template>
@@ -40,14 +64,26 @@ import { useRouter } from 'vue-router'
 
 import { useErrorReporter } from '@/composables'
 import { CallbackError, useAuth } from '@/composables/useAuth'
+import { useLastCatalog } from '@/composables/useLastCatalog'
 import { forgetEmail, recallEmail } from '@/composables/useLastEmail'
+import { usePageMeta } from '@/composables/usePageMeta'
 import { takeReturn } from '@/composables/useReturnPath'
 
 import AppButton from '@/components/ui/AppButton.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import SupportLink from '@/components/ui/SupportLink.vue'
+
+// The tab names the state the person is in, not only the route's "Entrando".
+const TITLES = {
+  loading: 'Entrando',
+  link: 'Não foi possível entrar',
+  platform: 'A plataforma está fora do ar',
+  resent: 'Enviamos outro link',
+} as const
 
 const router = useRouter()
+const lastCatalog = useLastCatalog()
 
 const { handleCallback, sendMagicLink } = useAuth()
 
@@ -56,9 +92,12 @@ const status = ref<'loading' | 'link' | 'platform' | 'resent'>('loading')
 // Expired link: resend to the e-mail that asked for it (same browser, within the hour) instead of retyping it.
 const lastEmail = ref(recallEmail())
 const resentTo = ref('')
-const resentMessage = ref<InstanceType<typeof EmptyState> | null>(null)
+// Whichever message is showing; the button pressed is gone, so the focus goes there.
+const message = ref<InstanceType<typeof EmptyState> | null>(null)
 const sending = ref(false)
 const resendError = ref('')
+
+usePageMeta(() => ({ title: TITLES[status.value], description: 'Entrada no Ecos Literários pelo link do e-mail.' }))
 
 const resend = async () => {
   if (!lastEmail.value) return
@@ -69,9 +108,8 @@ const resend = async () => {
     resentTo.value = lastEmail.value
     forgetEmail()
     status.value = 'resent'
-    // The pressed button is gone; move focus to the news so it is not lost on the page.
     await nextTick()
-    resentMessage.value?.focus()
+    message.value?.focus()
   } catch (err) {
     resendError.value = 'Não foi possível enviar agora. Tente de novo daqui a pouco.'
     useErrorReporter().captureException(err, { context: 'AuthCallback.resend' })
@@ -92,6 +130,8 @@ const enter = async () => {
     useErrorReporter().captureException(err instanceof CallbackError ? err.cause : err, {
       context: `AuthCallback.${status.value}`,
     })
+    await nextTick()
+    message.value?.focus()
   }
 }
 
@@ -116,6 +156,11 @@ onMounted(enter)
   max-width: var(--message-max);
   flex-direction: column;
   align-items: stretch;
+}
+
+.back-link {
+  align-self: center;
+  margin-top: var(--space-6);
 }
 
 .callback-loading {
