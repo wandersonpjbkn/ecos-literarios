@@ -1,3 +1,5 @@
+import { isAuthRetryableFetchError } from '@supabase/supabase-js'
+
 import { API_BASE } from '@/data/config'
 import { personName } from '@/data/person'
 import type {
@@ -28,6 +30,7 @@ import { useBooksStore, useCacheStore } from '@/stores'
 
 import { useErrorReporter } from '@/composables'
 import { toApiError } from '@/composables/apiError'
+import { supabase } from '@/composables/supabase'
 
 // ── Helpers ──
 const extractNome = (field: ApiPopulated | string | undefined): string => {
@@ -57,22 +60,37 @@ const normalizeBook = (raw: ApiBook): Book => ({
 })
 
 // ── Auth helper ──
-const getSupabaseToken = (): string | null => {
-  try {
-    const key = Object.keys(localStorage).find((k) => k.startsWith('sb-') && k.endsWith('-auth-token'))
-    if (!key) return null
-    const session = JSON.parse(localStorage.getItem(key) ?? '{}')
-    return (session?.access_token as string) ?? null
-  } catch {
-    return null
-  }
+// getSession renews a token about to expire, so a tab back from sleep does not send a stale one.
+const currentToken = async (): Promise<string | null> =>
+  (await supabase.auth.getSession()).data.session?.access_token ?? null
+
+const headersWith = (token: string | null): HeadersInit => ({
+  'Content-Type': 'application/json',
+  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+})
+
+// A token the API refused: another request may have renewed it already, otherwise it is renewed once here.
+const renewedToken = async (refused: string): Promise<string | null> => {
+  const current = await currentToken()
+  if (current && current !== refused) return current
+  const { data, error } = await supabase.auth.refreshSession()
+  // Offline or Supabase down: the session stays; the call fails like any other and is tried again later.
+  if (isAuthRetryableFetchError(error)) return null
+  return data.session?.access_token ?? null
 }
 
-export const buildHeaders = (): HeadersInit => {
-  const headers: HeadersInit = { 'Content-Type': 'application/json' }
-  const token = getSupabaseToken()
-  if (token) headers['Authorization'] = `Bearer ${token}`
-  return headers
+/** Every call to the API: a 401 renews the token and resends once; refused twice, the session ends. */
+const apiFetch = async (path: string, init: RequestInit = {}): Promise<Response> => {
+  const send = (token: string | null) => fetch(`${API_BASE}${path}`, { ...init, headers: headersWith(token) })
+  const token = await currentToken()
+  const res = await send(token)
+  if (res.status !== 401 || !token) return res
+
+  const renewed = await renewedToken(token)
+  if (!renewed) return res
+  const retried = await send(renewed)
+  if (retried.status === 401) await supabase.auth.signOut({ scope: 'local' })
+  return retried
 }
 
 // ── Composable ──
@@ -99,7 +117,7 @@ export function useApi() {
     try {
       if (import.meta.env.DEV) console.log('[useApi] Fetching books...')
 
-      const res = await fetch(`${API_BASE}/books`, { headers: buildHeaders() })
+      const res = await apiFetch('/books')
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
       const raw: ApiBook[] = await res.json()
@@ -151,9 +169,8 @@ export const verifyAuth = async (token: string) => {
 }
 
 export const claimRegister = async (quemNome: string): Promise<RegisterResponse> => {
-  const res = await fetch(`${API_BASE}/users/me/claim`, {
+  const res = await apiFetch('/users/me/claim', {
     method: 'POST',
-    headers: buildHeaders(),
     body: JSON.stringify({ quem_nome: quemNome }),
   })
 
@@ -165,10 +182,7 @@ export const claimRegister = async (quemNome: string): Promise<RegisterResponse>
 }
 
 export const getMyClaimStatus = async (): Promise<MyClaimStatus> => {
-  const res = await fetch(`${API_BASE}/users/me/claim`, {
-    method: 'GET',
-    headers: buildHeaders(),
-  })
+  const res = await apiFetch('/users/me/claim', { method: 'GET' })
 
   if (!res.ok) {
     throw await toApiError(res, 'Não foi possível carregar seu vínculo. Tente de novo.', 'GET')
@@ -178,10 +192,7 @@ export const getMyClaimStatus = async (): Promise<MyClaimStatus> => {
 }
 
 export const unclaimRegister = async (): Promise<{ message?: string }> => {
-  const res = await fetch(`${API_BASE}/users/me/claim`, {
-    method: 'DELETE',
-    headers: buildHeaders(),
-  })
+  const res = await apiFetch('/users/me/claim', { method: 'DELETE' })
 
   if (!res.ok) {
     throw await toApiError(res, 'Não foi possível desfazer o vínculo. Tente de novo.', 'DELETE')
@@ -192,7 +203,7 @@ export const unclaimRegister = async (): Promise<{ message?: string }> => {
 
 // ── "Quero ler" / "Lido" ──
 const authedRequest = async <T>(path: string, init: RequestInit, fallback: string): Promise<T> => {
-  const res = await fetch(`${API_BASE}${path}`, { ...init, headers: buildHeaders() })
+  const res = await apiFetch(path, init)
   if (!res.ok) throw await toApiError(res, fallback, init.method)
   return (res.status === 204 ? null : res.json()) as Promise<T>
 }

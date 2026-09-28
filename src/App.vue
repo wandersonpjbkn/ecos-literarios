@@ -22,9 +22,9 @@
 import { useHead } from '@unhead/vue'
 import { Head } from '@unhead/vue/components'
 import { onMounted, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
-import { useAuth } from '@/composables'
+import { useAuth, useToast } from '@/composables'
 import { startAccountSync } from '@/composables/accountSync'
 import { startFormatsSync } from '@/composables/formatsSync'
 import { useRouteFocus } from '@/composables/useRouteFocus'
@@ -35,8 +35,10 @@ import ReadingLayout from '@/layouts/ReadingLayout.vue'
 import UpdateNotification from '@/layouts/UpdateNotification.vue'
 
 const route = useRoute()
+const router = useRouter()
 useRouteFocus()
 const { restoreSession, watchSession } = useAuth()
+const toast = useToast()
 
 useHead({
   htmlAttrs: { lang: 'pt-BR' },
@@ -47,7 +49,13 @@ let stopWatchSession: (() => void) | null = null
 let stopAccount: (() => void) | null = null
 
 onMounted(async () => {
-  stopWatchSession = watchSession()
+  stopWatchSession = watchSession(async () => {
+    toast.show('Sua sessão venceu. Entre de novo.')
+    // The first navigation may still be resolving: the page it lands on decides, not the blank start.
+    await router.isReady()
+    const current = router.currentRoute.value
+    if (current.meta.signedIn) router.replace({ name: 'auth-login', query: { voltar: current.fullPath } })
+  })
   // A returning visit may carry an expired token: the account is read only after Supabase has refreshed it.
   await restoreSession()
   const formats = startFormatsSync()

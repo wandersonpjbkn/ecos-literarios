@@ -1,16 +1,12 @@
-import { createClient, type EmailOtpType } from '@supabase/supabase-js'
+import type { EmailOtpType } from '@supabase/supabase-js'
 
 import type { UserRole } from '@/types'
 
 import { useAuthStore } from '@/stores'
 
 import { useErrorReporter } from '@/composables'
+import { supabase } from '@/composables/supabase'
 import { verifyAuth } from '@/composables/useApi'
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL as string,
-  import.meta.env.VITE_SUPABASE_ANON_KEY as string,
-)
 
 // ── Session resolution from URL ───────────────────────────────────
 
@@ -53,6 +49,8 @@ const resolveSessionFromUrl = async (): Promise<string> => {
 
 // On /auth/callback both App (restoreSession) and the callback sync the same fresh session: one request serves both.
 let inFlightSync: { token: string; promise: Promise<void> } | null = null
+// "Sair" also fires SIGNED_OUT; this keeps it from reading as a session that ended on its own.
+let leaving = false
 
 export class CallbackError extends Error {
   constructor(
@@ -122,7 +120,12 @@ export function useAuth() {
   }
 
   const logout = async (): Promise<void> => {
-    await supabase.auth.signOut()
+    leaving = true
+    try {
+      await supabase.auth.signOut()
+    } finally {
+      leaving = false
+    }
     store.clearSession()
     useErrorReporter().setUser(null)
   }
@@ -152,7 +155,8 @@ export function useAuth() {
     }
   }
 
-  const watchSession = (): (() => void) => {
+  /** onEnded: the session ended without "Sair" (renewal refused, account blocked, another tab left). */
+  const watchSession = (onEnded: () => void): (() => void) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -162,8 +166,10 @@ export function useAuth() {
       }
 
       if (event === 'SIGNED_OUT') {
+        const wasSignedIn = store.isLoggedIn
         store.clearSession()
         useErrorReporter().setUser(null)
+        if (wasSignedIn && !leaving) onEnded()
       }
     })
 

@@ -54,7 +54,7 @@ export const routes: RouteRecordRaw[] = [
     beforeEnter: editorGuard,
     redirect: { name: 'admin-books' },
     // The panel is a tool, not part of the catalog: it brings its own bar and leaves the app's header and rail out.
-    meta: { frame: 'area' },
+    meta: { frame: 'area', signedIn: true },
     children: [
       {
         path: 'livros',

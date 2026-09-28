@@ -16,7 +16,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'profile-books',
     beforeEnter: authGuard,
     component: () => import('@/views/profile/ProfileBooks.vue'),
-    meta: { title: 'Meus livros', pageClass: 'page-profile' },
+    meta: { title: 'Meus livros', pageClass: 'page-profile', signedIn: true },
   },
   {
     path: '/perfil/conta',
@@ -25,7 +25,7 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/layouts/AccountLayout.vue'),
     redirect: { name: 'account-you' },
     // An area with its own frame, like the club panel (estudo-moldura.md).
-    meta: { frame: 'area' },
+    meta: { frame: 'area', signedIn: true },
     children: [
       {
         path: 'voce',

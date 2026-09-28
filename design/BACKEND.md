@@ -84,6 +84,8 @@ Entrada por link mágico (Supabase), sem senha. Um link vencido é o caso normal
 - "Enviamos outro link" só aparece depois que o reenvio foi feito de verdade. O sistema não envia sozinho.
 - Quando o link funcionou mas a plataforma não respondeu, o callback diz isso e não pede outro link (veja `COPY.md`).
 - Mensagens do servidor que chegam à tela seguem o `COPY.md`: sessão vencida é "Sua sessão venceu. Entre de novo.", falta de permissão é "Você não tem permissão para isso."
+- **Token recusado (401):** toda chamada passa pelo `apiFetch`. O token vem do Supabase, que renova o que está para vencer. Um 401 renova uma vez, e as chamadas que falharam juntas dividem essa renovação; cada uma é reenviada uma vez. Renovação recusada, ou token novo recusado de novo, encerra a sessão. Sem internet ou com o Supabase fora, a sessão fica.
+- **Sessão encerrada sem "Sair"** (renovação recusada, conta bloqueada, saída em outra aba): aparece "Sua sessão venceu. Entre de novo." e, em página que exige login (`meta.signedIn`), a pessoa vai para o login com o caminho de volta. No catálogo, ela fica onde está.
 
 ## 6. Dados que faltam, e o que fazer com eles
 
