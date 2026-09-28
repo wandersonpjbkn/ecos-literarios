@@ -1,5 +1,5 @@
-import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 
 // Also the localStorage key: "Limpar os dados deste aparelho" keeps it, the choice is the reader's, not cache.
 export const PREFERENCES_STORE_ID = 'preferences'

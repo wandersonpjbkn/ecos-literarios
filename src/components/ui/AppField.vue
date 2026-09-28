@@ -65,9 +65,11 @@ const model = defineModel<string | number | null | undefined>()
 
 // Class goes on the wrapper (grid placement); every other attribute (type, placeholder, disabled…) on the field.
 const attrs = useAttrs()
-const fieldAttrs = computed(() => Object.fromEntries(Object.entries(attrs).filter(([key]) => key !== 'class')))
 
 const uid = useId()
+
+const fieldAttrs = computed(() => Object.fromEntries(Object.entries(attrs).filter(([key]) => key !== 'class')))
+
 const fieldId = computed(() => props.id ?? `field-${uid}`)
 const labelId = computed(() => `${fieldId.value}-label`)
 const hintId = computed(() => `${fieldId.value}-hint`)

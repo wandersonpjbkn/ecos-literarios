@@ -1,7 +1,8 @@
 import { computed } from 'vue'
 
-import { useBooksStore } from '@/stores'
 import type { Book } from '@/types'
+
+import { useBooksStore } from '@/stores'
 
 /** ISO-8601 week, e.g. "2026-W39": the eco changes on Mondays and is the same for everyone that week. */
 export const isoWeekKey = (date: Date) => {

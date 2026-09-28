@@ -38,8 +38,10 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { useAddTarget, useCanWrite, useLastList } from '@/composables'
 import { useAuthStore } from '@/stores'
+
+import { useAddTarget, useCanWrite, useLastList } from '@/composables'
+
 import UserMenu from '@/layouts/UserMenu.vue'
 
 const route = useRoute()

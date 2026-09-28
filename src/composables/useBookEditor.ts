@@ -1,9 +1,10 @@
 import { ref } from 'vue'
-import { errorText } from '@/composables/apiError'
 
+import type { BookForEdit } from '@/types'
+
+import { errorText } from '@/composables/apiError'
 import { getBookForEdit, useApi } from '@/composables/useApi'
 import { useErrorReporter } from '@/composables/useErrorReporter'
-import type { BookForEdit } from '@/types'
 
 /** Loads a book with its editable fields and drives BookFormDrawer (member or admin scope). */
 export function useBookEditor() {

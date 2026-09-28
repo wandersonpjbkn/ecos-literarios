@@ -132,21 +132,35 @@
 </template>
 
 <script lang="ts" setup>
-import { errorText } from '@/composables/apiError'
 import { computed, onMounted, ref } from 'vue'
 
-import { useErrorReporter } from '@/composables'
-import { getEnrichmentHistory, getEnrichmentStatus, runEnrichment as runEnrichmentBatch } from '@/composables/useApi'
 import { counted } from '@/data/words'
+import type { ResultStatus, EnrichmentResult, EnrichmentSummary, EnrichmentRun } from '@/types'
+
+import { useErrorReporter } from '@/composables'
+import { errorText } from '@/composables/apiError'
+import { getEnrichmentHistory, getEnrichmentStatus, runEnrichment as runEnrichmentBatch } from '@/composables/useApi'
 import { useLoadMore } from '@/composables/useLoadMore'
-import ListFooter from '@/components/ui/ListFooter.vue'
-import SectionHeader from '@/components/ui/SectionHeader.vue'
+
+import AppBadge from '@/components/ui/AppBadge.vue'
 import AppButton from '@/components/ui/AppButton.vue'
+import AppNotice from '@/components/ui/AppNotice.vue'
 import CheckRow from '@/components/ui/CheckRow.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
-import AppBadge from '@/components/ui/AppBadge.vue'
-import AppNotice from '@/components/ui/AppNotice.vue'
-import type { ResultStatus, EnrichmentResult, EnrichmentSummary, EnrichmentRun } from '@/types'
+import ListFooter from '@/components/ui/ListFooter.vue'
+import SectionHeader from '@/components/ui/SectionHeader.vue'
+
+// The API answers with codes (isbn, manual_edit…); the panel says what happened to the book.
+const DETAILS: Record<string, string> = {
+  isbn: 'Achado pelo ISBN no Google Books',
+  title_author_pt: 'Achado por título e autor, edição em português',
+  title_author: 'Achado por título e autor no Google Books',
+  openlibrary_isbn: 'Achado pelo ISBN na Open Library',
+  openlibrary_title_author: 'Achado por título e autor na Open Library',
+  manual_edit: 'Alguém corrigiu à mão, então não mexemos',
+  missing_author: 'Falta o autor para procurar',
+  not_found: 'Não achamos este livro',
+}
 
 const loadingStatus = ref(false)
 // Numbers only after the first answer: before it, "0 / 0" and "Ainda não executado" would be invented.
@@ -165,18 +179,21 @@ const status = ref({
   last_enriched_at: '',
 })
 
-const nothingToSearch = computed(() => loadedOnce.value && status.value.total === 0)
-
 const results = ref<EnrichmentResult[]>([])
+
+// Only the latest run pages: a second list on this screen would share the same ?ver= in the URL.
+const { visible: visibleResults, nextBatch, more } = useLoadMore(results, { name: 'painel-capas' })
+
 const summary = ref<EnrichmentSummary | null>(null)
 const history = ref<EnrichmentRun[]>([])
 
 const resultList = ref<HTMLElement | null>(null)
-// Only the latest run pages: a second list on this screen would share the same ?ver= in the URL.
-const { visible: visibleResults, nextBatch, more } = useLoadMore(results, { name: 'painel-capas' })
+
+const nothingToSearch = computed(() => loadedOnce.value && status.value.total === 0)
 
 // The API does not report progress, so the screen says how many books this run covers, not a made-up count.
 const searchTotal = computed(() => (force.value ? status.value.total : status.value.without_cover))
+
 const booksWord = (n: number) => counted(n, 'livro', 'livros')
 
 const formatDateTime = (iso: string) => {
@@ -193,18 +210,6 @@ const statusLabel = (value: ResultStatus) => {
     failed: 'Sem resultado',
   }
   return map[value]
-}
-
-// The API answers with codes (isbn, manual_edit…); the panel says what happened to the book.
-const DETAILS: Record<string, string> = {
-  isbn: 'Achado pelo ISBN no Google Books',
-  title_author_pt: 'Achado por título e autor, edição em português',
-  title_author: 'Achado por título e autor no Google Books',
-  openlibrary_isbn: 'Achado pelo ISBN na Open Library',
-  openlibrary_title_author: 'Achado por título e autor na Open Library',
-  manual_edit: 'Alguém corrigiu à mão, então não mexemos',
-  missing_author: 'Falta o autor para procurar',
-  not_found: 'Não achamos este livro',
 }
 
 // A code the panel does not know yet still reads as a sentence, never as the raw code.

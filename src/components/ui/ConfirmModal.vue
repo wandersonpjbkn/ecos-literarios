@@ -42,9 +42,10 @@
 <script lang="ts" setup>
 import { ref, useId } from 'vue'
 
+import { useDialogFocus } from '@/composables/useDialogFocus'
+
 import AppButton from '@/components/ui/AppButton.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
-import { useDialogFocus } from '@/composables/useDialogFocus'
 
 const props = withDefaults(
   defineProps<{

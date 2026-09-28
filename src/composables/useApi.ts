@@ -1,5 +1,5 @@
-import { useErrorReporter } from '@/composables'
-import { useBooksStore, useCacheStore } from '@/stores'
+import { API_BASE } from '@/data/config'
+import { personName } from '@/data/person'
 import type {
   Action,
   AdminBook,
@@ -22,8 +22,10 @@ import type {
   Resource,
   Role,
 } from '@/types'
-import { personName } from '@/data/person'
-import { API_BASE } from '@/data/config'
+
+import { useBooksStore, useCacheStore } from '@/stores'
+
+import { useErrorReporter } from '@/composables'
 import { toApiError } from '@/composables/apiError'
 
 // ── Helpers ──

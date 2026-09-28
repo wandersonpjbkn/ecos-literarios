@@ -19,19 +19,20 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import { Head } from '@unhead/vue/components'
+import { onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 
 import { useAuth } from '@/composables'
-import { startFormatsSync } from '@/composables/formatsSync'
 import { startAccountSync } from '@/composables/accountSync'
+import { startFormatsSync } from '@/composables/formatsSync'
 import { useRouteFocus } from '@/composables/useRouteFocus'
+
+import AppToast from '@/layouts/AppToast.vue'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import ReadingLayout from '@/layouts/ReadingLayout.vue'
 import UpdateNotification from '@/layouts/UpdateNotification.vue'
-import AppToast from '@/layouts/AppToast.vue'
 
 const route = useRoute()
 useRouteFocus()

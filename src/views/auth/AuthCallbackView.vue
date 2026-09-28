@@ -35,9 +35,6 @@
 </template>
 
 <script lang="ts" setup>
-import AppButton from '@/components/ui/AppButton.vue'
-import AppNotice from '@/components/ui/AppNotice.vue'
-import EmptyState from '@/components/ui/EmptyState.vue'
 import { nextTick, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -46,8 +43,13 @@ import { CallbackError, useAuth } from '@/composables/useAuth'
 import { forgetEmail, recallEmail } from '@/composables/useLastEmail'
 import { takeReturn } from '@/composables/useReturnPath'
 
-const { handleCallback, sendMagicLink } = useAuth()
+import AppButton from '@/components/ui/AppButton.vue'
+import AppNotice from '@/components/ui/AppNotice.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+
 const router = useRouter()
+
+const { handleCallback, sendMagicLink } = useAuth()
 
 const status = ref<'loading' | 'link' | 'platform' | 'resent'>('loading')
 

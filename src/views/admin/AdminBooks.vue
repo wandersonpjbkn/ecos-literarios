@@ -110,32 +110,35 @@
 </template>
 
 <script lang="ts" setup>
-import { errorText } from '@/composables/apiError'
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import { personName } from '@/data/person'
+import { joinWords } from '@/data/words'
+import type { Suggestion, SegmentFilter, AdminBook } from '@/types'
+
+import { usePermissionsStore } from '@/stores'
+
 import { useErrorReporter } from '@/composables'
+import { errorText } from '@/composables/apiError'
 import { getPanelBooks } from '@/composables/useApi'
 import { useLoadMore } from '@/composables/useLoadMore'
 import { useSegments, type SegmentOption } from '@/composables/useSegments'
-import { personName } from '@/data/person'
-import { joinWords } from '@/data/words'
-import { usePermissionsStore } from '@/stores'
+
+import BookFormDrawer from '@/components/books/BookFormDrawer.vue'
 import AppButton from '@/components/ui/AppButton.vue'
+import AppNotice from '@/components/ui/AppNotice.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
+import ListFooter from '@/components/ui/ListFooter.vue'
 import SearchBar from '@/components/ui/SearchBar.vue'
 import SectionHeader from '@/components/ui/SectionHeader.vue'
-import AppNotice from '@/components/ui/AppNotice.vue'
-import ListFooter from '@/components/ui/ListFooter.vue'
-import BookFormDrawer from '@/components/books/BookFormDrawer.vue'
-import type { Suggestion, SegmentFilter, AdminBook } from '@/types'
+
+const route = useRoute()
+const router = useRouter()
 
 // Segment and how many are open live in the URL (FilterChip.md), so going back keeps the list the admin was fixing.
 const permissions = usePermissionsStore()
-
-// The server decides; this only hides what it would refuse for this level (users/me).
-const canCreate = computed(() => permissions.can('books', 'create'))
 
 const table = ref<HTMLElement | null>(null)
 const books = ref<AdminBook[]>([])
@@ -146,6 +149,48 @@ const searchQuery = ref('')
 const isDrawerOpen = ref(false)
 const editingBook = ref<AdminBook | null>(null)
 const newTitle = ref('')
+
+// The server decides; this only hides what it would refuse for this level (users/me).
+const canCreate = computed(() => permissions.can('books', 'create'))
+
+const summary = computed(() => {
+  const missing = segmentCounts.value.missing
+  const total = `${books.value.length} no acervo`
+  return missing ? `${total} · ${missing} com algo faltando` : `${total} · todos completos`
+})
+
+const filteredBooks = computed(() => {
+  if (!searchQuery.value.trim()) return segmentBooks.value
+  const q = searchQuery.value.toLowerCase()
+  return segmentBooks.value.filter(
+    (b) => b.titulo.toLowerCase().includes(q) || resolveName(b.autor).toLowerCase().includes(q),
+  )
+})
+
+const { visible: pageItems, nextBatch, more, reset } = useLoadMore(filteredBooks, { name: 'painel-livros' })
+
+const searchWhere = computed(() =>
+  segment.value.value === 'all'
+    ? 'Procuramos no título e no autor de cada livro.'
+    : `Procuramos no título e no autor, só entre os livros em "${segment.value.label}".`,
+)
+
+const searchSuggestions = computed(() => {
+  if (!searchQuery.value.trim() || searchQuery.value.length < 2) return []
+
+  const q = searchQuery.value.toLowerCase()
+
+  return filteredBooks.value
+    .filter((b) => b.titulo?.toLowerCase().includes(q))
+    .map((b) => {
+      return {
+        id: b._id,
+        main: b.titulo,
+        sub: typeof b.autor === 'string' ? b.autor : b.autor?.nome,
+      }
+    })
+    .slice(0, 8)
+})
 
 const resolveName = (field: string | { nome: string } | undefined): string =>
   !field ? '' : typeof field === 'string' ? field : field.nome
@@ -170,14 +215,6 @@ const FIELDS: { label: string; missing: (book: AdminBook) => boolean }[] = [
 const missingFields = (book: AdminBook) => FIELDS.filter((field) => field.missing(book)).map((field) => field.label)
 
 const hasMissingData = (book: AdminBook) => missingFields(book).length > 0
-
-// Two names are readable in a table cell; the rest becomes a count ("capa, ISBN e mais 3").
-const missingLabel = (book: AdminBook) => {
-  const fields = missingFields(book)
-  if (fields.length === 0) return 'nada'
-  if (fields.length <= 2) return joinWords(fields)
-  return `${fields.slice(0, 2).join(', ')} e mais ${fields.length - 2}`
-}
 
 const SEGMENTS: SegmentOption<SegmentFilter, AdminBook>[] = [
   { value: 'all', label: 'Todos', test: () => true, empty: { title: 'Nenhum livro no acervo ainda' } },
@@ -214,27 +251,13 @@ const {
   inCurrent: segmentBooks,
 } = useSegments(SEGMENTS, books)
 
-const summary = computed(() => {
-  const missing = segmentCounts.value.missing
-  const total = `${books.value.length} no acervo`
-  return missing ? `${total} · ${missing} com algo faltando` : `${total} · todos completos`
-})
-
-const filteredBooks = computed(() => {
-  if (!searchQuery.value.trim()) return segmentBooks.value
-  const q = searchQuery.value.toLowerCase()
-  return segmentBooks.value.filter(
-    (b) => b.titulo.toLowerCase().includes(q) || resolveName(b.autor).toLowerCase().includes(q),
-  )
-})
-
-const { visible: pageItems, nextBatch, more, reset } = useLoadMore(filteredBooks, { name: 'painel-livros' })
-
-const searchWhere = computed(() =>
-  segment.value.value === 'all'
-    ? 'Procuramos no título e no autor de cada livro.'
-    : `Procuramos no título e no autor, só entre os livros em "${segment.value.label}".`,
-)
+// Two names are readable in a table cell; the rest becomes a count ("capa, ISBN e mais 3").
+const missingLabel = (book: AdminBook) => {
+  const fields = missingFields(book)
+  if (fields.length === 0) return 'nada'
+  if (fields.length <= 2) return joinWords(fields)
+  return `${fields.slice(0, 2).join(', ')} e mais ${fields.length - 2}`
+}
 
 // A refresh after saving keeps the table on screen instead of swapping it for the spinner.
 const fetchBooks = async (quiet = false) => {
@@ -252,29 +275,10 @@ const fetchBooks = async (quiet = false) => {
   }
 }
 
-// ── Autocomplete ──────────────────────────────────────────────────
-const searchSuggestions = computed(() => {
-  if (!searchQuery.value.trim() || searchQuery.value.length < 2) return []
-
-  const q = searchQuery.value.toLowerCase()
-
-  return filteredBooks.value
-    .filter((b) => b.titulo?.toLowerCase().includes(q))
-    .map((b) => {
-      return {
-        id: b._id,
-        main: b.titulo,
-        sub: typeof b.autor === 'string' ? b.autor : b.autor?.nome,
-      }
-    })
-    .slice(0, 8)
-})
-
 const onSelectSuggestion = (suggestion: Suggestion) => {
   searchQuery.value = suggestion.main
 }
 
-// ── Drawer ────────────────────────────────────────────────────────
 const openCreate = (title = '') => {
   editingBook.value = null
   newTitle.value = title
@@ -306,8 +310,6 @@ watch(searchQuery, () => reset())
 onMounted(() => fetchBooks())
 
 // "Adicionar" from anywhere lands here with ?adicionar=1 and opens the form; the matrix may still be on its way.
-const route = useRoute()
-const router = useRouter()
 watch(
   [() => route.query.adicionar, canCreate],
   ([asked, may]) => {

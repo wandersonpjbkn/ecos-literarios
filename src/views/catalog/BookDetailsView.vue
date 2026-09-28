@@ -142,20 +142,10 @@
 import { computed, onMounted, ref, useId, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import AppButton from '@/components/ui/AppButton.vue'
-import AppNotice from '@/components/ui/AppNotice.vue'
-import EmptyState from '@/components/ui/EmptyState.vue'
-import BookCard from '@/components/books/BookCard.vue'
-import BookFacts from '@/components/catalog/BookFacts.vue'
-import BookFixLine from '@/components/catalog/BookFixLine.vue'
-import CoverBlock from '@/components/books/CoverBlock.vue'
-import FilterChip from '@/components/ui/FilterChip.vue'
-import PageStatus from '@/components/ui/PageStatus.vue'
-import QuoteBlock from '@/components/catalog/QuoteBlock.vue'
-import ReadingActions from '@/components/catalog/ReadingActions.vue'
-import ShareButton from '@/components/catalog/ShareButton.vue'
-import WhereToFind from '@/components/catalog/WhereToFind.vue'
-import BookFormDrawer from '@/components/books/BookFormDrawer.vue'
+import type { Book } from '@/types'
+
+import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
+
 import {
   askGroupLink,
   useApi,
@@ -166,16 +156,33 @@ import {
   useLastList,
   usePageMeta,
 } from '@/composables'
-import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
-import type { Book } from '@/types'
+
+import BookCard from '@/components/books/BookCard.vue'
+import BookFormDrawer from '@/components/books/BookFormDrawer.vue'
+import CoverBlock from '@/components/books/CoverBlock.vue'
+import BookFacts from '@/components/catalog/BookFacts.vue'
+import BookFixLine from '@/components/catalog/BookFixLine.vue'
+import QuoteBlock from '@/components/catalog/QuoteBlock.vue'
+import ReadingActions from '@/components/catalog/ReadingActions.vue'
+import ShareButton from '@/components/catalog/ShareButton.vue'
+import WhereToFind from '@/components/catalog/WhereToFind.vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import AppNotice from '@/components/ui/AppNotice.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import FilterChip from '@/components/ui/FilterChip.vue'
+import PageStatus from '@/components/ui/PageStatus.vue'
 
 const RELATED_COUNT = 6
 const SYNOPSIS_COLLAPSE_CHARS = 420
 
 const route = useRoute()
 const router = useRouter()
+
 const booksStore = useBooksStore()
 const authStore = useAuthStore()
+
+const permissions = usePermissionsStore()
+
 const canWrite = useCanWrite()
 const {
   editingBook,
@@ -185,47 +192,19 @@ const {
   close: closeEditor,
   onSaved,
 } = useBookEditor()
-const editFocus = ref<'porque' | undefined>()
-const openEditor = (id: string, focus?: 'porque') => {
-  editFocus.value = focus
-  return openBookEditor(id)
-}
+
 const lastCatalog = useLastCatalog()
 // Back goes to the list the book was opened from: the catalog, or Meus livros.
 const lastList = useLastList()
 const { catalogLink } = useFilters()
 
-onMounted(() => useApi().fetchBooks())
-const retry = () => useApi().fetchBooks(true)
-// The book no longer exists: back to the list it was opened from, which no longer shows it.
-const onRemoved = () => {
-  useApi().fetchBooks(true)
-  router.push(lastList.value.path)
-}
+const synopsisId = useId()
+
+const editFocus = ref<'porque' | undefined>()
+
+const synopsisOpen = ref(false)
 
 const book = computed((): Book | undefined => booksStore.books.find((b) => String(b.id) === String(route.params.id)))
-const bookPath = computed(() =>
-  book.value ? router.resolve({ name: 'catalog-book-details', params: { id: book.value.id } }).path : '',
-)
-const genre = computed(() => book.value?.categoria.replace(/-/g, ' ') ?? '')
-
-// The API only lets the person who mentioned the book (after linking the name) or an admin edit it.
-const isOwner = computed(() => !!book.value?.quem_user_id && book.value.quem_user_id === authStore.user?._id)
-// The API's matrix, not the role (front mirrors backend): the owner, or whoever may edit any book.
-const permissions = usePermissionsStore()
-const canEdit = computed(() => permissions.canEditBook(book.value?.quem_user_id))
-
-const ask = (message: string) => askGroupLink(message, bookPath.value)
-const askPerson = computed(() => ask(`${book.value?.quem}, o que você acha de "${book.value?.titulo}"?`))
-
-const synopsisId = useId()
-const synopsisOpen = ref(false)
-const synopsisIsLong = computed(() => (book.value?.synopsis?.length ?? 0) > SYNOPSIS_COLLAPSE_CHARS)
-watch(book, () => (synopsisOpen.value = !synopsisIsLong.value), { immediate: true })
-
-const sameGenre = computed(() => booksStore.books.filter((b) => b.categoria === book.value?.categoria))
-const genreTotal = computed(() => sameGenre.value.length)
-const related = computed(() => sameGenre.value.filter((b) => b.id !== book.value?.id).slice(0, RELATED_COUNT))
 
 usePageMeta(
   computed(() => ({
@@ -236,6 +215,43 @@ usePageMeta(
     type: 'article' as const,
   })),
 )
+
+const bookPath = computed(() =>
+  book.value ? router.resolve({ name: 'catalog-book-details', params: { id: book.value.id } }).path : '',
+)
+const genre = computed(() => book.value?.categoria.replace(/-/g, ' ') ?? '')
+
+// The API only lets the person who mentioned the book (after linking the name) or an admin edit it.
+const isOwner = computed(() => !!book.value?.quem_user_id && book.value.quem_user_id === authStore.user?._id)
+
+// The API's matrix, not the role (front mirrors backend): the owner, or whoever may edit any book.
+const canEdit = computed(() => permissions.canEditBook(book.value?.quem_user_id))
+
+const askPerson = computed(() => ask(`${book.value?.quem}, o que você acha de "${book.value?.titulo}"?`))
+
+const synopsisIsLong = computed(() => (book.value?.synopsis?.length ?? 0) > SYNOPSIS_COLLAPSE_CHARS)
+
+const sameGenre = computed(() => booksStore.books.filter((b) => b.categoria === book.value?.categoria))
+const genreTotal = computed(() => sameGenre.value.length)
+const related = computed(() => sameGenre.value.filter((b) => b.id !== book.value?.id).slice(0, RELATED_COUNT))
+
+const openEditor = (id: string, focus?: 'porque') => {
+  editFocus.value = focus
+  return openBookEditor(id)
+}
+
+const retry = () => useApi().fetchBooks(true)
+// The book no longer exists: back to the list it was opened from, which no longer shows it.
+const onRemoved = () => {
+  useApi().fetchBooks(true)
+  router.push(lastList.value.path)
+}
+
+const ask = (message: string) => askGroupLink(message, bookPath.value)
+
+onMounted(() => useApi().fetchBooks())
+
+watch(book, () => (synopsisOpen.value = !synopsisIsLong.value), { immediate: true })
 </script>
 
 <style lang="scss" scoped>

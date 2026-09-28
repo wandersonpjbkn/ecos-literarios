@@ -65,6 +65,7 @@
 import { computed, nextTick, ref, useId } from 'vue'
 
 import { useUtils } from '@/composables'
+
 import FilterChip from '@/components/ui/FilterChip.vue'
 
 const props = defineProps<{
@@ -87,8 +88,6 @@ const query = ref('')
 const isOpen = ref(false)
 const activeIndex = ref(-1)
 
-const words = (value: string) => normalizeText(value).split('-')
-
 // Word-start match: "ro" finds "romântico", not "horror".
 const matches = computed(() => {
   const q = normalizeText(query.value)
@@ -99,6 +98,8 @@ const matches = computed(() => {
   )
   return [...starts, ...wordStarts]
 })
+
+const words = (value: string) => normalizeText(value).split('-')
 
 const toggle = (value: string) => {
   model.value = model.value.includes(value) ? model.value.filter((v) => v !== value) : [...model.value, value]

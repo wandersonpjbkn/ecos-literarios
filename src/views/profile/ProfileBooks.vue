@@ -106,23 +106,24 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, type RouteLocationRaw } from 'vue-router'
 
+import type { Book } from '@/types'
+
+import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
+
 import { rememberMyBooks, useApi, useBookEditor, useBookSort, usePageMeta } from '@/composables'
 import { getMyClaimStatus } from '@/composables/useApi'
 import { useLoadMore } from '@/composables/useLoadMore'
 import { useSegments, type SegmentOption } from '@/composables/useSegments'
-import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
+
+import BookCard from '@/components/books/BookCard.vue'
+import BookFormDrawer from '@/components/books/BookFormDrawer.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
 import AppSelect from '@/components/ui/AppSelect.vue'
-import BookCard from '@/components/books/BookCard.vue'
-import BookFormDrawer from '@/components/books/BookFormDrawer.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
-import LiveStatus from '@/components/ui/LiveStatus.vue'
 import ListFooter from '@/components/ui/ListFooter.vue'
-import type { Book } from '@/types'
-
-usePageMeta({ title: 'Meus livros', description: 'Os livros que você mencionou no grupo e os que você adicionou.' })
+import LiveStatus from '@/components/ui/LiveStatus.vue'
 
 type Segment = 'all' | 'no-cover' | 'no-synopsis'
 
@@ -145,19 +146,27 @@ const SEGMENTS: SegmentOption<Segment, Book>[] = [
   },
 ]
 
+const claimLink: RouteLocationRaw = { name: 'account-claim' }
 
 const route = useRoute()
+
 const authStore = useAuthStore()
 const booksStore = useBooksStore()
-const canClaim = computed(() => usePermissionsStore().can('claim', 'update'))
+
+usePageMeta({ title: 'Meus livros', description: 'Os livros que você mencionou no grupo e os que você adicionou.' })
+
 const editor = useBookEditor()
 
-const claimLink: RouteLocationRaw = { name: 'account-claim' }
 const grid = ref<HTMLElement | null>(null)
-// The header search writes ?busca= here on Meus livros.
-const searchQuery = computed(() => String(route.query.busca ?? ''))
+
 // Only someone who has not linked a name can be missing books; after linking there is none left to claim.
 const hasClaim = ref<boolean | null>(null)
+
+const canClaim = computed(() => usePermissionsStore().can('claim', 'update'))
+
+// The header search writes ?busca= here on Meus livros.
+const searchQuery = computed(() => String(route.query.busca ?? ''))
+
 const loading = computed(() => booksStore.loading)
 
 const myBooks = computed(() => booksStore.books.filter((b) => b.quem_user_id === authStore.user?._id))
@@ -175,8 +184,9 @@ const searched = computed(() => {
   return segmentBooks.value.filter((b) => b.titulo.toLowerCase().includes(q) || b.autor.toLowerCase().includes(q))
 })
 
-// Everything here is the reader's own, so "Por quem mencionou" would sort nothing.
 const { sortOrder, sortOptions, sortedBooks: filteredBooks } = useBookSort(searched)
+
+// Everything here is the reader's own, so "Por quem mencionou" would sort nothing.
 const sortOptionsForMe = sortOptions.filter((option) => option.value !== 'pessoa')
 
 const { visible: visibleBooks, nextBatch, more } = useLoadMore(filteredBooks, { name: 'meus-livros' })

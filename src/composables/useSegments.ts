@@ -12,8 +12,9 @@ export type SegmentOption<V extends string, T> = {
 
 /** The chips over a list (?mostrar=): the current one, a count per chip, the link to each and its items. */
 export function useSegments<V extends string, T>(options: SegmentOption<V, T>[], items: Ref<T[]>) {
-  const route = useRoute()
   const fallback = options.find((option) => !option.query)!
+
+  const route = useRoute()
 
   const current = computed(
     () => options.find((option) => option.query && option.query === route.query.mostrar) ?? fallback,
@@ -27,6 +28,8 @@ export function useSegments<V extends string, T>(options: SegmentOption<V, T>[],
       >,
   )
 
+  const inCurrent = computed(() => items.value.filter(current.value.test))
+
   const link = (value: V): RouteLocationRaw => {
     const query = { ...route.query }
     const option = options.find((item) => item.value === value)
@@ -34,8 +37,6 @@ export function useSegments<V extends string, T>(options: SegmentOption<V, T>[],
     else delete query.mostrar
     return { query }
   }
-
-  const inCurrent = computed(() => items.value.filter(current.value.test))
 
   return { current, counts, link, inCurrent }
 }

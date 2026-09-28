@@ -1,7 +1,8 @@
-import { globalIgnores } from 'eslint/config'
-import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
-import pluginVue from 'eslint-plugin-vue'
 import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
+import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
+import perfectionist from 'eslint-plugin-perfectionist'
+import pluginVue from 'eslint-plugin-vue'
+import { globalIgnores } from 'eslint/config'
 
 // To allow more languages other than `ts` in `.vue` files, uncomment the following lines:
 // import { configureVueProject } from '@vue/eslint-config-typescript'
@@ -79,6 +80,37 @@ export default defineConfigWithVueTs(
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
+        },
+      ],
+    },
+  },
+
+  {
+    name: 'app/import-order',
+    plugins: { perfectionist },
+    rules: {
+      'perfectionist/sort-imports': [
+        'error',
+        {
+          type: 'alphabetical',
+          newlinesBetween: 1,
+          customGroups: [
+            { groupName: 'data', elementNamePattern: '^@/(types|data|plugins|router)(/|$)' },
+            { groupName: 'stores', elementNamePattern: '^@/stores(/|$)' },
+            { groupName: 'composables', elementNamePattern: '^@/composables(/|$)' },
+            { groupName: 'layouts', elementNamePattern: '^@/layouts/' },
+            { groupName: 'components', elementNamePattern: '^@/components/' },
+          ],
+          groups: [
+            ['builtin', 'external'],
+            'data',
+            'stores',
+            'composables',
+            'layouts',
+            'components',
+            'sibling',
+            'unknown',
+          ],
         },
       ],
     },

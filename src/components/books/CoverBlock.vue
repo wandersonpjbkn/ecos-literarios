@@ -14,6 +14,8 @@ import { computed, ref, watch } from 'vue'
 
 import { useCategoryColors } from '@/composables'
 
+const BADGED_FORMATS = ['Mangá', 'HQ']
+
 const props = defineProps<{
   title: string
   genre?: string
@@ -23,13 +25,7 @@ const props = defineProps<{
   size?: 'grid' | 'page'
 }>()
 
-const BADGED_FORMATS = ['Mangá', 'HQ']
-
 const imageFailed = ref(false)
-watch(
-  () => props.coverUrl,
-  () => (imageFailed.value = false),
-)
 
 const tintVars = computed(() => {
   const tint = useCategoryColors().coverTint(props.genre)
@@ -41,6 +37,11 @@ const tintVars = computed(() => {
 })
 const showImage = computed(() => !!props.coverUrl && !imageFailed.value)
 const badge = computed(() => (props.format && BADGED_FORMATS.includes(props.format) ? props.format : null))
+
+watch(
+  () => props.coverUrl,
+  () => (imageFailed.value = false),
+)
 </script>
 
 <style lang="scss" scoped>

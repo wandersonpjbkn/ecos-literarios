@@ -1,9 +1,10 @@
 import { ref } from 'vue'
-import { errorText } from '@/composables/apiError'
+
+import type { BookPayload, EnrichmentField, EnrichmentItem, EnrichmentPreview, EnrichmentApiResponse } from '@/types'
 
 import { useErrorReporter } from '@/composables'
+import { errorText } from '@/composables/apiError'
 import { applyBookEnrichment, previewBookEnrichment } from '@/composables/useApi'
-import type { BookPayload, EnrichmentField, EnrichmentItem, EnrichmentPreview, EnrichmentApiResponse } from '@/types'
 
 const FIELD_META: ReadonlyArray<{ field: EnrichmentField; label: string }> = [
   { field: 'description', label: 'Sinopse' },

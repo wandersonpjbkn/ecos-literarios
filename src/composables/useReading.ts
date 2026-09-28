@@ -1,18 +1,22 @@
-import { errorText } from '@/composables/apiError'
 import { computed, ref, watch, type Ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+import type { ReadingCounts, ReadingStatus } from '@/types'
+
+import { useAuthStore, useReadingStore } from '@/stores'
+
+import { errorText } from '@/composables/apiError'
 import { getMyReading, getReadingCounts, removeReading, saveReading } from '@/composables/useApi'
 import { useCanWrite } from '@/composables/useCanWrite'
 import { useErrorReporter } from '@/composables/useErrorReporter'
-import { useAuthStore, useReadingStore } from '@/stores'
-import type { ReadingCounts, ReadingStatus } from '@/types'
 
 /** "Quero ler" / "Lido" for one book: the reader's own status, the totals, and the actions. */
 export function useReading(bookId: Ref<string | undefined>) {
+  const router = useRouter()
+
   const auth = useAuthStore()
   const store = useReadingStore()
-  const router = useRouter()
+
   const canWrite = useCanWrite()
 
   const counts = ref<ReadingCounts | null>(null)
@@ -30,21 +34,6 @@ export function useReading(bookId: Ref<string | undefined>) {
       useErrorReporter().captureException(err, { context: 'useReading.loadCounts' })
     }
   }
-
-  watch(
-    () => auth.user?._id,
-    async (userId) => {
-      if (!userId) return store.clear()
-      if (store.loadedFor === userId) return
-      try {
-        store.replaceAll(userId, await getMyReading())
-      } catch (err) {
-        useErrorReporter().captureException(err, { context: 'useReading.load' })
-      }
-    },
-    { immediate: true },
-  )
-  watch(bookId, loadCounts, { immediate: true })
 
   // Signed out: the button leads to the login and back to this book (BACKEND.md, contract of slice 5).
   const change = async (next: ReadingStatus | null) => {
@@ -66,6 +55,21 @@ export function useReading(bookId: Ref<string | undefined>) {
       pending.value = false
     }
   }
+
+  watch(
+    () => auth.user?._id,
+    async (userId) => {
+      if (!userId) return store.clear()
+      if (store.loadedFor === userId) return
+      try {
+        store.replaceAll(userId, await getMyReading())
+      } catch (err) {
+        useErrorReporter().captureException(err, { context: 'useReading.load' })
+      }
+    },
+    { immediate: true },
+  )
+  watch(bookId, loadCounts, { immediate: true })
 
   return { status, counts, pending, error, canWrite, change }
 }

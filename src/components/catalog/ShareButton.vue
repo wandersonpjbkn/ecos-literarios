@@ -10,12 +10,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
+import { ref } from 'vue'
+
+import { useBreakpoints, useToast } from '@/composables'
 
 import AppButton from '@/components/ui/AppButton.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
-import { useBreakpoints, useToast } from '@/composables'
 
 const props = defineProps<{
   title: string

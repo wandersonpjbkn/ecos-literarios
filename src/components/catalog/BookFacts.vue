@@ -26,8 +26,9 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import { useFilters } from '@/composables'
 import type { Book } from '@/types'
+
+import { useFilters } from '@/composables'
 
 const props = defineProps<{
   book: Book

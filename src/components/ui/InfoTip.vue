@@ -16,8 +16,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, useId } from 'vue'
 import { onClickOutside } from '@vueuse/core'
+import { ref, useId } from 'vue'
 
 // A tap fires mouseenter and focus before click, so click only opens: a toggle would close it at once.
 defineProps<{

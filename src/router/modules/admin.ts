@@ -1,6 +1,8 @@
 import type { RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
-import { useAuthStore, usePermissionsStore } from '@/stores'
+
 import type { Action, Resource } from '@/types'
+
+import { useAuthStore, usePermissionsStore } from '@/stores'
 
 // Signed out goes to the login and back here; signed in without the level sees why (AdminForbidden).
 const editorGuard = (to: RouteLocationNormalized) => {

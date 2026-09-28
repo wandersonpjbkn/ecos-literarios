@@ -1,9 +1,9 @@
-import { ref } from 'vue'
 import { defineStore } from 'pinia'
-
-import { useAuthStore } from '@/stores/modules/auth'
+import { ref } from 'vue'
 
 import type { Action, Resource } from '@/types'
+
+import { useAuthStore } from '@/stores/modules/auth'
 
 // Not persisted: the matrix can change on the server, so each session reads it again (users/me).
 export const usePermissionsStore = defineStore('permissions', () => {

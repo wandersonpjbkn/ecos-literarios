@@ -31,6 +31,9 @@ const TONE: Record<Variant, PillTone> = {
   danger: 'danger',
 }
 
+// Leading space: without it a screen reader hears the label and the note as one word.
+const EXTERNAL_NOTE = ' (abre em outra aba)'
+
 const props = withDefaults(
   defineProps<{
     variant?: Variant
@@ -51,8 +54,6 @@ const isExternal = computed(() => !!props.href && !props.disabled)
 const externalAttrs = computed(() =>
   isExternal.value ? { href: props.href, target: '_blank', rel: 'noopener noreferrer' } : {},
 )
-// Leading space: without it a screen reader hears the label and the note as one word.
-const EXTERNAL_NOTE = ' (abre em outra aba)'
 </script>
 
 <style lang="scss" scoped>

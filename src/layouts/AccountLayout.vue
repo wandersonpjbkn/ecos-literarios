@@ -14,8 +14,10 @@
 <script lang="ts" setup>
 import { useRouter } from 'vue-router'
 
-import { useAuth } from '@/composables'
 import { useAuthStore } from '@/stores'
+
+import { useAuth } from '@/composables'
+
 import AreaLayout from '@/layouts/AreaLayout.vue'
 import type { AreaGroup } from '@/layouts/AreaSections.vue'
 

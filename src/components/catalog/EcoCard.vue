@@ -15,8 +15,9 @@
 </template>
 
 <script lang="ts" setup>
-import UserAvatar from '@/components/ui/UserAvatar.vue'
 import type { Book } from '@/types'
+
+import UserAvatar from '@/components/ui/UserAvatar.vue'
 
 defineProps<{
   book: Book

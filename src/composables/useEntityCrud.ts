@@ -1,9 +1,10 @@
-import { errorText } from '@/composables/apiError'
 import { ref } from 'vue'
 
-import { useErrorReporter } from '@/composables'
-import { createEntity, listEntities, removeEntity, updateEntity } from '@/composables/useApi'
 import type { SupportEntity, EntityCrudOptions } from '@/types'
+
+import { useErrorReporter } from '@/composables'
+import { errorText } from '@/composables/apiError'
+import { createEntity, listEntities, removeEntity, updateEntity } from '@/composables/useApi'
 
 /** Reusable CRUD state for flat support entities (nome + slug). */
 export function useEntityCrud({ resource }: EntityCrudOptions) {

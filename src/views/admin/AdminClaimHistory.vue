@@ -61,19 +61,21 @@
 </template>
 
 <script lang="ts" setup>
-import { errorText } from '@/composables/apiError'
 import { onMounted, ref } from 'vue'
 
-import { useErrorReporter } from '@/composables'
 import { joinWords } from '@/data/words'
-import { useLoadMore } from '@/composables/useLoadMore'
-import { getClaimHistory } from '@/composables/useApi'
-import SectionHeader from '@/components/ui/SectionHeader.vue'
-import AppButton from '@/components/ui/AppButton.vue'
-import EmptyState from '@/components/ui/EmptyState.vue'
-import AppNotice from '@/components/ui/AppNotice.vue'
-import ListFooter from '@/components/ui/ListFooter.vue'
 import type { AdminClaimHistoryEntry } from '@/types'
+
+import { useErrorReporter } from '@/composables'
+import { errorText } from '@/composables/apiError'
+import { getClaimHistory } from '@/composables/useApi'
+import { useLoadMore } from '@/composables/useLoadMore'
+
+import AppButton from '@/components/ui/AppButton.vue'
+import AppNotice from '@/components/ui/AppNotice.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import ListFooter from '@/components/ui/ListFooter.vue'
+import SectionHeader from '@/components/ui/SectionHeader.vue'
 
 // The API's ceiling for this list; older records stay in the database, and the footer says the list is the recent part.
 const HISTORY_LIMIT = 500
@@ -82,9 +84,11 @@ const loading = ref(false)
 const loaded = ref(false)
 const error = ref('')
 const history = ref<AdminClaimHistoryEntry[]>([])
+
+const { visible: visibleHistory, nextBatch, more } = useLoadMore(history, { name: 'painel-vinculos' })
+
 const serverTotal = ref(0)
 const table = ref<HTMLElement | null>(null)
-const { visible: visibleHistory, nextBatch, more } = useLoadMore(history, { name: 'painel-vinculos' })
 
 const formatDateTime = (iso: string) =>
   new Date(iso).toLocaleString('pt-BR', {

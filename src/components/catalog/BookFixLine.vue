@@ -16,8 +16,9 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import AppButton from '@/components/ui/AppButton.vue'
 import type { Book } from '@/types'
+
+import AppButton from '@/components/ui/AppButton.vue'
 
 const props = defineProps<{
   book: Book

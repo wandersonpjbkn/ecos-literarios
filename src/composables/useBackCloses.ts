@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 /** Back closes an open side panel; closing drops the entry opening added, unless the URL changed meanwhile. */
 export function useBackCloses(open: () => boolean, onClose: () => void) {
   const router = useRouter()
+
   let armed = false
   let openedAt = ''
   // One step to take once the panel's entry is gone (a link inside it); a newer one replaces it.
@@ -24,6 +25,13 @@ export function useBackCloses(open: () => boolean, onClose: () => void) {
   const disarm = () => {
     armed = false
     window.removeEventListener('popstate', onPop)
+  }
+
+  /** Closes the panel, then runs `step` once its history entry is gone (right away when there is none). */
+  const closeThen = (step: () => void) => {
+    afterClose = step
+    if (open()) onClose()
+    else runAfterClose()
   }
 
   watch(open, (isOpen) => {
@@ -56,13 +64,6 @@ export function useBackCloses(open: () => boolean, onClose: () => void) {
     disarm()
     window.removeEventListener('popstate', runAfterClose)
   })
-
-  /** Closes the panel, then runs `step` once its history entry is gone (right away when there is none). */
-  const closeThen = (step: () => void) => {
-    afterClose = step
-    if (open()) onClose()
-    else runAfterClose()
-  }
 
   return { closeThen }
 }

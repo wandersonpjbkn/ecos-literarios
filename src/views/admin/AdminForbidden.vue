@@ -8,18 +8,23 @@
 </template>
 
 <script lang="ts" setup>
-import AppButton from '@/components/ui/AppButton.vue'
-import EmptyState from '@/components/ui/EmptyState.vue'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { useLastCatalog, usePageMeta } from '@/composables'
-
 import { useAuthStore } from '@/stores'
 
-const auth = useAuthStore()
-const lastCatalog = useLastCatalog()
+import { useLastCatalog, usePageMeta } from '@/composables'
+
+import AppButton from '@/components/ui/AppButton.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+
 const route = useRoute()
+
+const auth = useAuthStore()
+
+const lastCatalog = useLastCatalog()
+
+usePageMeta({ title: 'Sem permissão', description: 'Esta parte do painel não está aberta para o seu nível.' })
 
 // Why this person is here: "Adicionar" as a Membro, an admin-only section as an Editor, or the panel itself.
 const reason = computed(() => {
@@ -28,5 +33,4 @@ const reason = computed(() => {
     ? 'Esta parte do painel é só para Administrador.'
     : 'O painel do clube é para Administrador e Editor.'
 })
-usePageMeta({ title: 'Sem permissão', description: 'Esta parte do painel não está aberta para o seu nível.' })
 </script>

@@ -53,16 +53,18 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, provide, ref } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
+import { computed, provide, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { useBreakpoints, useLastCatalog, usePageMeta } from '@/composables'
-import AppButton from '@/components/ui/AppButton.vue'
-import AppDrawer from '@/components/ui/AppDrawer.vue'
+
 import AreaSections, { type AreaGroup } from '@/layouts/AreaSections.vue'
 import BrandLogo from '@/layouts/BrandLogo.vue'
 import { FRAME_HAS_RAIL } from '@/layouts/frame'
+
+import AppButton from '@/components/ui/AppButton.vue'
+import AppDrawer from '@/components/ui/AppDrawer.vue'
 
 // The frame of the areas where someone looks after things (Minha conta, Painel do clube): estudo-moldura.md.
 const props = defineProps<{
@@ -73,19 +75,21 @@ const props = defineProps<{
 
 const route = useRoute()
 const router = useRouter()
+
 // No rail here: a drawer opened in an area starts at the left edge.
 provide(FRAME_HAS_RAIL, false)
 const lastCatalog = useLastCatalog()
 const isPhone = useMediaQuery(useBreakpoints.isPhone)
+
+// Each section names the tab ("Membros · Painel do clube"), so a screen reader hears the change of screen.
+usePageMeta(() => ({ title: route.meta.title ?? props.title, description: props.title }))
+
 const sectionsOpen = ref(false)
 const sheet = ref<InstanceType<typeof AppDrawer> | null>(null)
 
 const currentLabel = computed(
   () => props.groups.flatMap((group) => group.links).find((link) => link.name === route.name)?.label ?? props.title,
 )
-
-// Each section names the tab ("Membros · Painel do clube"), so a screen reader hears the change of screen.
-usePageMeta(() => ({ title: route.meta.title ?? props.title, description: props.title }))
 
 // The sheet added a history entry; it goes first, so Back from the new page returns to the section before.
 const leaveSheet = (event: MouseEvent) => {

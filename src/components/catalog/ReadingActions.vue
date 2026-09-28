@@ -32,28 +32,20 @@
 <script lang="ts" setup>
 import { computed, nextTick, ref, toRef } from 'vue'
 
+import type { ReadingStatus } from '@/types'
+
+import { useReading } from '@/composables'
+
 import AppButton from '@/components/ui/AppButton.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
-import { useReading } from '@/composables'
-import type { ReadingStatus } from '@/types'
 
 const props = defineProps<{
   bookId: string
 }>()
 
 const { status, counts, pending, error, canWrite, change } = useReading(toRef(props, 'bookId'))
+
 const root = ref<HTMLElement | null>(null)
-
-// The pressed button is replaced by the next state's buttons; focus moves to the first of them, not to the page.
-const act = async (next: ReadingStatus | null) => {
-  await change(next)
-  await nextTick()
-  const here = root.value
-  if (!here || here.contains(document.activeElement)) return
-  here.querySelector<HTMLButtonElement>('button:not([disabled])')?.focus()
-}
-
-const plural = (n: number, one: string, many: string) => (n === 1 ? `1 ${one}` : `${n} ${many}`)
 
 // Totals only, never names: who wants or read a book is private (contract of slice 5).
 const countsLabel = computed(() => {
@@ -67,6 +59,17 @@ const countsLabel = computed(() => {
     .filter(Boolean)
     .join(' · ')
 })
+
+// The pressed button is replaced by the next state's buttons; focus moves to the first of them, not to the page.
+const act = async (next: ReadingStatus | null) => {
+  await change(next)
+  await nextTick()
+  const here = root.value
+  if (!here || here.contains(document.activeElement)) return
+  here.querySelector<HTMLButtonElement>('button:not([disabled])')?.focus()
+}
+
+const plural = (n: number, one: string, many: string) => (n === 1 ? `1 ${one}` : `${n} ${many}`)
 </script>
 
 <style lang="scss" scoped>

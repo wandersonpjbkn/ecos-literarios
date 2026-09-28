@@ -112,12 +112,15 @@
 </template>
 
 <script lang="ts" setup>
+import { useMediaQuery, useOnline } from '@vueuse/core'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useMediaQuery, useOnline } from '@vueuse/core'
 
 import { joinWords } from '@/data/words'
+import type { FilterKey } from '@/types'
+
 import { useBooksStore, useCacheStore, usePermissionsStore, usePreferencesStore } from '@/stores'
+
 import {
   describeSelection,
   rememberCatalog,
@@ -131,24 +134,17 @@ import {
   usePageMeta,
 } from '@/composables'
 
-import AppSelect from '@/components/ui/AppSelect.vue'
-import FilterChip from '@/components/ui/FilterChip.vue'
+import BooksGrid from '@/components/catalog/BooksGrid.vue'
+import CatalogShelves from '@/components/catalog/CatalogShelves.vue'
+import CatalogSkeleton from '@/components/catalog/CatalogSkeleton.vue'
 import FilterDrawer from '@/components/catalog/FilterDrawer.vue'
-import PageStatus from '@/components/ui/PageStatus.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
-import CatalogSkeleton from '@/components/catalog/CatalogSkeleton.vue'
-import CatalogShelves from '@/components/catalog/CatalogShelves.vue'
-import BooksGrid from '@/components/catalog/BooksGrid.vue'
-import LiveStatus from '@/components/ui/LiveStatus.vue'
+import AppSelect from '@/components/ui/AppSelect.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
-
-import type { FilterKey } from '@/types'
-
-usePageMeta({
-  title: 'Catálogo',
-  description: 'Os livros, mangás e HQs mencionados no Clube Ecos Literários.',
-})
+import FilterChip from '@/components/ui/FilterChip.vue'
+import LiveStatus from '@/components/ui/LiveStatus.vue'
+import PageStatus from '@/components/ui/PageStatus.vue'
 
 const QUICK_GENRES = 5
 
@@ -166,21 +162,32 @@ const FORMAT_NAMES: Record<string, [string, string]> = {
   HQ: ['HQ', 'HQs'],
 }
 
-const { search, optionCounts, selected, hasFilters, hrefToggling, clearAll, filtered, hiddenByPreference } =
-  useFilters()
-const { sortOrder, sortedBooks, sortOptions } = useBookSort(filtered)
-
-onMounted(() => useApi().fetchBooks())
-
 const route = useRoute()
-watch(() => route.fullPath, rememberCatalog, { immediate: true })
 
 const preferences = usePreferencesStore()
 
 const booksStore = useBooksStore()
+
+const permissions = usePermissionsStore()
+
+usePageMeta({
+  title: 'Catálogo',
+  description: 'Os livros, mangás e HQs mencionados no Clube Ecos Literários.',
+})
+
+const { search, optionCounts, selected, hasFilters, hrefToggling, clearAll, filtered, hiddenByPreference } =
+  useFilters()
+const { sortOrder, sortedBooks, sortOptions } = useBookSort(filtered)
+
 const online = useOnline()
 
-const retry = () => useApi().fetchBooks(true)
+const eco = useEcoOfTheWeek()
+
+const addTarget = useAddTarget()
+const canWrite = useCanWrite()
+const isPhone = useMediaQuery(useBreakpoints.isPhone)
+
+const drawerOpen = ref(false)
 
 // Which list the reader is seeing when the server is down: from today, yesterday or the day it was saved here.
 const savedWhen = computed(() => {
@@ -199,10 +206,6 @@ const banner = computed(() => {
   return ''
 })
 
-const drawerOpen = ref(false)
-
-const eco = useEcoOfTheWeek()
-
 // The eco and the shelves belong to the whole catalog; next to a filtered list they would be out of context.
 const isDefaultView = computed(() => !hasFilters.value && !search.value.trim())
 
@@ -213,19 +216,12 @@ const searchWhere = computed(() =>
     ? 'Procuramos no título, no autor e no que as pessoas escreveram, dentro dos filtros escolhidos.'
     : 'Procuramos no título, no autor e no que as pessoas escreveram sobre cada livro.',
 )
-// The API's matrix decides who may add a book (front mirrors backend), not the role.
-const permissions = usePermissionsStore()
-const canAddBooks = computed(() => permissions.can('books', 'create'))
-const addTarget = useAddTarget()
-const canWrite = useCanWrite()
-// Catalog.mobile has no eco. Decided here rather than hidden by CSS, because the eco takes a book's slot.
-const isPhone = useMediaQuery(useBreakpoints.isPhone)
-const showEco = computed(() => isDefaultView.value && !isPhone.value)
 
-const formatName = (midia: string, count: number) => {
-  const [singular, plural] = FORMAT_NAMES[midia] ?? [midia, midia]
-  return count === 1 ? singular : plural
-}
+// The API's matrix decides who may add a book (front mirrors backend), not the role.
+const canAddBooks = computed(() => permissions.can('books', 'create'))
+
+// Catalog.mobile has no eco. Decided here rather than hidden by CSS, because the eco takes a book's slot.
+const showEco = computed(() => isDefaultView.value && !isPhone.value)
 
 // A format picked by the link overrides the preference, so its chip only shows when the preference is in force.
 const preferenceChips = computed(() => (selected.value.midia.length ? [] : preferences.hiddenMidias))
@@ -277,6 +273,17 @@ const summary = computed(() => {
 const announced = computed(() =>
   searchTerm.value && !filtered.value.length ? `Nada com "${searchTerm.value}"` : summary.value.count,
 )
+
+const retry = () => useApi().fetchBooks(true)
+
+const formatName = (midia: string, count: number) => {
+  const [singular, plural] = FORMAT_NAMES[midia] ?? [midia, midia]
+  return count === 1 ? singular : plural
+}
+
+onMounted(() => useApi().fetchBooks())
+
+watch(() => route.fullPath, rememberCatalog, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

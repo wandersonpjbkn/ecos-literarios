@@ -1,16 +1,16 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import { createHead } from '@unhead/vue/client'
-import persisteStorage from 'pinia-plugin-persistedstate'
 import gtm from '@gtm-support/vue-gtm'
+import { createHead } from '@unhead/vue/client'
+import { createPinia } from 'pinia'
+import persisteStorage from 'pinia-plugin-persistedstate'
+import { createApp } from 'vue'
 
-import router from '@/router'
 import { setupSentry } from '@/plugins/sentry'
+import router from '@/router'
 
-import App from '@/App.vue'
 import BaseIcon from '@/components/ui/BaseIcon.vue'
 import BaseSpinner from '@/components/ui/BaseSpinner.vue'
 
+import App from '@/App.vue'
 import '@/assets/scss/main.scss'
 
 const app = createApp(App)

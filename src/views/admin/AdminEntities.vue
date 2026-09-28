@@ -42,9 +42,10 @@
 import { computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import SectionHeader from '@/components/ui/SectionHeader.vue'
-import EntityTab from '@/components/admin/EntityTab.vue'
 import type { TabConfig } from '@/types'
+
+import EntityTab from '@/components/admin/EntityTab.vue'
+import SectionHeader from '@/components/ui/SectionHeader.vue'
 
 const tabs: TabConfig[] = [
   {

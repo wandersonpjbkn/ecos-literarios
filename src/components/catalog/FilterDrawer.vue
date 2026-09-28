@@ -77,18 +77,21 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, watch } from 'vue'
-import { storeToRefs } from 'pinia'
 import { useMediaQuery } from '@vueuse/core'
+import { storeToRefs } from 'pinia'
+import { computed, nextTick, ref, watch } from 'vue'
+
+import type { BookSortOrder, FilterKey, Options } from '@/types'
 
 import { useAuthStore, usePreferencesStore } from '@/stores'
+
 import { useBreakpoints, useFilters } from '@/composables'
-import LiveStatus from '@/components/ui/LiveStatus.vue'
+
 import AppButton from '@/components/ui/AppButton.vue'
 import AppDrawer from '@/components/ui/AppDrawer.vue'
 import CheckRow from '@/components/ui/CheckRow.vue'
 import ComboSelect from '@/components/ui/ComboSelect.vue'
-import type { BookSortOrder, FilterKey, Options } from '@/types'
+import LiveStatus from '@/components/ui/LiveStatus.vue'
 
 type Group = {
   title: string
@@ -119,25 +122,41 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const { emptySelection, options, optionCounts, selected, withToggled, apply, filtered } = useFilters()
 const preferences = usePreferencesStore()
 const { hiddenMidias } = storeToRefs(preferences)
 const auth = useAuthStore()
-const keptWhere = computed(() =>
-  auth.isLoggedIn ? 'A escolha fica guardada na sua conta.' : 'A escolha fica guardada neste aparelho.',
-)
+
+const { emptySelection, options, optionCounts, selected, withToggled, apply, filtered } = useFilters()
 
 const isPhone = useMediaQuery(useBreakpoints.isPhone)
 
 const expanded = ref<FilterKey[]>([])
+
+const panel = ref<HTMLElement | null>(null)
+
+const keptWhere = computed(() =>
+  auth.isLoggedIn ? 'A escolha fica guardada na sua conta.' : 'A escolha fica guardada neste aparelho.',
+)
+
+const midias = computed(() => sortedOptions('midia'))
+
+// With nothing left the button cannot promise books: it closes, and the line above it says why.
+const resultLabel = computed(() => {
+  const n = filtered.value.length
+  if (n === 0) return 'Fechar'
+  return n === 1 ? 'Ver 1 livro' : `Ver ${n} livros`
+})
+const resultSentence = computed(() => {
+  const n = filtered.value.length
+  if (n === 0) return 'Nenhum livro com esses filtros.'
+  return n === 1 ? '1 livro' : `${n} livros`
+})
 
 const byCount = (key: FilterKey) => (a: string, b: string) =>
   (optionCounts.value[key][b] ?? 0) - (optionCounts.value[key][a] ?? 0) || a.localeCompare(b, 'pt-BR')
 
 const sortedOptions = (key: FilterKey) =>
   key === 'tamanho' ? options.value[key] : [...options.value[key]].sort(byCount(key))
-
-const midias = computed(() => sortedOptions('midia'))
 
 // A checked option is never hidden behind "Mostrar os outros".
 const visibleOptions = (group: Group) => {
@@ -165,28 +184,6 @@ const toggle = (key: FilterKey, value: string) => change(withToggled(key, value)
 
 const changeOrder = (order: BookSortOrder) => change(selected.value, order)
 
-// With nothing left the button cannot promise books: it closes, and the line above it says why.
-const resultLabel = computed(() => {
-  const n = filtered.value.length
-  if (n === 0) return 'Fechar'
-  return n === 1 ? 'Ver 1 livro' : `Ver ${n} livros`
-})
-const resultSentence = computed(() => {
-  const n = filtered.value.length
-  if (n === 0) return 'Nenhum livro com esses filtros.'
-  return n === 1 ? '1 livro' : `${n} livros`
-})
-
-// ── Open / close and focus ──────────────────────────────────────
-const panel = ref<HTMLElement | null>(null)
-
-watch(
-  () => props.open,
-  (isOpen) => {
-    if (isOpen) expanded.value = []
-  },
-)
-
 const close = () => emit('close')
 
 // The "show more" button disappears once clicked; focus goes to the first revealed option instead of the page.
@@ -195,6 +192,13 @@ const showAll = async (key: FilterKey) => {
   await nextTick()
   panel.value?.querySelectorAll<HTMLInputElement>(`[data-group="${key}"] input`)[COLLAPSED_OPTIONS]?.focus()
 }
+
+watch(
+  () => props.open,
+  (isOpen) => {
+    if (isOpen) expanded.value = []
+  },
+)
 </script>
 
 <style lang="scss" scoped>

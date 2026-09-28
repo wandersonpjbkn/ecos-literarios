@@ -18,9 +18,14 @@ export function useLoadMore<T>(items: Ref<T[]>, { name, reserved }: Options) {
   const route = useRoute()
   const router = useRouter()
 
+  let opening = false
+
   const open = computed(() => Math.max(LOAD_MORE_BATCH, Number(route.query.ver) || LOAD_MORE_BATCH))
   const visible = computed(() => items.value.slice(0, open.value - (reserved?.value ?? 0)))
   const nextBatch = computed(() => Math.min(LOAD_MORE_BATCH, items.value.length - visible.value.length))
+
+  // Another criterion in the URL means another list; data arriving (reload, sync) keeps the place.
+  const otherParams = computed(() => JSON.stringify(Object.entries(route.query).filter(([key]) => key !== 'ver')))
 
   const setOpen = (count: number) => {
     const query = { ...route.query }
@@ -30,7 +35,6 @@ export function useLoadMore<T>(items: Ref<T[]>, { name, reserved }: Options) {
   }
 
   // Focus goes to the first item that just appeared, so a keyboard or screen reader continues from there.
-  let opening = false
   const more = async (list?: HTMLElement | null) => {
     // A second click before the URL updates would count the same batch twice in the analytics.
     if (opening) return
@@ -48,8 +52,6 @@ export function useLoadMore<T>(items: Ref<T[]>, { name, reserved }: Options) {
 
   const reset = () => (route.query.ver ? setOpen(LOAD_MORE_BATCH) : undefined)
 
-  // Another criterion in the URL means another list; data arriving (reload, sync) keeps the place.
-  const otherParams = computed(() => JSON.stringify(Object.entries(route.query).filter(([key]) => key !== 'ver')))
   watch(otherParams, () => reset())
 
   return { visible, nextBatch, more, reset }

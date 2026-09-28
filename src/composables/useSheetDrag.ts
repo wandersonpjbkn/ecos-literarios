@@ -18,6 +18,11 @@ export function useSheetDrag(panel: Ref<HTMLElement | null>, enabled: () => bool
   let lastT = 0
   let speed = 0
 
+  // While the finger moves the sheet follows it at once; on release the stylesheet's transition takes it back.
+  const style = computed(() =>
+    offset.value ? { transform: `translateY(${offset.value}px)`, transition: dragging.value ? 'none' : undefined } : undefined,
+  )
+
   const onPointerdown = (event: PointerEvent) => {
     if (!enabled() || event.button !== 0) return
     pointer = event.pointerId
@@ -53,23 +58,18 @@ export function useSheetDrag(panel: Ref<HTMLElement | null>, enabled: () => bool
     else offset.value = 0
   }
 
-  const reset = () => {
-    offset.value = 0
-    dragging.value = false
-    pointer = null
-    moved = false
-  }
-
-  // While the finger moves the sheet follows it at once; on release the stylesheet's transition takes it back.
-  const style = computed(() =>
-    offset.value ? { transform: `translateY(${offset.value}px)`, transition: dragging.value ? 'none' : undefined } : undefined,
-  )
-
   const handlers = {
     onPointerdown,
     onPointermove,
     onPointerup: (event: PointerEvent) => release(event, false),
     onPointercancel: (event: PointerEvent) => release(event, true),
+  }
+
+  const reset = () => {
+    offset.value = 0
+    dragging.value = false
+    pointer = null
+    moved = false
   }
 
   return { style, handlers, reset }

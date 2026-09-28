@@ -1,10 +1,11 @@
-import { watch } from 'vue'
 import { useEventListener } from '@vueuse/core'
+import { watch } from 'vue'
 
+import { useAuthStore, usePermissionsStore } from '@/stores'
+
+import type { FormatsSync } from '@/composables/formatsSync'
 import { getMe } from '@/composables/useApi'
 import { useErrorReporter } from '@/composables/useErrorReporter'
-import type { FormatsSync } from '@/composables/formatsSync'
-import { useAuthStore, usePermissionsStore } from '@/stores'
 
 let retryLoad: (() => void) | null = null
 let reloadNow: (() => Promise<void>) | null = null

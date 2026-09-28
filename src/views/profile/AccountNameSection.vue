@@ -40,16 +40,19 @@
 </template>
 
 <script lang="ts" setup>
-import { errorText } from '@/composables/apiError'
-import SectionHeader from '@/components/ui/SectionHeader.vue'
 import { computed, ref } from 'vue'
 
-import { useErrorReporter, useToast } from '@/composables'
-import { saveMyName } from '@/composables/useApi'
 import { roleLabel } from '@/data/roles'
+
 import { useAuthStore } from '@/stores'
+
+import { useErrorReporter, useToast } from '@/composables'
+import { errorText } from '@/composables/apiError'
+import { saveMyName } from '@/composables/useApi'
+
 import AppButton from '@/components/ui/AppButton.vue'
 import AppField from '@/components/ui/AppField.vue'
+import SectionHeader from '@/components/ui/SectionHeader.vue'
 
 const authStore = useAuthStore()
 const toast = useToast()

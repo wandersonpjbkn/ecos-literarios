@@ -53,12 +53,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, useId } from 'vue'
 import { onClickOutside } from '@vueuse/core'
-
-import { useUtils } from '@/composables'
+import { ref, computed, useId } from 'vue'
 
 import type { Suggestion } from '@/types'
+
+import { useUtils } from '@/composables'
 
 const model = defineModel<string>()
 
@@ -77,12 +77,12 @@ const props = withDefaults(
   },
 )
 const emit = defineEmits(['update:modelValue', 'select'])
+
 const inputId = useId()
 
 const wrapRef = ref<HTMLDivElement | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
 
-defineExpose({ focus: () => inputRef.value?.focus() })
 const focused = ref(false)
 const activeIdx = ref(-1)
 
@@ -127,6 +127,8 @@ const cleanAll = () => {
   emit('update:modelValue', '')
   inputRef.value?.focus()
 }
+
+defineExpose({ focus: () => inputRef.value?.focus() })
 
 onClickOutside(wrapRef, () => close())
 </script>

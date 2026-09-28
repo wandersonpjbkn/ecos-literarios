@@ -40,6 +40,8 @@ import { computed, ref, useId } from 'vue'
 
 import AppButton from '@/components/ui/AppButton.vue'
 
+const COLLAPSE_CHARS = 240
+
 const props = defineProps<{
   text: string
   // Who mentioned the book; "Comentário" does not claim they wrote the text (QuoteBlock.md, slice 5).
@@ -51,10 +53,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{ write: [] }>()
 
-const COLLAPSE_CHARS = 240
-
 const textId = useId()
+
 const expanded = ref(false)
+
 const hasText = computed(() => !!props.text.trim())
 const isLong = computed(() => props.text.length > COLLAPSE_CHARS)
 </script>

@@ -26,11 +26,15 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 
+import type { Book } from '@/types'
+
+import { useLoadMore } from '@/composables/useLoadMore'
+
 import BookCard from '@/components/books/BookCard.vue'
 import EcoCard from '@/components/catalog/EcoCard.vue'
 import ListFooter from '@/components/ui/ListFooter.vue'
-import { useLoadMore } from '@/composables/useLoadMore'
-import type { Book } from '@/types'
+
+const ECO_SLOT = 2
 
 const books = defineModel<Book[]>({ required: true })
 
@@ -42,8 +46,6 @@ const props = withDefaults(
   { eco: null },
 )
 
-const ECO_SLOT = 2
-
 const {
   visible: visibleBooks,
   nextBatch,
@@ -51,13 +53,14 @@ const {
 } = useLoadMore(books, { name: 'catalogo', reserved: computed(() => (props.eco ? 1 : 0)) })
 
 const grid = ref<{ $el: HTMLElement } | null>(null)
-const gridElement = () => grid.value?.$el
 
 const items = computed(() => {
   const list = visibleBooks.value.map((book) => ({ key: book.id, book, eco: false }))
   if (props.eco && list.length > ECO_SLOT) list.splice(ECO_SLOT, 0, { key: 'eco', book: props.eco, eco: true })
   return list
 })
+
+const gridElement = () => grid.value?.$el
 </script>
 
 <style lang="scss" scoped>

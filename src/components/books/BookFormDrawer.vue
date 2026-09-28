@@ -249,22 +249,29 @@
 </template>
 
 <script lang="ts" setup>
-import { errorText } from '@/composables/apiError'
 import { ref, reactive, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
+
+import { joinWords } from '@/data/words'
+import type { BookPayload } from '@/types'
+
+import { useAuthStore, usePermissionsStore } from '@/stores'
 
 import { useEntityCrud, useErrorReporter, useToast } from '@/composables'
 import { reloadAccount } from '@/composables/accountSync'
+import { errorText } from '@/composables/apiError'
 import { claimRegister, getPeople, removeBook, saveBook, useApi } from '@/composables/useApi'
-import { joinWords } from '@/data/words'
-import { useAuthStore, usePermissionsStore } from '@/stores'
-import MultiSelect from '@/components/ui/MultiSelect.vue'
+
+import BookEnrichmentPanel from '@/components/books/BookEnrichmentPanel.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppDrawer from '@/components/ui/AppDrawer.vue'
 import AppField from '@/components/ui/AppField.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
 import ConfirmModal from '@/components/ui/ConfirmModal.vue'
-import BookEnrichmentPanel from '@/components/books/BookEnrichmentPanel.vue'
-import type { BookPayload } from '@/types'
+import MultiSelect from '@/components/ui/MultiSelect.vue'
+
+const USER = 'user:'
+const NAME = 'name:'
+const NEW_NAME = 'new:'
 
 const props = defineProps<{
   book: BookPayload | null
@@ -283,6 +290,15 @@ const emit = defineEmits<{
   saved: []
   removed: [id: string]
 }>()
+
+const permissions = usePermissionsStore()
+
+const auth = useAuthStore()
+
+const autores = useEntityCrud({ resource: 'autores' })
+const midias = useEntityCrud({ resource: 'midias' })
+const categorias = useEntityCrud({ resource: 'categorias' })
+const subgeneros = useEntityCrud({ resource: 'subgeneros' })
 
 const isSaving = ref(false)
 const error = ref('')
@@ -305,19 +321,69 @@ const form = reactive({
   published_year: '',
 })
 
-// Scope follows the permission, not the screen: whoever may edit any book gets the panel's form everywhere.
-const permissions = usePermissionsStore()
-// The owner's own route unless the admin route (PATCH /books/:id) would accept this person for any book.
-const isMemberScope = computed(() => props.scope === 'member' && !permissions.can('books', 'update'))
-// The automatic search asks for books:update in the API; everyone else fills the same fields by hand.
-const canSearchData = computed(() => permissions.can('books', 'update'))
 // Open when editing a book that already has any of the optional data; closed when adding (cadastro-de-livro-essencial).
 const showMore = ref(false)
-const isEditMode = computed(() => !!props.book)
-const canRemove = computed(() => isEditMode.value && !isMemberScope.value && permissions.can('books', 'delete'))
 
 // A refused removal stays in the dialog, where the decision was made; confirming again retries it.
 const removal = reactive({ open: false, loading: false, error: '' })
+
+const people = ref<{ user_id: string | null; name: string }[]>([])
+const initialPerson = ref('')
+
+const peopleError = ref('')
+
+const claimDismissed = ref(false)
+const claiming = ref(false)
+const claimError = ref('')
+
+let closeTimer: ReturnType<typeof setTimeout> | undefined
+
+// Scope follows the permission, not the screen: whoever may edit any book (PATCH /books/:id) gets the panel's form.
+const isMemberScope = computed(() => props.scope === 'member' && !permissions.can('books', 'update'))
+// The automatic search asks for books:update in the API; everyone else fills the same fields by hand.
+const canSearchData = computed(() => permissions.can('books', 'update'))
+
+const isEditMode = computed(() => !!props.book)
+const canRemove = computed(() => isEditMode.value && !isMemberScope.value && permissions.can('books', 'delete'))
+
+// Says what is missing instead of a silent grey button.
+const missingText = computed(() => {
+  const missing = [
+    !form.titulo.trim() && 'o título',
+    !form.autor && 'o autor',
+    !form.midia && 'o formato',
+    !form.categoria && 'o gênero',
+  ].filter(Boolean) as string[]
+  if (!missing.length) return ''
+  return `${missing.length === 1 ? 'Falta' : 'Faltam'} ${joinWords(missing)}.`
+})
+
+const isValid = computed(
+  () =>
+    form.titulo.trim().length > 0 &&
+    form.autor.length > 0 &&
+    form.midia.length > 0 &&
+    form.categoria.length > 0,
+)
+
+// "Outro nome" follows the matrix (claim: create), by default only the Administrador.
+const canAddName = computed(() => permissions.can('claim', 'create'))
+
+const personOptions = computed(() => {
+  const options = people.value.map((p) => ({ label: p.name, value: p.user_id ? `${USER}${p.user_id}` : `${NAME}${p.name}` }))
+  if (form.person.startsWith(NEW_NAME)) options.push({ label: `${form.person.slice(NEW_NAME.length)} (nome novo)`, value: form.person })
+  return options
+})
+
+const claimOffer = computed(() =>
+  !isEditMode.value && !isMemberScope.value && !claimDismissed.value ? permissions.claimMatch : null,
+)
+
+const autorOptions = computed(() => toOptions(autores.items.value))
+const midiaOptions = computed(() => toOptions(midias.items.value))
+const categoriaOptions = computed(() => toOptions(categorias.items.value))
+const subgeneroOptions = computed(() => toOptions(subgeneros.items.value))
+
 const openRemove = () => {
   removal.error = ''
   removal.open = true
@@ -344,48 +410,15 @@ const remove = async () => {
   }
 }
 
-// Says what is missing instead of a silent grey button.
-const missingText = computed(() => {
-  const missing = [
-    !form.titulo.trim() && 'o título',
-    !form.autor && 'o autor',
-    !form.midia && 'o formato',
-    !form.categoria && 'o gênero',
-  ].filter(Boolean) as string[]
-  if (!missing.length) return ''
-  return `${missing.length === 1 ? 'Falta' : 'Faltam'} ${joinWords(missing)}.`
-})
-
-const isValid = computed(
-  () =>
-    form.titulo.trim().length > 0 &&
-    form.autor.length > 0 &&
-    form.midia.length > 0 &&
-    form.categoria.length > 0,
-)
-
-// ── Who mentioned the book ──
-const USER = 'user:'
-const NAME = 'name:'
-const NEW_NAME = 'new:'
-const auth = useAuthStore()
-const people = ref<{ user_id: string | null; name: string }[]>([])
-const initialPerson = ref('')
-// "Outro nome" follows the matrix (claim: create), by default only the Administrador.
-const canAddName = computed(() => permissions.can('claim', 'create'))
 const newNameLabel = (typed: string) => `Outro nome: ${typed}`
-const personOptions = computed(() => {
-  const options = people.value.map((p) => ({ label: p.name, value: p.user_id ? `${USER}${p.user_id}` : `${NAME}${p.name}` }))
-  if (form.person.startsWith(NEW_NAME)) options.push({ label: `${form.person.slice(NEW_NAME.length)} (nome novo)`, value: form.person })
-  return options
-})
+
 const personPayload = (): Record<string, string> => {
   if (form.person.startsWith(USER)) return { quem_user_id: form.person.slice(USER.length) }
   if (form.person.startsWith(NAME)) return { quem_nome: form.person.slice(NAME.length) }
   if (form.person.startsWith(NEW_NAME)) return { quem_nome: form.person.slice(NEW_NAME.length) }
   return {}
 }
-const peopleError = ref('')
+
 const loadPeople = async () => {
   peopleError.value = ''
   try {
@@ -396,19 +429,13 @@ const loadPeople = async () => {
   }
 }
 
-// ── "Is this you?" before adding (claim_match in users/me) ──
-const claimDismissed = ref(false)
-const claiming = ref(false)
-const claimError = ref('')
 // The box leaves with the button that had focus: the next field takes it.
 const focusTitle = () => nextTick(() => document.querySelector<HTMLElement>('#bf-titulo')?.focus())
 const dismissClaimOffer = () => {
   claimDismissed.value = true
   focusTitle()
 }
-const claimOffer = computed(() =>
-  !isEditMode.value && !isMemberScope.value && !claimDismissed.value ? permissions.claimMatch : null,
-)
+
 const claimOfferedName = async () => {
   const name = permissions.claimMatch
   if (!name) return
@@ -429,18 +456,7 @@ const claimOfferedName = async () => {
   }
 }
 
-// ── Support entity options ──
-const autores = useEntityCrud({ resource: 'autores' })
-const midias = useEntityCrud({ resource: 'midias' })
-const categorias = useEntityCrud({ resource: 'categorias' })
-const subgeneros = useEntityCrud({ resource: 'subgeneros' })
-
 const toOptions = (items: Array<{ _id: string; nome: string }>) => items.map((i) => ({ label: i.nome, value: i._id }))
-
-const autorOptions = computed(() => toOptions(autores.items.value))
-const midiaOptions = computed(() => toOptions(midias.items.value))
-const categoriaOptions = computed(() => toOptions(categorias.items.value))
-const subgeneroOptions = computed(() => toOptions(subgeneros.items.value))
 
 const handleSubgeneroToggle = (value: string) => {
   const idx = form.subgeneros.indexOf(value)
@@ -448,7 +464,6 @@ const handleSubgeneroToggle = (value: string) => {
   else form.subgeneros.splice(idx, 1)
 }
 
-// ── Form population ──
 const extractId = (field: string | { _id: string }): string => (typeof field === 'string' ? field : field._id)
 
 const resetForm = (): void => {
@@ -487,49 +502,11 @@ const populateForm = (book: BookPayload): void => {
   adoptOptional(book)
 }
 
-watch(
-  () => props.isOpen,
-  async (open) => {
-    if (!open) return
-
-    error.value = ''
-    success.value = ''
-
-    if (props.book) populateForm(props.book)
-    else {
-      resetForm()
-      form.titulo = props.title?.trim() ?? ''
-    }
-    initialPerson.value = form.person
-    claimDismissed.value = false
-    claimError.value = ''
-    if (!isMemberScope.value) loadPeople()
-    showMore.value =
-      (!!props.book &&
-        [
-          form.synopsis,
-          form.isbn,
-          form.cover_url,
-          form.google_books_id,
-          form.page_count,
-          form.published_year,
-        ].some(Boolean)) ||
-      (!!props.book && form.subgeneros.length > 0)
-  },
-  // Opened on arrival (?adicionar=1): the form must be prepared on the first render too.
-  { immediate: true },
-)
-
-let closeTimer: ReturnType<typeof setTimeout> | undefined
-
 const close = (): void => {
   clearTimeout(closeTimer)
   emit('close')
 }
 
-onBeforeUnmount(() => clearTimeout(closeTimer))
-
-// ── Submit ──
 // The API decides what changed and what counts as a hand edit; an emptied field goes as null so it is cleared.
 const optionalFields = () => {
   const fields: Record<string, string | number | null> = {
@@ -592,6 +569,41 @@ const handleEnrichmentApplied = (book: BookPayload): void => {
   success.value = 'Capa e dados salvos no livro.'
   emit('saved')
 }
+
+watch(
+  () => props.isOpen,
+  async (open) => {
+    if (!open) return
+
+    error.value = ''
+    success.value = ''
+
+    if (props.book) populateForm(props.book)
+    else {
+      resetForm()
+      form.titulo = props.title?.trim() ?? ''
+    }
+    initialPerson.value = form.person
+    claimDismissed.value = false
+    claimError.value = ''
+    if (!isMemberScope.value) loadPeople()
+    showMore.value =
+      (!!props.book &&
+        [
+          form.synopsis,
+          form.isbn,
+          form.cover_url,
+          form.google_books_id,
+          form.page_count,
+          form.published_year,
+        ].some(Boolean)) ||
+      (!!props.book && form.subgeneros.length > 0)
+  },
+  // Opened on arrival (?adicionar=1): the form must be prepared on the first render too.
+  { immediate: true },
+)
+
+onBeforeUnmount(() => clearTimeout(closeTimer))
 
 onMounted(() => {
   autores.fetchAll()

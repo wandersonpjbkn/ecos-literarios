@@ -1,4 +1,5 @@
 import type { RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
+
 import { useAuthStore } from '@/stores'
 
 // Signed out goes to the login and comes back to the page it asked for (?voltar).

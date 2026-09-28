@@ -143,21 +143,24 @@
 </template>
 
 <script lang="ts" setup>
-import { errorText } from '@/composables/apiError'
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, reactive } from 'vue'
 
-import { useApi, useEntityCrud, useErrorReporter, useToast } from '@/composables'
 import { counted } from '@/data/words'
-import { useLoadMore } from '@/composables/useLoadMore'
+import type { SupportEntity, TabConfig } from '@/types'
+
 import { useBooksStore, usePermissionsStore } from '@/stores'
+
+import { useApi, useEntityCrud, useErrorReporter, useToast } from '@/composables'
+import { errorText } from '@/composables/apiError'
+import { useLoadMore } from '@/composables/useLoadMore'
+
 import AppButton from '@/components/ui/AppButton.vue'
 import AppField from '@/components/ui/AppField.vue'
-import EmptyState from '@/components/ui/EmptyState.vue'
-import SearchBar from '@/components/ui/SearchBar.vue'
-import ConfirmModal from '@/components/ui/ConfirmModal.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
+import ConfirmModal from '@/components/ui/ConfirmModal.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import ListFooter from '@/components/ui/ListFooter.vue'
-import type { SupportEntity, TabConfig } from '@/types'
+import SearchBar from '@/components/ui/SearchBar.vue'
 
 const props = defineProps<{
   resource: TabConfig['resource']
@@ -166,14 +169,10 @@ const props = defineProps<{
   description?: string
 }>()
 
-const crud = useEntityCrud({ resource: props.resource })
-const toast = useToast()
 const permissions = usePermissionsStore()
 
-// The server decides; this only hides what it would refuse for this level (users/me).
-const canCreate = computed(() => permissions.can(props.resource, 'create'))
-const canEdit = computed(() => permissions.can(props.resource, 'update'))
-const canDelete = computed(() => permissions.can(props.resource, 'delete'))
+const crud = useEntityCrud({ resource: props.resource })
+const toast = useToast()
 
 const list = ref<HTMLElement | null>(null)
 const isFormOpen = ref(false)
@@ -188,6 +187,13 @@ const searchQuery = ref('')
 const actionError = ref('')
 
 const deleteModal = reactive({ open: false, title: '', error: '', targetId: '', usage: 0 })
+
+let clickOutsideTimer: ReturnType<typeof setTimeout> | null = null
+
+// The server decides; this only hides what it would refuse for this level (users/me).
+const canCreate = computed(() => permissions.can(props.resource, 'create'))
+const canEdit = computed(() => permissions.can(props.resource, 'update'))
+const canDelete = computed(() => permissions.can(props.resource, 'delete'))
 
 // The API refuses to remove an author, format or genre in use; a subgenre it removes without that check.
 const removeHint = computed(() => {
@@ -204,17 +210,11 @@ const filteredItems = computed(() => {
 })
 
 const { visible: pageItems, nextBatch, more, reset } = useLoadMore(filteredItems, { name: `painel-${props.resource}` })
-// The search is not in the URL, so a new term starts the list from the top here.
-watch(searchQuery, () => reset())
 
 const focusField = async (id: string) => {
   await nextTick()
   document.getElementById(id)?.focus()
 }
-
-watch(isFormOpen, (open) => {
-  if (open) focusField(`new-${props.resource}`)
-})
 
 const closeForm = () => {
   isFormOpen.value = false
@@ -227,24 +227,6 @@ const onDocumentClick = (e: MouseEvent) => {
   if (target.closest('.entity-row__edit-form')) return
   cancelEdit()
 }
-
-let clickOutsideTimer: ReturnType<typeof setTimeout> | null = null
-
-watch(editingId, (id) => {
-  document.removeEventListener('click', onDocumentClick)
-  if (clickOutsideTimer) clearTimeout(clickOutsideTimer)
-
-  if (id) {
-    clickOutsideTimer = setTimeout(() => {
-      document.addEventListener('click', onDocumentClick)
-    }, 0)
-  }
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', onDocumentClick)
-  if (clickOutsideTimer) clearTimeout(clickOutsideTimer)
-})
 
 const handleCreate = async () => {
   const name = newName.value.trim()
@@ -327,6 +309,29 @@ const handleDelete = async () => {
     isDeleting.value = false
   }
 }
+
+// The search is not in the URL, so a new term starts the list from the top here.
+watch(searchQuery, () => reset())
+
+watch(isFormOpen, (open) => {
+  if (open) focusField(`new-${props.resource}`)
+})
+
+watch(editingId, (id) => {
+  document.removeEventListener('click', onDocumentClick)
+  if (clickOutsideTimer) clearTimeout(clickOutsideTimer)
+
+  if (id) {
+    clickOutsideTimer = setTimeout(() => {
+      document.addEventListener('click', onDocumentClick)
+    }, 0)
+  }
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocumentClick)
+  if (clickOutsideTimer) clearTimeout(clickOutsideTimer)
+})
 
 onMounted(() => crud.fetchAll())
 </script>

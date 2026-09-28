@@ -2,9 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import { useUtils } from '@/composables'
 
-import Catalog from './modules/catalog'
-import Auth from './modules/auth'
 import Admin from './modules/admin'
+import Auth from './modules/auth'
+import Catalog from './modules/catalog'
 import Profile from './modules/profile'
 
 const routes = [...Catalog.routes, ...Auth.routes, ...Admin.routes, ...Profile.routes]

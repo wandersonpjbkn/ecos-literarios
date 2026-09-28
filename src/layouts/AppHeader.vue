@@ -24,21 +24,34 @@
 </template>
 
 <script lang="ts" setup>
+import { useMediaQuery } from '@vueuse/core'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useMediaQuery } from '@vueuse/core'
+
+import type { Suggestion } from '@/types'
 
 import { useBooksStore } from '@/stores'
+
 import { useAddTarget, useBreakpoints, useCanWrite, useCatalogSearch } from '@/composables'
-import AppButton from '@/components/ui/AppButton.vue'
+
 import BrandLogo from '@/layouts/BrandLogo.vue'
-import SearchBar from '@/components/ui/SearchBar.vue'
 import UserMenu from '@/layouts/UserMenu.vue'
-import type { Suggestion } from '@/types'
+
+import AppButton from '@/components/ui/AppButton.vue'
+import SearchBar from '@/components/ui/SearchBar.vue'
+
+const route = useRoute()
+
+const router = useRouter()
 
 const isPhone = useMediaQuery(useBreakpoints.isPhone)
 const addTarget = useAddTarget()
 const { model, suggestions, searchesMyBooks } = useCatalogSearch()
+
+const canWrite = useCanWrite()
+
+const search = ref<InstanceType<typeof SearchBar> | null>(null)
+
 const placeholder = computed(() =>
   searchesMyBooks.value
     ? 'Buscar nos meus livros'
@@ -46,14 +59,10 @@ const placeholder = computed(() =>
       ? 'Título, autor ou quem mencionou'
       : 'Buscar por título, autor ou quem mencionou',
 )
-const canWrite = useCanWrite()
 
-const route = useRoute()
 // One primary per fold: on the open book that is "Guardar em Quero ler" (Detail.desktop).
 // Primary only where adding is the page's own action; elsewhere the page's primary would get a rival (Button.md).
 const addVariant = computed(() => (route.name === 'catalog-books' ? 'primary' : 'secondary'))
-const router = useRouter()
-const search = ref<InstanceType<typeof SearchBar> | null>(null)
 
 // Navegacao: desktop opens with the search focused; only on app open, so returning from a book keeps focus.
 onMounted(async () => {

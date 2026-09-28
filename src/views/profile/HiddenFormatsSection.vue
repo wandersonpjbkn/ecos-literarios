@@ -36,16 +36,18 @@
 </template>
 
 <script lang="ts" setup>
-import SectionHeader from '@/components/ui/SectionHeader.vue'
-import { computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
+import { computed, onMounted } from 'vue'
+
+import { useBooksStore, usePreferencesStore } from '@/stores'
 
 import { useApi, useLastCatalog } from '@/composables'
-import { useBooksStore, usePreferencesStore } from '@/stores'
+
 import AppButton from '@/components/ui/AppButton.vue'
-import CheckRow from '@/components/ui/CheckRow.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
+import CheckRow from '@/components/ui/CheckRow.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import SectionHeader from '@/components/ui/SectionHeader.vue'
 
 // The filter drawer's "O que você quer ver", same polarity (ticked = shown); formatsSync keeps it in the account.
 const preferences = usePreferencesStore()

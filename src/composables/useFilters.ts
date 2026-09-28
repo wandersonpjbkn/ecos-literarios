@@ -1,10 +1,12 @@
-import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 import { useRoute, useRouter, type LocationQueryRaw, type RouteLocationRaw } from 'vue-router'
 
-import { useBooksStore, usePreferencesStore } from '@/stores'
-import { useUtils } from '@/composables/useUtils'
 import type { Book, BookSortOrder, FilterKey, Options } from '@/types'
+
+import { useBooksStore, usePreferencesStore } from '@/stores'
+
+import { useUtils } from '@/composables/useUtils'
 
 const FILTER_KEYS: FilterKey[] = ['midia', 'categoria', 'subgeneros', 'quem', 'autor', 'tamanho']
 
@@ -89,13 +91,12 @@ const applyFilters = (books: Book[], selection: Options, search: string, hiddenM
 export function useFilters() {
   const route = useRoute()
   const router = useRouter()
-  const { slugify } = useUtils()
+
   const { hiddenMidias } = storeToRefs(usePreferencesStore())
 
-  const books = computed(() => useBooksStore().books)
+  const { slugify } = useUtils()
 
-  const toSlug = (key: FilterKey, value: string) =>
-    key === 'tamanho' ? (SIZES.find((size) => size.label === value)?.slug ?? '') : slugify(value)
+  const books = computed(() => useBooksStore().books)
 
   // ── Options and their counts over the whole catalog ─────────────
   const options = computed(
@@ -135,6 +136,42 @@ export function useFilters() {
         }),
       ) as unknown as Options,
   )
+
+  const search = computed({
+    get: () => String(route.query.busca ?? ''),
+    set: (value: string) => {
+      const query: LocationQueryRaw = { ...route.query, busca: value }
+      if (!value.trim()) delete query.busca
+      router.replace({ query })
+    },
+  })
+
+  const filtered = computed(() => applyFilters(books.value, selected.value, search.value, hiddenMidias.value))
+
+  /** Books left out only because of the format preference, per hidden format. */
+  const hiddenByPreference = computed(() => {
+    if (selected.value.midia.length) return []
+    const wouldShow = applyFilters(books.value, selected.value, search.value, [])
+    return hiddenMidias.value
+      .map((midia) => ({ midia, count: wouldShow.filter((book) => book.midia === midia).length }))
+      .filter((entry) => entry.count > 0)
+  })
+
+  const hasFilters = computed(() => FILTER_KEYS.some((key) => selected.value[key].length > 0))
+
+  const searchSuggestions = computed(() => {
+    if (!search.value.trim() || search.value.length < 2) return []
+
+    const q = search.value.toLowerCase()
+
+    return books.value
+      .filter((book) => book.titulo?.toLowerCase().includes(q))
+      .map((book) => ({ id: book.id, main: book.titulo, sub: book.autor }))
+      .slice(0, 8)
+  })
+
+  const toSlug = (key: FilterKey, value: string) =>
+    key === 'tamanho' ? (SIZES.find((size) => size.label === value)?.slug ?? '') : slugify(value)
 
   const queryFor = (selection: Options): LocationQueryRaw => {
     const query: LocationQueryRaw = { ...route.query }
@@ -177,41 +214,8 @@ export function useFilters() {
     return router.push({ query })
   }
 
-  const search = computed({
-    get: () => String(route.query.busca ?? ''),
-    set: (value: string) => {
-      const query: LocationQueryRaw = { ...route.query, busca: value }
-      if (!value.trim()) delete query.busca
-      router.replace({ query })
-    },
-  })
-
-  const filtered = computed(() => applyFilters(books.value, selected.value, search.value, hiddenMidias.value))
-
   /** Books a selection opens from a link (no search, format preference in force), so a shelf count matches its page. */
   const booksFor = (selection: Options) => applyFilters(books.value, selection, '', hiddenMidias.value)
-
-  /** Books left out only because of the format preference, per hidden format. */
-  const hiddenByPreference = computed(() => {
-    if (selected.value.midia.length) return []
-    const wouldShow = applyFilters(books.value, selected.value, search.value, [])
-    return hiddenMidias.value
-      .map((midia) => ({ midia, count: wouldShow.filter((book) => book.midia === midia).length }))
-      .filter((entry) => entry.count > 0)
-  })
-
-  const hasFilters = computed(() => FILTER_KEYS.some((key) => selected.value[key].length > 0))
-
-  const searchSuggestions = computed(() => {
-    if (!search.value.trim() || search.value.length < 2) return []
-
-    const q = search.value.toLowerCase()
-
-    return books.value
-      .filter((book) => book.titulo?.toLowerCase().includes(q))
-      .map((book) => ({ id: book.id, main: book.titulo, sub: book.autor }))
-      .slice(0, 8)
-  })
 
   return {
     emptySelection,

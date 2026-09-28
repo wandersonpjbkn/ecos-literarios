@@ -73,21 +73,24 @@
 </template>
 
 <script lang="ts" setup>
-import { errorText } from '@/composables/apiError'
-import SectionHeader from '@/components/ui/SectionHeader.vue'
 import { computed, onMounted, reactive, ref } from 'vue'
+
+import type { MyClaimStatus } from '@/types'
+
+import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
 
 import { useApi, useErrorReporter, useToast } from '@/composables'
 import { reloadAccount } from '@/composables/accountSync'
+import { errorText } from '@/composables/apiError'
 import { claimRegister, getMyClaimStatus, unclaimRegister } from '@/composables/useApi'
-import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
+
 import AppButton from '@/components/ui/AppButton.vue'
 import AppField from '@/components/ui/AppField.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
 import ConfirmModal from '@/components/ui/ConfirmModal.vue'
 import MultiSelect from '@/components/ui/MultiSelect.vue'
+import SectionHeader from '@/components/ui/SectionHeader.vue'
 import UserAvatar from '@/components/ui/UserAvatar.vue'
-import type { MyClaimStatus } from '@/types'
 
 const authStore = useAuthStore()
 const booksStore = useBooksStore()

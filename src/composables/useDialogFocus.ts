@@ -17,9 +17,11 @@ const stack: symbol[] = []
 
 /** Modal focus: moves in on open, Tab stays inside, Esc closes, and focus returns to what opened it. */
 export function useDialogFocus({ open, panel, initial, onClose, fallback }: Options) {
+  const token = Symbol('dialog')
+
   let opener: HTMLElement | null = null
   let active = false
-  const token = Symbol('dialog')
+
   const leaveStack = () => {
     const at = stack.indexOf(token)
     if (at !== -1) stack.splice(at, 1)

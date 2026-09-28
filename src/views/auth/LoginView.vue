@@ -50,32 +50,41 @@
 </template>
 
 <script lang="ts" setup>
+import { nextTick, ref, onBeforeUnmount, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
+import { useAuthStore } from '@/stores'
+
+import { useAuth } from '@/composables/useAuth'
+import { useLastCatalog } from '@/composables/useLastCatalog'
+import { rememberEmail } from '@/composables/useLastEmail'
+import { usePageMeta } from '@/composables/usePageMeta'
+import { rememberReturn, takeReturn } from '@/composables/useReturnPath'
+
 import AppButton from '@/components/ui/AppButton.vue'
 import AppField from '@/components/ui/AppField.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
-import { usePageMeta } from '@/composables/usePageMeta'
-import { useLastCatalog } from '@/composables/useLastCatalog'
-import { nextTick, ref, onBeforeUnmount, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 
-import { useAuth } from '@/composables/useAuth'
-import { rememberEmail } from '@/composables/useLastEmail'
-import { rememberReturn, takeReturn } from '@/composables/useReturnPath'
-import { useAuthStore } from '@/stores'
+const router = useRouter()
+const route = useRoute()
+
+const authStore = useAuthStore()
 
 usePageMeta({ title: 'Entrar', description: 'Entre no Ecos Literários com um link no seu e-mail.' })
 
 const { sendMagicLink } = useAuth()
-const authStore = useAuthStore()
-const router = useRouter()
-const route = useRoute()
+
 const lastCatalog = useLastCatalog()
 
 const email = ref('')
 const loading = ref(false)
 const errorMsg = ref('')
 const step = ref<'form' | 'sent'>('form')
+
+const resendCooldown = ref(0)
+
+let cooldown: ReturnType<typeof setInterval> | undefined
 
 // Back to the field, still filled, for whoever typed the address wrong.
 const retypeEmail = async () => {
@@ -84,15 +93,6 @@ const retypeEmail = async () => {
   await nextTick()
   document.querySelector<HTMLInputElement>('#email')?.focus()
 }
-const resendCooldown = ref(0)
-
-onMounted(() => {
-  if (authStore.isLoggedIn) {
-    rememberReturn(route.query.voltar)
-    router.replace(takeReturn())
-  }
-  document.getElementById('email')?.focus()
-})
 
 const submit = async () => {
   errorMsg.value = ''
@@ -126,8 +126,6 @@ const submit = async () => {
   }
 }
 
-let cooldown: ReturnType<typeof setInterval> | undefined
-
 const startCooldown = () => {
   clearInterval(cooldown)
   resendCooldown.value = 60
@@ -136,6 +134,14 @@ const startCooldown = () => {
     if (resendCooldown.value <= 0) clearInterval(cooldown)
   }, 1000)
 }
+
+onMounted(() => {
+  if (authStore.isLoggedIn) {
+    rememberReturn(route.query.voltar)
+    router.replace(takeReturn())
+  }
+  document.getElementById('email')?.focus()
+})
 
 onBeforeUnmount(() => clearInterval(cooldown))
 </script>
@@ -163,7 +169,6 @@ onBeforeUnmount(() => clearInterval(cooldown))
   gap: var(--space-8);
 }
 
-// ── Formulário ────────────────────────────────────────────────────
 .login-form {
   display: flex;
   flex-direction: column;
@@ -191,7 +196,6 @@ onBeforeUnmount(() => clearInterval(cooldown))
   color: var(--color-text-subtle);
 }
 
-// ── Back link ─────────────────────────────────────────────────────
 .back-link {
   align-self: center;
 }

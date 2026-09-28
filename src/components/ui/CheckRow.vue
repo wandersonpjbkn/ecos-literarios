@@ -18,10 +18,6 @@ defineOptions({ inheritAttrs: false })
 
 // class and style dress the row; the rest (change, name) belongs to the input.
 const attrs = useAttrs()
-const inputAttrs = computed(() => {
-  const { class: _class, style: _style, ...rest } = attrs
-  return rest
-})
 
 withDefaults(
   defineProps<{
@@ -34,6 +30,11 @@ withDefaults(
   }>(),
   { type: 'checkbox', disabled: false, detail: undefined, count: undefined },
 )
+
+const inputAttrs = computed(() => {
+  const { class: _class, style: _style, ...rest } = attrs
+  return rest
+})
 </script>
 
 <style lang="scss" scoped>

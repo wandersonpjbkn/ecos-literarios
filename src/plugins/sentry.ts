@@ -1,8 +1,8 @@
 import * as Sentry from '@sentry/vue'
 import type { App } from 'vue'
+import type { Router } from 'vue-router'
 
 import { ApiError } from '@/composables/apiError'
-import type { Router } from 'vue-router'
 
 interface SentrySetupOptions {
   app: App

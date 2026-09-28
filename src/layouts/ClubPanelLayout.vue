@@ -17,12 +17,16 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { retryAccountSync } from '@/composables/accountSync'
-import { useAuthStore, usePermissionsStore } from '@/stores'
-import AppNotice from '@/components/ui/AppNotice.vue'
-import AreaLayout from '@/layouts/AreaLayout.vue'
 import { mayOpen } from '@/router/modules/admin'
+
+import { useAuthStore, usePermissionsStore } from '@/stores'
+
+import { retryAccountSync } from '@/composables/accountSync'
+
+import AreaLayout from '@/layouts/AreaLayout.vue'
 import type { AreaGroup } from '@/layouts/AreaSections.vue'
+
+import AppNotice from '@/components/ui/AppNotice.vue'
 
 const GROUPS: AreaGroup[] = [
   {
@@ -44,8 +48,15 @@ const GROUPS: AreaGroup[] = [
 ]
 
 const router = useRouter()
+
 const authStore = useAuthStore()
 const permissions = usePermissionsStore()
+
+const visibleGroups = computed(() =>
+  GROUPS.map((group) => ({ ...group, links: group.links.filter((link) => isOpenToMe(link.name)) })).filter(
+    (group) => group.links.length > 0,
+  ),
+)
 
 // The route says who may enter (adminRoute, permissionRoute), so the menu never offers what the guard refuses.
 const isOpenToMe = (name: string) => {
@@ -53,10 +64,4 @@ const isOpenToMe = (name: string) => {
   if (permission) return mayOpen(permission)
   return !adminOnly || authStore.isAdmin
 }
-
-const visibleGroups = computed(() =>
-  GROUPS.map((group) => ({ ...group, links: group.links.filter((link) => isOpenToMe(link.name)) })).filter(
-    (group) => group.links.length > 0,
-  ),
-)
 </script>

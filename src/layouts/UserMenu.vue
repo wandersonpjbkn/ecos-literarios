@@ -14,6 +14,7 @@
 
 <script lang="ts" setup>
 import { useAuthStore } from '@/stores'
+
 import UserAvatar from '@/components/ui/UserAvatar.vue'
 
 withDefaults(

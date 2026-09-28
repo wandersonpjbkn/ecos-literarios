@@ -1,9 +1,11 @@
 import { createClient, type EmailOtpType } from '@supabase/supabase-js'
 
+import type { UserRole } from '@/types'
+
 import { useAuthStore } from '@/stores'
+
 import { useErrorReporter } from '@/composables'
 import { verifyAuth } from '@/composables/useApi'
-import type { UserRole } from '@/types'
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL as string,

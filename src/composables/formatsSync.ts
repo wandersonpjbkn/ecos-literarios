@@ -1,9 +1,10 @@
-import { watch } from 'vue'
 import { useEventListener } from '@vueuse/core'
+import { watch } from 'vue'
+
+import { useAuthStore, usePreferencesStore } from '@/stores'
 
 import { saveMyFormats } from '@/composables/useApi'
 import { useErrorReporter } from '@/composables/useErrorReporter'
-import { useAuthStore, usePreferencesStore } from '@/stores'
 
 // A few toggles in a row become one save instead of one write per click.
 const SAVE_DELAY_MS = 800

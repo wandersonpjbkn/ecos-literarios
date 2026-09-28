@@ -98,11 +98,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, useId, watch } from 'vue'
 import { onClickOutside } from '@vueuse/core'
+import { computed, ref, useId, watch } from 'vue'
+
+import type { OptionMultiSelect } from '@/types'
 
 import AppBadge from '@/components/ui/AppBadge.vue'
-import type { OptionMultiSelect } from '@/types'
+
+// Never a real option value: the option list is built from ids and names.
+const CREATE = '\u0000create'
 
 const props = withDefaults(
   defineProps<{
@@ -124,27 +128,18 @@ const props = withDefaults(
   },
 )
 
-const id = useId()
-
 const emit = defineEmits<{
   toggle: [value: string]
   clear: []
   create: [typed: string]
 }>()
 
-// Never a real option value: the option list is built from ids and names.
-const CREATE = '\u0000create'
+const id = useId()
 
 const wrapRef = ref<HTMLDivElement | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
 const isOpen = ref(false)
 
-// Esc closes an open list here; with the list closed it reaches the drawer and closes that.
-const onEscape = (event: KeyboardEvent) => {
-  if (!isOpen.value) return
-  event.stopPropagation()
-  close()
-}
 const query = ref('')
 const activeIdx = ref(-1)
 
@@ -183,6 +178,13 @@ const selectedOption = computed(() => {
       .find((opt) => opt.value === props.selected) ?? null
   )
 })
+
+// Esc closes an open list here; with the list closed it reaches the drawer and closes that.
+const onEscape = (event: KeyboardEvent) => {
+  if (!isOpen.value) return
+  event.stopPropagation()
+  close()
+}
 
 const isSelected = (value: string): boolean => {
   if (multiple.value) {

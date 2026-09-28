@@ -24,12 +24,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
+
+import type { FilterKey } from '@/types'
 
 import { usePreferencesStore } from '@/stores'
+
 import { useCategoryColors, useFilters } from '@/composables'
-import type { FilterKey } from '@/types'
 
 const SHELVES: { title: string; key: FilterKey; value: string; note: string }[] = [
   { title: 'Menos de 200 páginas', key: 'tamanho', value: 'Menos de 200 páginas', note: 'para ler em uma semana' },
@@ -40,8 +42,10 @@ const SHELVES: { title: string; key: FilterKey; value: string; note: string }[] 
 
 const STACKED_COVERS = 4
 
-const { emptySelection, booksFor, hrefToggling } = useFilters()
 const { hiddenMidias } = storeToRefs(usePreferencesStore())
+
+const { emptySelection, booksFor, hrefToggling } = useFilters()
+
 const { coverTint } = useCategoryColors()
 
 // A format the reader chose to hide gets no shelf, and an empty shelf is not shown.

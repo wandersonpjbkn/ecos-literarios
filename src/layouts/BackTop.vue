@@ -8,16 +8,16 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
 import { useScroll } from '@vueuse/core'
+import { computed } from 'vue'
 
 import AppButton from '@/components/ui/AppButton.vue'
+
+const THRESHOLD = 300
 
 const props = defineProps<{
   target: HTMLElement | null
 }>()
-
-const THRESHOLD = 300
 
 const { y } = useScroll(() => props.target ?? window)
 

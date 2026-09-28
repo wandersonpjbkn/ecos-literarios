@@ -1,7 +1,8 @@
 import * as Sentry from '@sentry/vue'
 
-import { ApiError } from '@/composables/apiError'
 import type { AuthUser } from '@/types'
+
+import { ApiError } from '@/composables/apiError'
 
 type ErrorContext = Record<string, unknown>
 

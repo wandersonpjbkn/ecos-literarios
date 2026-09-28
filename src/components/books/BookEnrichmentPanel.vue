@@ -34,11 +34,13 @@
 </template>
 
 <script lang="ts" setup>
+import type { BookPayload } from '@/types'
+
 import { useBookEnrichment } from '@/composables/useBookEnrichment'
-import CheckRow from '@/components/ui/CheckRow.vue'
+
 import AppButton from '@/components/ui/AppButton.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
-import type { BookPayload } from '@/types'
+import CheckRow from '@/components/ui/CheckRow.vue'
 
 const props = defineProps<{
   bookId: string | null

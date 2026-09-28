@@ -17,8 +17,9 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import { useUtils } from '@/composables'
 import type { Book } from '@/types'
+
+import { useUtils } from '@/composables'
 
 const props = defineProps<{
   book: Book

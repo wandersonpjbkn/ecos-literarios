@@ -1,12 +1,11 @@
-import { fileURLToPath, URL } from 'node:url'
+import { sentryVitePlugin } from '@sentry/vite-plugin'
+import vue from '@vitejs/plugin-vue'
 import { readFileSync } from 'node:fs'
-
+import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
-import vue from '@vitejs/plugin-vue'
-import svgLoader from 'vite-svg-loader'
 import vueDevTools from 'vite-plugin-vue-devtools'
-import { sentryVitePlugin } from '@sentry/vite-plugin'
+import svgLoader from 'vite-svg-loader'
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'))
 

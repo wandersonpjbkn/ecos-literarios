@@ -68,30 +68,26 @@
 </template>
 
 <script lang="ts" setup>
-import { errorText } from '@/composables/apiError'
-import { roleLabel } from '@/data/roles'
 import { computed, ref, onMounted, reactive } from 'vue'
 
-import { useAuthStore } from '@/stores'
-import { useErrorReporter, useToast } from '@/composables'
-import { getMembers, setMemberRole } from '@/composables/useApi'
-import { useLoadMore } from '@/composables/useLoadMore'
-import ListFooter from '@/components/ui/ListFooter.vue'
-import SectionHeader from '@/components/ui/SectionHeader.vue'
-import AppSelect from '@/components/ui/AppSelect.vue'
-import InfoTip from '@/components/ui/InfoTip.vue'
-import AppBadge from '@/components/ui/AppBadge.vue'
-import EmptyState from '@/components/ui/EmptyState.vue'
-import AppNotice from '@/components/ui/AppNotice.vue'
-import ConfirmModal from '@/components/ui/ConfirmModal.vue'
+import { roleLabel } from '@/data/roles'
 import type { ApiUser } from '@/types'
 
-const authStore = useAuthStore()
-const users = ref<ApiUser[]>([])
-const list = ref<HTMLElement | null>(null)
-const { visible: visibleUsers, nextBatch, more } = useLoadMore(users, { name: 'painel-membros' })
-const loading = ref(false)
-const error = ref('')
+import { useAuthStore } from '@/stores'
+
+import { useErrorReporter, useToast } from '@/composables'
+import { errorText } from '@/composables/apiError'
+import { getMembers, setMemberRole } from '@/composables/useApi'
+import { useLoadMore } from '@/composables/useLoadMore'
+
+import AppBadge from '@/components/ui/AppBadge.vue'
+import AppNotice from '@/components/ui/AppNotice.vue'
+import AppSelect from '@/components/ui/AppSelect.vue'
+import ConfirmModal from '@/components/ui/ConfirmModal.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import InfoTip from '@/components/ui/InfoTip.vue'
+import ListFooter from '@/components/ui/ListFooter.vue'
+import SectionHeader from '@/components/ui/SectionHeader.vue'
 
 // The select stays on the current level until the change is confirmed: it only shows what the server holds.
 const ROLE_OPTIONS: { label: string; value: ApiUser['role'] }[] = [
@@ -100,12 +96,16 @@ const ROLE_OPTIONS: { label: string; value: ApiUser['role'] }[] = [
   { label: roleLabel('admin'), value: 'admin' },
 ]
 
-const summary = computed(() => {
-  const intro = 'Quem entrou na plataforma e o que cada pessoa pode fazer.'
-  const count = users.value.length
-  if (!count) return intro
-  return `${intro} ${count === 1 ? '1 pessoa entrou' : `${count} pessoas entraram`} até agora.`
-})
+const authStore = useAuthStore()
+
+const users = ref<ApiUser[]>([])
+
+const { visible: visibleUsers, nextBatch, more } = useLoadMore(users, { name: 'painel-membros' })
+
+const list = ref<HTMLElement | null>(null)
+
+const loading = ref(false)
+const error = ref('')
 
 const confirm = reactive({
   open: false,
@@ -115,6 +115,13 @@ const confirm = reactive({
   error: '',
   userId: '',
   newRole: '' as ApiUser['role'],
+})
+
+const summary = computed(() => {
+  const intro = 'Quem entrou na plataforma e o que cada pessoa pode fazer.'
+  const count = users.value.length
+  if (!count) return intro
+  return `${intro} ${count === 1 ? '1 pessoa entrou' : `${count} pessoas entraram`} até agora.`
 })
 
 const formatDate = (iso: string) => {

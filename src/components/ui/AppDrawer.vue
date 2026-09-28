@@ -51,16 +51,17 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onBeforeUnmount, ref, useId, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
+import { computed, inject, onBeforeUnmount, ref, useId, watch } from 'vue'
 
-import AppButton from '@/components/ui/AppButton.vue'
-
-import { FRAME_HAS_RAIL } from '@/layouts/frame'
 import { useBackCloses } from '@/composables/useBackCloses'
 import { useBreakpoints } from '@/composables/useBreakpoints'
-import { useSheetDrag } from '@/composables/useSheetDrag'
 import { useDialogFocus } from '@/composables/useDialogFocus'
+import { useSheetDrag } from '@/composables/useSheetDrag'
+
+import { FRAME_HAS_RAIL } from '@/layouts/frame'
+
+import AppButton from '@/components/ui/AppButton.vue'
 
 // A Teleport root takes no attrs: class and the rest go to the drawer itself.
 defineOptions({ inheritAttrs: false })
@@ -82,27 +83,23 @@ const props = defineProps<{
 const emit = defineEmits<{ close: [] }>()
 
 const generatedId = useId()
-const titleId = computed(() => props.titleId ?? generatedId)
+
 // The frame says whether a rail sits beside the drawer; outside any frame there is none.
 const hasRail = inject(FRAME_HAS_RAIL, false)
-const panel = ref<HTMLElement | null>(null)
-const closeButton = ref<{ $el: HTMLElement } | null>(null)
-// Only the phone's bottom sheet drags; the desktop side panel does not.
+
 const isPhone = useMediaQuery(useBreakpoints.isPhone)
-const drag = useSheetDrag(panel, () => isPhone.value, () => emit('close'))
-watch(() => props.open, (isOpen) => isOpen && drag.reset())
 
 const { closeThen } = useBackCloses(
   () => props.open,
   () => emit('close'),
 )
-// A link inside the panel navigates only after the panel's own history entry is gone (AreaLayout).
-defineExpose({ closeThen })
 
-// The page under an open panel does not scroll; the lock goes with the panel, even when it unmounts open.
-const lockScroll = (locked: boolean) => (document.body.style.overflow = locked ? 'hidden' : '')
-watch(() => props.open, lockScroll, { immediate: true })
-onBeforeUnmount(() => lockScroll(false))
+const panel = ref<HTMLElement | null>(null)
+
+// Only the phone's bottom sheet drags; the desktop side panel does not.
+const drag = useSheetDrag(panel, () => isPhone.value, () => emit('close'))
+
+const closeButton = ref<{ $el: HTMLElement } | null>(null)
 
 useDialogFocus({
   open: () => props.open,
@@ -112,6 +109,19 @@ useDialogFocus({
   onClose: () => emit('close'),
   fallback: () => props.returnFocus?.(),
 })
+
+const titleId = computed(() => props.titleId ?? generatedId)
+
+// The page under an open panel does not scroll; the lock goes with the panel, even when it unmounts open.
+const lockScroll = (locked: boolean) => (document.body.style.overflow = locked ? 'hidden' : '')
+
+watch(() => props.open, (isOpen) => isOpen && drag.reset())
+
+// A link inside the panel navigates only after the panel's own history entry is gone (AreaLayout).
+defineExpose({ closeThen })
+
+watch(() => props.open, lockScroll, { immediate: true })
+onBeforeUnmount(() => lockScroll(false))
 </script>
 
 <style lang="scss" scoped>
