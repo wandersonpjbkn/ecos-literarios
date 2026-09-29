@@ -5,6 +5,8 @@
 $config: (
   'badges': (
       'tag':   ('bg': #F4F6F8, 'ink': #47525C),
+      // A state that asks for attention and can be undone (a suspended account); red stays for no way back.
+      'alert': ('bg': var(--alert-bg), 'ink': var(--alert-ink)),
     ),
 
   'semantics': (
