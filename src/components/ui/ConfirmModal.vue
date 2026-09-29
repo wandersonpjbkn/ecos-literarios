@@ -5,6 +5,7 @@
         <div
           ref="card"
           class="modal-card"
+          tabindex="-1"
           role="alertdialog"
           aria-modal="true"
           :aria-labelledby="titleId"
@@ -25,6 +26,7 @@
               Cancelar
             </AppButton>
             <AppButton
+              ref="confirmButton"
               :variant="destructive ? 'danger' : 'primary'"
               class="modal-btn"
               :disabled="loading"
@@ -40,7 +42,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, useId } from 'vue'
+import { nextTick, ref, useId, watch } from 'vue'
 
 import { useDialogFocus } from '@/composables/useDialogFocus'
 
@@ -83,6 +85,7 @@ const titleId = useId()
 const descId = useId()
 const card = ref<HTMLElement | null>(null)
 const cancelButton = ref<{ $el: HTMLElement } | null>(null)
+const confirmButton = ref<{ $el: HTMLElement } | null>(null)
 
 // Focus starts on "Cancelar": most of these dialogs remove or change something for good.
 useDialogFocus({
@@ -94,6 +97,17 @@ useDialogFocus({
   },
   fallback: () => props.returnFocus?.(),
 })
+
+// A disabled button drops focus: the card holds it while loading, and a failure hands it to the confirm button.
+watch(
+  () => props.loading,
+  async (loading) => {
+    if (!props.modelValue) return
+    if (loading) return card.value?.contains(document.activeElement) && card.value.focus()
+    await nextTick()
+    if (props.modelValue) confirmButton.value?.$el.focus()
+  },
+)
 </script>
 
 <style lang="scss" scoped>
@@ -116,6 +130,11 @@ useDialogFocus({
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
   overflow: hidden;
+
+  // Holds focus only while the buttons are disabled; it is a container, not a control.
+  &:focus {
+    outline: none;
+  }
 }
 
 .modal-header {
