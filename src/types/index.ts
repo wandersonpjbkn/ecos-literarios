@@ -143,6 +143,8 @@ export interface MyClaimStatus {
   claim_name: string | null
   claimed_books: number
   has_claim: boolean
+  // Only without a claim: the placeholders nobody has claimed, counted by the API.
+  available_names?: string[]
   warning?: string
 }
 

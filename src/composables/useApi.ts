@@ -317,6 +317,13 @@ export const removeMember = (id: string) =>
     'Não foi possível remover. Tente de novo.',
   )
 
+export const getSubgeneroUsage = (id: string) =>
+  authedRequest<{ books: number }>(
+    `/subgeneros/${id}/usage`,
+    { method: 'GET' },
+    'Não foi possível contar os livros. Tente de novo.',
+  )
+
 export const getClaimHistory = (limit: number) =>
   authedRequest<{ total: number; history: AdminClaimHistoryEntry[] }>(
     `/admin/users/claims/history?limit=${limit}`,

@@ -148,10 +148,11 @@ import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, reactive } 
 import { counted } from '@/data/words'
 import type { SupportEntity, TabConfig } from '@/types'
 
-import { useBooksStore, usePermissionsStore } from '@/stores'
+import { usePermissionsStore } from '@/stores'
 
-import { useApi, useEntityCrud, useErrorReporter, useToast } from '@/composables'
+import { useEntityCrud, useErrorReporter, useToast } from '@/composables'
 import { errorText } from '@/composables/apiError'
+import { getSubgeneroUsage } from '@/composables/useApi'
 import { useLoadMore } from '@/composables/useLoadMore'
 
 import AppButton from '@/components/ui/AppButton.vue'
@@ -276,15 +277,15 @@ const handleUpdate = async () => {
   }
 }
 
-const booksUsing = async (name: string) => {
-  const store = useBooksStore()
-  if (!store.books.length) await useApi().fetchBooks()
-  return store.books.filter((book) => (book.subgenerosArr ?? []).includes(name.toLowerCase())).length
-}
-
 const confirmDelete = async (item: SupportEntity) => {
   actionError.value = ''
-  deleteModal.usage = props.resource === 'subgeneros' ? await booksUsing(item.nome) : 0
+  // Counted by the API: a catalog copy saved on this device could say "no book" for a subgenre in use.
+  try {
+    deleteModal.usage = props.resource === 'subgeneros' ? (await getSubgeneroUsage(item._id)).books : 0
+  } catch (e) {
+    actionError.value = errorText(e, 'Não foi possível contar os livros. Tente de novo.')
+    return
+  }
   deleteModal.title = `Remover "${item.nome}"?`
   deleteModal.error = ''
   deleteModal.targetId = item._id

@@ -85,7 +85,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 
 import type { MyClaimStatus } from '@/types'
 
-import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
+import { useAuthStore, usePermissionsStore } from '@/stores'
 
 import { useAccessRequest, useApi, useErrorReporter, useToast } from '@/composables'
 import { reloadAccount } from '@/composables/accountSync'
@@ -101,7 +101,6 @@ import SectionHeader from '@/components/ui/SectionHeader.vue'
 import UserAvatar from '@/components/ui/UserAvatar.vue'
 
 const authStore = useAuthStore()
-const booksStore = useBooksStore()
 const permissions = usePermissionsStore()
 const toast = useToast()
 
@@ -113,14 +112,8 @@ const isSubmitting = ref(false)
 const chosenName = ref('')
 const undo = reactive({ open: false, loading: false, error: '' })
 
-// Placeholders no account has linked; a book added after a claim may lack its owner, so its name is not free.
-const availableNames = computed(() => {
-  const taken = new Set(booksStore.books.filter((b) => b.quem_user_id && b.quem_nome).map((b) => b.quem_nome))
-  const free = booksStore.books
-    .filter((b) => !b.quem_user_id && b.quem_nome && !taken.has(b.quem_nome))
-    .map((b) => b.quem_nome as string)
-  return [...new Set(free)].sort((a, b) => a.localeCompare(b, 'pt-BR'))
-})
+// From the API, never from the catalog saved on this device: another account may have linked or let go since.
+const availableNames = computed(() => status.value?.available_names ?? [])
 const canClaim = computed(() => permissions.can('claim', 'update'))
 const accessRequest = useAccessRequest()
 // Known to lack the permission: the invitation to link would contradict the refusal below.
