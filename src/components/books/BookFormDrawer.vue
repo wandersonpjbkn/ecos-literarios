@@ -445,7 +445,7 @@ const claimOfferedName = async () => {
     await claimRegister(name)
     useToast().show(`Pronto: "${name}" é você no catálogo.`)
     await reloadAccount()
-    useApi().fetchBooks(true)
+    useApi().fetchBooks()
     loadPeople()
     focusTitle()
   } catch (e) {

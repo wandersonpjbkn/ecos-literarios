@@ -37,7 +37,7 @@
 
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 
 import { useBooksStore, usePreferencesStore } from '@/stores'
 
@@ -70,11 +70,6 @@ const resultText = computed(() => {
   if (shown === total)
     return total === 1 ? 'O catálogo mostra o único livro.' : `O catálogo mostra todos os ${total} livros.`
   return `O catálogo mostra ${shown} de ${total} ${total === 1 ? 'livro' : 'livros'}.`
-})
-
-// Opened straight from its address, nothing has loaded the catalog yet.
-onMounted(() => {
-  if (booksStore.books.length === 0) useApi().fetchBooks()
 })
 </script>
 

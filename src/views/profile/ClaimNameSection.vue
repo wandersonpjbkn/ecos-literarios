@@ -164,7 +164,7 @@ const submitClaim = async () => {
     )
     chosenName.value = ''
     await Promise.all([load(), reloadAccount()])
-    useApi().fetchBooks(true)
+    useApi().fetchBooks()
   } catch (err) {
     actionError.value = errorText(err, 'Não foi possível vincular o nome. Tente de novo.')
     useErrorReporter().captureException(err, { context: 'ClaimNameSection.submit', quemNome: chosenName.value })
@@ -187,7 +187,7 @@ const unclaim = async () => {
     undo.open = false
     toast.show('Vínculo desfeito. Os livros saíram de Meus livros.')
     await Promise.all([load(), reloadAccount()])
-    useApi().fetchBooks(true)
+    useApi().fetchBooks()
   } catch (err) {
     undo.error = errorText(err, 'Não foi possível desfazer o vínculo. Tente de novo.')
     useErrorReporter().captureException(err, { context: 'ClaimNameSection.unclaim' })
@@ -196,10 +196,7 @@ const unclaim = async () => {
   }
 }
 
-onMounted(() => {
-  load()
-  if (booksStore.books.length === 0) useApi().fetchBooks()
-})
+onMounted(load)
 </script>
 
 <style lang="scss" scoped>

@@ -33,7 +33,7 @@ export function useBookEditor() {
     editingBook.value = null
   }
 
-  const onSaved = () => useApi().fetchBooks(true)
+  const onSaved = () => useApi().fetchBooks()
 
   return { editingBook, isOpen, loadingId, error, open, close, onSaved }
 }

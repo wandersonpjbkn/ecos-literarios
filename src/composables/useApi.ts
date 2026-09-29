@@ -27,7 +27,7 @@ import type {
   Role,
 } from '@/types'
 
-import { useBooksStore, useCacheStore } from '@/stores'
+import { useBooksStore } from '@/stores'
 
 import { useErrorReporter } from '@/composables'
 import { toApiError } from '@/composables/apiError'
@@ -101,54 +101,45 @@ const apiFetch = async (path: string, init: RequestInit = {}): Promise<Response>
 }
 
 // ── Composable ──
+// One request at a time: screens and the sync asking together share it.
+let inFlight: Promise<void> | null = null
+
+const loadBooks = async () => {
+  const store = useBooksStore()
+  if (!API_BASE) {
+    store.error = 'VITE_API_URL não configurada.'
+    return
+  }
+
+  store.loading = true
+  store.error = null
+  try {
+    // no-cache: the browser asks with the ETag every time; an unchanged catalog is a 304 and its own copy comes back.
+    const res = await apiFetch('/books', { cache: 'no-cache' })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+
+    const raw: ApiBook[] = await res.json()
+    store.books = raw.map(normalizeBook)
+    store.savedAt = Date.now()
+  } catch (e: unknown) {
+    // Offline the saved copy is the catalog, not an error; the banner already says there is no internet.
+    if (!navigator.onLine && store.books.length > 0) return
+    const raw = e instanceof Error ? e.message : String(e)
+    store.error = raw || 'Não foi possível carregar os livros.'
+    if (import.meta.env.DEV) console.error('[useApi]', e)
+    useErrorReporter().captureException(e, { context: 'useApi.fetchBooks' })
+  } finally {
+    store.loading = false
+  }
+}
+
 export function useApi() {
-  const fetchBooks = async (forceRefresh = false) => {
-    if (!forceRefresh && useCacheStore().isCacheValid) {
-      useBooksStore().books = useCacheStore().cache!
-      useBooksStore().loading = false
-      useBooksStore().error = null
-      if (import.meta.env.DEV) console.log('📦 Usando dados do cache')
-      return
-    }
-
-    if (!API_BASE) {
-      useBooksStore().error = 'VITE_API_URL não configurada.'
-      useBooksStore().loading = false
-      useBooksStore().error = null
-      return
-    }
-
-    useBooksStore().loading = true
-    useBooksStore().error = null
-
-    try {
-      if (import.meta.env.DEV) console.log('[useApi] Fetching books...')
-
-      const res = await apiFetch('/books')
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-
-      const raw: ApiBook[] = await res.json()
-      const books = raw.map(normalizeBook)
-
-      useBooksStore().books = books
-      useCacheStore().cache = books
-      useCacheStore().ts = Date.now()
-
-      if (import.meta.env.DEV) console.log('[useApi] Books loaded:', books.length)
-    } catch (e: unknown) {
-      if (!navigator.onLine && useBooksStore().books.length > 0) {
-        if (import.meta.env.DEV) console.warn('[useApi] Offline, usando dados persistidos do Pinia')
-        useBooksStore().error = null
-      } else {
-        const raw = e instanceof Error ? e.message : String(e)
-        useBooksStore().error = raw || 'Não foi possível carregar os livros.'
-        if (import.meta.env.DEV) console.error('[useApi]', e)
-
-        useErrorReporter().captureException(e, { context: 'useApi.fetchBooks' })
-      }
-    } finally {
-      useBooksStore().loading = false
-    }
+  /** The catalog from the API; the saved copy stays on screen meanwhile and when the platform is down. */
+  const fetchBooks = (): Promise<void> => {
+    inFlight ??= loadBooks().finally(() => {
+      inFlight = null
+    })
+    return inFlight
   }
 
   return { fetchBooks }

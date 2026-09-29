@@ -138,7 +138,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, useId, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import type { Book } from '@/types'
@@ -240,17 +240,15 @@ const openEditor = (id: string, focus?: 'porque') => {
   return openBookEditor(id)
 }
 
-const retry = () => useApi().fetchBooks(true)
+const retry = () => useApi().fetchBooks()
 // The book no longer exists: back to the list it was opened from, which no longer shows it.
 const onRemoved = () => {
-  useApi().fetchBooks(true)
+  useApi().fetchBooks()
   router.push(lastList.value.path)
 }
 
 const ask = (message: string) => askGroupLink(message, bookPath.value)
 const report = (message: string) => reportLink(message, bookPath.value)
-
-onMounted(() => useApi().fetchBooks())
 
 watch(book, () => (synopsisOpen.value = !synopsisIsLong.value), { immediate: true })
 </script>

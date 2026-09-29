@@ -126,3 +126,14 @@ DELETE /users/:id                                                → { removed, 
 - **Token:** a API exige `aud = authenticated`, o `iss` do projeto e um e-mail.
 - **No front:** a conta suspensa sai da sessão com "Esta conta está suspensa." e vai para o catálogo se estiver numa página com login. O Supabase envia o link mágico mesmo para a conta suspensa e só o recusa quando ele é usado (`user_banned`): o callback mostra a mesma frase, sem oferecer outro link. Em Membros, "Gerenciar acesso" abre a linha com suspender ou reativar e remover, cada um com confirmação, e a conta suspensa leva a etiqueta âmbar "suspensa".
 - **Chaves:** a API usa a secret key (`SUPABASE_SECRET_KEY`) só no servidor, para o admin do Auth; o front e o keepalive usam a publishable key.
+
+## 10. O catálogo no aparelho
+
+O aparelho guarda **uma** cópia do catálogo (`books`, com a hora em que veio da API) para mostrar na hora e sem internet. Ela nunca vence e nunca é a verdade: a cada visita o app pergunta à API se mudou.
+
+- **Como:** `GET /books` vai com `cache: 'no-cache'`, e a API responde com `ETag` e `Cache-Control: no-cache`. O próprio navegador manda o `If-None-Match`; catálogo sem mudança volta `304`, sem corpo, e o navegador entrega a cópia que já tinha. Medido na API real: 55 KB comprimido quando muda, 0 bytes de corpo quando não muda.
+- **Quando:** ao abrir o app (antes de esperar a sessão, porque o catálogo é público), quando a aba volta a ficar visível depois de 10 minutos, quando a conexão volta, e depois de uma mudança feita no próprio aparelho. Uma busca em andamento serve a todos que pedirem ao mesmo tempo.
+- **Plataforma fora ou sem internet:** a cópia continua na tela, e o aviso diz de quando ela é ("a lista de ontem").
+- **O que decide uma ação vem da API, nunca da cópia:** os nomes livres para vincular (`available_names` em `GET /users/me/claim`) e quantos livros perdem um subgênero antes de removê-lo (`GET /subgeneros/:id/usage`).
+- **Por que não um prazo:** o antigo cache de 7 dias (com uma segunda cópia sem prazo nenhum) escondia livro novo, edição, remoção e vínculo feitos em outro aparelho. A revalidação custa uma requisição de cabeçalhos por visita; no plano grátis do Render (5 GB/mês de saída) isso não chega perto do limite.
+- **Se o clube crescer muito:** o `304` ainda consulta o banco para calcular a `ETag`. Uma versão do catálogo, incrementada a cada escrita, responderia `304` sem ler os livros.

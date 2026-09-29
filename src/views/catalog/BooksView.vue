@@ -116,13 +116,13 @@
 
 <script lang="ts" setup>
 import { useMediaQuery, useOnline } from '@vueuse/core'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { joinWords } from '@/data/words'
 import type { FilterKey } from '@/types'
 
-import { useBooksStore, useCacheStore, usePermissionsStore, usePreferencesStore } from '@/stores'
+import { useBooksStore, usePermissionsStore, usePreferencesStore } from '@/stores'
 
 import {
   describeSelection,
@@ -194,7 +194,7 @@ const drawerOpen = ref(false)
 
 // Which list the reader is seeing when the server is down: from today, yesterday or the day it was saved here.
 const savedWhen = computed(() => {
-  const saved = useCacheStore().ts
+  const saved = booksStore.savedAt
   if (!saved) return 'a última lista salva neste aparelho'
   const days = Math.floor((Date.now() - saved) / 86_400_000)
   if (days === 0) return 'a lista de hoje'
@@ -277,14 +277,12 @@ const announced = computed(() =>
   searchTerm.value && !filtered.value.length ? `Nada com "${searchTerm.value}"` : summary.value.count,
 )
 
-const retry = () => useApi().fetchBooks(true)
+const retry = () => useApi().fetchBooks()
 
 const formatName = (midia: string, count: number) => {
   const [singular, plural] = FORMAT_NAMES[midia] ?? [midia, midia]
   return count === 1 ? singular : plural
 }
-
-onMounted(() => useApi().fetchBooks())
 
 watch(() => route.fullPath, rememberCatalog, { immediate: true })
 </script>

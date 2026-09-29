@@ -55,7 +55,7 @@ const clearing = ref(false)
 
 const fetchFresh = () => {
   useUtils().sendGtmEvent({ event: 'force_refresh', force_refresh_origin: route.fullPath })
-  return useApi().fetchBooks(true)
+  return useApi().fetchBooks()
 }
 
 const refreshCatalog = async () => {

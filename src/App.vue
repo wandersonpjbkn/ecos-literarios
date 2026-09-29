@@ -26,6 +26,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import { useAuth, useToast } from '@/composables'
 import { startAccountSync } from '@/composables/accountSync'
+import { startCatalogSync } from '@/composables/catalogSync'
 import { startFormatsSync } from '@/composables/formatsSync'
 import { useRouteFocus } from '@/composables/useRouteFocus'
 
@@ -47,6 +48,7 @@ useHead({
 
 let stopWatchSession: (() => void) | null = null
 let stopAccount: (() => void) | null = null
+let stopCatalog: (() => void) | null = null
 
 onMounted(async () => {
   stopWatchSession = watchSession(async (reason) => {
@@ -59,6 +61,8 @@ onMounted(async () => {
     if (reason === 'suspended') router.replace('/')
     else router.replace({ name: 'auth-login', query: { voltar: current.fullPath } })
   })
+  // Public: the catalog does not wait for the session.
+  stopCatalog = startCatalogSync()
   // A returning visit may carry an expired token: the account is read only after Supabase has refreshed it.
   await restoreSession()
   const formats = startFormatsSync()
@@ -72,6 +76,7 @@ onMounted(async () => {
 onUnmounted(() => {
   stopWatchSession?.()
   stopAccount?.()
+  stopCatalog?.()
 })
 </script>
 

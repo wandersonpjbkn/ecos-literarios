@@ -211,7 +211,6 @@ watch(
 )
 
 onMounted(async () => {
-  if (booksStore.books.length === 0) useApi().fetchBooks()
   hasClaim.value = await getMyClaimStatus()
     .then((status) => status.has_claim)
     .catch(() => null)
