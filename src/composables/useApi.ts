@@ -271,7 +271,7 @@ export const savePermission = (role: Role, resource: Resource, actions: Action[]
 export const getPanelBooks = () =>
   authedRequest<AdminBook[]>('/books', { method: 'GET' }, 'Não foi possível carregar os livros. Tente de novo.')
 
-// Who a book can be credited to: every account (user_id) and the placeholders nobody claimed (user_id null).
+// Who a book can be credited to: accounts that linked a name and the placeholders nobody linked (user_id null).
 export const getPeople = () =>
   authedRequest<{ user_id: string | null; name: string }[]>(
     '/books/people',

@@ -104,8 +104,8 @@ Os filtros viram query no catálogo (veja `IA.md`). As rotas `/midia/:slug`, `/c
 - **Quem mencionou, sem coleção nova.** Um livro é creditado a uma conta (`quem_user_id`) ou a um marcador sem dono (`quem_nome`). Livro novo sem escolha sai creditado a quem cadastra, e `quem_nome` deixa de ser obrigatório. `utils/bookPerson.ts` decide:
   - marcador existente (pela normalização dos slugs) mantém a grafia e o dono;
   - grafia quase igual é recusada (409);
-  - nome novo exige `claim: create` e não pode repetir um marcador nem um nome de conta.
-- **`GET /books/people`** (`books: create`) devolve as contas e os marcadores sem dono, para o campo do formulário.
+  - nome novo exige `claim: create` e não pode repetir um marcador nem o nome de uma conta que já vinculou; o nome de uma conta que ainda não vinculou vira marcador, que ela pode vincular depois.
+- **`GET /books/people`** (`books: create`) devolve, para o campo "Mencionado por", as contas que já vincularam um nome e os marcadores ainda sem vínculo. A conta que ainda não vinculou fica de fora, para não aparecer duas vezes ao lado do próprio marcador; se o livro já estiver creditado a ela (ou for um livro novo, que começa creditado a quem cadastra), o formulário mostra esse valor atual mesmo assim.
 - **`GET /users/me`** devolve `claim_match`: o marcador sem dono com o nome da conta, para o "É você?" do formulário. Só vem para quem tem `claim: update`.
 - **Desfazer o vínculo** solta só os livros do marcador reivindicado; livro creditado direto à conta continua dela.
 - **Capas e sinopses vira permissão.** Recurso novo `enrichment` (`update`), padrão Administrador e Editor. `/admin/books/enrich`, `/status` e `/history` saem do `adminOnly` do router de admin e passam a exigir `authorize('enrichment', 'update')`. O `/books/:id/enrich` do formulário continua em `books: update`, e o histórico de vínculos continua só do Administrador.

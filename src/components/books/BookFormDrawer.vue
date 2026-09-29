@@ -329,6 +329,8 @@ const removal = reactive({ open: false, loading: false, error: '' })
 
 const people = ref<{ user_id: string | null; name: string }[]>([])
 const initialPerson = ref('')
+// The book's own account, which the list leaves out until it links a name (the adder, by default).
+const currentAccount = ref<{ value: string; label: string } | null>(null)
 
 const peopleError = ref('')
 
@@ -371,6 +373,8 @@ const canAddName = computed(() => permissions.can('claim', 'create'))
 
 const personOptions = computed(() => {
   const options = people.value.map((p) => ({ label: p.name, value: p.user_id ? `${USER}${p.user_id}` : `${NAME}${p.name}` }))
+  const current = currentAccount.value
+  if (current && !options.some((o) => o.value === current.value)) options.push(current)
   if (form.person.startsWith(NEW_NAME)) options.push({ label: `${form.person.slice(NEW_NAME.length)} (nome novo)`, value: form.person })
   return options
 })
@@ -473,6 +477,7 @@ const resetForm = (): void => {
   form.categoria = ''
   form.subgeneros = []
   form.person = auth.user ? `${USER}${auth.user._id}` : ''
+  currentAccount.value = auth.user ? { value: form.person, label: auth.user.name } : null
   form.porque = ''
   form.isbn = ''
   form.cover_url = ''
@@ -498,6 +503,7 @@ const populateForm = (book: BookPayload): void => {
   form.categoria = extractId(book.categoria)
   form.subgeneros = book.subgeneros.map(extractId)
   form.person = book.quem_user_id ? `${USER}${book.quem_user_id._id}` : book.quem_nome ? `${NAME}${book.quem_nome}` : ''
+  currentAccount.value = book.quem_user_id ? { value: form.person, label: book.quem_user_id.name } : null
   form.porque = book.porque ?? ''
   adoptOptional(book)
 }
