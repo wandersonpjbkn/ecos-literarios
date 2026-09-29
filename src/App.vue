@@ -49,12 +49,15 @@ let stopWatchSession: (() => void) | null = null
 let stopAccount: (() => void) | null = null
 
 onMounted(async () => {
-  stopWatchSession = watchSession(async () => {
-    toast.show('Sua sessão venceu. Entre de novo.')
+  stopWatchSession = watchSession(async (reason) => {
+    toast.show(reason === 'suspended' ? 'Esta conta está suspensa.' : 'Sua sessão venceu. Entre de novo.')
     // The first navigation may still be resolving: the page it lands on decides, not the blank start.
     await router.isReady()
     const current = router.currentRoute.value
-    if (current.meta.signedIn) router.replace({ name: 'auth-login', query: { voltar: current.fullPath } })
+    if (!current.meta.signedIn) return
+    // A suspended account has no login to go back to; the catalog stays open to anyone.
+    if (reason === 'suspended') router.replace('/')
+    else router.replace({ name: 'auth-login', query: { voltar: current.fullPath } })
   })
   // A returning visit may carry an expired token: the account is read only after Supabase has refreshed it.
   await restoreSession()

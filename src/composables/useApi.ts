@@ -3,6 +3,7 @@ import { isAuthRetryableFetchError } from '@supabase/supabase-js'
 import { API_BASE } from '@/data/config'
 import { personName } from '@/data/person'
 import type {
+  AccountStatus,
   Action,
   AdminBook,
   AdminClaimHistoryEntry,
@@ -30,6 +31,7 @@ import { useBooksStore, useCacheStore } from '@/stores'
 
 import { useErrorReporter } from '@/composables'
 import { toApiError } from '@/composables/apiError'
+import { endSession } from '@/composables/sessionEnd'
 import { supabase } from '@/composables/supabase'
 
 // ── Helpers ──
@@ -79,18 +81,23 @@ const renewedToken = async (refused: string): Promise<string | null> => {
   return data.session?.access_token ?? null
 }
 
-/** Every call to the API: a 401 renews the token and resends once; refused twice, the session ends. */
+const isSuspended = async (res: Response): Promise<boolean> =>
+  res.status === 403 && ((await res.clone().json().catch(() => ({}))) as { code?: string }).code === 'account_suspended'
+
+/** Every call to the API: a 401 renews the token and resends once; refused twice, or suspended, the session ends. */
 const apiFetch = async (path: string, init: RequestInit = {}): Promise<Response> => {
   const send = (token: string | null) => fetch(`${API_BASE}${path}`, { ...init, headers: headersWith(token) })
   const token = await currentToken()
-  const res = await send(token)
-  if (res.status !== 401 || !token) return res
+  let res = await send(token)
 
-  const renewed = await renewedToken(token)
-  if (!renewed) return res
-  const retried = await send(renewed)
-  if (retried.status === 401) await supabase.auth.signOut({ scope: 'local' })
-  return retried
+  if (res.status === 401 && token) {
+    const renewed = await renewedToken(token)
+    if (!renewed) return res
+    res = await send(renewed)
+    if (res.status === 401) await endSession('expired')
+  }
+  if (await isSuspended(res)) await endSession('suspended')
+  return res
 }
 
 // ── Composable ──
@@ -303,6 +310,20 @@ export const setMemberRole = (id: string, role: Role) =>
     `/users/${id}/role`,
     { method: 'PATCH', body: JSON.stringify({ role }) },
     'Não foi possível mudar o nível. Tente de novo.',
+  )
+
+export const setMemberStatus = (id: string, status: AccountStatus) =>
+  authedRequest<ApiUser>(
+    `/users/${id}/status`,
+    { method: 'PATCH', body: JSON.stringify({ status }) },
+    'Não foi possível mudar o acesso. Tente de novo.',
+  )
+
+export const removeMember = (id: string) =>
+  authedRequest<{ removed: string; books: number }>(
+    `/users/${id}`,
+    { method: 'DELETE' },
+    'Não foi possível remover. Tente de novo.',
   )
 
 export const getClaimHistory = (limit: number) =>

@@ -17,6 +17,10 @@
         <SupportLink pill :email="lastEmail" />
       </EmptyState>
 
+      <EmptyState v-else-if="status === 'suspended'" ref="message" title-tag="h1" title="Esta conta está suspensa.">
+        <SupportLink pill :email="lastEmail" />
+      </EmptyState>
+
       <EmptyState v-else-if="status === 'resent'" ref="message" title-tag="h1" title="Enviamos outro link">
         <template #text
           >Foi para <strong>{{ resentTo }}</strong
@@ -45,7 +49,7 @@
 
       <!-- The same way back as the login page; "platform" already offers "Continuar sem entrar". -->
       <AppButton
-        v-if="status === 'link' || status === 'resent'"
+        v-if="status === 'link' || status === 'resent' || status === 'suspended'"
         :to="lastCatalog"
         variant="ghost"
         size="md"
@@ -79,6 +83,7 @@ const TITLES = {
   loading: 'Entrando',
   link: 'Não foi possível entrar',
   platform: 'A plataforma está fora do ar',
+  suspended: 'Conta suspensa',
   resent: 'Enviamos outro link',
 } as const
 
@@ -87,7 +92,7 @@ const lastCatalog = useLastCatalog()
 
 const { handleCallback, sendMagicLink } = useAuth()
 
-const status = ref<'loading' | 'link' | 'platform' | 'resent'>('loading')
+const status = ref<'loading' | 'link' | 'platform' | 'resent' | 'suspended'>('loading')
 
 // Expired link: resend to the e-mail that asked for it (same browser, within the hour) instead of retyping it.
 const lastEmail = ref(recallEmail())

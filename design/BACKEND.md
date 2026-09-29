@@ -110,3 +110,19 @@ Os filtros viram query no catálogo (veja `IA.md`). As rotas `/midia/:slug`, `/c
 - **Desfazer o vínculo** solta só os livros do marcador reivindicado; livro creditado direto à conta continua dela.
 - **Capas e sinopses vira permissão.** Recurso novo `enrichment` (`update`), padrão Administrador e Editor. `/admin/books/enrich`, `/status` e `/history` saem do `adminOnly` do router de admin e passam a exigir `authorize('enrichment', 'update')`. O `/books/:id/enrich` do formulário continua em `books: update`, e o histórico de vínculos continua só do Administrador.
 - **Remover um livro** apaga as marcações de leitura dele (já é assim, §2b); o texto da confirmação passa a dizer isso.
+
+## 9. Suspender e remover contas
+
+Só o Administrador, e nunca na própria conta. Como só um Administrador com acesso chega a essas rotas, sempre sobra pelo menos um.
+
+```http
+PATCH  /users/:id/status  ← { status: "active" | "suspended" }  → o membro, com o estado
+DELETE /users/:id                                                → { removed, books }
+```
+
+- **Suspender** vale na hora: toda requisição da conta recebe 403 com `code: "account_suspended"`, e o Supabase recusa entrar e renovar o token (`ban_duration`). Reativar desfaz os dois. A conta, os livros e a lista de leitura continuam.
+- **Remover** apaga a conta no Supabase e no `ecos-api`. Os livros ficam: os creditados à conta ganham o nome dela como marcador (`quem_nome`), e os de um nome vinculado voltam para esse nome. A lista de leitura e o histórico de vínculo continuam. A pessoa pode voltar pelo mesmo e-mail, como Visitante nova.
+- **Conta nova só com conta real no Supabase:** no primeiro acesso, a API confirma que a conta existe antes de criá-la. O token de uma conta removida ainda vale por até 1 hora e não pode trazê-la de volta.
+- **Token:** a API exige `aud = authenticated`, o `iss` do projeto e um e-mail.
+- **No front:** a conta suspensa sai da sessão com "Esta conta está suspensa." e vai para o catálogo se estiver numa página com login. O Supabase envia o link mágico mesmo para a conta suspensa e só o recusa quando ele é usado (`user_banned`): o callback mostra a mesma frase, sem oferecer outro link. Em Membros, "Gerenciar acesso" abre a linha com suspender ou reativar e remover, cada um com confirmação, e a conta suspensa leva a etiqueta âmbar "suspensa".
+- **Chaves:** a API usa a secret key (`SUPABASE_SECRET_KEY`) só no servidor, para o admin do Auth; o front e o keepalive usam a publishable key.

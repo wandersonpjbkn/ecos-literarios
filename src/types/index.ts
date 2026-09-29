@@ -280,11 +280,15 @@ export interface TabConfig {
   singular: string
 }
 
+export type AccountStatus = 'active' | 'suspended'
+
 export interface ApiUser {
   _id: string
   name: string
   email: string
   role: Role
+  // Absent on accounts from before suspension existed: they are active.
+  status?: AccountStatus
   created_at: string
   last_seen_at: string
 }
