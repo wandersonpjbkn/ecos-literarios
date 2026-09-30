@@ -7,6 +7,7 @@ import { useBookEnrichment } from '@/composables/useBookEnrichment'
 import { useBookSort } from '@/composables/useBookSort'
 import { useBreakpoints } from '@/composables/useBreakpoints'
 import { useCanWrite } from '@/composables/useCanWrite'
+import { useCatalogRefresh } from '@/composables/useCatalogRefresh'
 import { useCatalogSearch } from '@/composables/useCatalogSearch'
 import { useCategoryColors } from '@/composables/useCategoryColors'
 import { useEcoOfTheWeek } from '@/composables/useEcoOfTheWeek'
@@ -27,6 +28,7 @@ export {
   describeSelection,
   useFilters,
   useCatalogSearch,
+  useCatalogRefresh,
   useAddTarget,
   useCanWrite,
   useBookEditor,

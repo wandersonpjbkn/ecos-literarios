@@ -26,6 +26,17 @@
               <span class="catalog-bar__count">{{ summary.count }}</span
               >{{ summary.rest }}
             </p>
+            <AppButton
+              v-if="booksStore.books.length"
+              class="catalog-bar__refresh"
+              variant="outline"
+              size="md"
+              :aria-busy="refreshing"
+              @click="refresh"
+            >
+              <BaseIcon name="reload" aria-hidden="true" />
+              {{ refreshing ? 'Atualizando…' : 'Atualizar' }}
+            </AppButton>
           </header>
 
           <!-- With nothing in the collection there is nothing to filter, sort or count: only the empty state speaks. -->
@@ -118,7 +129,7 @@
 
 <script lang="ts" setup>
 import { useMediaQuery, useOnline } from '@vueuse/core'
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { joinWords } from '@/data/words'
@@ -133,6 +144,7 @@ import {
   useApi,
   useBreakpoints,
   useCanWrite,
+  useCatalogRefresh,
   useEcoOfTheWeek,
   useFilters,
   useBookSort,
@@ -301,6 +313,11 @@ const announced = computed(() =>
 )
 
 const retry = () => useApi().fetchBooks()
+
+// Every visit checks the catalog: unchanged, the API answers with a bodyless 304.
+onMounted(() => useApi().fetchBooks())
+
+const { refreshing, refresh } = useCatalogRefresh()
 
 const formatName = (midia: string, count: number) => {
   const [singular, plural] = FORMAT_NAMES[midia] ?? [midia, midia]
