@@ -20,6 +20,10 @@
         <RouterLink :to="catalogLink('midia', book.midia)" class="facts__link">{{ book.midia }}</RouterLink>
       </dd>
     </div>
+    <div v-if="book.publisher" class="facts__item">
+      <dt>Editora</dt>
+      <dd>{{ book.publisher }}</dd>
+    </div>
   </dl>
 </template>
 

@@ -194,6 +194,7 @@
               :disabled="isSaving"
               autocomplete="off"
             />
+            <AppField v-model="form.publisher" trim label="Editora" :disabled="isSaving" autocomplete="off" />
             <AppField
               v-model="form.google_books_id"
               trim
@@ -320,6 +321,7 @@ const form = reactive({
   person: '',
   porque: '',
   isbn: '',
+  publisher: '',
   cover_url: '',
   synopsis: '',
   google_books_id: '',
@@ -486,6 +488,7 @@ const resetForm = (): void => {
   currentAccount.value = auth.user ? { value: form.person, label: auth.user.name } : null
   form.porque = ''
   form.isbn = ''
+  form.publisher = ''
   form.cover_url = ''
   form.synopsis = ''
   form.google_books_id = ''
@@ -495,6 +498,7 @@ const resetForm = (): void => {
 
 const adoptOptional = (book: BookPayload): void => {
   form.isbn = book.isbn ?? ''
+  form.publisher = book.publisher ?? ''
   form.cover_url = book.cover_url ?? ''
   form.synopsis = book.synopsis ?? ''
   form.google_books_id = book.google_books_id ? String(book.google_books_id) : ''
@@ -523,6 +527,7 @@ const close = (): void => {
 const optionalFields = () => {
   const fields: Record<string, string | number | null> = {
     isbn: form.isbn || null,
+    publisher: form.publisher || null,
     cover_url: form.cover_url || null,
     synopsis: form.synopsis || null,
     google_books_id: form.google_books_id || null,
@@ -601,9 +606,15 @@ watch(
     if (!isMemberScope.value) loadPeople()
     showMore.value =
       (!!props.book &&
-        [form.synopsis, form.isbn, form.cover_url, form.google_books_id, form.page_count, form.published_year].some(
-          Boolean,
-        )) ||
+        [
+          form.synopsis,
+          form.isbn,
+          form.publisher,
+          form.cover_url,
+          form.google_books_id,
+          form.page_count,
+          form.published_year,
+        ].some(Boolean)) ||
       (!!props.book && form.subgeneros.length > 0)
   },
   // Opened on arrival (?adicionar=1): the form must be prepared on the first render too.

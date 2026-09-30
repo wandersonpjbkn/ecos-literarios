@@ -37,6 +37,7 @@ export interface Book {
   synopsis?: string
   google_books_id?: string
   isbn?: string
+  publisher?: string
   page_count?: number
   published_year?: number
   added_at?: string
@@ -81,6 +82,7 @@ export interface BookPayload {
   quem_user_id?: { _id: string; name: string } | null
   porque: string
   isbn?: string
+  publisher?: string
   cover_url?: string
   synopsis?: string
   google_books_id?: string | number
@@ -134,6 +136,7 @@ export interface ApiBook {
   page_count?: number
   added_at?: string
   isbn?: string
+  publisher?: string
   google_books_id?: string
   subgeneros: (ApiPopulated | string)[]
 }
@@ -198,6 +201,7 @@ export interface AdminBook {
   quem_user_id?: { _id: string; name: string } | null
   porque: string
   isbn?: string
+  publisher?: string
   cover_url?: string
   synopsis?: string
   page_count?: number
@@ -307,6 +311,7 @@ export interface BookForEdit {
   porque: string
   synopsis?: string
   isbn?: string
+  publisher?: string
   cover_url?: string
   google_books_id?: string | number
   page_count?: number
