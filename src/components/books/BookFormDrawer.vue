@@ -132,7 +132,12 @@
                 >Open Library<span class="visually-hidden">{{ ' ' }}(abre em outra aba)</span></a
               >. Tudo continua editável à mão.
             </p>
-            <BookEnrichmentPanel :book-id="book?._id ?? null" :disabled="isSaving" @applied="handleEnrichmentApplied" />
+            <BookEnrichmentPanel
+              class="form-section__enrichment"
+              :book-id="book?._id ?? null"
+              :disabled="isSaving"
+              @applied="handleEnrichmentApplied"
+            />
           </template>
 
           <div class="form-grid">
@@ -691,6 +696,11 @@ onMounted(() => {
   &__more {
     margin-top: var(--space-3);
   }
+
+  // One grid row gap, so the button sits apart from the field below like any other field.
+  &__enrichment {
+    margin-bottom: var(--space-4);
+  }
 }
 
 .form-grid {
@@ -771,6 +781,10 @@ onMounted(() => {
 
   .form-section {
     padding: var(--space-3);
+
+    &__enrichment {
+      margin-bottom: var(--space-3);
+    }
   }
 
   .drawer-footer__actions {
