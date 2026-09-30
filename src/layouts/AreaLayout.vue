@@ -26,7 +26,12 @@
         @click="sectionsOpen = true"
       >
         <span class="visually-hidden">{{ navLabel }}: </span>{{ currentLabel }}
-        <BaseIcon name="chevron" class="panel-sections-bar__chevron" :class="{ 'is-open': sectionsOpen }" aria-hidden="true" />
+        <BaseIcon
+          name="chevron"
+          class="panel-sections-bar__chevron"
+          :class="{ 'is-open': sectionsOpen }"
+          aria-hidden="true"
+        />
       </AppButton>
     </div>
 

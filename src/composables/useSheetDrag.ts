@@ -20,7 +20,9 @@ export function useSheetDrag(panel: Ref<HTMLElement | null>, enabled: () => bool
 
   // While the finger moves the sheet follows it at once; on release the stylesheet's transition takes it back.
   const style = computed(() =>
-    offset.value ? { transform: `translateY(${offset.value}px)`, transition: dragging.value ? 'none' : undefined } : undefined,
+    offset.value
+      ? { transform: `translateY(${offset.value}px)`, transition: dragging.value ? 'none' : undefined }
+      : undefined,
   )
 
   const onPointerdown = (event: PointerEvent) => {

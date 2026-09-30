@@ -43,7 +43,9 @@
           <span class="history-table__email">{{ item.user_email }}</span>
         </span>
         <span role="cell" data-label="O que fez">{{ item.action === 'claim' ? 'Vinculou' : 'Desfez o vínculo' }}</span>
-        <span role="cell" data-label="Nome">{{ item.claim_name || joinWords(item.previous_claim_names ?? []) || 'sem nome' }}</span>
+        <span role="cell" data-label="Nome">{{
+          item.claim_name || joinWords(item.previous_claim_names ?? []) || 'sem nome'
+        }}</span>
         <span role="cell" data-label="Livros">{{ item.affected_books }}</span>
         <span role="cell" data-label="Quando">{{ formatDateTime(item.performed_at) }}</span>
       </div>
@@ -123,7 +125,9 @@ onMounted(loadHistory)
 
   &__row {
     display: grid;
-    grid-template-columns: minmax(var(--col-xl), 2fr) minmax(var(--col-lg), 1.2fr) minmax(var(--col-lg), 1.4fr) minmax(var(--col-sm), 0.6fr) minmax(var(--col-date), 1fr);
+    grid-template-columns:
+      minmax(var(--col-xl), 2fr) minmax(var(--col-lg), 1.2fr) minmax(var(--col-lg), 1.4fr) minmax(var(--col-sm), 0.6fr)
+      minmax(var(--col-date), 1fr);
     align-items: center;
     gap: var(--space-3);
     min-height: var(--row-min);

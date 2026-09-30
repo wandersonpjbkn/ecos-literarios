@@ -4,9 +4,7 @@
       <p class="reading__state">
         <BaseIcon name="check" aria-hidden="true" />
         <span>Lido</span>
-        <AppButton variant="ghost" size="md" :disabled="!canWrite || pending" @click="act(null)"
-          >Desmarcar</AppButton
-        >
+        <AppButton variant="ghost" size="md" :disabled="!canWrite || pending" @click="act(null)">Desmarcar</AppButton>
       </p>
     </template>
 

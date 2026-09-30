@@ -444,7 +444,6 @@ onMounted(() => crud.fetchAll())
     &__actions {
       margin-left: auto;
     }
-
   }
 }
 

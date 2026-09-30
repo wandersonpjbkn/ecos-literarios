@@ -70,14 +70,27 @@
           <span role="columnheader" class="visually-hidden">Ações</span>
         </div>
 
-        <div v-for="book in pageItems" :key="book._id" class="books-table__row panel-row" role="row" tabindex="-1" data-list-item>
+        <div
+          v-for="book in pageItems"
+          :key="book._id"
+          class="books-table__row panel-row"
+          role="row"
+          tabindex="-1"
+          data-list-item
+        >
           <span role="cell" class="books-table__title">{{ book.titulo }}</span>
-          <span role="cell" class="books-table__field" data-label="Autor">{{ resolveName(book.autor) || 'sem autor' }}</span>
+          <span role="cell" class="books-table__field" data-label="Autor">{{
+            resolveName(book.autor) || 'sem autor'
+          }}</span>
           <span role="cell" class="books-table__field" data-label="Gênero">{{
             resolveName(book.categoria) || 'sem gênero'
           }}</span>
-          <span role="cell" class="books-table__field" data-label="Formato">{{ resolveName(book.midia) || 'sem formato' }}</span>
-          <span role="cell" class="books-table__field" data-label="Quem mencionou">{{ personName(book) || 'ninguém' }}</span>
+          <span role="cell" class="books-table__field" data-label="Formato">{{
+            resolveName(book.midia) || 'sem formato'
+          }}</span>
+          <span role="cell" class="books-table__field" data-label="Quem mencionou">{{
+            personName(book) || 'ninguém'
+          }}</span>
           <span role="cell" class="books-table__missing" data-label="Faltando">{{ missingLabel(book) }}</span>
           <span role="cell" class="books-table__actions">
             <AppButton v-if="permissions.canEditBook(book.quem_user_id?._id)" size="md" @click="openEdit(book)">

@@ -1,7 +1,9 @@
 <template>
   <div class="empty-state">
     <component :is="titleTag" ref="titleEl" class="empty-state__title" tabindex="-1">{{ title }}</component>
-    <p v-if="text || $slots.text" class="empty-state__text"><slot name="text">{{ text }}</slot></p>
+    <p v-if="text || $slots.text" class="empty-state__text">
+      <slot name="text">{{ text }}</slot>
+    </p>
     <div v-if="$slots.default" class="empty-state__actions">
       <slot />
     </div>

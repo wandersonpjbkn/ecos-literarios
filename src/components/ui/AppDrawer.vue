@@ -97,7 +97,11 @@ const { closeThen } = useBackCloses(
 const panel = ref<HTMLElement | null>(null)
 
 // Only the phone's bottom sheet drags; the desktop side panel does not.
-const drag = useSheetDrag(panel, () => isPhone.value, () => emit('close'))
+const drag = useSheetDrag(
+  panel,
+  () => isPhone.value,
+  () => emit('close'),
+)
 
 const closeButton = ref<{ $el: HTMLElement } | null>(null)
 
@@ -115,7 +119,10 @@ const titleId = computed(() => props.titleId ?? generatedId)
 // The page under an open panel does not scroll; the lock goes with the panel, even when it unmounts open.
 const lockScroll = (locked: boolean) => (document.body.style.overflow = locked ? 'hidden' : '')
 
-watch(() => props.open, (isOpen) => isOpen && drag.reset())
+watch(
+  () => props.open,
+  (isOpen) => isOpen && drag.reset(),
+)
 
 // A link inside the panel navigates only after the panel's own history entry is gone (AreaLayout).
 defineExpose({ closeThen })

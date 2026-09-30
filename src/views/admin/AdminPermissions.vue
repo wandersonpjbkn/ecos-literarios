@@ -261,7 +261,8 @@ const allowedText = (role: Role, resource: Resource) => {
   const phrases = PHRASE[resource] ?? {}
   return capitalize(joinWords(allowed.map((action) => phrases[action] ?? VERB[action])))
 }
-const isNone = (role: Role, resource: Resource) => !actionsOf(resource).some((action) => hasAction(role, resource, action))
+const isNone = (role: Role, resource: Resource) =>
+  !actionsOf(resource).some((action) => hasAction(role, resource, action))
 
 const openConfirm = () => {
   confirm.error = ''
@@ -416,5 +417,4 @@ onMounted(fetchPermissions)
     margin-top: var(--space-1);
   }
 }
-
 </style>

@@ -43,7 +43,6 @@ export interface Book {
   // Where the book came from: the WhatsApp conversation (CSV import) or the site. Decided by the API.
 }
 
-
 export type ReadingStatus = 'quero_ler' | 'lido'
 
 export interface ReadingEntry {
@@ -249,15 +248,7 @@ export interface EnrichmentRun {
 export type Role = 'admin' | 'editor' | 'viewer'
 
 export type Resource =
-  | 'books'
-  | 'users'
-  | 'autores'
-  | 'midias'
-  | 'categorias'
-  | 'subgeneros'
-  | 'permissions'
-  | 'claim'
-  | 'enrichment'
+  'books' | 'users' | 'autores' | 'midias' | 'categorias' | 'subgeneros' | 'permissions' | 'claim' | 'enrichment'
 
 export type Action = 'create' | 'read' | 'update' | 'delete'
 

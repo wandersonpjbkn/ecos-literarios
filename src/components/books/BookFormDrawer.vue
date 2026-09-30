@@ -16,7 +16,8 @@
         <!-- A free placeholder with this account's name: linking first makes those books this person's too. -->
         <div v-if="claimOffer" class="claim-offer" role="status">
           <p class="claim-offer__text">
-            O nome "{{ claimOffer }}" já está no catálogo. É você? Se for, vincule esse nome e esses livros passam a ser seus.
+            O nome "{{ claimOffer }}" já está no catálogo. É você? Se for, vincule esse nome e esses livros passam a ser
+            seus.
           </p>
           <AppNotice v-if="claimError" :text="claimError" />
           <div class="claim-offer__actions">
@@ -366,21 +367,21 @@ const missingText = computed(() => {
 })
 
 const isValid = computed(
-  () =>
-    form.titulo.trim().length > 0 &&
-    form.autor.length > 0 &&
-    form.midia.length > 0 &&
-    form.categoria.length > 0,
+  () => form.titulo.trim().length > 0 && form.autor.length > 0 && form.midia.length > 0 && form.categoria.length > 0,
 )
 
 // "Outro nome" follows the matrix (claim: create), by default only the Administrador.
 const canAddName = computed(() => permissions.can('claim', 'create'))
 
 const personOptions = computed(() => {
-  const options = people.value.map((p) => ({ label: p.name, value: p.user_id ? `${USER}${p.user_id}` : `${NAME}${p.name}` }))
+  const options = people.value.map((p) => ({
+    label: p.name,
+    value: p.user_id ? `${USER}${p.user_id}` : `${NAME}${p.name}`,
+  }))
   const current = currentAccount.value
   if (current && !options.some((o) => o.value === current.value)) options.push(current)
-  if (form.person.startsWith(NEW_NAME)) options.push({ label: `${form.person.slice(NEW_NAME.length)} (nome novo)`, value: form.person })
+  if (form.person.startsWith(NEW_NAME))
+    options.push({ label: `${form.person.slice(NEW_NAME.length)} (nome novo)`, value: form.person })
   return options
 })
 
@@ -600,14 +601,9 @@ watch(
     if (!isMemberScope.value) loadPeople()
     showMore.value =
       (!!props.book &&
-        [
-          form.synopsis,
-          form.isbn,
-          form.cover_url,
-          form.google_books_id,
-          form.page_count,
-          form.published_year,
-        ].some(Boolean)) ||
+        [form.synopsis, form.isbn, form.cover_url, form.google_books_id, form.page_count, form.published_year].some(
+          Boolean,
+        )) ||
       (!!props.book && form.subgeneros.length > 0)
   },
   // Opened on arrival (?adicionar=1): the form must be prepared on the first render too.

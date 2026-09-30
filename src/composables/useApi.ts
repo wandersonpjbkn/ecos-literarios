@@ -82,7 +82,13 @@ const renewedToken = async (refused: string): Promise<string | null> => {
 }
 
 const isSuspended = async (res: Response): Promise<boolean> =>
-  res.status === 403 && ((await res.clone().json().catch(() => ({}))) as { code?: string }).code === 'account_suspended'
+  res.status === 403 &&
+  (
+    (await res
+      .clone()
+      .json()
+      .catch(() => ({}))) as { code?: string }
+  ).code === 'account_suspended'
 
 /** Every call to the API: a 401 renews the token and resends once; refused twice, or suspended, the session ends. */
 const apiFetch = async (path: string, init: RequestInit = {}): Promise<Response> => {
@@ -207,7 +213,11 @@ const authedRequest = async <T>(path: string, init: RequestInit, fallback: strin
 }
 
 export const getMyReading = () =>
-  authedRequest<ReadingEntry[]>('/users/me/reading', { method: 'GET' }, 'Não foi possível abrir sua lista. Tente de novo.')
+  authedRequest<ReadingEntry[]>(
+    '/users/me/reading',
+    { method: 'GET' },
+    'Não foi possível abrir sua lista. Tente de novo.',
+  )
 
 export const saveReading = (bookId: string, status: ReadingStatus) =>
   authedRequest<ReadingEntry>(
@@ -224,7 +234,11 @@ export const removeReading = (bookId: string) =>
   )
 
 export const getReadingCounts = (bookId: string) =>
-  authedRequest<ReadingCounts>(`/books/${bookId}/reading`, { method: 'GET' }, 'Não foi possível carregar essa contagem.')
+  authedRequest<ReadingCounts>(
+    `/books/${bookId}/reading`,
+    { method: 'GET' },
+    'Não foi possível carregar essa contagem.',
+  )
 
 // ── Conta: formatos escondidos e permissões do próprio nível ──
 export const getMe = () =>
@@ -232,11 +246,7 @@ export const getMe = () =>
     user: AuthUser & { hidden_midias?: string[] }
     permissions: Partial<Record<Resource, Action[]>>
     claim_match?: string | null
-  }>(
-    '/users/me',
-    { method: 'GET' },
-    'Não foi possível carregar sua conta.',
-  )
+  }>('/users/me', { method: 'GET' }, 'Não foi possível carregar sua conta.')
 
 export const saveMyName = (name: string) =>
   authedRequest<{ name: string }>(
@@ -280,7 +290,11 @@ export const getPeople = () =>
   )
 
 export const getBookForEdit = (id: string) =>
-  authedRequest<BookForEdit>(`/books/${id}`, { method: 'GET' }, 'Não foi possível abrir este livro para editar. Tente de novo.')
+  authedRequest<BookForEdit>(
+    `/books/${id}`,
+    { method: 'GET' },
+    'Não foi possível abrir este livro para editar. Tente de novo.',
+  )
 
 // The owner's own route for someone who cannot update every book; the panel route otherwise (the API decides).
 export const saveBook = (payload: Record<string, unknown>, target: { id?: string; asOwner?: boolean }) =>
@@ -394,4 +408,3 @@ export const updateEntity = (resource: string, id: string, nome: string) =>
 
 export const removeEntity = (resource: string, id: string) =>
   authedRequest<null>(`/${resource}/${id}`, { method: 'DELETE' }, 'Não foi possível remover. Tente de novo.')
-

@@ -6,7 +6,8 @@
 import { computed, defineAsyncComponent } from 'vue'
 
 const props = defineProps<{
-  name: // UI
+  name:
+    // UI
     | 'arrow-left'
     | 'arrow-right'
     | 'book'
