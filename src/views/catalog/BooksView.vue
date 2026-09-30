@@ -63,13 +63,15 @@
                 >Limpar os filtros</AppButton
               >
             </div>
-            <div v-else-if="quickGenres.length" class="catalog-bar__chips chip-strip">
+            <div v-else-if="quickGenres.length" class="catalog-bar__chips chip-strip" role="group" aria-label="Gêneros">
               <FilterChip
                 v-for="genre in quickGenres"
                 :key="genre"
                 :label="genre"
                 :count="quickCounts[genre]"
                 :to="hrefToggling('categoria', genre)"
+                :selected="selected.categoria.includes(genre)"
+                :removable="selected.categoria.includes(genre)"
               />
             </div>
 
@@ -178,8 +180,17 @@ usePageMeta({
   description: 'Os livros, mangás e HQs mencionados no Clube Ecos Literários.',
 })
 
-const { search, optionCounts, selected, hasFilters, hrefToggling, clearAll, filtered, hiddenByPreference } =
-  useFilters()
+const {
+  search,
+  optionCounts,
+  selected,
+  hasFilters,
+  hrefToggling,
+  clearAll,
+  filtered,
+  filteredIgnoring,
+  hiddenByPreference,
+} = useFilters()
 const { sortOrder, sortedBooks, sortOptions } = useBookSort(filtered)
 
 const online = useOnline()
@@ -229,13 +240,13 @@ const showEco = computed(() => isDefaultView.value && !isPhone.value)
 // A format picked by the link overrides the preference, so its chip only shows when the preference is in force.
 const preferenceChips = computed(() => (selected.value.midia.length ? [] : preferences.hiddenMidias))
 
-const showApplied = computed(() => hasFilters.value || preferenceChips.value.length > 0)
-
 // A chip counts what its click will show: with a search on, the search's result; a zero chip is left out (slice 8d).
 const quickCounts = computed<Record<string, number>>(() => {
   if (!searchTerm.value) return optionCounts.value.categoria
   const counts: Record<string, number> = {}
-  for (const book of filtered.value) if (book.categoria) counts[book.categoria] = (counts[book.categoria] ?? 0) + 1
+  for (const book of filteredIgnoring('categoria')) {
+    if (book.categoria) counts[book.categoria] = (counts[book.categoria] ?? 0) + 1
+  }
   return counts
 })
 
@@ -246,6 +257,18 @@ const quickGenres = computed(() =>
     .slice(0, QUICK_GENRES)
     .map(([genre]) => genre),
 )
+
+// Picking a quick genre keeps the strip where it was clicked; any other filter shows the applied ones instead.
+const onlyQuickGenres = computed(() => {
+  const { categoria, ...others } = selected.value
+  return (
+    categoria.length > 0 &&
+    Object.values(others).every((values) => values.length === 0) &&
+    categoria.every((genre) => quickGenres.value.includes(genre))
+  )
+})
+
+const showApplied = computed(() => preferenceChips.value.length > 0 || (hasFilters.value && !onlyQuickGenres.value))
 
 const appliedChips = computed(() =>
   APPLIED_ORDER.flatMap((key) =>

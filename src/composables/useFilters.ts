@@ -214,6 +214,10 @@ export function useFilters() {
     return router.push({ query })
   }
 
+  /** The catalog as filtered, minus one group: what that group's options would count if nothing in it were picked. */
+  const filteredIgnoring = (key: FilterKey) =>
+    applyFilters(books.value, { ...selected.value, [key]: [] }, search.value, hiddenMidias.value)
+
   /** Books a selection opens from a link (no search, format preference in force), so a shelf count matches its page. */
   const booksFor = (selection: Options) => applyFilters(books.value, selection, '', hiddenMidias.value)
 
@@ -230,6 +234,7 @@ export function useFilters() {
     apply,
     clearAll,
     filtered,
+    filteredIgnoring,
     booksFor,
     hiddenByPreference,
     searchSuggestions,
