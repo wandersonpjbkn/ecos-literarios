@@ -7,15 +7,17 @@
       'has-value': hasValue,
       'is-single': !multiple,
     }"
+    @focusout="onFocusOut"
   >
     <button
+      ref="controlRef"
       type="button"
       class="ms-control"
       aria-haspopup="listbox"
       role="combobox"
       :aria-expanded="isOpen"
-      :aria-controls="isOpen ? `${id}-list` : undefined"
-      :aria-activedescendant="isOpen && activeIdx >= 0 ? `${id}-opt-${activeIdx}` : undefined"
+      :aria-controls="isOpen && !searchable ? `${id}-list` : undefined"
+      :aria-activedescendant="isOpen && !searchable && activeIdx >= 0 ? `${id}-opt-${activeIdx}` : undefined"
       :aria-labelledby="labelledby"
       @click="toggleOpen"
       @keydown.down.prevent="openOrMove(1)"
@@ -38,7 +40,7 @@
     </button>
 
     <Transition name="ms-dropdown">
-      <div v-if="isOpen" class="ms-dropdown">
+      <div v-if="isOpen" class="ms-dropdown" @keydown.escape.stop="closeToControl">
         <div v-if="searchable" class="ms-search-wrap">
           <BaseIcon name="search" class="ms-search-icon" />
           <input
@@ -54,13 +56,18 @@
             :aria-label="`Buscar em ${label.toLowerCase()}`"
             :aria-controls="`${id}-list`"
             :aria-activedescendant="activeIdx >= 0 ? `${id}-opt-${activeIdx}` : undefined"
-            @keydown.escape.stop="close"
-            @keydown.tab="close"
             @keydown.down.prevent="moveActive(1)"
             @keydown.up.prevent="moveActive(-1)"
             @keydown.enter.prevent="selectActive"
           />
-          <button v-if="query" type="button" class="ms-clear-query" aria-label="Apagar a busca" @click.stop="query = ''">
+          <button
+            v-if="query"
+            type="button"
+            class="ms-clear-query"
+            aria-label="Apagar a busca"
+            @mousedown.prevent
+            @click.stop="query = ''"
+          >
             <BaseIcon name="times" aria-hidden="true" />
           </button>
         </div>
@@ -89,7 +96,7 @@
         </ul>
 
         <div v-if="multiple && selected.length > 0" class="ms-footer">
-          <button type="button" class="ms-clear-all" @click.stop="emit('clear')">Limpar</button>
+          <button type="button" class="ms-clear-all" @mousedown.prevent @click.stop="emit('clear')">Limpar</button>
           <span class="ms-footer-count">{{ selected.length }} selecionado{{ selected.length > 1 ? 's' : '' }}</span>
         </div>
       </div>
@@ -99,7 +106,7 @@
 
 <script lang="ts" setup>
 import { onClickOutside } from '@vueuse/core'
-import { computed, ref, useId, watch } from 'vue'
+import { computed, nextTick, ref, useId, watch } from 'vue'
 
 import type { OptionMultiSelect } from '@/types'
 
@@ -137,6 +144,7 @@ const emit = defineEmits<{
 const id = useId()
 
 const wrapRef = ref<HTMLDivElement | null>(null)
+const controlRef = ref<HTMLButtonElement | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
 const isOpen = ref(false)
 
@@ -183,7 +191,7 @@ const selectedOption = computed(() => {
 const onEscape = (event: KeyboardEvent) => {
   if (!isOpen.value) return
   event.stopPropagation()
-  close()
+  closeToControl()
 }
 
 const isSelected = (value: string): boolean => {
@@ -197,21 +205,24 @@ const isSelected = (value: string): boolean => {
 const handleSelect = (value: string) => {
   if (value === CREATE) {
     emit('create', query.value.trim())
-    close()
+    closeToControl()
     return
   }
   emit('toggle', value)
 
-  if (!multiple.value) close()
+  if (!multiple.value) closeToControl()
+}
+
+// With a search box, typing right after opening filters: the focus goes to the box.
+const openAt = (active: number) => {
+  isOpen.value = true
+  activeIdx.value = active
+  if (searchable.value) nextTick(() => inputRef.value?.focus())
 }
 
 const toggleOpen = () => {
-  if (isOpen.value) {
-    close()
-  } else {
-    isOpen.value = true
-    activeIdx.value = -1
-  }
+  if (isOpen.value) close()
+  else openAt(-1)
 }
 
 const close = () => {
@@ -220,11 +231,16 @@ const close = () => {
   activeIdx.value = -1
 }
 
+// Closing removes the search box: without this the focus inside it would drop to the page.
+const closeToControl = () => {
+  close()
+  controlRef.value?.focus()
+}
+
 // Without a search box the button itself takes the arrows: first press opens, the next ones move.
 const openOrMove = (dir: number) => {
   if (!isOpen.value) {
-    isOpen.value = true
-    activeIdx.value = 0
+    openAt(0)
     return
   }
   moveActive(dir)
@@ -243,6 +259,11 @@ const selectActive = () => {
 watch(normalizedOptions, () => {
   activeIdx.value = -1
 })
+
+// Tab walks through the open list (search, clear, "Limpar") and closes it only when the focus leaves the select.
+const onFocusOut = (event: FocusEvent) => {
+  if (isOpen.value && !wrapRef.value?.contains(event.relatedTarget as Node | null)) close()
+}
 
 onClickOutside(wrapRef, close)
 </script>
