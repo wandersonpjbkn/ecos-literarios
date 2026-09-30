@@ -44,7 +44,12 @@
           :aria-selected="i === activeIdx"
           @mousedown.prevent="selectSuggestion(s)"
         >
-          <span class="sug-main" v-html="useUtils().sanitizeText(highlight(s.main))" />
+          <span class="sug-main">
+            <template v-for="(part, j) in highlightParts(s.main)" :key="j">
+              <mark v-if="part.match">{{ part.text }}</mark>
+              <template v-else>{{ part.text }}</template>
+            </template>
+          </span>
           <span class="sug-sub">{{ s.sub }}</span>
         </li>
       </ul>
@@ -57,8 +62,6 @@ import { onClickOutside } from '@vueuse/core'
 import { ref, computed, useId } from 'vue'
 
 import type { Suggestion } from '@/types'
-
-import { useUtils } from '@/composables'
 
 const model = defineModel<string>()
 
@@ -117,10 +120,14 @@ const close = () => {
   activeIdx.value = -1
 }
 
-const highlight = (text: string) => {
-  if (!model.value) return text
+// Titles come from people: the match is marked by the template, never by building HTML from them.
+const highlightParts = (text: string) => {
+  if (!model.value) return [{ text, match: false }]
   const q = model.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  return text.replace(new RegExp(`(${q})`, 'gi'), '<mark>$1</mark>')
+  return text
+    .split(new RegExp(`(${q})`, 'gi'))
+    .map((part, i) => ({ text: part, match: i % 2 === 1 }))
+    .filter((part) => part.text !== '')
 }
 
 const cleanAll = () => {

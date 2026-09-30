@@ -11,6 +11,8 @@
     "ts": "vue-tsc --build",
     "lint": "eslint . --fix --cache && yarn lint:style",
     "lint:style": "stylelint \"src/**/*.{vue,scss}\"",
+    "codeql": "mkdir -p .codeql && gh codeql database create .codeql/db --language=javascript-typescript --source-root=. --overwrite && gh codeql database analyze .codeql/db codeql/javascript-queries:codeql-suites/javascript-code-scanning.qls --download --format=csv --output=.codeql/results.csv && cat .codeql/results.csv",
+    "audit:check": "yarn audit --summary; test $(( $? & 24 )) -eq 0",
     "format": "prettier --write src/"
   },
   "dependencies": {
@@ -20,7 +22,6 @@
     "@supabase/supabase-js": "^2.102.1",
     "@unhead/vue": "^3.0.0-beta.9",
     "@vueuse/core": "^14.2.1",
-    "dompurify": "^3.3.3",
     "pinia": "^3.0.4",
     "pinia-plugin-persistedstate": "^4.7.1",
     "vue": "^3.5.29",
@@ -35,6 +36,7 @@
     "@vue/tsconfig": "^0.9.0",
     "eslint": "^10.0.3",
     "eslint-plugin-perfectionist": "^5.12.1",
+    "eslint-plugin-sonarjs": "^4.2.2",
     "eslint-plugin-vue": "^10.8.0",
     "jiti": "^2.6.1",
     "npm-run-all2": "^8.0.4",
@@ -63,6 +65,7 @@
     "workbox-precaching": "^6.6.0",
     "workbox-navigation-preload": "^6.6.0",
     "workbox-expiration": "^6.6.0",
-    "workbox-cacheable-response": "^6.6.0"
+    "workbox-cacheable-response": "^6.6.0",
+    "typescript": "~5.9.3"
   }
 }
