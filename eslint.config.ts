@@ -1,6 +1,7 @@
 import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
 import perfectionist from 'eslint-plugin-perfectionist'
+import sonarjs, { configs as sonarjsConfigs } from 'eslint-plugin-sonarjs'
 import pluginVue from 'eslint-plugin-vue'
 import { globalIgnores } from 'eslint/config'
 
@@ -19,6 +20,11 @@ export default defineConfigWithVueTs(
 
   pluginVue.configs['flat/recommended'],
   vueTsConfigs.recommended,
+  {
+    name: 'app/sonarjs',
+    plugins: { sonarjs },
+    rules: { ...sonarjsConfigs.recommended.rules },
+  },
 
   {
     name: 'app/vite-config-overrides',
@@ -51,6 +57,7 @@ export default defineConfigWithVueTs(
       'no-await-in-loop': 'off',
       'no-continue': 'off',
       'no-nested-ternary': 'off',
+      'sonarjs/no-nested-conditional': 'off',
       'no-plusplus': [
         'error',
         {
@@ -75,6 +82,8 @@ export default defineConfigWithVueTs(
 
       // TypeScript specific overrides
       '@typescript-eslint/no-explicit-any': 'warn',
+      // Duplicates the rule below, which honors the `_` prefix used to drop props from a rest.
+      'sonarjs/no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -121,6 +130,23 @@ export default defineConfigWithVueTs(
     files: ['src/composables/useApi.ts'],
     rules: {
       'no-restricted-globals': 'off',
+    },
+  },
+
+  // Debt that predates sonarjs: warn here, error everywhere else.
+  {
+    name: 'app/sonarjs-debt',
+    files: [
+      'src/composables/useAskGroup.ts',
+      'src/composables/useSupport.ts',
+      'src/views/admin/AdminMembers.vue',
+      'src/views/auth/LoginView.vue',
+      'src/views/catalog/BookDetailsView.vue',
+      'src/views/profile/ClaimNameSection.vue',
+    ],
+    rules: {
+      'sonarjs/no-nested-template-literals': 'warn',
+      'sonarjs/super-linear-regex': 'warn',
     },
   },
 

@@ -45,6 +45,7 @@ export function useDialogFocus({ open, panel, initial, onClose, fallback }: Opti
     } else if (event.shiftKey && document.activeElement === first) {
       event.preventDefault()
       last?.focus()
+      // eslint-disable-next-line sonarjs/no-duplicated-branches -- outside the panel and past the last both wrap to the first
     } else if (!event.shiftKey && document.activeElement === last) {
       event.preventDefault()
       first?.focus()
