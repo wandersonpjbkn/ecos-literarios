@@ -121,7 +121,7 @@ import { usePermissionsStore } from '@/stores'
 
 import { useErrorReporter } from '@/composables'
 import { errorText } from '@/composables/apiError'
-import { getPanelBooks } from '@/composables/useApi'
+import { getPanelBooks, useApi } from '@/composables/useApi'
 import { useLoadMore } from '@/composables/useLoadMore'
 import { useSegments, type SegmentOption } from '@/composables/useSegments'
 
@@ -295,13 +295,16 @@ const closeDrawer = () => {
   editingBook.value = null
 }
 
+// The catalog is another list: without its own refresh it keeps showing the books from before the change.
 const onBookSaved = () => {
   fetchBooks(true)
+  useApi().fetchBooks()
 }
 
 // Removing lives in the edit form (slice 8b); the row only leaves the list.
 const onBookRemoved = (id: string) => {
   books.value = books.value.filter((b) => b._id !== id)
+  useApi().fetchBooks()
 }
 
 // The search is not in the URL, so a new term starts the list from the top here.
