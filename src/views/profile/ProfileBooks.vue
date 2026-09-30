@@ -3,7 +3,9 @@
     <header class="my-books__head">
       <div>
         <h1 class="my-books__title">Meus livros</h1>
-        <p class="my-books__subtitle">Os livros que você mencionou no grupo e os que você adicionou aqui.</p>
+        <p class="my-books__subtitle">
+          Os livros que você mencionou no grupo, os que adicionou aqui e os que marcou em Quero ler e Lidos.
+        </p>
       </div>
       <LiveStatus :text="announced" />
     </header>
@@ -21,22 +23,14 @@
       @retry="useApi().fetchBooks()"
     />
 
-    <!-- Linking follows the matrix (claim: update): without it, no way in that leads to a refusal. -->
-    <EmptyState v-else-if="!myBooks.length" title="Nenhum livro com o seu nome ainda" :text="emptyText">
-      <AppButton v-if="canClaim" variant="primary" :to="claimLink">Vincular meu nome</AppButton>
-      <AppButton v-else-if="accessRequest" variant="primary" :href="accessRequest"
-        ><BaseIcon name="whatsapp" aria-hidden="true" />Pedir a liberação</AppButton
-      >
-    </EmptyState>
-
-    <template v-else>
-      <p v-if="hasClaim === false && canClaim" class="my-books__hint">
+    <ListTabs v-else :tabs="shelfTabs" :active="shelf" label="Prateleiras" @select="selectShelf">
+      <p v-if="shelf === 'mencionados' && hasClaim === false && canClaim" class="my-books__hint">
         Faltou algum livro seu? Os livros da conversa do grupo aparecem aqui quando você vincula o seu nome.
         <RouterLink :to="claimLink" class="my-books__hint-link">Vincular meu nome</RouterLink>
       </p>
 
       <div class="my-books__toolbar">
-        <div class="my-books__segments chip-strip" role="group" aria-label="Mostrar">
+        <div v-if="shelf === 'mencionados'" class="my-books__segments chip-strip" role="group" aria-label="Mostrar">
           <FilterChip
             v-for="option in SEGMENTS"
             :key="option.value"
@@ -47,7 +41,7 @@
           />
         </div>
         <div class="my-books__controls">
-          <AppSelect v-model="sortOrder" label="Ordenar" :options="sortOptionsForMe" />
+          <AppSelect v-model="sortOrder" label="Ordenar" :options="shelfSortOptions" />
         </div>
       </div>
 
@@ -59,16 +53,36 @@
         <AppButton :to="{ query: { ...route.query, busca: undefined } }">Apagar a busca</AppButton>
       </EmptyState>
 
+      <!-- Linking follows the matrix (claim: update): without it, no way in that leads to a refusal. -->
+      <EmptyState
+        v-else-if="shelf === 'mencionados' && !myBooks.length"
+        title="Nenhum livro com o seu nome ainda"
+        :text="emptyText"
+      >
+        <AppButton v-if="canClaim" variant="primary" :to="claimLink">Vincular meu nome</AppButton>
+        <AppButton v-else-if="accessRequest" variant="primary" :href="accessRequest"
+          ><BaseIcon name="whatsapp" aria-hidden="true" />Pedir a liberação</AppButton
+        >
+      </EmptyState>
+
+      <EmptyState
+        v-else-if="shelf !== 'mencionados' && !filteredBooks.length"
+        :title="shelfEmpty.title"
+        :text="shelfEmpty.text"
+      >
+        <AppButton :to="{ name: 'catalog-books' }">Ver o catálogo</AppButton>
+      </EmptyState>
+
       <EmptyState v-else-if="!filteredBooks.length" :title="segment.empty.title" :text="segment.empty.text">
         <AppButton :to="segmentLink('all')">Ver todos os seus livros</AppButton>
       </EmptyState>
 
       <ul v-else ref="grid" class="my-books__grid book-grid">
         <li v-for="book in visibleBooks" :key="book.id" class="my-book">
-          <BookCard :book="book" hide-mention data-list-item />
+          <BookCard :book="book" :hide-mention="shelf === 'mencionados'" data-list-item />
           <div class="my-book__foot">
             <!-- Not disabled while loading: open() already refuses a second click, and a disabled button drops the focus. -->
-            <AppButton size="md" @click="editor.open(book.id)">
+            <AppButton v-if="permissions.canEditBook(book.quem_user_id)" size="md" @click="editor.open(book.id)">
               <BaseIcon name="pencil" aria-hidden="true" />
               {{ editor.loadingId.value === book.id ? 'Abrindo…' : 'Editar' }}
               <span class="visually-hidden">{{ book.titulo }}</span>
@@ -84,7 +98,7 @@
         :next-batch="nextBatch"
         @more="more(grid)"
       />
-    </template>
+    </ListTabs>
 
     <BookFormDrawer
       :book="editor.editingBook.value"
@@ -99,13 +113,21 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, type RouteLocationRaw } from 'vue-router'
+import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 
 import type { Book } from '@/types'
 
-import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
+import { useAuthStore, useBooksStore, usePermissionsStore, useReadingStore } from '@/stores'
 
-import { rememberMyBooks, useAccessRequest, useApi, useBookEditor, useBookSort, usePageMeta } from '@/composables'
+import {
+  loadMyReading,
+  rememberMyBooks,
+  useAccessRequest,
+  useApi,
+  useBookEditor,
+  useBookSort,
+  usePageMeta,
+} from '@/composables'
 import { getMyClaimStatus } from '@/composables/useApi'
 import { useLoadMore } from '@/composables/useLoadMore'
 import { useSegments, type SegmentOption } from '@/composables/useSegments'
@@ -118,9 +140,26 @@ import AppSelect from '@/components/ui/AppSelect.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import ListFooter from '@/components/ui/ListFooter.vue'
+import ListTabs from '@/components/ui/ListTabs.vue'
 import LiveStatus from '@/components/ui/LiveStatus.vue'
 
 type Segment = 'all' | 'no-cover' | 'no-synopsis'
+type Shelf = 'mencionados' | 'quero-ler' | 'lidos'
+
+// Same words as the buttons on the book page. The shelf lives in the URL (?lista=), like the tabs of the panel.
+const SHELVES: { value: Shelf; label: string }[] = [
+  { value: 'mencionados', label: 'Mencionados por mim' },
+  { value: 'quero-ler', label: 'Quero ler' },
+  { value: 'lidos', label: 'Lidos' },
+]
+
+const SHELF_EMPTY: Record<Exclude<Shelf, 'mencionados'>, { title: string; text: string }> = {
+  'quero-ler': {
+    title: 'Nenhum livro em Quero ler ainda',
+    text: 'Na página de um livro, use “Guardar em Quero ler” para ele aparecer aqui.',
+  },
+  lidos: { title: 'Nenhum livro marcado como lido', text: 'Na página de um livro, use “Marcar como lido”.' },
+}
 
 // The segment lives in the URL (FilterChip.md).
 const SEGMENTS: SegmentOption<Segment, Book>[] = [
@@ -144,11 +183,16 @@ const SEGMENTS: SegmentOption<Segment, Book>[] = [
 const claimLink: RouteLocationRaw = { name: 'account-claim' }
 
 const route = useRoute()
+const router = useRouter()
 
 const authStore = useAuthStore()
 const booksStore = useBooksStore()
+const readingStore = useReadingStore()
 
-usePageMeta({ title: 'Meus livros', description: 'Os livros que você mencionou no grupo e os que você adicionou.' })
+usePageMeta({
+  title: 'Meus livros',
+  description: 'Os livros que você mencionou no grupo, os que adicionou aqui e os que marcou em Quero ler e Lidos.',
+})
 
 const editor = useBookEditor()
 
@@ -157,7 +201,8 @@ const grid = ref<HTMLElement | null>(null)
 // Only someone who has not linked a name can be missing books; after linking there is none left to claim.
 const hasClaim = ref<boolean | null>(null)
 
-const canClaim = computed(() => usePermissionsStore().can('claim', 'update'))
+const permissions = usePermissionsStore()
+const canClaim = computed(() => permissions.can('claim', 'update'))
 const accessRequest = useAccessRequest()
 const emptyText = computed(() => {
   if (canClaim.value)
@@ -172,7 +217,29 @@ const searchQuery = computed(() => String(route.query.busca ?? ''))
 
 const loading = computed(() => booksStore.loading)
 
-const myBooks = computed(() => booksStore.books.filter((b) => b.quem_user_id === authStore.user?._id))
+const myBooks = computed(() => booksStore.books.filter((book) => book.quem_user_id === authStore.user?._id))
+
+const withStatus = (status: 'quero_ler' | 'lido') =>
+  booksStore.books.filter((book) => readingStore.statuses[book.id] === status)
+
+const shelfItems = computed<Record<Shelf, Book[]>>(() => ({
+  mencionados: myBooks.value,
+  'quero-ler': withStatus('quero_ler'),
+  lidos: withStatus('lido'),
+}))
+
+const shelfTabs = computed(() =>
+  SHELVES.map((option) => ({ key: option.value, label: option.label, count: shelfItems.value[option.value].length })),
+)
+
+// Always the same first shelf without ?lista=, like the panel tabs: a default that followed the data would move alone.
+const shelf = computed<Shelf>(
+  () => SHELVES.find((option) => option.value === route.query.lista)?.value ?? 'mencionados',
+)
+
+const selectShelf = (key: string) => router.replace({ query: { ...route.query, lista: key, mostrar: undefined } })
+
+const shelfEmpty = computed(() => SHELF_EMPTY[shelf.value as Exclude<Shelf, 'mencionados'>])
 
 const {
   current: segment,
@@ -181,16 +248,20 @@ const {
   inCurrent: segmentBooks,
 } = useSegments(SEGMENTS, myBooks)
 
+const shelfBooks = computed(() => (shelf.value === 'mencionados' ? segmentBooks.value : shelfItems.value[shelf.value]))
+
 const searched = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
-  if (!q) return segmentBooks.value
-  return segmentBooks.value.filter((b) => b.titulo.toLowerCase().includes(q) || b.autor.toLowerCase().includes(q))
+  if (!q) return shelfBooks.value
+  return shelfBooks.value.filter((b) => b.titulo.toLowerCase().includes(q) || b.autor.toLowerCase().includes(q))
 })
 
 const { sortOrder, sortOptions, sortedBooks: filteredBooks } = useBookSort(searched)
 
-// Everything here is the reader's own, so "Por quem mencionou" would sort nothing.
-const sortOptionsForMe = sortOptions.filter((option) => option.value !== 'pessoa')
+// Mentions are all the reader's own, so "Por quem mencionou" would sort nothing there; the reading shelves keep it.
+const shelfSortOptions = computed(() =>
+  shelf.value === 'mencionados' ? sortOptions.filter((option) => option.value !== 'pessoa') : sortOptions,
+)
 
 const { visible: visibleBooks, nextBatch, more } = useLoadMore(filteredBooks, { name: 'meus-livros' })
 
@@ -198,7 +269,9 @@ const { visible: visibleBooks, nextBatch, more } = useLoadMore(filteredBooks, { 
 const announced = computed(() => {
   if (searchQuery.value && !filteredBooks.value.length) return `Nada com "${searchQuery.value}"`
   const n = filteredBooks.value.length
-  return `${n} de ${myBooks.value.length} ${myBooks.value.length === 1 ? 'livro' : 'livros'}`
+  const total = shelfItems.value[shelf.value].length
+  const name = SHELVES.find((option) => option.value === shelf.value)!.label
+  return `${name}: ${n} de ${total} ${total === 1 ? 'livro' : 'livros'}`
 })
 
 // A book opened from here comes back here, with the same chip and search.
@@ -209,6 +282,8 @@ watch(
   },
   { immediate: true },
 )
+
+watch(() => authStore.user?._id, loadMyReading, { immediate: true })
 
 onMounted(async () => {
   hasClaim.value = await getMyClaimStatus()

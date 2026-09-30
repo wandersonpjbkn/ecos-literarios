@@ -3,7 +3,9 @@
     <template v-if="status === 'lido'">
       <p class="reading__state">
         <BaseIcon name="check" aria-hidden="true" />
-        <span>Lido</span>
+        <RouterLink :to="shelfLink('lidos')" class="reading__link"
+          >Lido<span class="visually-hidden">, ver em Meus livros</span></RouterLink
+        >
         <AppButton variant="ghost" size="md" :disabled="!canWrite || pending" @click="act(null)">Desmarcar</AppButton>
       </p>
     </template>
@@ -11,7 +13,12 @@
     <template v-else>
       <p v-if="status === 'quero_ler'" class="reading__state">
         <BaseIcon name="check" aria-hidden="true" />
-        <span>Guardado em Quero ler</span>
+        <span
+          >Guardado em
+          <RouterLink :to="shelfLink('quero-ler')" class="reading__link"
+            >Quero ler<span class="visually-hidden">, ver em Meus livros</span></RouterLink
+          ></span
+        >
         <AppButton variant="ghost" size="md" :disabled="!canWrite || pending" @click="act(null)">
           Tirar da lista
         </AppButton>
@@ -44,6 +51,9 @@ const props = defineProps<{
 const { status, counts, pending, error, canWrite, change } = useReading(toRef(props, 'bookId'))
 
 const root = ref<HTMLElement | null>(null)
+
+// The status names the shelf of Meus livros where the book now is: the way to find the list again.
+const shelfLink = (lista: 'quero-ler' | 'lidos') => ({ name: 'profile-books', query: { lista } })
 
 // Totals only, never names: who wants or read a book is private (contract of slice 5).
 const countsLabel = computed(() => {
@@ -78,6 +88,10 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? `1 ${one}` :
 
   > .app-button {
     width: 100%;
+  }
+
+  &__link {
+    @include text-link;
   }
 
   // Selected state: soft action background with its line, never a filled blue (rule of every slice).

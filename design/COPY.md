@@ -19,8 +19,8 @@ Vale na interface, nos títulos de página, nos textos de estado vazio, nos e-ma
 | Onde | Texto |
 | --- | --- |
 | Ação primária do catálogo | Adicionar um livro |
-| Guardar para ler | Guardar em "Quero ler" → depois do clique: **Guardado em Quero ler · Tirar da lista** |
-| Marcar lido | Marcar como lido → depois: **Lido · Desmarcar** |
+| Guardar para ler | Guardar em "Quero ler" → depois do clique: **Guardado em Quero ler · Tirar da lista**, com "Quero ler" como link para a prateleira em Meus livros |
+| Marcar lido | Marcar como lido → depois: **Lido · Desmarcar**, com "Lido" como link para a prateleira em Meus livros |
 | Abrir o filtro | Filtrar |
 | Fechar filtro aplicando | Ver 25 livros *(o número real)* · sem nenhum: **Fechar**, com **Nenhum livro com esses filtros.** acima |
 | Limpar | **Limpar os filtros** — nunca "Limpar tudo", que soa como apagar a conta |

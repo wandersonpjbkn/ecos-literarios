@@ -10,6 +10,18 @@ import { getMyReading, getReadingCounts, removeReading, saveReading } from '@/co
 import { useCanWrite } from '@/composables/useCanWrite'
 import { useErrorReporter } from '@/composables/useErrorReporter'
 
+/** The reader's list, loaded once per account: the book page and the shelves of Meus livros read the same copy. */
+export const loadMyReading = async (userId: string | undefined) => {
+  const store = useReadingStore()
+  if (!userId) return store.clear()
+  if (store.loadedFor === userId) return
+  try {
+    store.replaceAll(userId, await getMyReading())
+  } catch (err) {
+    useErrorReporter().captureException(err, { context: 'useReading.load' })
+  }
+}
+
 /** "Quero ler" / "Lido" for one book: the reader's own status, the totals, and the actions. */
 export function useReading(bookId: Ref<string | undefined>) {
   const router = useRouter()
@@ -56,19 +68,7 @@ export function useReading(bookId: Ref<string | undefined>) {
     }
   }
 
-  watch(
-    () => auth.user?._id,
-    async (userId) => {
-      if (!userId) return store.clear()
-      if (store.loadedFor === userId) return
-      try {
-        store.replaceAll(userId, await getMyReading())
-      } catch (err) {
-        useErrorReporter().captureException(err, { context: 'useReading.load' })
-      }
-    },
-    { immediate: true },
-  )
+  watch(() => auth.user?._id, loadMyReading, { immediate: true })
   watch(bookId, loadCounts, { immediate: true })
 
   return { status, counts, pending, error, canWrite, change }
