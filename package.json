@@ -11,6 +11,8 @@
     "ts": "vue-tsc --build",
     "lint": "eslint . --fix --cache && yarn lint:style",
     "lint:style": "stylelint \"src/**/*.{vue,scss}\"",
+    "codeql": "mkdir -p .codeql && gh codeql database create .codeql/db --language=javascript-typescript --source-root=. --overwrite && gh codeql database analyze .codeql/db codeql/javascript-queries:codeql-suites/javascript-code-scanning.qls --download --format=csv --output=.codeql/results.csv && cat .codeql/results.csv",
+    "audit:check": "yarn audit --summary; test $(( $? & 24 )) -eq 0",
     "format": "prettier --write src/"
   },
   "dependencies": {
