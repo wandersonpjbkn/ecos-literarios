@@ -43,6 +43,7 @@ Todo campo de formulário (`AppField`, `MultiSelect`, o campo do `ComboSelect`) 
 - `ConfirmModal`: diálogo de confirmação. O foco começa em "Cancelar", Tab fica dentro, Esc fecha e o foco volta ao botão que abriu; o erro aparece dentro do diálogo.
 - `AppDrawer`: a moldura do FilterDrawer para qualquer painel lateral: ao lado do trilho no desktop, folha de baixo no celular. Trava a rolagem da página enquanto está aberta. Fecha por "Fechar", pelo fundo, por Esc, pelo Voltar e, no celular, arrastando a alça ou o cabeçalho para baixo (`useSheetDrag`). Hoje é usada pela gaveta de filtro, pelo formulário do livro e pelas seções das áreas no celular.
 - `SectionHeader` e `BookFormDrawer`: servem o painel, o perfil e a página do livro.
+- `ListTabs`: abas que trocam de lista, com a lista na URL (`?lista=`), setas, Home e End, e contagem opcional. Aba troca de lista; pílula (`FilterChip`) filtra dentro dela. Hoje: Autores e gêneros no painel e as prateleiras de Meus livros.
 - `useDialogFocus` e `useLoadMore`: foco de diálogo e "Ver mais" com a quantidade na URL, os mesmos em todas as telas.
 
 `PanelPagination` saiu na fatia 7, e o "Ver mais" passou a valer no app inteiro ([ListFooter](componentes/ListFooter.md)).
