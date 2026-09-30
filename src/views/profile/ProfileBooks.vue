@@ -261,16 +261,12 @@ onMounted(async () => {
   }
 
   &__hint-link {
+    @include text-link;
+
     display: inline-flex;
     min-height: var(--touch-min);
     align-items: center;
     font-weight: var(--font-weight-semibold);
-    color: var(--color-action-default);
-
-    &:focus-visible {
-      outline: 2px solid var(--color-border-focus);
-      outline-offset: var(--focus-offset);
-    }
   }
 
   &__toolbar {

@@ -124,11 +124,11 @@
           <template v-if="canSearchData">
             <p class="form-section__text">
               A busca preenche capa, sinopse, páginas e ano pelo
-              <a href="https://books.google.com/" target="_blank" rel="noopener noreferrer"
+              <a href="https://books.google.com/" class="form-section__link" target="_blank" rel="noopener noreferrer"
                 >Google Books<span class="visually-hidden">{{ ' ' }}(abre em outra aba)</span></a
               >
               ou pela
-              <a href="https://openlibrary.org" target="_blank" rel="noopener noreferrer"
+              <a href="https://openlibrary.org" class="form-section__link" target="_blank" rel="noopener noreferrer"
                 >Open Library<span class="visually-hidden">{{ ' ' }}(abre em outra aba)</span></a
               >. Tudo continua editável à mão.
             </p>
@@ -644,6 +644,10 @@ onMounted(() => {
     margin: 0 0 var(--space-3);
     font-size: var(--font-size-ui);
     color: var(--color-text-secondary);
+  }
+
+  &__link {
+    @include text-link;
   }
 
   &__toggle {

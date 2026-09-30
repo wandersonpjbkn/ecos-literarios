@@ -101,6 +101,16 @@ Nenhum componente aceita cor por prop. A cor vem do token, e o gênero do livro 
 escolhe a tinta da capa. Um `color="blue"` em qualquer assinatura é o começo do fim da
 regra de que azul quer dizer clicável.
 
+## Link dentro de texto
+
+Azul sozinho não basta quando o link está no meio de uma frase: quem não distingue a cor, ou
+lê numa tela ruim, vê só texto. Link dentro de texto corrido usa o mixin `text-link`
+(`abstracts/_a11y.scss`): azul de ação, sublinhado e foco visível. Hoje: os links de fonte
+do formulário de livro, "Vincular meu nome" em Meus livros e gênero e formato na ficha do livro.
+
+Link de ação com ícone (voltar, ver todos, onde encontrar) não leva sublinhado: o ícone e a
+posição já dizem que é clicável.
+
 ## Nenhum valor solto
 
 Todo valor visual vem de token (`src/assets/scss/themes/_ecos.scss`): cor, raio, tamanho e

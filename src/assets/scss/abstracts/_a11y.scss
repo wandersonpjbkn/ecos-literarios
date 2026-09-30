@@ -10,3 +10,16 @@
   white-space: nowrap;
   border: 0;
 }
+
+// A link inside text: color alone does not tell it apart, so it keeps the underline.
+@mixin text-link {
+  color: var(--color-action-default);
+  text-decoration: underline;
+  text-underline-offset: var(--underline-offset);
+
+  &:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: var(--focus-offset);
+    border-radius: var(--radius-sm);
+  }
+}

@@ -80,18 +80,11 @@ const genre = computed(() => props.book.categoria.replace(/-/g, ' '))
   }
 
   &__link {
+    @include text-link;
+
     display: inline-flex;
     min-height: var(--touch-min);
     align-items: center;
-    color: var(--color-action-default);
-    text-decoration: underline;
-    text-underline-offset: var(--underline-offset);
-
-    &:focus-visible {
-      outline: 2px solid var(--color-border-focus);
-      outline-offset: var(--focus-offset);
-      border-radius: var(--radius-sm);
-    }
   }
 }
 </style>
