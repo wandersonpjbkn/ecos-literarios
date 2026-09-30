@@ -1,5 +1,3 @@
-import DOMPurify from 'dompurify'
-
 const normalizeText = (value: unknown): string => {
   if (typeof value !== 'string') return ''
   return String(value)
@@ -23,13 +21,11 @@ const slugify = (value: unknown): string => {
     .replace(/-{2,}/g, '-') // colapsa hífens duplos
 }
 
-const sanitizeText = (content: string): string => DOMPurify.sanitize(content)
-
 function sendGtmEvent(payload: Record<string, unknown>) {
   window.dataLayer = window.dataLayer || []
   window.dataLayer.push(payload)
 }
 
 export function useUtils() {
-  return { normalizeText, slugify, sanitizeText, sendGtmEvent }
+  return { normalizeText, slugify, sendGtmEvent }
 }

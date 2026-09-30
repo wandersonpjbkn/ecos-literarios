@@ -38,7 +38,7 @@ export default defineConfigWithVueTs(
     name: 'app/rules',
     rules: {
       // Vue specific rules
-      'vue/no-v-html': 'off',
+      'vue/no-v-html': 'error',
 
       // Console and debugging
       'no-console': 'off',
