@@ -5,6 +5,8 @@ export type OptionMultiSelect =
   | {
       label: string
       value: string
+      // The bare name when the label carries more (a pending "Ana (autor novo)"): what typing is compared against.
+      match?: string
     }
 
 // Meta

@@ -48,7 +48,9 @@
                 :selected="form.autor"
                 :multiple="false"
                 :searchable="true"
+                :create-label="canCreate('autores') ? createLabel('autor') : undefined"
                 @toggle="(v) => (form.autor = v)"
+                @create="pickNewAuthor"
               />
             </template>
           </AppField>
@@ -73,8 +75,10 @@
                 :options="categoriaOptions"
                 :selected="form.categoria"
                 :multiple="false"
-                :searchable="false"
+                :searchable="true"
+                :create-label="canCreate('categorias') ? createLabel('gênero') : undefined"
                 @toggle="(v) => (form.categoria = v)"
+                @create="pickNewGenre"
               />
             </template>
           </AppField>
@@ -151,7 +155,9 @@
                   :selected="form.subgeneros"
                   :multiple="true"
                   :searchable="true"
+                  :create-label="canCreate('subgeneros') ? createLabel('subgênero') : undefined"
                   @toggle="handleSubgeneroToggle"
+                  @create="pickNewSubgenre"
                   @clear="form.subgeneros = []"
                 />
               </template>
@@ -263,9 +269,9 @@ import type { BookPayload } from '@/types'
 
 import { useAuthStore, usePermissionsStore } from '@/stores'
 
-import { useEntityCrud, useErrorReporter, useToast } from '@/composables'
+import { useEntityCrud, useErrorReporter, useToast, useUtils } from '@/composables'
 import { reloadAccount } from '@/composables/accountSync'
-import { errorText } from '@/composables/apiError'
+import { ApiError, errorText } from '@/composables/apiError'
 import { claimRegister, getPeople, removeBook, saveBook, useApi } from '@/composables/useApi'
 
 import BookEnrichmentPanel from '@/components/books/BookEnrichmentPanel.vue'
@@ -301,6 +307,8 @@ const emit = defineEmits<{
 const permissions = usePermissionsStore()
 
 const auth = useAuthStore()
+
+const { slugify } = useUtils()
 
 const autores = useEntityCrud({ resource: 'autores' })
 const midias = useEntityCrud({ resource: 'midias' })
@@ -391,10 +399,24 @@ const claimOffer = computed(() =>
   !isEditMode.value && !isMemberScope.value && !claimDismissed.value ? permissions.claimMatch : null,
 )
 
-const autorOptions = computed(() => toOptions(autores.items.value))
+// A list item typed in the form is created on save, like "Outro nome": nothing is left behind if the form is dropped.
+const canCreate = (resource: 'autores' | 'categorias' | 'subgeneros') => permissions.can(resource, 'create')
+const createLabel = (word: string) => (typed: string) => `Outro ${word}: ${typed}`
+const withPending = (options: { label: string; value: string }[], picked: string[], word: string) => [
+  ...options,
+  ...picked
+    .filter((value) => value.startsWith(NEW_NAME))
+    .map((value) => ({
+      label: `${value.slice(NEW_NAME.length)} (${word} novo)`,
+      value,
+      match: value.slice(NEW_NAME.length),
+    })),
+]
+
+const autorOptions = computed(() => withPending(toOptions(autores.items.value), [form.autor], 'autor'))
 const midiaOptions = computed(() => toOptions(midias.items.value))
-const categoriaOptions = computed(() => toOptions(categorias.items.value))
-const subgeneroOptions = computed(() => toOptions(subgeneros.items.value))
+const categoriaOptions = computed(() => withPending(toOptions(categorias.items.value), [form.categoria], 'gênero'))
+const subgeneroOptions = computed(() => withPending(toOptions(subgeneros.items.value), form.subgeneros, 'subgênero'))
 
 const openRemove = () => {
   removal.error = ''
@@ -543,6 +565,42 @@ const positiveInt = (raw: string) => {
   return Number.isInteger(value) && value > 0 ? value : null
 }
 
+const pickNewAuthor = (typed: string) => {
+  form.autor = `${NEW_NAME}${typed}`
+}
+
+const pickNewGenre = (typed: string) => {
+  form.categoria = `${NEW_NAME}${typed}`
+}
+
+const pickNewSubgenre = (typed: string) => {
+  const value = `${NEW_NAME}${typed}`
+  if (!form.subgeneros.includes(value)) form.subgeneros.push(value)
+}
+
+type EntityList = ReturnType<typeof useEntityCrud>
+// The list may be stale: the API refuses a name someone else created (409), and the existing one is used.
+const createPicked = async (list: EntityList, value: string) => {
+  if (!value.startsWith(NEW_NAME)) return value
+  const name = value.slice(NEW_NAME.length)
+  try {
+    return (await list.create(name))._id
+  } catch (err) {
+    if (!(err instanceof ApiError) || err.status !== 409) throw err
+    await list.fetchAll()
+    const existing = list.items.value.find((item) => slugify(item.nome) === slugify(name))
+    if (!existing) throw err
+    return existing._id
+  }
+}
+
+// Written back into the form: a retry after a failed save reuses what was created instead of creating it twice.
+const createPickedItems = async () => {
+  form.autor = await createPicked(autores, form.autor)
+  form.categoria = await createPicked(categorias, form.categoria)
+  for (const [index, value] of form.subgeneros.entries()) form.subgeneros[index] = await createPicked(subgeneros, value)
+}
+
 const handleSubmit = async () => {
   if (!isValid.value) return
   if (isMemberScope.value && !props.book) return
@@ -552,6 +610,7 @@ const handleSubmit = async () => {
   success.value = ''
 
   try {
+    await createPickedItems()
     const shared = {
       titulo: form.titulo,
       autor: form.autor,

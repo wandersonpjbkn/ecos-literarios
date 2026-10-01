@@ -134,6 +134,8 @@ Ninguém precisa vincular antes de adicionar: o livro sai com quem cadastra como
 
 "Mencionado por" é escolha em uma lista (as contas e os nomes da carga sem dono), com quem cadastra já escolhido. Nome digitado só pela última opção, **"Outro nome: {o que foi digitado}"**, que segue a matriz (Vínculo · Criar; por padrão só Administrador). O nome novo não pode repetir um que já existe, nem com outro acento ou outra caixa: "Natalia" não entra se há "Natália"; "Natalia C." entra.
 
+Autor, Gênero e Subgênero, no formulário do livro, seguem o mesmo padrão: **"Outro autor: {o que foi digitado}"**, **"Outro gênero: …"** e **"Outro subgênero: …"**, só para quem pode criar a lista na matriz (por padrão Administrador e Editor). Escolhido, o item aparece como "{nome} (autor novo)" e só é criado quando o livro é salvo; desistir do formulário não deixa nada para trás. A busca ignora acento e caixa, e o nome que já existe com outra grafia aparece no lugar de "Outro …".
+
 As linhas novas da matriz de Permissões, em frase: **"Vincular a própria conta a um nome do grupo"** (Vínculo · Editar), **"Incluir um nome novo de pessoa do clube"** (Vínculo · Criar) e **"Buscar capas e dados para o acervo inteiro"**.
 
 ## Suporte

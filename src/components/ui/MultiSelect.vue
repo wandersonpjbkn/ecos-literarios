@@ -110,6 +110,8 @@ import { computed, nextTick, ref, useId, watch } from 'vue'
 
 import type { OptionMultiSelect } from '@/types'
 
+import { useUtils } from '@/composables'
+
 import AppBadge from '@/components/ui/AppBadge.vue'
 
 // Never a real option value: the option list is built from ids and names.
@@ -154,17 +156,21 @@ const activeIdx = ref(-1)
 const multiple = computed(() => props.multiple !== false)
 const searchable = computed(() => props.searchable !== false)
 
+const { slugify } = useUtils()
+
 const normalizedOptions = computed(() => {
   const base = props.options.map((opt) =>
-    typeof opt === 'string' ? { label: opt, value: opt } : { label: opt.label, value: opt.value },
+    typeof opt === 'string' ? { label: opt, value: opt } : { label: opt.label, value: opt.value, match: opt.match },
   )
 
   if (!searchable.value || !query.value.trim()) return base
 
-  const q = query.value.toLowerCase()
-  const found = base.filter((opt) => opt.label.toLowerCase().includes(q))
+  // Same comparison as the API (slug), for finding and for "already exists": an accent or a dot more is the same name.
   const typed = query.value.trim()
-  if (!props.createLabel || base.some((opt) => opt.label.toLowerCase() === typed.toLowerCase())) return found
+  const key = slugify(typed)
+  if (!key) return []
+  const found = base.filter((opt) => slugify(opt.label).includes(key))
+  if (!props.createLabel || base.some((opt) => slugify(opt.match ?? opt.label) === key)) return found
   return [...found, { label: props.createLabel(typed), value: CREATE }]
 })
 
