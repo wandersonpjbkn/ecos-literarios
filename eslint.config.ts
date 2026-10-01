@@ -5,6 +5,8 @@ import sonarjs, { configs as sonarjsConfigs } from 'eslint-plugin-sonarjs'
 import pluginVue from 'eslint-plugin-vue'
 import { globalIgnores } from 'eslint/config'
 
+import englishNames from './eslint/english-names'
+
 // To allow more languages other than `ts` in `.vue` files, uncomment the following lines:
 // import { configureVueProject } from '@vue/eslint-config-typescript'
 // configureVueProject({ scriptLangs: ['ts', 'tsx'] })
@@ -147,6 +149,48 @@ export default defineConfigWithVueTs(
         {
           selector: "BinaryExpression[left.property.name='status'][right.raw=/^[1-5][0-9][0-9]$/]",
           message: 'Status da API se trata no composable; na tela, use errorText.',
+        },
+      ],
+    },
+  },
+
+  // Code and new database fields are named in English; the frozen lists are what already existed outside the code.
+  {
+    name: 'app/english-names',
+    files: ['src/**/*.{ts,vue}'],
+    plugins: { local: englishNames },
+    rules: {
+      'local/english-names': [
+        'error',
+        {
+          legacyFields: [
+            // Database and API fields.
+            'titulo',
+            'autor',
+            'autores',
+            'categoria',
+            'categorias',
+            'midia',
+            'midias',
+            'subgeneros',
+            'nome',
+            'porque',
+            'quem_nome',
+            'quem_user_id',
+            'hidden_midias',
+            'lido',
+            // URL names, already in links shared in the club group.
+            'busca',
+            'lista',
+            'mostrar',
+            'adicionar',
+            'estante',
+            'lidos',
+            'pessoa',
+            'genero',
+            // A format name as the database has it.
+            'Livro',
+          ],
         },
       ],
     },

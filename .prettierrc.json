@@ -2,5 +2,13 @@
   "$schema": "https://json.schemastore.org/prettierrc",
   "semi": false,
   "singleQuote": true,
-  "printWidth": 120
+  "printWidth": 120,
+  "overrides": [
+    {
+      "files": "eslint/**",
+      "options": {
+        "printWidth": 100
+      }
+    }
+  ]
 }
