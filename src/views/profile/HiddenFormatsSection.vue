@@ -23,8 +23,8 @@
         class="formats__row"
         :label="format.name"
         :count="`${format.count} no catálogo`"
-        :checked="!hiddenMidias.includes(format.name)"
-        @change="preferences.toggleMidia(format.name)"
+        :checked="!hiddenFormats.includes(format.name)"
+        @change="preferences.toggleFormat(format.name)"
       />
     </fieldset>
 
@@ -51,7 +51,7 @@ import SectionHeader from '@/components/ui/SectionHeader.vue'
 
 // The filter drawer's "O que você quer ver", same polarity (ticked = shown); formatsSync keeps it in the account.
 const preferences = usePreferencesStore()
-const { hiddenMidias } = storeToRefs(preferences)
+const { hiddenFormats } = storeToRefs(preferences)
 const booksStore = useBooksStore()
 const lastCatalog = useLastCatalog()
 
@@ -66,7 +66,7 @@ const formats = computed(() => {
 
 const resultText = computed(() => {
   const total = booksStore.books.length
-  const shown = booksStore.books.filter((book) => !hiddenMidias.value.includes(book.midia)).length
+  const shown = booksStore.books.filter((book) => !hiddenFormats.value.includes(book.midia)).length
   if (shown === total)
     return total === 1 ? 'O catálogo mostra o único livro.' : `O catálogo mostra todos os ${total} livros.`
   return `O catálogo mostra ${shown} de ${total} ${total === 1 ? 'livro' : 'livros'}.`

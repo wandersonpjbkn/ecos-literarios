@@ -26,14 +26,14 @@ export function useEntityCrud({ resource }: EntityCrudOptions) {
     }
   }
 
-  const create = async (nome: string): Promise<SupportEntity> => {
-    const created = await createEntity(resource, nome)
+  const create = async (name: string): Promise<SupportEntity> => {
+    const created = await createEntity(resource, name)
     items.value = [...items.value, created].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
     return created
   }
 
-  const update = async (id: string, nome: string): Promise<SupportEntity> => {
-    const updated = await updateEntity(resource, id, nome)
+  const update = async (id: string, name: string): Promise<SupportEntity> => {
+    const updated = await updateEntity(resource, id, name)
     items.value = items.value
       .map((e) => (e._id === id ? updated : e))
       .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))

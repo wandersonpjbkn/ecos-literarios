@@ -53,13 +53,13 @@
           <p class="filter-drawer__hint">Desmarque o que você não lê. {{ keptWhere }}</p>
 
           <CheckRow
-            v-for="midia in midias"
-            :key="midia"
+            v-for="format in formats"
+            :key="format"
             class="filter-drawer__row"
-            :label="midia"
-            :count="optionCounts.midia[midia]"
-            :checked="!hiddenMidias.includes(midia)"
-            @change="preferences.toggleMidia(midia)"
+            :label="format"
+            :count="optionCounts.midia[format]"
+            :checked="!hiddenFormats.includes(format)"
+            @change="preferences.toggleFormat(format)"
           />
         </fieldset>
       </template>
@@ -123,7 +123,7 @@ const emit = defineEmits<{
 }>()
 
 const preferences = usePreferencesStore()
-const { hiddenMidias } = storeToRefs(preferences)
+const { hiddenFormats } = storeToRefs(preferences)
 const auth = useAuthStore()
 
 const { emptySelection, options, optionCounts, selected, withToggled, apply, filtered } = useFilters()
@@ -138,7 +138,7 @@ const keptWhere = computed(() =>
   auth.isLoggedIn ? 'A escolha fica guardada na sua conta.' : 'A escolha fica guardada neste aparelho.',
 )
 
-const midias = computed(() => sortedOptions('midia'))
+const formats = computed(() => sortedOptions('midia'))
 
 // With nothing left the button cannot promise books: it closes, and the line above it says why.
 const resultLabel = computed(() => {

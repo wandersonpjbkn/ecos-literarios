@@ -53,7 +53,7 @@ const { status, counts, pending, error, canWrite, change } = useReading(toRef(pr
 const root = ref<HTMLElement | null>(null)
 
 // The status names the shelf of Meus livros where the book now is: the way to find the list again.
-const shelfLink = (lista: 'quero-ler' | 'lidos') => ({ name: 'profile-books', query: { lista } })
+const shelfLink = (shelf: 'quero-ler' | 'lidos') => ({ name: 'profile-books', query: { lista: shelf } })
 
 // Totals only, never names: who wants or read a book is private (contract of slice 5).
 const countsLabel = computed(() => {

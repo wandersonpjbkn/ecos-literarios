@@ -64,11 +64,11 @@
                 removable
               />
               <FilterChip
-                v-for="midia in preferenceChips"
-                :key="`sem-${midia}`"
-                :label="`Sem ${formatName(midia, 1)}`"
+                v-for="format in preferenceChips"
+                :key="`sem-${format}`"
+                :label="`Sem ${formatName(format, 1)}`"
                 removable
-                @click="preferences.toggleMidia(midia)"
+                @click="preferences.toggleFormat(format)"
               />
               <AppButton class="catalog-bar__clear" variant="ghost" size="md" @click="clearAll"
                 >Limpar os filtros</AppButton
@@ -250,7 +250,7 @@ const canAddBooks = computed(() => permissions.can('books', 'create'))
 const showEco = computed(() => isDefaultView.value && !isPhone.value)
 
 // A format picked by the link overrides the preference, so its chip only shows when the preference is in force.
-const preferenceChips = computed(() => (selected.value.midia.length ? [] : preferences.hiddenMidias))
+const preferenceChips = computed(() => (selected.value.midia.length ? [] : preferences.hiddenFormats))
 
 // A chip counts what its click will show: with a search on, the search's result; a zero chip is left out (slice 8d).
 const quickCounts = computed<Record<string, number>>(() => {
@@ -272,11 +272,11 @@ const quickGenres = computed(() =>
 
 // Picking a quick genre keeps the strip where it was clicked; any other filter shows the applied ones instead.
 const onlyQuickGenres = computed(() => {
-  const { categoria, ...others } = selected.value
+  const { categoria: genres, ...others } = selected.value
   return (
-    categoria.length > 0 &&
+    genres.length > 0 &&
     Object.values(others).every((values) => values.length === 0) &&
-    categoria.every((genre) => quickGenres.value.includes(genre))
+    genres.every((genre) => quickGenres.value.includes(genre))
   )
 })
 
@@ -302,7 +302,7 @@ const summary = computed(() => {
   const hidden = hiddenByPreference.value
   if (!hidden.length) return { count, rest: '' }
 
-  const parts = hidden.map(({ midia, count: n }) => `${n} ${formatName(midia, n)}`)
+  const parts = hidden.map(({ format, count: n }) => `${n} ${formatName(format, n)}`)
   const onlyOne = hidden.length === 1 && hidden[0]!.count === 1
   return { count, rest: ` · ${joinWords(parts)} ${onlyOne ? 'está' : 'estão'} fora por sua escolha` }
 })
@@ -319,8 +319,8 @@ onMounted(() => useApi().fetchBooks())
 
 const { refreshing, refresh } = useCatalogRefresh()
 
-const formatName = (midia: string, count: number) => {
-  const [singular, plural] = FORMAT_NAMES[midia] ?? [midia, midia]
+const formatName = (format: string, count: number) => {
+  const [singular, plural] = FORMAT_NAMES[format] ?? [format, format]
   return count === 1 ? singular : plural
 }
 

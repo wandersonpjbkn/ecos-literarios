@@ -152,7 +152,7 @@ import { usePermissionsStore } from '@/stores'
 
 import { useEntityCrud, useErrorReporter, useToast } from '@/composables'
 import { errorText } from '@/composables/apiError'
-import { getSubgeneroUsage } from '@/composables/useApi'
+import { getSubgenreUsage } from '@/composables/useApi'
 import { useLoadMore } from '@/composables/useLoadMore'
 
 import AppButton from '@/components/ui/AppButton.vue'
@@ -281,7 +281,7 @@ const confirmDelete = async (item: SupportEntity) => {
   actionError.value = ''
   // Counted by the API: a catalog copy saved on this device could say "no book" for a subgenre in use.
   try {
-    deleteModal.usage = props.resource === 'subgeneros' ? (await getSubgeneroUsage(item._id)).books : 0
+    deleteModal.usage = props.resource === 'subgeneros' ? (await getSubgenreUsage(item._id)).books : 0
   } catch (e) {
     actionError.value = errorText(e, 'Não foi possível contar os livros. Tente de novo.')
     return

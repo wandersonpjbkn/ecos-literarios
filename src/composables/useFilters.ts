@@ -76,12 +76,12 @@ const valuesOf = (book: Book, key: FilterKey): string[] => {
 const emptySelection = (): Options => Object.fromEntries(FILTER_KEYS.map((key) => [key, []])) as unknown as Options
 
 /** OR inside a group, AND across groups; the format preference only applies when the URL does not pick a format. */
-const applyFilters = (books: Book[], selection: Options, search: string, hiddenMidias: string[]) => {
+const applyFilters = (books: Book[], selection: Options, search: string, hiddenFormats: string[]) => {
   const q = search.trim().toLowerCase()
   return books.filter((book) => {
     if (q && ![book.titulo, book.autor, book.quem, book.porque].some((field) => field?.toLowerCase().includes(q)))
       return false
-    if (!selection.midia.length && hiddenMidias.includes(book.midia)) return false
+    if (!selection.midia.length && hiddenFormats.includes(book.midia)) return false
     return FILTER_KEYS.every(
       (key) => !selection[key].length || valuesOf(book, key).some((value) => selection[key].includes(value)),
     )
@@ -92,7 +92,7 @@ export function useFilters() {
   const route = useRoute()
   const router = useRouter()
 
-  const { hiddenMidias } = storeToRefs(usePreferencesStore())
+  const { hiddenFormats } = storeToRefs(usePreferencesStore())
 
   const { slugify } = useUtils()
 
@@ -146,14 +146,14 @@ export function useFilters() {
     },
   })
 
-  const filtered = computed(() => applyFilters(books.value, selected.value, search.value, hiddenMidias.value))
+  const filtered = computed(() => applyFilters(books.value, selected.value, search.value, hiddenFormats.value))
 
   /** Books left out only because of the format preference, per hidden format. */
   const hiddenByPreference = computed(() => {
     if (selected.value.midia.length) return []
     const wouldShow = applyFilters(books.value, selected.value, search.value, [])
-    return hiddenMidias.value
-      .map((midia) => ({ midia, count: wouldShow.filter((book) => book.midia === midia).length }))
+    return hiddenFormats.value
+      .map((format) => ({ format, count: wouldShow.filter((book) => book.midia === format).length }))
       .filter((entry) => entry.count > 0)
   })
 
@@ -216,10 +216,10 @@ export function useFilters() {
 
   /** The catalog as filtered, minus one group: what that group's options would count if nothing in it were picked. */
   const filteredIgnoring = (key: FilterKey) =>
-    applyFilters(books.value, { ...selected.value, [key]: [] }, search.value, hiddenMidias.value)
+    applyFilters(books.value, { ...selected.value, [key]: [] }, search.value, hiddenFormats.value)
 
   /** Books a selection opens from a link (no search, format preference in force), so a shelf count matches its page. */
-  const booksFor = (selection: Options) => applyFilters(books.value, selection, '', hiddenMidias.value)
+  const booksFor = (selection: Options) => applyFilters(books.value, selection, '', hiddenFormats.value)
 
   return {
     emptySelection,

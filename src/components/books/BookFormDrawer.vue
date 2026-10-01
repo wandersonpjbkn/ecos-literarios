@@ -44,7 +44,7 @@
               <MultiSelect
                 label="Escolher o autor"
                 :labelledby="labelId"
-                :options="autorOptions"
+                :options="authorOptions"
                 :selected="form.autor"
                 :multiple="false"
                 :searchable="true"
@@ -59,7 +59,7 @@
               <MultiSelect
                 label="Escolher o formato"
                 :labelledby="labelId"
-                :options="midiaOptions"
+                :options="formatOptions"
                 :selected="form.midia"
                 :multiple="false"
                 :searchable="false"
@@ -72,7 +72,7 @@
               <MultiSelect
                 label="Escolher o gênero"
                 :labelledby="labelId"
-                :options="categoriaOptions"
+                :options="genreOptions"
                 :selected="form.categoria"
                 :multiple="false"
                 :searchable="true"
@@ -151,12 +151,12 @@
                 <MultiSelect
                   label="Escolher subgêneros"
                   :labelledby="labelId"
-                  :options="subgeneroOptions"
+                  :options="subgenreOptions"
                   :selected="form.subgeneros"
                   :multiple="true"
                   :searchable="true"
                   :create-label="canCreate('subgeneros') ? createLabel('subgênero') : undefined"
-                  @toggle="handleSubgeneroToggle"
+                  @toggle="toggleSubgenre"
                   @create="pickNewSubgenre"
                   @clear="form.subgeneros = []"
                 />
@@ -310,10 +310,10 @@ const auth = useAuthStore()
 
 const { slugify } = useUtils()
 
-const autores = useEntityCrud({ resource: 'autores' })
-const midias = useEntityCrud({ resource: 'midias' })
-const categorias = useEntityCrud({ resource: 'categorias' })
-const subgeneros = useEntityCrud({ resource: 'subgeneros' })
+const authors = useEntityCrud({ resource: 'autores' })
+const formats = useEntityCrud({ resource: 'midias' })
+const genres = useEntityCrud({ resource: 'categorias' })
+const subgenres = useEntityCrud({ resource: 'subgeneros' })
 
 const isSaving = ref(false)
 const error = ref('')
@@ -413,10 +413,10 @@ const withPending = (options: { label: string; value: string }[], picked: string
     })),
 ]
 
-const autorOptions = computed(() => withPending(toOptions(autores.items.value), [form.autor], 'autor'))
-const midiaOptions = computed(() => toOptions(midias.items.value))
-const categoriaOptions = computed(() => withPending(toOptions(categorias.items.value), [form.categoria], 'gênero'))
-const subgeneroOptions = computed(() => withPending(toOptions(subgeneros.items.value), form.subgeneros, 'subgênero'))
+const authorOptions = computed(() => withPending(toOptions(authors.items.value), [form.autor], 'autor'))
+const formatOptions = computed(() => toOptions(formats.items.value))
+const genreOptions = computed(() => withPending(toOptions(genres.items.value), [form.categoria], 'gênero'))
+const subgenreOptions = computed(() => withPending(toOptions(subgenres.items.value), form.subgeneros, 'subgênero'))
 
 const openRemove = () => {
   removal.error = ''
@@ -492,7 +492,7 @@ const claimOfferedName = async () => {
 
 const toOptions = (items: Array<{ _id: string; nome: string }>) => items.map((i) => ({ label: i.nome, value: i._id }))
 
-const handleSubgeneroToggle = (value: string) => {
+const toggleSubgenre = (value: string) => {
   const idx = form.subgeneros.indexOf(value)
   if (idx === -1) form.subgeneros.push(value)
   else form.subgeneros.splice(idx, 1)
@@ -596,9 +596,9 @@ const createPicked = async (list: EntityList, value: string) => {
 
 // Written back into the form: a retry after a failed save reuses what was created instead of creating it twice.
 const createPickedItems = async () => {
-  form.autor = await createPicked(autores, form.autor)
-  form.categoria = await createPicked(categorias, form.categoria)
-  for (const [index, value] of form.subgeneros.entries()) form.subgeneros[index] = await createPicked(subgeneros, value)
+  form.autor = await createPicked(authors, form.autor)
+  form.categoria = await createPicked(genres, form.categoria)
+  for (const [index, value] of form.subgeneros.entries()) form.subgeneros[index] = await createPicked(subgenres, value)
 }
 
 const handleSubmit = async () => {
@@ -683,10 +683,10 @@ watch(
 onBeforeUnmount(() => clearTimeout(closeTimer))
 
 onMounted(() => {
-  autores.fetchAll()
-  midias.fetchAll()
-  categorias.fetchAll()
-  subgeneros.fetchAll()
+  authors.fetchAll()
+  formats.fetchAll()
+  genres.fetchAll()
+  subgenres.fetchAll()
 })
 </script>
 

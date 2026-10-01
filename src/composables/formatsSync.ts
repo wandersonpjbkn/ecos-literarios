@@ -34,7 +34,7 @@ export function startFormatsSync(): FormatsSync {
   const adopt = (list: string[]) => {
     accountList = [...list]
     adopting = true
-    preferences.hiddenMidias = [...list]
+    preferences.hiddenFormats = [...list]
     preferences.owner = auth.user?._id ?? null
     adopting = false
   }
@@ -75,8 +75,8 @@ export function startFormatsSync(): FormatsSync {
     if (server === undefined) {
       // Another account's list, or one chosen signed out, would leak into this one: it starts empty instead.
       if (preferences.owner !== userId) return adopt([])
-      if (!preferences.hiddenMidias.length) return
-      preferences.pending = { userId, list: [...preferences.hiddenMidias] }
+      if (!preferences.hiddenFormats.length) return
+      preferences.pending = { userId, list: [...preferences.hiddenFormats] }
       return save()
     }
     adopt(server)
@@ -84,7 +84,7 @@ export function startFormatsSync(): FormatsSync {
 
   // Sync flush: the change is marked pending the moment it happens, so closing the tab inside the delay loses nothing.
   const stopList = watch(
-    () => preferences.hiddenMidias,
+    () => preferences.hiddenFormats,
     (list) => {
       if (adopting) return
       const userId = auth.user?._id

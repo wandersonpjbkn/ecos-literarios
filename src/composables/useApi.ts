@@ -35,7 +35,7 @@ import { endSession } from '@/composables/sessionEnd'
 import { supabase } from '@/composables/supabase'
 
 // ── Helpers ──
-const extractNome = (field: ApiPopulated | string | undefined): string => {
+const extractName = (field: ApiPopulated | string | undefined): string => {
   if (!field) return ''
   return typeof field === 'string' ? field : field.nome
 }
@@ -44,9 +44,9 @@ const extractNome = (field: ApiPopulated | string | undefined): string => {
 const normalizeBook = (raw: ApiBook): Book => ({
   id: raw._id,
   titulo: raw.titulo,
-  autor: extractNome(raw.autor),
-  midia: extractNome(raw.midia),
-  categoria: extractNome(raw.categoria) as Book['categoria'],
+  autor: extractName(raw.autor),
+  midia: extractName(raw.midia),
+  categoria: extractName(raw.categoria) as Book['categoria'],
   quem: personName(raw),
   quem_nome: raw.quem_nome ?? undefined,
   quem_user_id: raw.quem_user_id?._id,
@@ -173,10 +173,10 @@ export const verifyAuth = async (token: string) => {
   }>
 }
 
-export const claimRegister = async (quemNome: string): Promise<RegisterResponse> => {
+export const claimRegister = async (name: string): Promise<RegisterResponse> => {
   const res = await apiFetch('/users/me/claim', {
     method: 'POST',
-    body: JSON.stringify({ quem_nome: quemNome }),
+    body: JSON.stringify({ quem_nome: name }),
   })
 
   if (!res.ok) {
@@ -256,10 +256,10 @@ export const saveMyName = (name: string) =>
     'Não foi possível salvar o nome. Tente de novo.',
   )
 
-export const saveMyFormats = (hiddenMidias: string[]) =>
+export const saveMyFormats = (hiddenFormats: string[]) =>
   authedRequest<{ hidden_midias?: string[] }>(
     '/users/me',
-    { method: 'PATCH', body: JSON.stringify({ hidden_midias: hiddenMidias }) },
+    { method: 'PATCH', body: JSON.stringify({ hidden_midias: hiddenFormats }) },
     'Não foi possível salvar seus formatos.',
   )
 
@@ -332,7 +332,7 @@ export const removeMember = (id: string) =>
     'Não foi possível remover. Tente de novo.',
   )
 
-export const getSubgeneroUsage = (id: string) =>
+export const getSubgenreUsage = (id: string) =>
   authedRequest<{ books: number }>(
     `/subgeneros/${id}/usage`,
     { method: 'GET' },
@@ -393,17 +393,17 @@ export const applyBookEnrichment = (id: string, fields: EnrichmentField[]) =>
 export const listEntities = (resource: string) =>
   authedRequest<SupportEntity[]>(`/${resource}`, { method: 'GET' }, 'Não foi possível carregar a lista. Tente de novo.')
 
-export const createEntity = (resource: string, nome: string) =>
+export const createEntity = (resource: string, name: string) =>
   authedRequest<SupportEntity>(
     `/${resource}`,
-    { method: 'POST', body: JSON.stringify({ nome }) },
+    { method: 'POST', body: JSON.stringify({ nome: name }) },
     'Não foi possível criar. Tente de novo.',
   )
 
-export const updateEntity = (resource: string, id: string, nome: string) =>
+export const updateEntity = (resource: string, id: string, name: string) =>
   authedRequest<SupportEntity>(
     `/${resource}/${id}`,
-    { method: 'PATCH', body: JSON.stringify({ nome }) },
+    { method: 'PATCH', body: JSON.stringify({ nome: name }) },
     'Não foi possível salvar. Tente de novo.',
   )
 
