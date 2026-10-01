@@ -116,8 +116,11 @@ const resend = async () => {
     await nextTick()
     message.value?.focus()
   } catch (err) {
-    resendError.value = 'Não foi possível enviar agora. Tente de novo daqui a pouco.'
-    useErrorReporter().captureException(err, { context: 'AuthCallback.resend' })
+    const tooSoon = (err as { tooSoon?: boolean }).tooSoon === true
+    resendError.value = tooSoon
+      ? 'Você já pediu um link agora há pouco. Espere um minuto e peça de novo.'
+      : 'Não foi possível enviar agora. Tente de novo daqui a pouco.'
+    if (!tooSoon) useErrorReporter().captureException(err, { context: 'AuthCallback.resend' })
   } finally {
     sending.value = false
   }

@@ -115,6 +115,8 @@ Depois de enviar, a introdução some e fica só:
 
 Espera não é botão desabilitado: botão cinza parece quebrado, e o texto diz quando vai dar.
 
+Pedido cedo demais (o serviço de login recusa por excesso de pedidos), no Entrar e no "Enviar outro link" da volta do link: **"Você já pediu um link agora há pouco. Espere um minuto e peça de novo."** As duas entradas dizem o mesmo; o resto dos erros de envio segue o texto de cada tela.
+
 ## Vincular meu nome
 
 A seção tem o mesmo nome do botão de Meus livros que leva a ela e aparece para toda conta. Vincular segue a matriz (Vínculo · Editar; por padrão Editor e Administrador); sem essa permissão, no lugar do formulário:
