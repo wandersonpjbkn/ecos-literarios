@@ -16,7 +16,7 @@ const SORT_OPTIONS: { label: string; value: BookSortOrder }[] = [
 
 const SORT_FIELD: Record<Exclude<BookSortOrder, 'recentes'>, (book: Book) => string> = {
   titulo: () => '',
-  pessoa: (book) => book.quem,
+  pessoa: (book) => book.person,
   genero: (book) => book.categoria,
 }
 

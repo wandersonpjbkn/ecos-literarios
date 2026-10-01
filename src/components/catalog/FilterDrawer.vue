@@ -104,10 +104,10 @@ type Group = {
 // [plural, singular, article]: "Mostrar as outras 8 pessoas" / "Mostrar o outro gênero".
 const GROUPS: Group[] = [
   { title: 'Gênero', key: 'categoria', more: ['gêneros', 'gênero', 'o'] },
-  { title: 'Subgênero', key: 'subgeneros', searchable: true },
-  { title: 'Tamanho', key: 'tamanho' },
+  { title: 'Subgênero', key: 'subgenres', searchable: true },
+  { title: 'Tamanho', key: 'size' },
   { title: 'O que você quer ver' },
-  { title: 'Quem mencionou', key: 'quem', more: ['pessoas', 'pessoa', 'a'] },
+  { title: 'Quem mencionou', key: 'person', more: ['pessoas', 'pessoa', 'a'] },
 ]
 
 const COLLAPSED_OPTIONS = 6
@@ -156,7 +156,7 @@ const byCount = (key: FilterKey) => (a: string, b: string) =>
   (optionCounts.value[key][b] ?? 0) - (optionCounts.value[key][a] ?? 0) || a.localeCompare(b, 'pt-BR')
 
 const sortedOptions = (key: FilterKey) =>
-  key === 'tamanho' ? options.value[key] : [...options.value[key]].sort(byCount(key))
+  key === 'size' ? options.value[key] : [...options.value[key]].sort(byCount(key))
 
 // A checked option is never hidden behind "Mostrar os outros".
 const visibleOptions = (group: Group) => {

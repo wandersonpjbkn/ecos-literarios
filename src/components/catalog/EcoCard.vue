@@ -6,8 +6,8 @@
       <p class="eco-card__foot">
         <strong class="eco-card__book">{{ book.titulo }}</strong>
         <span class="eco-card__who">
-          <UserAvatar :alt="book.quem" class="eco-card__avatar" />
-          mencionado por {{ book.quem }}
+          <UserAvatar :alt="book.person" class="eco-card__avatar" />
+          mencionado por {{ book.person }}
         </span>
       </p>
     </figure>

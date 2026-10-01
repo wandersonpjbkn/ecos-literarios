@@ -167,11 +167,11 @@ const QUICK_GENRES = 5
 
 // "por" (who mentioned) and "de" (author) keep the two apart without repeating "mencionado por" per chip.
 const CHIP_LABEL: Partial<Record<FilterKey, (value: string) => string>> = {
-  quem: (value) => `por ${value}`,
+  person: (value) => `por ${value}`,
   autor: (value) => `de ${value}`,
 }
 
-const APPLIED_ORDER: FilterKey[] = ['categoria', 'subgeneros', 'tamanho', 'midia', 'quem', 'autor']
+const APPLIED_ORDER: FilterKey[] = ['categoria', 'subgenres', 'size', 'midia', 'person', 'autor']
 
 const FORMAT_NAMES: Record<string, [string, string]> = {
   Livro: ['livro', 'livros'],

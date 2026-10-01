@@ -47,7 +47,7 @@ const normalizeBook = (raw: ApiBook): Book => ({
   autor: extractName(raw.autor),
   midia: extractName(raw.midia),
   categoria: extractName(raw.categoria) as Book['categoria'],
-  quem: personName(raw),
+  person: personName(raw),
   quem_nome: raw.quem_nome ?? undefined,
   quem_user_id: raw.quem_user_id?._id,
   porque: raw.porque ?? '',
@@ -59,7 +59,7 @@ const normalizeBook = (raw: ApiBook): Book => ({
   isbn: raw.isbn,
   publisher: raw.publisher,
   google_books_id: raw.google_books_id,
-  subgenerosArr: raw.subgeneros.map((s) => (typeof s === 'string' ? s : s.nome.toLowerCase())),
+  subgenreNames: raw.subgeneros.map((s) => (typeof s === 'string' ? s : s.nome.toLowerCase())),
 })
 
 // ── Auth helper ──

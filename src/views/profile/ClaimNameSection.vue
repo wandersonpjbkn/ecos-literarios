@@ -160,7 +160,7 @@ const submitClaim = async () => {
     useApi().fetchBooks()
   } catch (err) {
     actionError.value = errorText(err, 'Não foi possível vincular o nome. Tente de novo.')
-    useErrorReporter().captureException(err, { context: 'ClaimNameSection.submit', quemNome: chosenName.value })
+    useErrorReporter().captureException(err, { context: 'ClaimNameSection.submit', claimedName: chosenName.value })
   } finally {
     isSubmitting.value = false
   }

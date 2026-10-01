@@ -8,16 +8,16 @@ import { useBooksStore, usePreferencesStore } from '@/stores'
 
 import { useUtils } from '@/composables/useUtils'
 
-const FILTER_KEYS: FilterKey[] = ['midia', 'categoria', 'subgeneros', 'quem', 'autor', 'tamanho']
+const FILTER_KEYS: FilterKey[] = ['midia', 'categoria', 'subgenres', 'person', 'autor', 'size']
 
 // Query names are part of links already shared in the club group: renaming one breaks them.
 const QUERY_PARAM: Record<FilterKey, string> = {
   midia: 'midia',
   categoria: 'genero',
-  subgeneros: 'subgenero',
-  quem: 'quem',
+  subgenres: 'subgenero',
+  person: 'quem',
   autor: 'autor',
-  tamanho: 'tamanho',
+  size: 'tamanho',
 }
 
 // `phrase` completes "Nenhum livro …" in the empty state (EmptyState.md: the combination said in Portuguese).
@@ -53,22 +53,22 @@ const inSentence = (value: string) => (value === value.toUpperCase() ? value : v
 
 /** The filters as one sentence; "mencionado" agrees with "livro", since the data holds no gender. */
 export const describeSelection = (selection: Options): string => {
-  const kinds = [...selection.categoria, ...selection.subgeneros].map(inSentence)
+  const kinds = [...selection.categoria, ...selection.subgenres].map(inSentence)
   const formats = selection.midia.map(inSentence)
   const parts = [
     'Nenhum livro',
     kinds.length && `de ${orList(kinds)}`,
     formats.length && `em ${orList(formats)}`,
-    selection.tamanho.length && orList(selection.tamanho.map((label) => SIZES.find((s) => s.label === label)!.phrase)),
+    selection.size.length && orList(selection.size.map((label) => SIZES.find((s) => s.label === label)!.phrase)),
     selection.autor.length && `de ${orList(selection.autor)}`,
-    selection.quem.length && `mencionado por ${orList(selection.quem)}`,
+    selection.person.length && `mencionado por ${orList(selection.person)}`,
   ]
   return `${parts.filter(Boolean).join(' ')}.`
 }
 
 const valuesOf = (book: Book, key: FilterKey): string[] => {
-  if (key === 'tamanho') return SIZES.filter((size) => size.match(book)).map((size) => size.label)
-  if (key === 'subgeneros') return book.subgenerosArr ?? []
+  if (key === 'size') return SIZES.filter((size) => size.match(book)).map((size) => size.label)
+  if (key === 'subgenres') return book.subgenreNames ?? []
   const value = book[key]
   return value ? [value] : []
 }
@@ -79,7 +79,7 @@ const emptySelection = (): Options => Object.fromEntries(FILTER_KEYS.map((key) =
 const applyFilters = (books: Book[], selection: Options, search: string, hiddenFormats: string[]) => {
   const q = search.trim().toLowerCase()
   return books.filter((book) => {
-    if (q && ![book.titulo, book.autor, book.quem, book.porque].some((field) => field?.toLowerCase().includes(q)))
+    if (q && ![book.titulo, book.autor, book.person, book.porque].some((field) => field?.toLowerCase().includes(q)))
       return false
     if (!selection.midia.length && hiddenFormats.includes(book.midia)) return false
     return FILTER_KEYS.every(
@@ -104,7 +104,7 @@ export function useFilters() {
       Object.fromEntries(
         FILTER_KEYS.map((key) => [
           key,
-          key === 'tamanho'
+          key === 'size'
             ? SIZES.map((size) => size.label)
             : [...new Set(books.value.flatMap((book) => valuesOf(book, key)))].sort((a, b) =>
                 a.localeCompare(b, 'pt-BR'),
@@ -171,7 +171,7 @@ export function useFilters() {
   })
 
   const toSlug = (key: FilterKey, value: string) =>
-    key === 'tamanho' ? (SIZES.find((size) => size.label === value)?.slug ?? '') : slugify(value)
+    key === 'size' ? (SIZES.find((size) => size.label === value)?.slug ?? '') : slugify(value)
 
   const queryFor = (selection: Options): LocationQueryRaw => {
     const query: LocationQueryRaw = { ...route.query }

@@ -34,9 +34,11 @@
           <RouterLink v-if="book.autor" :to="catalogLink('autor', book.autor)" class="book-page__author">
             {{ book.autor }}
           </RouterLink>
-          <p v-if="book.quem" class="book-page__mention">
+          <p v-if="book.person" class="book-page__mention">
             mencionado por
-            <RouterLink :to="catalogLink('quem', book.quem)" class="book-page__person">{{ book.quem }}</RouterLink>
+            <RouterLink :to="catalogLink('person', book.person)" class="book-page__person">{{
+              book.person
+            }}</RouterLink>
           </p>
         </header>
 
@@ -58,7 +60,7 @@
 
           <QuoteBlock
             :text="book.porque"
-            :person="book.quem"
+            :person="book.person"
             :is-author="isOwner"
             :can-write="canWrite"
             :ask-link="askPerson"
@@ -94,14 +96,14 @@
             </AppButton>
           </section>
 
-          <section v-if="book.subgenerosArr.length" class="book-page__tags" aria-labelledby="tags-title">
+          <section v-if="book.subgenreNames.length" class="book-page__tags" aria-labelledby="tags-title">
             <h2 id="tags-title" class="book-page__section-title">Subgêneros</h2>
             <div class="book-page__chips">
               <FilterChip
-                v-for="tag in book.subgenerosArr"
+                v-for="tag in book.subgenreNames"
                 :key="tag"
                 :label="tag"
-                :to="catalogLink('subgeneros', tag)"
+                :to="catalogLink('subgenres', tag)"
               />
             </div>
           </section>
@@ -210,7 +212,7 @@ usePageMeta(
   computed(() => ({
     title: book.value?.titulo ?? 'Livro',
     description: book.value
-      ? `${book.value.titulo} · ${book.value.autor}${book.value.quem ? ` · mencionado por ${book.value.quem}` : ''}`
+      ? `${book.value.titulo} · ${book.value.autor}${book.value.person ? ` · mencionado por ${book.value.person}` : ''}`
       : '',
     type: 'article' as const,
   })),
@@ -227,7 +229,7 @@ const isOwner = computed(() => !!book.value?.quem_user_id && book.value.quem_use
 // The API's matrix, not the role (front mirrors backend): the owner, or whoever may edit any book.
 const canEdit = computed(() => permissions.canEditBook(book.value?.quem_user_id))
 
-const askPerson = computed(() => ask(`${book.value?.quem}, o que você acha de "${book.value?.titulo}"?`))
+const askPerson = computed(() => ask(`${book.value?.person}, o que você acha de "${book.value?.titulo}"?`))
 
 const synopsisIsLong = computed(() => (book.value?.synopsis?.length ?? 0) > SYNOPSIS_COLLAPSE_CHARS)
 

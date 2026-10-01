@@ -28,11 +28,11 @@ export interface Book {
   autor: string
   categoria: keyof typeof CategoriesColors
   midia: string
-  quem: string
+  person: string
   porque: string
-  subgenerosArr: string[]
+  subgenreNames: string[]
   quem_user_id?: string
-  // The placeholder from the first load, when the book has one; `quem` is the name shown.
+  // The placeholder from the first load, when the book has one; `person` is the name shown.
   quem_nome?: string
 
   cover_url?: string
@@ -59,7 +59,7 @@ export interface ReadingCounts {
   lido: number
 }
 
-export type FilterKey = 'midia' | 'categoria' | 'subgeneros' | 'quem' | 'autor' | 'tamanho'
+export type FilterKey = 'midia' | 'categoria' | 'subgenres' | 'person' | 'autor' | 'size'
 
 export type Options = Record<FilterKey, string[]>
 

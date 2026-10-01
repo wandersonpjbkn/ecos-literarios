@@ -34,8 +34,8 @@ import { usePreferencesStore } from '@/stores'
 import { useCategoryColors, useFilters } from '@/composables'
 
 const SHELVES: { title: string; key: FilterKey; value: string; note: string }[] = [
-  { title: 'Menos de 200 páginas', key: 'tamanho', value: 'Menos de 200 páginas', note: 'para ler em uma semana' },
-  { title: 'Mais de 500 páginas', key: 'tamanho', value: 'Mais de 500 páginas', note: 'para quem tem fôlego' },
+  { title: 'Menos de 200 páginas', key: 'size', value: 'Menos de 200 páginas', note: 'para ler em uma semana' },
+  { title: 'Mais de 500 páginas', key: 'size', value: 'Mais de 500 páginas', note: 'para quem tem fôlego' },
   { title: 'Mangás', key: 'midia', value: 'Mangá', note: 'para curtir e acompanhar' },
   { title: 'HQs', key: 'midia', value: 'HQ', note: 'termina em uma tarde só' },
 ]
