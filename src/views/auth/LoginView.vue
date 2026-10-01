@@ -125,7 +125,7 @@ const submit = async () => {
     nextTick(() => sentMessage.value?.focus())
     startCooldown()
   } catch (err) {
-    const tooSoon = (err as { status?: number }).status === 429
+    const tooSoon = (err as { tooSoon?: boolean }).tooSoon === true
     errorMsg.value = tooSoon
       ? 'Você já pediu um link agora há pouco. Espere um minuto e peça de novo.'
       : 'Não foi possível enviar o link. Tente de novo.'

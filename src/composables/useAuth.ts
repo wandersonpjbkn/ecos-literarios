@@ -77,8 +77,8 @@ export function useAuth() {
       },
     })
 
-    // Supabase's text is English and technical; the status is what the login screen needs.
-    if (error) throw Object.assign(new Error(error.message), { status: error.status })
+    // Supabase's text is English and technical; the screen only needs to know the link was asked for too soon (429).
+    if (error) throw Object.assign(new Error(error.message), { tooSoon: error.status === 429 })
   }
 
   // "platform" = valid session but the API did not answer (network or 5xx): a new link would not help.

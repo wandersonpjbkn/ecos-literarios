@@ -269,9 +269,9 @@ import type { BookPayload } from '@/types'
 
 import { useAuthStore, usePermissionsStore } from '@/stores'
 
-import { useEntityCrud, useErrorReporter, useToast, useUtils } from '@/composables'
+import { useEntityCrud, useErrorReporter, useToast } from '@/composables'
 import { reloadAccount } from '@/composables/accountSync'
-import { ApiError, errorText } from '@/composables/apiError'
+import { errorText } from '@/composables/apiError'
 import { claimRegister, getPeople, removeBook, saveBook, useApi } from '@/composables/useApi'
 
 import BookEnrichmentPanel from '@/components/books/BookEnrichmentPanel.vue'
@@ -307,8 +307,6 @@ const emit = defineEmits<{
 const permissions = usePermissionsStore()
 
 const auth = useAuthStore()
-
-const { slugify } = useUtils()
 
 const authors = useEntityCrud({ resource: 'autores' })
 const formats = useEntityCrud({ resource: 'midias' })
@@ -579,26 +577,14 @@ const pickNewSubgenre = (typed: string) => {
 }
 
 type EntityList = ReturnType<typeof useEntityCrud>
-// The list may be stale: the API refuses a name someone else created (409), and the existing one is used.
-const createPicked = async (list: EntityList, value: string) => {
-  if (!value.startsWith(NEW_NAME)) return value
-  const name = value.slice(NEW_NAME.length)
-  try {
-    return (await list.create(name))._id
-  } catch (err) {
-    if (!(err instanceof ApiError) || err.status !== 409) throw err
-    await list.fetchAll()
-    const existing = list.items.value.find((item) => slugify(item.nome) === slugify(name))
-    if (!existing) throw err
-    return existing._id
-  }
-}
+const resolvePicked = async (list: EntityList, value: string) =>
+  value.startsWith(NEW_NAME) ? (await list.findOrCreate(value.slice(NEW_NAME.length)))._id : value
 
 // Written back into the form: a retry after a failed save reuses what was created instead of creating it twice.
-const createPickedItems = async () => {
-  form.autor = await createPicked(authors, form.autor)
-  form.categoria = await createPicked(genres, form.categoria)
-  for (const [index, value] of form.subgeneros.entries()) form.subgeneros[index] = await createPicked(subgenres, value)
+const resolvePickedItems = async () => {
+  form.autor = await resolvePicked(authors, form.autor)
+  form.categoria = await resolvePicked(genres, form.categoria)
+  for (const [index, value] of form.subgeneros.entries()) form.subgeneros[index] = await resolvePicked(subgenres, value)
 }
 
 const handleSubmit = async () => {
@@ -610,7 +596,7 @@ const handleSubmit = async () => {
   success.value = ''
 
   try {
-    await createPickedItems()
+    await resolvePickedItems()
     const shared = {
       titulo: form.titulo,
       autor: form.autor,
