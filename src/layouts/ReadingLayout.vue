@@ -3,7 +3,8 @@
     <!-- Tab order follows the screen: top bar, then navigation, then the content; this link jumps straight there. -->
     <a href="#conteudo" class="skip-link">Ir para o conteúdo</a>
     <AppHeader />
-    <AppSidebar />
+    <!-- On the phone the navigation is the bar at the bottom, so it comes after the content in the tab order too. -->
+    <AppSidebar v-if="!isPhone" />
 
     <main id="conteudo" ref="content" class="app-main" tabindex="-1">
       <RouterView v-slot="{ Component }">
@@ -12,6 +13,7 @@
         </Transition>
       </RouterView>
     </main>
+    <AppSidebar v-if="isPhone" />
 
     <BackTop :target="content" />
   </div>
@@ -23,8 +25,11 @@ const scrollPositions = new Map<string, number>()
 </script>
 
 <script lang="ts" setup>
+import { useMediaQuery } from '@vueuse/core'
 import { defineAsyncComponent, nextTick, onUnmounted, provide, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
+import { useBreakpoints } from '@/composables'
 
 import AppHeader from '@/layouts/AppHeader.vue'
 import { FRAME_HAS_RAIL } from '@/layouts/frame'
@@ -37,6 +42,7 @@ const route = useRoute()
 const router = useRouter()
 // The rail sits at the left edge: a drawer opens beside it.
 provide(FRAME_HAS_RAIL, true)
+const isPhone = useMediaQuery(useBreakpoints.isPhone)
 
 const content = ref<HTMLElement | null>(null)
 
