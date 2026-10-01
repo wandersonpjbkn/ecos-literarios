@@ -4,7 +4,7 @@ A célula da grade. Três informações, uma vez cada: **título** (dentro da ca
 
 Essa é a correção mais importante do sistema. A versão anterior punha título e autor dentro do bloco de capa *e* embaixo dele — quatro linhas por cartão, 24 cartões por tela, e a grade ficava ilegível.
 
-Não há avatar de quem mencionou. O campo `avatar_url` existe no tipo do projeto mas nunca teve valor; a interface mostra o nome, que é verdade.
+Não há avatar de quem mencionou. O campo `avatar_url` existe no tipo do projeto mas nunca teve valor; a interface mostra o nome, que é verdade. E 24 monogramas rosa por tela fariam do acento da voz um tema (ver [Avatar](Avatar.md)). A estrela do Favorito do clube, quando há, mora na capa.
 
 ## Regras
 

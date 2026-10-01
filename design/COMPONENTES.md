@@ -1,6 +1,6 @@
 # Componentes
 
-Dez componentes, um arquivo cada em `componentes/`. Cada um traz as regras, os estados
+Onze componentes, um arquivo cada em `componentes/`. Cada um traz as regras, os estados
 (inclusive o vazio) e o que o consumidor precisa fornecer. Os previews ao vivo estão no
 design system; aqui está o texto, que é o que decide implementação.
 
@@ -16,6 +16,7 @@ design system; aqui está o texto, que é o que decide implementação.
 | [EmptyState](componentes/EmptyState.md) | Sem resultado, sem conteúdo, fora do ar | 6 |
 | [NavRail](componentes/NavRail.md) | Os três destinos, no desktop | 3 |
 | [TabBar](componentes/TabBar.md) | Os mesmos três, no celular | 3 |
+| [Avatar](componentes/Avatar.md) | A inicial de quem é do clube, e a da sua conta | 8g |
 
 ## Controles de formulário
 
@@ -163,3 +164,14 @@ outro arquivo. A tela chama a função e mostra o erro com `errorText`.
 **Caixa de marcar: exceção documentada.** Marcada, a caixa (e o rádio) é preenchida com `action` e tique branco. É a única exceção à regra "azul cheio só em botão", e é de propósito: é a convenção de todo celular e navegador, e para quem não é nativo digital reconhecer vale mais que a pureza da regra. A regra continua valendo para áreas: chip, linha e item selecionados usam `action-soft` com borda.
 
 **Largura nas áreas.** Em Minha conta e nas seções de formulário do painel, o conteúdo tem largura máxima: `--form-max` para campos, `--text-column` para linhas de escolha com contagem ou ação à direita. Tabela de várias colunas usa a largura toda.
+
+**Acento da voz (8g).** Uma segunda cor, que nunca clica. Tokens novos no tema, ao lado dos `--alert-*`:
+
+```
+--voice-soft: #FBEFF4;  /* fundo do monograma */
+--voice-line: #EFCADB;  /* borda do monograma */
+--voice-mark: #C25E88;  /* estrela e ícone: 4,0:1, só objeto gráfico */
+--voice-ink:  #8A3A5C;  /* texto: 7,4:1 sobre branco, 6,6:1 sobre voice-soft */
+```
+
+Três lugares, e mais nenhum: a estrela do Favorito do clube (`CoverBlock`), o monograma de pessoa do clube (`UserAvatar kind="pessoa"`) e o rótulo do eco da semana (`EcoCard`). Sempre do tamanho do objeto: nenhum fundo, faixa ou borda de bloco em rosa, e nunca em botão, link, chip ou item selecionado. Medido nas telas do estudo: 0,1% da área, contra 1,1–1,7% de azul. Passou de 1% em uma tela, virou tema. O vermelho destrutivo fica a 28° de matiz do rosa: os dois não dividem tela.

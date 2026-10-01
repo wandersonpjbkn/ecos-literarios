@@ -75,7 +75,7 @@ O painel Adicionar, as prateleiras, a nova Meus livros e a Conta entram na fatia
 
 ## 8 · Correções da revisão de 2026-09-27
 
-Revisão das telas depois da fatia 7, triada pelo dono item a item. Entra aqui só o que foi aprovado. As correções vêm na ordem de gravidade, e dá para abrir um PR por grupo (8a a 8f) sem que um espere o outro. O 8c não tem migração: usa os campos que já existiam.
+Revisão das telas depois da fatia 7, triada pelo dono item a item. Entra aqui só o que foi aprovado. As correções vêm na ordem de gravidade, e dá para abrir um PR por grupo (8a a 8h) sem que um espere o outro. O 8c não tem migração: usa os campos que já existiam. A 8h espera duas decisões do dono.
 
 ### 8a · Níveis e o botão Adicionar
 
@@ -161,6 +161,41 @@ Na matriz, a linha em frase é **"Buscar capas e dados para o acervo inteiro"**.
 
 Aceite: Editor abre Capas e sinopses e roda a busca; Visitante não vê a seção nem consegue chamar a rota; tirar a permissão do Editor em Permissões esconde a seção sem deploy.
 
+### 8g · Acento da voz
+
+**A decisão (dono, 2026-10-01).** Capa, moldura e blocos ficam como estão. A página sem capa continua sem graça, de propósito: o que falta é a capa, e isso é incentivo para completar o acervo. O sistema ganha uma segunda cor, um rosa do outro lado do logo, que **nunca clica** e marca o que é do clube, não da interface. Estudo e medição no canvas, linha "Cor · um acento que não clica".
+
+**Tokens.** `--voice-soft`, `--voice-line`, `--voice-mark` e `--voice-ink` entram no tema (`src/assets/scss/themes/_ecos.scss`), no bloco de `:root[data-theme='ecos']` ao lado dos `--alert-*`. Valores e contrastes em `tokens/tokens.json` e em `COMPONENTES.md`.
+
+**Onde entra, e só aí.**
+1. **`UserAvatar` ganha `kind`** (`pessoa` | `conta`, padrão `pessoa`). Pessoa: fundo `voice-soft`, borda `voice-line`, inicial em `voice-ink`, peso 700. Conta: o neutro de hoje. `UserMenu` passa `kind="conta"`; `EcoCard` e `ClaimNameSection` ficam no padrão. É papel, não cor: nada de `color` por prop.
+2. **Página do livro:** o monograma de pessoa (26px) entra antes de "mencionado por", na mesma linha. O nome continua `RouterLink` azul.
+3. **`EcoCard`:** o rótulo "O eco da semana" passa a `voice-ink` com o ícone de conversa (14px, traço 2) em `voice-mark` antes dele. Moldura e fundo do cartão não mudam.
+
+A estrela do Favorito do clube usa os mesmos tokens, mas depende de dado novo: está na 8h.
+
+**O que não muda.** `BookCard` continua sem avatar. A régua do `QuoteBlock` continua `action-line` (a troca por `voice-line` foi sugerida e não adotada). Nenhum botão, link, chip ou estado selecionado em rosa.
+
+Aceite:
+- Monograma rosa no eco da semana, em "Vincular meu nome" e ao lado de "mencionado por" na página do livro; neutro no menu da conta.
+- Rótulo do eco em `voice-ink` com o ícone; cartão do eco igual ao de hoje no resto.
+- `yarn lint` passa sem valor cru: tudo pelos tokens novos.
+- Nenhum outro elemento em rosa (busca por `--voice-` mostra só `UserAvatar`, `EcoCard` e, depois da 8h, `CoverBlock`).
+
+### 8h · Favorito do clube
+
+Recurso novo, pedido na lista de melhorias ("livros em destaque/estrela"). O visual está decidido; o dado e a regra, ainda não.
+
+**Visual (decidido).** No `CoverBlock`, canto superior esquerdo (o direito é do selo de formato): na grade, círculo branco de 28px com borda `border-hair` e estrela cheia de 15px em `voice-mark`, `role="img"` e `aria-label="Favorito do clube"`; na página do livro, a pílula branca com a estrela e **"Favorito do clube"** em `voice-ink`, `caption` 600. Ver `componentes/CoverBlock.md`.
+
+**Antes de codar, o dono decide:**
+1. **Quem marca.** Proposta: matriz de Permissões, recurso `favoritos`, ação `update`, padrão **só Administrador** (é uma afirmação do clube, não de uma pessoa). Linha em frase: **"Marcar um livro como favorito do clube"**.
+2. **Se entra no filtro.** Proposta: sim, como linha na gaveta ("Só favoritos do clube"), não como chip rápido.
+
+**Dado (proposta).** `Book.favorito: { por: user_id, em: Date } | null`. Marcar e desmarcar entram no histórico, como o vínculo. `PATCH /books/:id/favorito` com `authorize('favoritos', 'update')`.
+
+Aceite (depois das decisões): marcar no formulário do livro mostra a estrela na grade e a pílula na página; quem não tem a permissão não vê o controle e a API recusa; a estrela nunca encobre o selo de formato.
+
 ### O que ficou de fora, de propósito
 
 - **Capa carregando com título e sem "sem capa".** Não é bug: é o estado de carregamento, e o `@error` troca para "sem capa" quando a imagem falha.
@@ -172,7 +207,7 @@ Aceite: Editor abre Capas e sinopses e roda a busca; Visitante não vê a seçã
 
 ## Fora do plano, de propósito
 
-**Tema escuro.** Não foi desenhado. Se for preciso, é trabalho novo — não uma inversão automática destas cores.
+**Tema escuro.** Não foi desenhado. Se for preciso, é trabalho novo — não uma inversão automática destas cores. Os quatro `voice-*` vão precisar de par escuro próprio.
 
 **Tablet, detalhe no celular e folha de filtro do celular.** Os artboards existem mas só foram repintados, não refeitos: ainda têm livros inventados e o cartão com título duplicado. Refaça o desenho antes de codar essas três telas.
 
