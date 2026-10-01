@@ -9,7 +9,7 @@ O app tem cinco superfícies de navegação, duas interfaces de filtro e dois de
 | Destino | Rota | O que é |
 | --- | --- | --- |
 | Catálogo | `/` | A raiz. A grade de livros abre a página; abaixo dela, na mesma rolagem, vêm as prateleiras. **Não existe uma "home" separada.** |
-| Meus livros | `/perfil/livros` | O que a pessoa mencionou e o que ela guardou, em três prateleiras (`?lista=`): Mencionados por mim (abre nela, com Editar, Sem capa e Sem sinopse), Quero ler e Lidos. |
+| Meus livros | `/perfil/livros` | O que a pessoa mencionou e o que ela guardou, em três prateleiras (`?lista=`): Estante (os livros dela; abre nela, com Editar, Sem capa e Sem sinopse), Quero ler e Lidos. |
 | Adicionar | `/admin/livros` | Leva quem pode criar livro (Administrador e Editor) à lista de livros do painel, onde o formulário abre na gaveta. **O Visitante não vê o botão** (topo, trilho e barra de baixo): estranho não é convidado a adicionar. Quem não entrou vê, e vai para Entrar com volta ao formulário, porque quase sempre é alguém do clube num aparelho novo. "Sem permissão" fica para quem digita o endereço do painel (fatia 8a). |
 
 A conta (`/perfil/conta`, **Minha conta**) fica no avatar, no fim do trilho. Ela reúne "Perfil", "O que você quer ver" (a mesma preferência da gaveta), "Vincular meu nome" e "Dados salvos", cada um com seu endereço (os endereços continuam `voce`, `nome-no-grupo` e `aparelho`). No pé, "Falar com o suporte" abre o WhatsApp do suporte com a mensagem pronta; o Painel do clube tem o mesmo pé, e o trilho do desktop tem "Ajuda" no pé, acima do Painel e da conta, na navegação "Conta" do pé, separada da principal. O antigo `/perfil/vinculos` abre direto nessa parte.
