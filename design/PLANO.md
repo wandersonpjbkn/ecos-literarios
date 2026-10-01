@@ -75,7 +75,7 @@ O painel Adicionar, as prateleiras, a nova Meus livros e a Conta entram na fatia
 
 ## 8 · Correções da revisão de 2026-09-27
 
-Revisão das telas depois da fatia 7, triada pelo dono item a item. Entra aqui só o que foi aprovado. As correções vêm na ordem de gravidade, e dá para abrir um PR por grupo (8a a 8h) sem que um espere o outro. O 8c não tem migração: usa os campos que já existiam. A 8h espera duas decisões do dono.
+Revisão das telas depois da fatia 7, triada pelo dono item a item. Entra aqui só o que foi aprovado. As correções vêm na ordem de gravidade, e dá para abrir um PR por grupo (8a a 8h) sem que um espere o outro. O 8c não tem migração: usa os campos que já existiam.
 
 ### 8a · Níveis e o botão Adicionar
 
@@ -172,7 +172,7 @@ Aceite: Editor abre Capas e sinopses e roda a busca; Visitante não vê a seçã
 2. **Página do livro:** o monograma de pessoa (26px) entra antes de "mencionado por", na mesma linha. O nome continua `RouterLink` azul.
 3. **`EcoCard`:** o rótulo "O eco da semana" passa a `voice-ink` com o ícone de conversa (14px, traço 2) em `voice-mark` antes dele. Moldura e fundo do cartão não mudam.
 
-A estrela do Favorito do clube usa os mesmos tokens, mas depende de dado novo: está na 8h.
+A estrela do Destaque do clube usa os mesmos tokens, mas depende de dado novo: está na 8h.
 
 **O que não muda.** `BookCard` continua sem avatar. A régua do `QuoteBlock` continua `action-line` (a troca por `voice-line` foi sugerida e não adotada). Nenhum botão, link, chip ou estado selecionado em rosa.
 
@@ -182,19 +182,21 @@ Aceite:
 - `yarn lint` passa sem valor cru: tudo pelos tokens novos.
 - Nenhum outro elemento em rosa (busca por `--voice-` mostra só `UserAvatar`, `EcoCard` e, depois da 8h, `CoverBlock`).
 
-### 8h · Favorito do clube
+### 8h · Destaque do clube
 
-Recurso novo, pedido na lista de melhorias ("livros em destaque/estrela"). O visual está decidido; o dado e a regra, ainda não.
+Recurso novo, pedido na lista de melhorias ("livros em destaque/estrela"). Visual e regra decididos; o formato do dado é proposta.
 
-**Visual (decidido).** No `CoverBlock`, canto superior esquerdo (o direito é do selo de formato): na grade, círculo branco de 28px com borda `border-hair` e estrela cheia de 15px em `voice-mark`, `role="img"` e `aria-label="Favorito do clube"`; na página do livro, a pílula branca com a estrela e **"Favorito do clube"** em `voice-ink`, `caption` 600. Ver `componentes/CoverBlock.md`.
+**Visual (decidido).** No `CoverBlock`, canto superior esquerdo (o direito é do selo de formato): na grade, círculo branco de 28px com borda `border-hair` e estrela cheia de 15px em `voice-mark`, `role="img"` e `aria-label="Destaque do clube"`; na página do livro, a pílula branca com a estrela e **"Destaque do clube"** em `voice-ink`, `caption` 600. Ver `componentes/CoverBlock.md`.
 
-**Antes de codar, o dono decide:**
-1. **Quem marca.** Proposta: matriz de Permissões, recurso `favoritos`, ação `update`, padrão **só Administrador** (é uma afirmação do clube, não de uma pessoa). Linha em frase: **"Marcar um livro como favorito do clube"**.
-2. **Se entra no filtro.** Proposta: sim, como linha na gaveta ("Só favoritos do clube"), não como chip rápido.
+**Decidido (dono, 2026-10-01).** O nome é **Destaque do clube**, não "Favorito": favorito soa como a lista pessoal dos sites, e isto é quem cadastra dizendo ao clube que o livro foi uma sensação de leitura.
+1. **Quem marca:** Administrador e Editor. Matriz de Permissões, recurso `destaques`, ação `update`, padrão **Administrador e Editor**. Linha em frase: **"Marcar um livro como destaque do clube"**.
+2. **Filtro:** entra, como caixa de marcar na gaveta (**"Só destaques do clube"**), não como chip rápido.
 
-**Dado (proposta).** `Book.favorito: { por: user_id, em: Date } | null`. Marcar e desmarcar entram no histórico, como o vínculo. `PATCH /books/:id/favorito` com `authorize('favoritos', 'update')`.
+Hoje três livros já carregam essa distinção e são os primeiros a marcar: **A hora da estrela** (leitura difícil que a mídia trata como culta e ninguém do clube captou; o choque virou piada interna), **Nunca minta** (virou favorito da galera) e **O pequeno príncipe** (a discussão sobre a morte, ou não, do pequeno príncipe no fim).
 
-Aceite (depois das decisões): marcar no formulário do livro mostra a estrela na grade e a pílula na página; quem não tem a permissão não vê o controle e a API recusa; a estrela nunca encobre o selo de formato.
+**Dado (proposta).** `Book.destaque: { por: user_id, em: Date } | null`. Marcar e desmarcar entram no histórico, como o vínculo. `PATCH /books/:id/destaque` com `authorize('destaques', 'update')`.
+
+Aceite: marcar no formulário do livro mostra a estrela na grade e a pílula na página; quem não tem a permissão não vê o controle e a API recusa; a estrela nunca encobre o selo de formato.
 
 ### O que ficou de fora, de propósito
 

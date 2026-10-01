@@ -10,7 +10,7 @@ Ele mostra **o título e nada mais**. Autor e quem mencionou vivem fora do bloco
 
 **Com selo de formato** — Mangá e HQ ganham selo branco no canto superior direito. Livro é o padrão e não recebe marca nenhuma; se tudo tivesse selo, nada teria.
 
-**Favorito do clube** (fatia 8h) — estrela cheia em `voice-mark` num selo branco com borda `border-hair`, no canto superior **esquerdo** (o direito é do formato). Na grade (`size` de cartão), só a estrela, num círculo de 28px com `aria-label="Favorito do clube"`; na página do livro (`size="page"`), a pílula com o texto em `voice-ink`. O branco é o que deixa a estrela legível sobre qualquer capa, clara ou real.
+**Destaque do clube** (fatia 8h) — estrela cheia em `voice-mark` num selo branco com borda `border-hair`, no canto superior **esquerdo** (o direito é do formato). Na grade (`size` de cartão), só a estrela, num círculo de 28px com `aria-label="Destaque do clube"`; na página do livro (`size="page"`), a pílula com o texto em `voice-ink`. O branco é o que deixa a estrela legível sobre qualquer capa, clara ou real.
 
 ## Regras
 

@@ -48,8 +48,8 @@
   --on-inverse: #FFFFFF; /* Texto sobre fundo ink: só o toast usa. */
   --voice-soft: #FBEFF4; /* Fundo do monograma de pessoa do clube. Nunca fundo de bloco, faixa ou botão. */
   --voice-line: #EFCADB; /* Borda do monograma de pessoa do clube. */
-  --voice-mark: #C25E88; /* Estrela do Favorito do clube e ícone do eco da semana. 4,0:1 sobre branco: só objeto gráfico (pede 3:1), nunca texto. */
-  --voice-ink: #8A3A5C; /* Texto da voz: selo "Favorito do clube", rótulo "O eco da semana", inicial do monograma. 7,4:1 sobre branco, 6,6:1 sobre voice-soft. */
+  --voice-mark: #C25E88; /* Estrela do Destaque do clube e ícone do eco da semana. 4,0:1 sobre branco: só objeto gráfico (pede 3:1), nunca texto. */
+  --voice-ink: #8A3A5C; /* Texto da voz: selo "Destaque do clube", rótulo "O eco da semana", inicial do monograma. 7,4:1 sobre branco, 6,6:1 sobre voice-soft. */
 
   --space-1: 4px;
   --space-2: 8px;

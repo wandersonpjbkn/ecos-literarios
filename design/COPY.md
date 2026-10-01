@@ -159,9 +159,9 @@ Título com o item entre aspas, uma frase do que acontece e do que vai junto, e 
 
 Cada linha é uma frase sobre o que ela controla ("Ver a lista de membros"), nunca o nome do recurso seguido de um verbo ("Membros: Ver"). O que o painel não configura aparece como linha fixa: **"Mudar o nível de alguém: só Administrador (não muda aqui)"**.
 
-## Favorito do clube
+## Destaque do clube
 
-**"Favorito do clube"**, nunca "Destaque", "Recomendado" ou "Escolha do clube": "recomendado" afirma intenção (a regra de cima), e "destaque" é palavra de vitrine. Na grade a estrela vai sozinha, com o nome no `aria-label`; na página do livro, estrela e texto juntos. Não confundir com o "Favorito da Brenda" que aparece em comentários: aquele é de uma pessoa e é texto dela.
+**"Destaque do clube"**, nunca "Favorito" nem "Recomendado". "Favorito" é a lista pessoal de todo site (cada um marca o que gosta), e não é isso: aqui é quem cadastra os livros dizendo ao clube, e a quem chega no catálogo, que aquele livro foi uma sensação de leitura (dono, 2026-10-01). "Recomendado" afirma intenção (a regra de cima). Na grade a estrela vai sozinha, com o nome no `aria-label`; na página do livro, estrela e texto juntos. Não confundir com o "Favorito da Brenda" que aparece em comentários: aquele é de uma pessoa e é texto dela.
 
 ## Palavras de sistema que não aparecem
 

@@ -174,4 +174,4 @@ outro arquivo. A tela chama a função e mostra o erro com `errorText`.
 --voice-ink:  #8A3A5C;  /* texto: 7,4:1 sobre branco, 6,6:1 sobre voice-soft */
 ```
 
-Três lugares, e mais nenhum: a estrela do Favorito do clube (`CoverBlock`), o monograma de pessoa do clube (`UserAvatar kind="pessoa"`) e o rótulo do eco da semana (`EcoCard`). Sempre do tamanho do objeto: nenhum fundo, faixa ou borda de bloco em rosa, e nunca em botão, link, chip ou item selecionado. Medido nas telas do estudo: 0,1% da área, contra 1,1–1,7% de azul. Passou de 1% em uma tela, virou tema. O vermelho destrutivo fica a 28° de matiz do rosa: os dois não dividem tela.
+Três lugares, e mais nenhum: a estrela do Destaque do clube (`CoverBlock`), o monograma de pessoa do clube (`UserAvatar kind="pessoa"`) e o rótulo do eco da semana (`EcoCard`). Sempre do tamanho do objeto: nenhum fundo, faixa ou borda de bloco em rosa, e nunca em botão, link, chip ou item selecionado. Medido nas telas do estudo: 0,1% da área, contra 1,1–1,7% de azul. Passou de 1% em uma tela, virou tema. O vermelho destrutivo fica a 28° de matiz do rosa: os dois não dividem tela.
