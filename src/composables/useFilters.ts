@@ -2,13 +2,14 @@ import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import { useRoute, useRouter, type LocationQueryRaw, type RouteLocationRaw } from 'vue-router'
 
+import { authorLine } from '@/data/authors'
 import type { Book, BookSortOrder, FilterKey, Options } from '@/types'
 
 import { useBooksStore, usePreferencesStore } from '@/stores'
 
 import { useUtils } from '@/composables/useUtils'
 
-const FILTER_KEYS: FilterKey[] = ['midia', 'categoria', 'subgenres', 'person', 'autor', 'size']
+const FILTER_KEYS: FilterKey[] = ['midia', 'categoria', 'subgenres', 'person', 'authors', 'size']
 
 // Query names are part of links already shared in the club group: renaming one breaks them.
 const QUERY_PARAM: Record<FilterKey, string> = {
@@ -16,7 +17,7 @@ const QUERY_PARAM: Record<FilterKey, string> = {
   categoria: 'genero',
   subgenres: 'subgenero',
   person: 'quem',
-  autor: 'autor',
+  authors: 'autor',
   size: 'tamanho',
 }
 
@@ -60,7 +61,7 @@ export const describeSelection = (selection: Options): string => {
     kinds.length && `de ${orList(kinds)}`,
     formats.length && `em ${orList(formats)}`,
     selection.size.length && orList(selection.size.map((label) => SIZES.find((s) => s.label === label)!.phrase)),
-    selection.autor.length && `de ${orList(selection.autor)}`,
+    selection.authors.length && `de ${orList(selection.authors)}`,
     selection.person.length && `mencionado por ${orList(selection.person)}`,
   ]
   return `${parts.filter(Boolean).join(' ')}.`
@@ -69,6 +70,7 @@ export const describeSelection = (selection: Options): string => {
 const valuesOf = (book: Book, key: FilterKey): string[] => {
   if (key === 'size') return SIZES.filter((size) => size.match(book)).map((size) => size.label)
   if (key === 'subgenres') return book.subgenreNames ?? []
+  if (key === 'authors') return book.authors ?? []
   const value = book[key]
   return value ? [value] : []
 }
@@ -79,7 +81,10 @@ const emptySelection = (): Options => Object.fromEntries(FILTER_KEYS.map((key) =
 const applyFilters = (books: Book[], selection: Options, search: string, hiddenFormats: string[]) => {
   const q = search.trim().toLowerCase()
   return books.filter((book) => {
-    if (q && ![book.titulo, book.autor, book.person, book.porque].some((field) => field?.toLowerCase().includes(q)))
+    if (
+      q &&
+      ![book.titulo, ...book.authors, book.person, book.porque].some((field) => field?.toLowerCase().includes(q))
+    )
       return false
     if (!selection.midia.length && hiddenFormats.includes(book.midia)) return false
     return FILTER_KEYS.every(
@@ -166,7 +171,7 @@ export function useFilters() {
 
     return books.value
       .filter((book) => book.titulo?.toLowerCase().includes(q))
-      .map((book) => ({ id: book.id, main: book.titulo, sub: book.autor }))
+      .map((book) => ({ id: book.id, main: book.titulo, sub: authorLine(book.authors) }))
       .slice(0, 8)
   })
 

@@ -2,7 +2,10 @@
   <RouterLink :to="{ name: 'catalog-book-details', params: { id: book.id } }" class="book-card" :aria-label="label">
     <CoverBlock :title="book.titulo" :genre="book.categoria" :format="book.midia" :cover-url="book.cover_url" />
 
-    <p class="book-card__author">{{ book.autor }}</p>
+    <p class="book-card__author">
+      <span class="book-card__author-name">{{ book.authors[0] }}</span>
+      <span v-if="book.authors.length > 1">{{ authorMore(book.authors) }}</span>
+    </p>
     <p v-if="book.person && !hideMention" class="book-card__mention">mencionado por {{ book.person }}</p>
   </RouterLink>
 </template>
@@ -10,6 +13,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
+import { authorLineSpoken, authorMore } from '@/data/authors'
 import type { Book } from '@/types'
 
 import CoverBlock from '@/components/books/CoverBlock.vue'
@@ -23,7 +27,7 @@ const props = defineProps<{
 const label = computed(() =>
   [
     props.book.titulo,
-    props.book.autor,
+    authorLineSpoken(props.book.authors),
     !props.hideMention && props.book.person && `mencionado por ${props.book.person}`,
   ]
     .filter(Boolean)
@@ -43,15 +47,22 @@ const label = computed(() =>
     outline-offset: var(--space-1);
   }
 
+  // Only the name is cut: "(+2)" stays whole, it is what says the book has more authors.
   &__author {
+    display: flex;
+    gap: var(--space-1);
     margin-top: var(--space-2);
-    overflow: hidden;
 
     font-size: var(--font-size-meta);
     line-height: var(--line-height-title);
     color: var(--color-text-secondary);
 
     white-space: nowrap;
+  }
+
+  &__author-name {
+    min-width: 0;
+    overflow: hidden;
     text-overflow: ellipsis;
   }
 

@@ -32,12 +32,18 @@ export const useBooksStore = defineStore(
       pick: ['books', 'savedAt'],
       serializer: {
         serialize: JSON.stringify,
-        // Saved before the rename, a book came with "quem" and "subgenerosArr": the copy shown offline keeps them.
+        // Saved before the renames ("quem", "subgenerosArr", a single "autor"): the copy shown offline keeps them.
         deserialize: (raw) => {
           const state = JSON.parse(raw)
           state.books = (state.books ?? []).map(
-            ({ quem: legacyPerson, subgenerosArr: legacySubgenres, ...book }: Record<string, unknown>) => ({
+            ({
+              quem: legacyPerson,
+              subgenerosArr: legacySubgenres,
+              autor: legacyAuthor,
+              ...book
+            }: Record<string, unknown>) => ({
               ...book,
+              authors: book.authors ?? (legacyAuthor ? [legacyAuthor] : []),
               person: book.person ?? legacyPerson,
               subgenreNames: book.subgenreNames ?? legacySubgenres ?? [],
             }),

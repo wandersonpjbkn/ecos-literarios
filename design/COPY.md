@@ -138,6 +138,8 @@ Ninguém precisa vincular antes de adicionar: o livro sai com quem cadastra como
 
 Autor, Gênero e Subgênero, no formulário do livro, seguem o mesmo padrão: **"Outro autor: {o que foi digitado}"**, **"Outro gênero: …"** e **"Outro subgênero: …"**, só para quem pode criar a lista na matriz (por padrão Administrador e Editor). Escolhido, o item aparece como "{nome} (autor novo)" e só é criado quando o livro é salvo; desistir do formulário não deixa nada para trás. A busca ignora acento e caixa, e o nome que já existe com outra grafia aparece no lugar de "Outro …".
 
+Um livro pode ter vários autores: o campo é **"Autores"**, com "Escolher autores" e a contagem, como Subgêneros. O primeiro escolhido é o que aparece nas listas. O filtro de autor acha o livro por qualquer um deles.
+
 As linhas novas da matriz de Permissões, em frase: **"Vincular a própria conta a um nome do grupo"** (Vínculo · Editar), **"Incluir um nome novo de pessoa do clube"** (Vínculo · Criar) e **"Buscar capas e dados para o acervo inteiro"**.
 
 ## Suporte

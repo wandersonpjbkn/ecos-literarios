@@ -251,7 +251,9 @@ const shelfBooks = computed(() => (shelf.value === 'estante' ? segmentBooks.valu
 const searched = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
   if (!q) return shelfBooks.value
-  return shelfBooks.value.filter((b) => b.titulo.toLowerCase().includes(q) || b.autor.toLowerCase().includes(q))
+  return shelfBooks.value.filter(
+    (b) => b.titulo.toLowerCase().includes(q) || b.authors.some((name) => name.toLowerCase().includes(q)),
+  )
 })
 
 const { sortOrder, sortOptions, sortedBooks: filteredBooks } = useBookSort(searched)

@@ -39,18 +39,19 @@
             :disabled="isSaving"
             autocomplete="off"
           />
-          <AppField label="Autor">
+          <AppField label="Autores">
             <template #default="{ labelId }">
               <MultiSelect
-                label="Escolher o autor"
+                label="Escolher autores"
                 :labelledby="labelId"
                 :options="authorOptions"
-                :selected="form.autor"
-                :multiple="false"
+                :selected="form.authors"
+                :multiple="true"
                 :searchable="true"
                 :create-label="canCreate('autores') ? createLabel('autor') : undefined"
-                @toggle="(v) => (form.autor = v)"
+                @toggle="toggleAuthor"
                 @create="pickNewAuthor"
+                @clear="form.authors = []"
               />
             </template>
           </AppField>
@@ -319,7 +320,7 @@ const success = ref('')
 
 const form = reactive({
   titulo: '',
-  autor: '',
+  authors: [] as string[],
   midia: '',
   categoria: '',
   subgeneros: [] as string[],
@@ -366,7 +367,7 @@ const canRemove = computed(() => isEditMode.value && !isMemberScope.value && per
 const missingText = computed(() => {
   const missing = [
     !form.titulo.trim() && 'o título',
-    !form.autor && 'o autor',
+    !form.authors.length && 'o autor',
     !form.midia && 'o formato',
     !form.categoria && 'o gênero',
   ].filter(Boolean) as string[]
@@ -375,7 +376,7 @@ const missingText = computed(() => {
 })
 
 const isValid = computed(
-  () => form.titulo.trim().length > 0 && form.autor.length > 0 && form.midia.length > 0 && form.categoria.length > 0,
+  () => form.titulo.trim().length > 0 && form.authors.length > 0 && form.midia.length > 0 && form.categoria.length > 0,
 )
 
 // "Outro nome" follows the matrix (claim: create), by default only the Administrador.
@@ -411,7 +412,7 @@ const withPending = (options: { label: string; value: string }[], picked: string
     })),
 ]
 
-const authorOptions = computed(() => withPending(toOptions(authors.items.value), [form.autor], 'autor'))
+const authorOptions = computed(() => withPending(toOptions(authors.items.value), form.authors, 'autor'))
 const formatOptions = computed(() => toOptions(formats.items.value))
 const genreOptions = computed(() => withPending(toOptions(genres.items.value), [form.categoria], 'gênero'))
 const subgenreOptions = computed(() => withPending(toOptions(subgenres.items.value), form.subgeneros, 'subgênero'))
@@ -490,17 +491,19 @@ const claimOfferedName = async () => {
 
 const toOptions = (items: Array<{ _id: string; nome: string }>) => items.map((i) => ({ label: i.nome, value: i._id }))
 
-const toggleSubgenre = (value: string) => {
-  const idx = form.subgeneros.indexOf(value)
-  if (idx === -1) form.subgeneros.push(value)
-  else form.subgeneros.splice(idx, 1)
+const toggleValue = (list: string[], value: string) => {
+  const idx = list.indexOf(value)
+  if (idx === -1) list.push(value)
+  else list.splice(idx, 1)
 }
+const toggleAuthor = (value: string) => toggleValue(form.authors, value)
+const toggleSubgenre = (value: string) => toggleValue(form.subgeneros, value)
 
 const extractId = (field: string | { _id: string }): string => (typeof field === 'string' ? field : field._id)
 
 const resetForm = (): void => {
   form.titulo = ''
-  form.autor = ''
+  form.authors = []
   form.midia = ''
   form.categoria = ''
   form.subgeneros = []
@@ -528,7 +531,7 @@ const adoptOptional = (book: BookPayload): void => {
 
 const populateForm = (book: BookPayload): void => {
   form.titulo = book.titulo
-  form.autor = extractId(book.autor)
+  form.authors = book.authors.map(extractId)
   form.midia = extractId(book.midia)
   form.categoria = extractId(book.categoria)
   form.subgeneros = book.subgeneros.map(extractId)
@@ -564,7 +567,8 @@ const positiveInt = (raw: string) => {
 }
 
 const pickNewAuthor = (typed: string) => {
-  form.autor = `${NEW_NAME}${typed}`
+  const value = `${NEW_NAME}${typed}`
+  if (!form.authors.includes(value)) form.authors.push(value)
 }
 
 const pickNewGenre = (typed: string) => {
@@ -582,7 +586,7 @@ const resolvePicked = async (list: EntityList, value: string) =>
 
 // Written back into the form: a retry after a failed save reuses what was created instead of creating it twice.
 const resolvePickedItems = async () => {
-  form.autor = await resolvePicked(authors, form.autor)
+  for (const [index, value] of form.authors.entries()) form.authors[index] = await resolvePicked(authors, value)
   form.categoria = await resolvePicked(genres, form.categoria)
   for (const [index, value] of form.subgeneros.entries()) form.subgeneros[index] = await resolvePicked(subgenres, value)
 }
@@ -599,7 +603,7 @@ const handleSubmit = async () => {
     await resolvePickedItems()
     const shared = {
       titulo: form.titulo,
-      autor: form.autor,
+      authors: form.authors,
       midia: form.midia,
       categoria: form.categoria,
       subgeneros: form.subgeneros,

@@ -95,7 +95,7 @@ import LiveStatus from '@/components/ui/LiveStatus.vue'
 
 type Group = {
   title: string
-  key?: Exclude<FilterKey, 'midia' | 'autor'>
+  key?: Exclude<FilterKey, 'midia' | 'authors'>
   more?: [string, string, 'o' | 'a']
   // Long lists (100+ subgenres) become a combobox: browsable, and typing narrows by word start.
   searchable?: boolean

@@ -44,7 +44,7 @@ const extractName = (field: ApiPopulated | string | undefined): string => {
 const normalizeBook = (raw: ApiBook): Book => ({
   id: raw._id,
   titulo: raw.titulo,
-  autor: extractName(raw.autor),
+  authors: raw.authors.map(extractName).filter(Boolean),
   midia: extractName(raw.midia),
   categoria: extractName(raw.categoria) as Book['categoria'],
   person: personName(raw),

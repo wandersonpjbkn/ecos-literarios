@@ -31,9 +31,12 @@
             <FilterChip v-if="book.categoria" :label="genre" :to="catalogLink('categoria', book.categoria)" />
           </div>
           <h1 class="book-page__title">{{ book.titulo }}</h1>
-          <RouterLink v-if="book.autor" :to="catalogLink('autor', book.autor)" class="book-page__author">
-            {{ book.autor }}
-          </RouterLink>
+          <p v-if="book.authors.length" class="book-page__authors">
+            <template v-for="(author, index) in book.authors" :key="author">
+              <RouterLink :to="catalogLink('authors', author)" class="book-page__author">{{ author }}</RouterLink
+              >{{ separator(index) }}
+            </template>
+          </p>
           <p v-if="book.person" class="book-page__mention">
             mencionado por
             <RouterLink :to="catalogLink('person', book.person)" class="book-page__person">{{
@@ -143,6 +146,7 @@
 import { computed, ref, useId, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import { authorNames } from '@/data/authors'
 import type { Book } from '@/types'
 
 import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
@@ -212,7 +216,7 @@ usePageMeta(
   computed(() => ({
     title: book.value?.titulo ?? 'Livro',
     description: book.value
-      ? `${book.value.titulo} · ${book.value.autor}${book.value.person ? ` · mencionado por ${book.value.person}` : ''}`
+      ? `${book.value.titulo} · ${authorNames(book.value.authors)}${book.value.person ? ` · mencionado por ${book.value.person}` : ''}`
       : '',
     type: 'article' as const,
   })),
@@ -222,6 +226,12 @@ const bookPath = computed(() =>
   book.value ? router.resolve({ name: 'catalog-book-details', params: { id: book.value.id } }).path : '',
 )
 const genre = computed(() => book.value?.categoria.replace(/-/g, ' ') ?? '')
+
+const separator = (index: number) => {
+  const left = (book.value?.authors.length ?? 0) - 1 - index
+  if (left > 1) return ', '
+  return left === 1 ? ' e ' : ''
+}
 
 // The API only lets the person who mentioned the book (after linking the name) or an admin edit it.
 const isOwner = computed(() => !!book.value?.quem_user_id && book.value.quem_user_id === authStore.user?._id)
@@ -364,6 +374,11 @@ watch(book, () => (synopsisOpen.value = !synopsisIsLong.value), { immediate: tru
       outline: 2px solid var(--color-border-focus);
       outline-offset: var(--focus-offset);
     }
+  }
+
+  &__authors {
+    font-size: var(--font-size-section);
+    color: var(--color-text-subtle);
   }
 
   // A link, so it takes the action colour like the person below (one colour means "this clicks").

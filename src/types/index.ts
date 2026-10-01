@@ -25,7 +25,8 @@ import CategoriesColors from '@/data/categoryColors.json'
 export interface Book {
   id: string
   titulo: string
-  autor: string
+  // In the order the book lists them; a list shows the first.
+  authors: string[]
   categoria: keyof typeof CategoriesColors
   midia: string
   person: string
@@ -59,7 +60,7 @@ export interface ReadingCounts {
   lido: number
 }
 
-export type FilterKey = 'midia' | 'categoria' | 'subgenres' | 'person' | 'autor' | 'size'
+export type FilterKey = 'midia' | 'categoria' | 'subgenres' | 'person' | 'authors' | 'size'
 
 export type Options = Record<FilterKey, string[]>
 
@@ -76,7 +77,7 @@ export type BookSortOrder = 'recentes' | 'titulo' | 'pessoa' | 'genero'
 export interface BookPayload {
   _id: string
   titulo: string
-  autor: string | { _id: string; nome: string }
+  authors: Array<string | { _id: string; nome: string }>
   midia: string | { _id: string; nome: string }
   categoria: string | { _id: string; nome: string }
   subgeneros: Array<string | { _id: string; nome: string }>
@@ -126,7 +127,7 @@ export interface ApiPopulated {
 export interface ApiBook {
   _id: string
   titulo: string
-  autor: ApiPopulated | string
+  authors: Array<ApiPopulated | string>
   midia: ApiPopulated | string
   categoria: ApiPopulated | string
   quem_nome?: string | null
@@ -195,7 +196,7 @@ export type SegmentFilter = 'all' | 'missing' | 'complete' | 'missing-isbn'
 export interface AdminBook {
   _id: string
   titulo: string
-  autor: string | { _id: string; nome: string }
+  authors: Array<string | { _id: string; nome: string }>
   midia: string | { _id: string; nome: string }
   categoria: string | { _id: string; nome: string }
   subgeneros: Array<string | { _id: string; nome: string }>
@@ -304,7 +305,7 @@ export interface Permission {
 export interface BookForEdit {
   _id: string
   titulo: string
-  autor: string | { _id: string; nome: string }
+  authors: Array<string | { _id: string; nome: string }>
   midia: string | { _id: string; nome: string }
   categoria: string | { _id: string; nome: string }
   subgeneros: Array<string | { _id: string; nome: string }>

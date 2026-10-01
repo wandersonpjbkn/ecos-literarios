@@ -80,7 +80,7 @@
         >
           <span role="cell" class="books-table__title">{{ book.titulo }}</span>
           <span role="cell" class="books-table__field" data-label="Autor">{{
-            resolveName(book.autor) || 'sem autor'
+            authorLine(authorsOf(book)) || 'sem autor'
           }}</span>
           <span role="cell" class="books-table__field" data-label="Gênero">{{
             resolveName(book.categoria) || 'sem gênero'
@@ -126,6 +126,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import { authorLine } from '@/data/authors'
 import { personName } from '@/data/person'
 import { joinWords } from '@/data/words'
 import type { Suggestion, SegmentFilter, AdminBook } from '@/types'
@@ -176,7 +177,7 @@ const filteredBooks = computed(() => {
   if (!searchQuery.value.trim()) return segmentBooks.value
   const q = searchQuery.value.toLowerCase()
   return segmentBooks.value.filter(
-    (b) => b.titulo.toLowerCase().includes(q) || resolveName(b.autor).toLowerCase().includes(q),
+    (b) => b.titulo.toLowerCase().includes(q) || authorsOf(b).some((name) => name.toLowerCase().includes(q)),
   )
 })
 
@@ -199,7 +200,7 @@ const searchSuggestions = computed(() => {
       return {
         id: b._id,
         main: b.titulo,
-        sub: typeof b.autor === 'string' ? b.autor : b.autor?.nome,
+        sub: authorLine(authorsOf(b)),
       }
     })
     .slice(0, 8)
@@ -207,6 +208,7 @@ const searchSuggestions = computed(() => {
 
 const resolveName = (field: string | { nome: string } | undefined): string =>
   !field ? '' : typeof field === 'string' ? field : field.nome
+const authorsOf = (book: AdminBook) => book.authors.map(resolveName)
 
 const isMissingField = (value?: string | null) => !value || !value.trim()
 
@@ -219,7 +221,7 @@ const FIELDS: { label: string; missing: (book: AdminBook) => boolean }[] = [
   { label: 'ano', missing: (b) => !b.published_year },
   { label: 'comentário', missing: (b) => isMissingField(b.porque) },
   { label: 'subgêneros', missing: (b) => b.subgeneros.length === 0 },
-  { label: 'autor', missing: (b) => isMissingField(resolveName(b.autor)) },
+  { label: 'autor', missing: (b) => !authorsOf(b).some((name) => !isMissingField(name)) },
   { label: 'gênero', missing: (b) => isMissingField(resolveName(b.categoria)) },
   { label: 'formato', missing: (b) => isMissingField(resolveName(b.midia)) },
   { label: 'título', missing: (b) => isMissingField(b.titulo) },
