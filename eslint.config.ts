@@ -125,6 +125,33 @@ export default defineConfigWithVueTs(
     },
   },
 
+  // The data layer (composables) reads API statuses; a screen only shows the message (errorText).
+  {
+    name: 'app/data-layer',
+    files: ['src/components/**/*.vue', 'src/views/**/*.vue', 'src/layouts/**/*.vue'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@/composables/apiError',
+              importNames: ['ApiError'],
+              message: 'Status da API se trata no composable; na tela, use errorText.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "BinaryExpression[left.property.name='status'][right.raw=/^[1-5][0-9][0-9]$/]",
+          message: 'Status da API se trata no composable; na tela, use errorText.',
+        },
+      ],
+    },
+  },
+
   {
     name: 'app/api-gateway',
     files: ['src/composables/useApi.ts'],
