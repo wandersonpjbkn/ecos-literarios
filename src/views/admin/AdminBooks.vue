@@ -95,7 +95,8 @@
           <span role="cell" class="books-table__actions">
             <AppButton v-if="permissions.canEditBook(book.quem_user_id?._id)" size="md" @click="openEdit(book)">
               <BaseIcon name="pencil" aria-hidden="true" />
-              Editar<span class="visually-hidden">{{ ' ' }}{{ book.titulo }}</span>
+              {{ bookForm.loadingId.value === book._id ? 'Abrindo…' : 'Editar'
+              }}<span class="visually-hidden">{{ ' ' }}{{ book.titulo }}</span>
             </AppButton>
           </span>
         </div>
@@ -109,16 +110,6 @@
         @more="more(table)"
       />
     </template>
-
-    <BookFormDrawer
-      :book="editingBook"
-      :title="newTitle"
-      :is-open="isDrawerOpen"
-      :return-focus="() => table?.querySelector<HTMLElement>('[data-list-item]')"
-      @close="closeDrawer"
-      @saved="onBookSaved"
-      @removed="onBookRemoved"
-    />
   </div>
 </template>
 
@@ -133,13 +124,12 @@ import type { Suggestion, SegmentFilter, AdminBook } from '@/types'
 
 import { usePermissionsStore } from '@/stores'
 
-import { useErrorReporter } from '@/composables'
+import { useBookForm, useErrorReporter } from '@/composables'
 import { errorText } from '@/composables/apiError'
-import { getPanelBooks, useApi } from '@/composables/useApi'
+import { getPanelBooks } from '@/composables/useApi'
 import { useLoadMore } from '@/composables/useLoadMore'
 import { useSegments, type SegmentOption } from '@/composables/useSegments'
 
-import BookFormDrawer from '@/components/books/BookFormDrawer.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
@@ -153,16 +143,13 @@ const router = useRouter()
 
 // Segment and how many are open live in the URL (FilterChip.md), so going back keeps the list the admin was fixing.
 const permissions = usePermissionsStore()
+const bookForm = useBookForm()
 
 const table = ref<HTMLElement | null>(null)
 const books = ref<AdminBook[]>([])
 const loading = ref(false)
 const loadError = ref('')
 const searchQuery = ref('')
-
-const isDrawerOpen = ref(false)
-const editingBook = ref<AdminBook | null>(null)
-const newTitle = ref('')
 
 // The server decides; this only hides what it would refuse for this level (users/me).
 const canCreate = computed(() => permissions.can('books', 'create'))
@@ -294,33 +281,16 @@ const onSelectSuggestion = (suggestion: Suggestion) => {
   searchQuery.value = suggestion.main
 }
 
-const openCreate = (title = '') => {
-  editingBook.value = null
-  newTitle.value = title
-  isDrawerOpen.value = true
-}
+// A removed row takes its "Editar" with it: focus goes to the list instead.
+const firstRow = () => table.value?.querySelector<HTMLElement>('[data-list-item]')
+const openCreate = (title = '') => bookForm.openAdd({ title, fallback: firstRow })
+const openEdit = (book: AdminBook) => bookForm.openEdit(book._id, { fallback: firstRow })
 
-const openEdit = (book: AdminBook) => {
-  editingBook.value = book
-  isDrawerOpen.value = true
-}
-
-const closeDrawer = () => {
-  isDrawerOpen.value = false
-  editingBook.value = null
-}
-
-// The catalog is another list: without its own refresh it keeps showing the books from before the change.
-const onBookSaved = () => {
-  fetchBooks(true)
-  useApi().fetchBooks()
-}
-
-// Removing lives in the edit form (slice 8b); the row only leaves the list.
-const onBookRemoved = (id: string) => {
-  books.value = books.value.filter((b) => b._id !== id)
-  useApi().fetchBooks()
-}
+// The panel keeps its own list (App.vue refreshes the catalog): a saved book reloads it, a removed one leaves it.
+watch(bookForm.lastChange, (change) => {
+  if (change?.kind === 'removed') books.value = books.value.filter((b) => b._id !== change.id)
+  else if (change) fetchBooks(true)
+})
 
 // The search is not in the URL, so a new term starts the list from the top here.
 watch(searchQuery, () => reset())

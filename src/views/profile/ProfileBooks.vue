@@ -82,7 +82,7 @@
           <BookCard :book="book" :hide-mention="shelf === 'estante'" data-list-item />
           <div class="my-book__foot">
             <!-- Not disabled while loading: open() already refuses a second click, and a disabled button drops the focus. -->
-            <AppButton v-if="permissions.canEditBook(book.quem_user_id)" size="md" @click="editor.open(book.id)">
+            <AppButton v-if="permissions.canEditBook(book.quem_user_id)" size="md" @click="editor.openEdit(book.id)">
               <BaseIcon name="pencil" aria-hidden="true" />
               {{ editor.loadingId.value === book.id ? 'Abrindo…' : 'Editar' }}
               <span class="visually-hidden">{{ book.titulo }}</span>
@@ -99,15 +99,6 @@
         @more="more(grid)"
       />
     </ListTabs>
-
-    <BookFormDrawer
-      :book="editor.editingBook.value"
-      :is-open="editor.isOpen.value"
-      scope="member"
-      @close="editor.close"
-      @saved="editor.onSaved"
-      @removed="editor.onSaved"
-    />
   </div>
 </template>
 
@@ -124,7 +115,7 @@ import {
   rememberMyBooks,
   useAccessRequest,
   useApi,
-  useBookEditor,
+  useBookForm,
   useBookSort,
   usePageMeta,
 } from '@/composables'
@@ -133,7 +124,6 @@ import { useLoadMore } from '@/composables/useLoadMore'
 import { useSegments, type SegmentOption } from '@/composables/useSegments'
 
 import BookCard from '@/components/books/BookCard.vue'
-import BookFormDrawer from '@/components/books/BookFormDrawer.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
 import AppSelect from '@/components/ui/AppSelect.vue'
@@ -194,7 +184,7 @@ usePageMeta({
   description: 'Os livros que você mencionou no grupo, os que adicionou aqui e os que marcou em Quero ler e Lidos.',
 })
 
-const editor = useBookEditor()
+const editor = useBookForm()
 
 const grid = ref<HTMLElement | null>(null)
 

@@ -283,7 +283,6 @@ const NEW_NAME = 'new:'
 const props = defineProps<{
   book: BookPayload | null
   isOpen: boolean
-  scope?: 'admin' | 'member'
   // A new book can start with a title, e.g. the search that found nothing.
   title?: string
   // Opened to write the comment ("Escrever o que achei"): focus starts on it.
@@ -350,7 +349,7 @@ const claimError = ref('')
 let closeTimer: ReturnType<typeof setTimeout> | undefined
 
 // Scope follows the permission, not the screen: whoever may edit any book (PATCH /books/:id) gets the panel's form.
-const isMemberScope = computed(() => props.scope === 'member' && !permissions.can('books', 'update'))
+const isMemberScope = computed(() => !permissions.can('books', 'update'))
 // The automatic search asks for books:update in the API; everyone else fills the same fields by hand.
 const canSearchData = computed(() => permissions.can('books', 'update'))
 

@@ -136,16 +136,6 @@
         /></a>
         <PoweredByGoogle />
       </p>
-
-      <BookFormDrawer
-        :book="editingBook"
-        :is-open="isEditing"
-        :focus="editFocus"
-        scope="member"
-        @close="closeEditor"
-        @saved="onSaved"
-        @removed="onRemoved"
-      />
     </template>
   </div>
 </template>
@@ -164,7 +154,7 @@ import {
   askGroupLink,
   reportLink,
   useApi,
-  useBookEditor,
+  useBookForm,
   useCanWrite,
   useFilters,
   useLastCatalog,
@@ -173,7 +163,6 @@ import {
 } from '@/composables'
 
 import BookCard from '@/components/books/BookCard.vue'
-import BookFormDrawer from '@/components/books/BookFormDrawer.vue'
 import CoverBlock from '@/components/books/CoverBlock.vue'
 import BookFacts from '@/components/catalog/BookFacts.vue'
 import BookFixLine from '@/components/catalog/BookFixLine.vue'
@@ -200,14 +189,7 @@ const authStore = useAuthStore()
 const permissions = usePermissionsStore()
 
 const canWrite = useCanWrite()
-const {
-  editingBook,
-  isOpen: isEditing,
-  error: editError,
-  open: openBookEditor,
-  close: closeEditor,
-  onSaved,
-} = useBookEditor()
+const { error: editError, openEdit, lastChange } = useBookForm()
 
 const lastCatalog = useLastCatalog()
 // Back goes to the list the book was opened from: the catalog, or Meus livros.
@@ -260,15 +242,14 @@ const related = computed(() => sameGenre.value.filter((b) => b.id !== book.value
 
 const openEditor = (id: string, focus?: 'porque') => {
   editFocus.value = focus
-  return openBookEditor(id)
+  return openEdit(id, { field: focus })
 }
 
 const retry = () => useApi().fetchBooks()
 // The book no longer exists: back to the list it was opened from, which no longer shows it.
-const onRemoved = () => {
-  useApi().fetchBooks()
-  router.push(lastList.value.path)
-}
+watch(lastChange, (change) => {
+  if (change?.kind === 'removed' && change.id === String(route.params.id)) router.push(lastList.value.path)
+})
 
 const ask = (message: string) => askGroupLink(message, bookPath.value)
 const report = (message: string) => reportLink(message, bookPath.value)

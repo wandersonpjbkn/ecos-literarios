@@ -2,8 +2,8 @@ import { useAddTarget } from '@/composables/useAddTarget'
 import { useApi } from '@/composables/useApi'
 import { askGroupLink } from '@/composables/useAskGroup'
 import { useAuth } from '@/composables/useAuth'
-import { useBookEditor } from '@/composables/useBookEditor'
 import { useBookEnrichment } from '@/composables/useBookEnrichment'
+import { useBookForm } from '@/composables/useBookForm'
 import { useBookSort } from '@/composables/useBookSort'
 import { useBreakpoints } from '@/composables/useBreakpoints'
 import { useCanWrite } from '@/composables/useCanWrite'
@@ -31,7 +31,7 @@ export {
   useCatalogRefresh,
   useAddTarget,
   useCanWrite,
-  useBookEditor,
+  useBookForm,
   useReading,
   loadMyReading,
   rememberCatalog,

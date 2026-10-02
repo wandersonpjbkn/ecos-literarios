@@ -13,6 +13,17 @@
     <AuthLayout v-else-if="route.meta.frame === 'auth'" />
     <ReadingLayout v-else />
 
+    <BookFormDrawer
+      :book="bookForm.book.value"
+      :title="bookForm.title.value"
+      :focus="bookForm.focus.value"
+      :return-focus="bookForm.returnFocus.value"
+      :is-open="bookForm.isOpen.value"
+      @close="bookForm.close"
+      @saved="onBookSaved"
+      @removed="onBookRemoved"
+    />
+
     <UpdateNotification />
     <AppToast />
   </div>
@@ -21,10 +32,10 @@
 <script lang="ts" setup>
 import { useHead } from '@unhead/vue'
 import { Head } from '@unhead/vue/components'
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { useAuth, useToast } from '@/composables'
+import { useApi, useAuth, useBookForm, useToast } from '@/composables'
 import { startAccountSync } from '@/composables/accountSync'
 import { startCatalogSync } from '@/composables/catalogSync'
 import { startFormatsSync } from '@/composables/formatsSync'
@@ -35,11 +46,29 @@ import AuthLayout from '@/layouts/AuthLayout.vue'
 import ReadingLayout from '@/layouts/ReadingLayout.vue'
 import UpdateNotification from '@/layouts/UpdateNotification.vue'
 
+import BookFormDrawer from '@/components/books/BookFormDrawer.vue'
+
 const route = useRoute()
 const router = useRouter()
 useRouteFocus()
 const { restoreSession, watchSession } = useAuth()
 const toast = useToast()
+const bookForm = useBookForm()
+
+// The catalog is one list for every screen; a screen with a list of its own reacts to bookForm.lastChange.
+const onBookSaved = () => {
+  useApi().fetchBooks()
+  bookForm.notify({ kind: 'saved' })
+}
+const onBookRemoved = (id: string) => {
+  useApi().fetchBooks()
+  bookForm.notify({ kind: 'removed', id })
+}
+// The form belonged to the screen that opened it: going to another page closes it, as before.
+watch(
+  () => route.path,
+  () => bookForm.close(),
+)
 
 useHead({
   htmlAttrs: { lang: 'pt-BR' },
