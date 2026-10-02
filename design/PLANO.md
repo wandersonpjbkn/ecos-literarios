@@ -219,11 +219,9 @@ Um PR por fatia, nesta ordem. A 9a e a 9b não dependem de nada e podem ir antes
 
 ### 9a · Atribuição na página do livro
 
-A página do livro já mostra capa e sinopse vindas do Google Books, sem atribuição. Uma frase no rodapé da página, com o texto de `COPY.md`, quando `cover_source` é `"google"` ou o livro tem `google_books_id`.
+A página do livro já mostra capa e sinopse vindas do Google Books, sem atribuição. A atribuição vale para a capa (ver `BACKEND.md` §11, "Atribuição"): no rodapé da página, a frase de `COPY.md` com o logo oficial "powered by Google" ao lado, e a frase levando à página do livro no Google Books, quando o endereço da capa é do Google Books. O link do Google Books sai de "Onde encontrar". O `google_books_id` sai do sistema antes desta fatia.
 
-Antes de começar: ler as diretrizes atuais de marca do Google Books e confirmar se a frase basta ou se o logo também é exigido aqui.
-
-Aceite: livro com capa do Google mostra a frase; livro com capa manual e sem `google_books_id` não mostra.
+Aceite: livro com capa do Google mostra a frase, o logo e o link; livro com capa de outro endereço ou sem capa não mostra; "Onde encontrar" não tem Google Books.
 
 ### 9b · Cadastro duplicado
 
@@ -261,7 +259,7 @@ Aceite: o resultado em inglês mostra "Inglês"; a sinopse aparece inteira no V3
 
 ### 9g · A linha no formulário
 
-`componentes/LinhaCapaEDados.md`: L0 a L4, no fim do essencial, largura inteira no computador. Sai o `BookEnrichmentPanel` e o aviso "Depois de salvar o livro…". Os valores que voltam da vista entram nos campos do formulário e vão no mesmo salvar, com `isbn_source`, `cover_source` e `google_books_id` quando for o caso.
+`componentes/LinhaCapaEDados.md`: L0 a L4, no fim do essencial, largura inteira no computador. Sai o `BookEnrichmentPanel` e o aviso "Depois de salvar o livro…". Os valores que voltam da vista entram nos campos do formulário e vão no mesmo salvar, com `isbn_source` e `cover_source` quando for o caso.
 
 Aceite: no cadastro, a linha aparece antes de salvar e o botão habilita ao preencher título e autor; escolher e salvar grava capa e dados num salvar só; "Desfazer" esvazia só o que veio da busca; na edição de um livro sem capa, a linha diz o que falta.
 

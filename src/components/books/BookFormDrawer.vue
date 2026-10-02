@@ -203,13 +203,6 @@
             />
             <AppField v-model="form.publisher" trim label="Editora" :disabled="isSaving" autocomplete="off" />
             <AppField
-              v-model="form.google_books_id"
-              trim
-              label="Código no Google Books"
-              :disabled="isSaving"
-              autocomplete="off"
-            />
-            <AppField
               v-model="form.cover_url"
               trim
               class="form-grid__full"
@@ -331,7 +324,6 @@ const form = reactive({
   publisher: '',
   cover_url: '',
   synopsis: '',
-  google_books_id: '',
   page_count: '',
   published_year: '',
 })
@@ -514,7 +506,6 @@ const resetForm = (): void => {
   form.publisher = ''
   form.cover_url = ''
   form.synopsis = ''
-  form.google_books_id = ''
   form.page_count = ''
   form.published_year = ''
 }
@@ -524,7 +515,6 @@ const adoptOptional = (book: BookPayload): void => {
   form.publisher = book.publisher ?? ''
   form.cover_url = book.cover_url ?? ''
   form.synopsis = book.synopsis ?? ''
-  form.google_books_id = book.google_books_id ? String(book.google_books_id) : ''
   form.page_count = book.page_count ? String(book.page_count) : ''
   form.published_year = book.published_year ? String(book.published_year) : ''
 }
@@ -553,7 +543,6 @@ const optionalFields = () => {
     publisher: form.publisher || null,
     cover_url: form.cover_url || null,
     synopsis: form.synopsis || null,
-    google_books_id: form.google_books_id || null,
     page_count: positiveInt(form.page_count),
     published_year: positiveInt(form.published_year),
   }
@@ -655,15 +644,9 @@ watch(
     if (!isMemberScope.value) loadPeople()
     showMore.value =
       (!!props.book &&
-        [
-          form.synopsis,
-          form.isbn,
-          form.publisher,
-          form.cover_url,
-          form.google_books_id,
-          form.page_count,
-          form.published_year,
-        ].some(Boolean)) ||
+        [form.synopsis, form.isbn, form.publisher, form.cover_url, form.page_count, form.published_year].some(
+          Boolean,
+        )) ||
       (!!props.book && form.subgeneros.length > 0)
   },
   // Opened on arrival (?adicionar=1): the form must be prepared on the first render too.

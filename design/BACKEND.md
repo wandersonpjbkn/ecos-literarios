@@ -165,10 +165,15 @@ POST /books/enrich/search   ← { title, author, isbn? }
 
 - **`isbn_source`** no livro: `"person"`, `"search"` ou ausente. O formulário manda `"search"` quando o ISBN veio da busca e não foi mexido; qualquer ISBN digitado ou alterado à mão vira `"person"`. Se o `PATCH` trouxer um ISBN diferente do salvo sem `isbn_source`, o servidor grava `"person"`. Ausente quer dizer origem desconhecida e conta como não confirmado. Sem migração: os ISBNs já gravados ficam sem origem.
 - **`cover_source` vindo do formulário.** Hoje, trocar a capa num `PATCH` grava `"manual"`. Passa a aceitar `"google"` ou `"openlibrary"` no payload quando a capa veio da busca; sem isso, continua `"manual"`.
-- **`google_books_id`** vai junto no salvar quando o resultado escolhido veio do Google (o `volume_id`). Serve à atribuição (fatia 9a) e ao "Onde encontrar".
+
+### O que sai do livro
+
+- **`google_books_id`** sai do modelo, da validação e das respostas, e a subida da API apaga o campo dos livros já gravados (`migrations/book-google-id.ts`). O dono (2026-10-02): "o catálogo é um acervo do clube do livro, não é um acervo do google ou extensão dele" e "nunca foi a intenção criar essa relação". O `volume_id` da busca serve para escolher um resultado na vista; não é gravado.
 
 ### Atribuição
 
-A página do livro mostra a frase de atribuição quando `cover_source` é `"google"` ou quando existe `google_books_id`. Não precisa de campo novo. A imprecisão é aceita (dono, 2026-10-02): um livro reescrito à mão continua com a frase enquanto tiver `google_books_id`.
+Só onde o sistema mostra algo do Google: os resultados da busca e a capa. O dono (2026-10-02): "se o google exige atribuição, que fique onde de fato usa coisa deles: resultados de busca; capa". A sinopse não leva atribuição; o dono: "sinopse, não pode se valer disso... entra na questão da cópia de texto".
 
-**A conferir antes da 9a:** se as diretrizes de marca do Google Books exigem o logo também na página do livro, ou se a frase basta; e a cláusula que diz que os resultados não podem ser alterados, em tensão com "tudo continua editável à mão".
+A página do livro mostra a atribuição quando o endereço da capa é do Google Books (`books.google.com`). O endereço é o que guarda a origem da capa; `cover_source` não serve para isso (em 2026-10-02, 63 das 75 capas do acervo estavam sem `cover_source`). Trocar a capa por outra tira a atribuição sozinho. Não precisa de campo novo.
+
+**Diretrizes de marca (conferidas em 2026-10-02, developers.google.com/books/branding):** o logo "powered by Google" junto dos resultados ("must appear adjacent to these results"), e cada livro mostrado com um link para a página dele no Google Books. Na página do livro, o link usa o `id` que o próprio endereço da capa traz. "You must not alter results": vale para os resultados como a API devolve (a vista não reordena nem reescreve); o que a pessoa escolhe e edita passa a ser dado do livro (leitura do dono e do estudo, 2026-10-02).

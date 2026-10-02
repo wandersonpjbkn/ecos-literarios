@@ -38,7 +38,6 @@ export interface Book {
 
   cover_url?: string
   synopsis?: string
-  google_books_id?: string
   isbn?: string
   publisher?: string
   page_count?: number
@@ -88,7 +87,6 @@ export interface BookPayload {
   publisher?: string
   cover_url?: string
   synopsis?: string
-  google_books_id?: string | number
   page_count?: number
   published_year?: number
 }
@@ -140,7 +138,6 @@ export interface ApiBook {
   added_at?: string
   isbn?: string
   publisher?: string
-  google_books_id?: string
   subgeneros: (ApiPopulated | string)[]
 }
 
@@ -316,7 +313,6 @@ export interface BookForEdit {
   isbn?: string
   publisher?: string
   cover_url?: string
-  google_books_id?: string | number
   page_count?: number
   published_year?: number
 }

@@ -212,7 +212,7 @@ O botão de ficar não se chama "Cancelar": é a exceção registrada em "Confir
 
 > Parte dos dados deste livro veio do Google Books.
 
-No rodapé da página, em `caption`. Aparece quando a capa veio do Google ou quando o livro tem o código do Google Books.
+No rodapé da página, em `caption`, com o logo "powered by Google" ao lado; a frase leva à página do livro no Google Books. Aparece quando o endereço da capa é do Google Books.
 
 ## Palavras de sistema que não aparecem
 
