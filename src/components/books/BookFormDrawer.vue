@@ -224,7 +224,7 @@
 
         <div class="drawer-footer__actions">
           <AppButton size="md" :disabled="isSaving" @click="close">Cancelar</AppButton>
-          <AppButton variant="primary" size="md" :disabled="isSaving || !isValid" @click="handleSubmit">
+          <AppButton variant="primary" size="md" :disabled="isSaving || isAdded || !isValid" @click="handleSubmit">
             {{ isSaving ? 'Salvando…' : isEditMode ? 'Salvar alterações' : 'Adicionar o livro' }}
           </AppButton>
         </div>
@@ -308,6 +308,8 @@ const genres = useEntityCrud({ resource: 'categorias' })
 const subgenres = useEntityCrud({ resource: 'subgeneros' })
 
 const isSaving = ref(false)
+// A new book is in: the form stays on screen until it closes, but it cannot add the same book again.
+const isAdded = ref(false)
 const error = ref('')
 const success = ref('')
 
@@ -581,7 +583,7 @@ const resolvePickedItems = async () => {
 }
 
 const handleSubmit = async () => {
-  if (!isValid.value) return
+  if (!isValid.value || isAdded.value) return
   if (isMemberScope.value && !props.book) return
 
   isSaving.value = true
@@ -608,6 +610,7 @@ const handleSubmit = async () => {
     emit('saved')
 
     if (!isEditMode.value) {
+      isAdded.value = true
       closeTimer = setTimeout(close, 800)
     }
   } catch (e) {
@@ -630,6 +633,7 @@ watch(
   async (open) => {
     if (!open) return
 
+    isAdded.value = false
     error.value = ''
     success.value = ''
 
