@@ -101,7 +101,7 @@ Aceite: nenhum botão azul cheio em diálogo destrutivo; nenhuma linha de tabela
 
 - Todo livro tem quem o mencionou: uma **conta** (`quem_user_id`) ou um **marcador** sem dono (`quem_nome`). Não existe livro sem pessoa.
 - O nome mostrado é o **atual**: com conta, o nome da conta; sem conta, o marcador. `quem_nome` fica como histórico da carga e não é preenchido em livro novo.
-- **Sem coleção nova.** A proposta de uma coleção `Pessoa` ficou de fora: a estrutura que já existia resolve (dono). Nomes novos no banco seguem em inglês.
+- **Sem coleção nova.** A proposta de uma coleção `Pessoa` ficou de fora: a estrutura que já existia resolve. Quem levantou a dúvida foi o dono ("acho que esse desenho do `pessoa` pode ser volta desnecessária, valida", 2026-09-28); a conclusão veio da validação. Nomes novos no banco seguem em inglês.
 
 **Quem faz o quê, pela matriz de Permissões.** Recurso novo **Vínculo** (`claim`):
 
@@ -147,7 +147,7 @@ Aceite:
 
 **"Fechar" das gavetas e folhas.** Hoje é uma pílula `bg-sunken` sem borda, o mesmo visual de botão desabilitado. Passa a usar o tom `neutral` do `BasePill` (branco, borda `border-strong`, texto `ink`), igual ao secundário.
 
-**Livro aberto no celular.** As pílulas do topo (formato e gênero) somem no celular: repetem os links da ficha logo abaixo e empurram o conteúdo. No desktop elas ficam, como atalho para o catálogo filtrado. A capa continua em largura cheia; o comentário abaixo da dobra é aceito (dono, 2026-09-27: capa e dados lado a lado não se sustentam sem saber a largura da tela).
+**Livro aberto no celular.** As pílulas do topo (formato e gênero) somem no celular: repetem os links da ficha logo abaixo e empurram o conteúdo. No desktop elas ficam, como atalho para o catálogo filtrado. A capa continua em largura cheia; o comentário abaixo da dobra é aceito. Capa e dados lado a lado não se sustentam sem saber a largura da tela.
 
 ### 8f · Capas e sinopses pela matriz de Permissões
 
@@ -163,7 +163,11 @@ Aceite: Editor abre Capas e sinopses e roda a busca; Visitante não vê a seçã
 
 ### 8g · Acento da voz
 
-**A decisão (dono, 2026-10-01).** Capa, moldura e blocos ficam como estão. A página sem capa continua sem graça, de propósito: o que falta é a capa, e isso é incentivo para completar o acervo. O sistema ganha uma segunda cor, um rosa do outro lado do logo, que **nunca clica** e marca o que é do clube, não da interface. Estudo e medição no canvas, linha "Cor · um acento que não clica".
+**O pedido (dono, 2026-09-30, palavras dele).** "sistema ainda podia melhorar a palheta de cores, hoje, ela só tem o azul; mas algumas telas que não tem capa e coisas assim, fica bem 'plain' (sem graça) só com azul e cinza [...] a identidade da marca carrega duas cores, não teria mesmo como espandir a palheta?"
+
+**A proposta (estudo do Claude Design, 2026-10-01; trazida para esta pasta a pedido do dono; ainda não implementada).** O sistema ganha uma segunda cor, um rosa do outro lado do logo, que **nunca clica** e marca o que é do clube, não da interface. Capa, moldura e blocos ficam como estão. Estudo e medição no canvas, linha "Cor · um acento que não clica".
+
+Argumento do estudo, não do dono: a cor nova não entra na página sem capa, porque ali o que falta é a capa, e enfeitar o vazio esconderia isso.
 
 **Tokens.** `--voice-soft`, `--voice-line`, `--voice-mark` e `--voice-ink` entram no tema (`src/assets/scss/themes/_ecos.scss`), no bloco de `:root[data-theme='ecos']` ao lado dos `--alert-*`. Valores e contrastes em `tokens/tokens.json` e em `COMPONENTES.md`.
 
@@ -188,7 +192,7 @@ Recurso novo, pedido na lista de melhorias ("livros em destaque/estrela"). Visua
 
 **Visual (decidido).** No `CoverBlock`, canto superior esquerdo (o direito é do selo de formato): na grade, círculo branco de 28px com borda `border-hair` e estrela cheia de 15px em `voice-mark`, `role="img"` e `aria-label="Destaque do clube"`; na página do livro, a pílula branca com a estrela e **"Destaque do clube"** em `voice-ink`, `caption` 600. Ver `componentes/CoverBlock.md`.
 
-**Decidido (dono, 2026-10-01).** O nome é **Destaque do clube**, não "Favorito": favorito soa como a lista pessoal dos sites, e isto é quem cadastra dizendo ao clube que o livro foi uma sensação de leitura.
+**Decidido (dono, 2026-10-01).** O nome é **Destaque do clube**, não "Favorito". Nas palavras dele: "favorito dá a impressão de ser o wishlist ou favoritos que vemos em websites por aqui: você, o usuário do sistema, pode marcar um livro como 'favorito'; e não é isso!" e "é para quem cadastrou o livro poder dizer para o resto do clube - ou para quem acessar o catalog - 'olha, esse livro foi uma sensação de leitura!'".
 1. **Quem marca:** Administrador e Editor. Matriz de Permissões, recurso `destaques`, ação `update`, padrão **Administrador e Editor**. Linha em frase: **"Marcar um livro como destaque do clube"**.
 2. **Filtro:** entra, como caixa de marcar na gaveta (**"Só destaques do clube"**), não como chip rápido.
 

@@ -11,6 +11,15 @@ A especificação do redesign do Ecos Literários, commitada junto do código pa
 5. **`PLANO.md`** — as sete fatias, na ordem.
 6. **`PROMPT-CLAUDE-CODE.md`** — como pedir cada fatia sem virar um PR de milhares de linhas.
 
+## Quem disse o quê
+
+Esta pasta é escrita e lida por agentes de IA. Uma frase afirmativa vira instrução para quem lê, e uma atribuição errada vira "o dono disse isso". Por isso:
+
+- **"(dono, data)" marca só o que o dono disse ou aprovou**, e de preferência vem com as palavras dele entre aspas. Paráfrase não leva o nome dele.
+- **Argumento, justificativa e leitura de estudo** (de agente, do Claude Design ou de quem escreveu o documento) se dizem como tal: "argumento do estudo, não do dono".
+- **Proposta não é decisão.** O que veio de um estudo e ainda não foi aprovado ou implementado diz isso.
+- Na dúvida sobre quem decidiu, a frase fica sem atribuição e a pergunta vai ao dono.
+
 ## As cinco regras
 
 **Uma cor de ação.** `--color-action-default` (#3A63B8, do azul-marinho do logo) quer dizer *isto clica*. Selecionado é fundo claro com borda, nunca azul preenchido. Uma ação primária por tela.

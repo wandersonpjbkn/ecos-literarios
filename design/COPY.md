@@ -167,7 +167,7 @@ Cada linha é uma frase sobre o que ela controla ("Ver a lista de membros"), nun
 
 ## Destaque do clube
 
-**"Destaque do clube"**, nunca "Favorito" nem "Recomendado". "Favorito" é a lista pessoal de todo site (cada um marca o que gosta), e não é isso: aqui é quem cadastra os livros dizendo ao clube, e a quem chega no catálogo, que aquele livro foi uma sensação de leitura (dono, 2026-10-01). "Recomendado" afirma intenção (a regra de cima). Na grade a estrela vai sozinha, com o nome no `aria-label`; na página do livro, estrela e texto juntos. Não confundir com o "Favorito da Brenda" que aparece em comentários: aquele é de uma pessoa e é texto dela.
+**"Destaque do clube"**, nunca "Favorito" nem "Recomendado". O dono (2026-10-01): "favorito dá a impressão de ser o wishlist ou favoritos que vemos em websites [...] e não é isso!"; o recurso "é para quem cadastrou o livro poder dizer para o resto do clube - ou para quem acessar o catalog - 'olha, esse livro foi uma sensação de leitura!'". "Recomendado" sai pela regra de cima (afirma intenção). Na grade a estrela vai sozinha, com o nome no `aria-label`; na página do livro, estrela e texto juntos. Não confundir com o "Favorito da Brenda" que aparece em comentários: aquele é de uma pessoa e é texto dela.
 
 ## Palavras de sistema que não aparecem
 
@@ -189,4 +189,4 @@ Na tela, inclusive no painel do clube e nas mensagens que vêm do servidor:
 
 Texto de tela é placa: orienta quem chega, onde está. O texto dos artboards é ponto de partida; o que não orienta foi reescrito ("Recortes que saem do próprio acervo" saiu: são quatro palavras de leitura de máquina juntas). Frases curtas. Nada de "explore", "descubra", "gerencie", "otimize". Sem emoji. O leitor é um amigo do grupo, não um usuário de SaaS — e não é nativo digital, então nenhum rótulo depende de reconhecer um ícone.
 
-"Importação" e "cadastrado" são palavras de sistema. O app não diz de onde o livro veio (conversa do grupo ou cadastro aqui): a informação não muda nada para quem lê (dono, 2026-09-27).
+"Importação" e "cadastrado" são palavras de sistema. O app não diz de onde o livro veio (conversa do grupo ou cadastro aqui). O dono, sobre os textos de origem (2026-09-27): "é completamente irrelevante ao sistema; pode remover toda a esteira disso".
