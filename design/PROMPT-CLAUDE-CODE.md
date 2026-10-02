@@ -28,6 +28,25 @@ Cole isto na raiz do projeto, com a pasta `design/` já commitada. Um prompt por
 
 ---
 
+## Fatia 9 · Capa e dados
+
+Antes da primeira sub-fatia, numa sessão sem código:
+
+> Leia `design/componentes/LinhaCapaEDados.md`, `design/componentes/VistaBusca.md`, `design/BACKEND.md` §11, a seção "Capa e dados" de `design/COPY.md` e a fatia 9 de `design/PLANO.md`. As telas estão em `design/telas/capa-e-dados/`. Não escreva código. Me devolva: (a) o que muda em cada sub-fatia, 9a a 9h, arquivo por arquivo; (b) onde o código atual vai brigar com isso; (c) o que você precisa saber antes da 9e, que mexe num composable usado por todas as gavetas.
+
+Para cada sub-fatia, o prompt de fatia de sempre, com "Implemente a **fatia 9x**", mais estas regras:
+
+> - Nada da busca é gravado fora do salvar do formulário. Se você está chamando uma rota que grava a partir da vista, pare.
+> - Voltar fica à esquerda e Fechar à direita, no mesmo lugar em todas as vistas da gaveta. Nenhum "Voltar" no rodapé.
+> - O nome é "Capa e dados", em todo lugar. "Enriquecimento" e "Capas e sinopses" não aparecem na tela.
+> - Um campo que o livro já tem nunca é substituído sem a pessoa marcar.
+> - O logo do Google vem do arquivo oficial das diretrizes de marca. Não desenhe nem recrie.
+> - Na 9e, teste o voltar do sistema nos três lugares que já abrem gaveta (painel, página do livro, Meus livros) antes de dizer que acabou.
+
+Corte de escopo típico desta fatia: na 9d ele vai querer remover a busca em lote junto. Não: a 9h é outro PR, depois da vista nova existir.
+
+---
+
 ## Como cortar o Claude Code quando ele passar do escopo
 
 O erro típico não é ele errar a fatia — é ele resolver de brinde a próxima. Duas frases que funcionam:

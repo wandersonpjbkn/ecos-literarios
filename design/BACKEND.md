@@ -137,3 +137,38 @@ O aparelho guarda **uma** cópia do catálogo (`books`, com a hora em que veio d
 - **O que decide uma ação vem da API, nunca da cópia:** os nomes livres para vincular (`available_names` em `GET /users/me/claim`) e quantos livros perdem um subgênero antes de removê-lo (`GET /subgeneros/:id/usage`).
 - **Por que não um prazo:** o antigo cache de 7 dias (com uma segunda cópia sem prazo nenhum) escondia livro novo, edição, remoção e vínculo feitos em outro aparelho. A revalidação custa uma requisição de cabeçalhos por visita; no plano grátis do Render (5 GB/mês de saída) isso não chega perto do limite.
 - **Se o clube crescer muito:** o `304` ainda consulta o banco para calcular a `ETag`. Uma versão do catálogo, incrementada a cada escrita, responderia `304` sem ler os livros.
+
+## 11. Capa e dados (fatia 9)
+
+A busca deixa de depender de um livro salvo e deixa de gravar sozinha. Quem grava é o formulário, com os valores que a pessoa conferiu. Com isso, "o que é gravado é o que foi visto" vale por construção.
+
+### Busca nova
+
+```http
+POST /books/enrich/search   ← { title, author, isbn? }
+                            → { source: "google_books" | "open_library", candidates: [...] }
+```
+
+- Exige `books: create` **ou** `books: update` (quem cadastra e quem edita). Mantém o `enrichmentRateLimit`.
+- Até 5 candidatos (`maxResults=5` no Google, `limit=5` na Open Library). Cada um: `volume_id`, `title`, `authors`, `publisher`, `published_year`, `page_count`, `language`, `synopsis`, `cover_url`, `isbn`.
+- `language`: o Google devolve `volumeInfo.language` (código de duas letras); a Open Library, uma lista de códigos de três letras. O servidor devolve o código; o front mostra o nome ("Português").
+- Ordem das estratégias como hoje: ISBN (só se veio na consulta), título e autor em português, título e autor sem idioma, e a Open Library como reserva. Devolve os candidatos da primeira estratégia que achar algo.
+- `isbn` na consulta vem só do que a pessoa digitou. O ISBN que veio de uma busca anterior não é usado como chave (ver `isbn_source`).
+
+### O que sai
+
+- `POST /books/:id/enrich` e `POST /books/:id/enrich/apply`. Só o `useBookEnrichment` usava as duas.
+- A busca em lote: `POST /admin/books/enrich`, `GET /admin/books/enrich/status`, `GET /admin/books/enrich/history`, o modelo `EnrichmentRun` e o recurso `enrichment` (em `RESOURCES`, `CONFIGURABLE` e na semente). A seção 8 deixa de valer no item "Capas e sinopses vira permissão". A semente do boot apaga as linhas `enrichment` da coleção `Permission`.
+- A trava manual: o campo `manually_edited_at` sai do modelo, e `hasEnrichmentEdit` e a parte `enrichmentEdited` de `markBookEdit` saem de `utils/bookEdit.ts`. O histórico de edição (`edit_history`) continua.
+
+### O que entra
+
+- **`isbn_source`** no livro: `"person"`, `"search"` ou ausente. O formulário manda `"search"` quando o ISBN veio da busca e não foi mexido; qualquer ISBN digitado ou alterado à mão vira `"person"`. Se o `PATCH` trouxer um ISBN diferente do salvo sem `isbn_source`, o servidor grava `"person"`. Ausente quer dizer origem desconhecida e conta como não confirmado. Sem migração: os ISBNs já gravados ficam sem origem.
+- **`cover_source` vindo do formulário.** Hoje, trocar a capa num `PATCH` grava `"manual"`. Passa a aceitar `"google"` ou `"openlibrary"` no payload quando a capa veio da busca; sem isso, continua `"manual"`.
+- **`google_books_id`** vai junto no salvar quando o resultado escolhido veio do Google (o `volume_id`). Serve à atribuição (fatia 9a) e ao "Onde encontrar".
+
+### Atribuição
+
+A página do livro mostra a frase de atribuição quando `cover_source` é `"google"` ou quando existe `google_books_id`. Não precisa de campo novo. A imprecisão é aceita (dono, 2026-10-02): um livro reescrito à mão continua com a frase enquanto tiver `google_books_id`.
+
+**A conferir antes da 9a:** se as diretrizes de marca do Google Books exigem o logo também na página do livro, ou se a frase basta; e a cláusula que diz que os resultados não podem ser alterados, em tensão com "tudo continua editável à mão".

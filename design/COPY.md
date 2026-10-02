@@ -140,7 +140,7 @@ Autor, Gênero e Subgênero, no formulário do livro, seguem o mesmo padrão: **
 
 Um livro pode ter vários autores: o campo é **"Autores"**, com "Escolher autores" e a contagem, como Subgêneros. O primeiro escolhido é o que aparece nas listas. O filtro de autor acha o livro por qualquer um deles.
 
-As linhas novas da matriz de Permissões, em frase: **"Vincular a própria conta a um nome do grupo"** (Vínculo · Editar), **"Incluir um nome novo de pessoa do clube"** (Vínculo · Criar) e **"Buscar capas e dados para o acervo inteiro"**.
+As linhas novas da matriz de Permissões, em frase: **"Vincular a própria conta a um nome do grupo"** (Vínculo · Editar) e **"Incluir um nome novo de pessoa do clube"** (Vínculo · Criar).
 
 ## Suporte
 
@@ -161,6 +161,8 @@ Título com o item entre aspas, uma frase do que acontece e do que vai junto, e 
 > O livro sai do catálogo e das listas de quem guardou. Não é possível desfazer.
 > `[Cancelar]` `[Remover o livro]` ← peso destrutivo, nunca o azul
 
+Exceção: ao sair de um formulário com dados preenchidos ("Sair sem adicionar o livro?", "Sair sem salvar as alterações?", em Capa e dados), o botão de ficar não se chama "Cancelar". Em um diálogo que pergunta se a pessoa quer sair, "Cancelar" pode ser lido como cancelar o livro. O foco inicial continua no botão de ficar.
+
 ## Permissões
 
 Cada linha é uma frase sobre o que ela controla ("Ver a lista de membros"), nunca o nome do recurso seguido de um verbo ("Membros: Ver"). O que o painel não configura aparece como linha fixa: **"Mudar o nível de alguém: só Administrador (não muda aqui)"**.
@@ -168,6 +170,49 @@ Cada linha é uma frase sobre o que ela controla ("Ver a lista de membros"), nun
 ## Destaque do clube
 
 **"Destaque do clube"**, nunca "Favorito" nem "Recomendado". O dono (2026-10-01): "favorito dá a impressão de ser o wishlist ou favoritos que vemos em websites [...] e não é isso!"; o recurso "é para quem cadastrou o livro poder dizer para o resto do clube - ou para quem acessar o catalog - 'olha, esse livro foi uma sensação de leitura!'". "Recomendado" sai pela regra de cima (afirma intenção). Na grade a estrela vai sozinha, com o nome no `aria-label`; na página do livro, estrela e texto juntos. Não confundir com o "Favorito da Brenda" que aparece em comentários: aquele é de uma pessoa e é texto dela.
+
+## Capa e dados
+
+Um nome só: **"Capa e dados"**, na linha do formulário, no botão e no título da vista. A sinopse vai na frase de apoio, nunca no nome. As fontes (Google Books, Open Library) não aparecem em frase: a tela não narra o mecanismo. A atribuição exigida pelo Google é o logo, ao lado dos resultados, e uma frase na página do livro.
+
+**A linha no formulário**
+
+| Estado | Texto |
+| --- | --- |
+| Título | Capa e dados (opcional) |
+| L0 | Preencha o título e o autor para buscar a capa e os dados do livro. `[Buscar capa e dados]` desabilitado |
+| L1 | A busca traz capa, sinopse, editora, páginas e ano. Tudo continua editável à mão. `[Buscar capa e dados]` |
+| L2 | **Capa e dados escolhidos.** {Os campos} entram no livro quando você o adicionar. (Edição: "quando você salvar".) `[Trocar]` `[Desfazer]` |
+| L3 | Este livro já tem capa e sinopse. `[Buscar de novo]` |
+| L4 | Faltam a capa e a sinopse deste livro. (Ou: "Falta a capa deste livro.", "Falta a sinopse deste livro.") A busca traz capa, sinopse, editora, páginas e ano. `[Buscar capa e dados]` |
+
+**A vista**
+
+| Estado | Texto |
+| --- | --- |
+| V1 | Buscando por **{título}**, de {autor} · Buscando… |
+| V2 | {n} livros encontrados (1 livro encontrado) · Toque no livro certo para conferir. (Computador: "Escolha o livro certo para conferir.") · `[Mudar a busca]` |
+| V2, consulta aberta | Título · Autor · ISBN (opcional), com o apoio "Fica no verso do livro, perto do código de barras." · `[Buscar de novo]` |
+| V3 | Título da vista: **Conferir** · Sinopse · **O que entra no livro** · Campo vazio: "O livro ainda não tem {capa/sinopse…}." · Campo preenchido: "O livro já tem {atual}. A busca traz {novo}." · Nada marcado: "Marque pelo menos um dado para usar." · `[Escolher outro]` `[Usar estes dados]` |
+| V4 | **Nenhum livro encontrado** · Confira a grafia, tente só o título ou informe o ISBN, se tiver o livro em mãos. O livro também pode ser adicionado sem capa e completado depois. · `[Buscar de novo]` |
+| V5 | **A busca de capa e dados não respondeu** · Tente de novo em alguns minutos. O que você já preencheu no livro continua guardado, e ele pode ser salvo sem a capa. · `[Tentar de novo]` |
+
+Sem internet, vale o aviso geral que já existe ("Você está sem internet…"); o V5 é só para a busca fora do ar.
+
+**Sair com dados preenchidos**
+
+| Caso | Título | Frase | Botões |
+| --- | --- | --- | --- |
+| Cadastro | Sair sem adicionar o livro? | O que você preencheu, inclusive a capa e os dados escolhidos, será perdido. | `[Sair sem adicionar]` (peso destrutivo) `[Continuar preenchendo]` |
+| Edição | Sair sem salvar as alterações? | As mudanças que você fez neste livro serão perdidas. | `[Sair sem salvar]` (peso destrutivo) `[Continuar editando]` |
+
+O botão de ficar não se chama "Cancelar": é a exceção registrada em "Confirmar o que não tem volta".
+
+**Atribuição na página do livro**
+
+> Parte dos dados deste livro veio do Google Books.
+
+No rodapé da página, em `caption`. Aparece quando a capa veio do Google ou quando o livro tem o código do Google Books.
 
 ## Palavras de sistema que não aparecem
 
@@ -178,8 +223,8 @@ Na tela, inclusive no painel do clube e nas mensagens que vêm do servidor:
 - "Painel admin" vira **"Painel do clube"**; "Segmentações" vira **"Autores e gêneros"**;
 - os níveis de permissão aparecem como **Administrador, Editor, Visitante**, nunca `admin`, `editor`, `viewer`. "Membro" não é nível: os membros do clube são Editores, e o nível mais baixo é de quem entrou por um link sem ser do clube (fatia 8a);
 - "Resetar cache" vira **"Limpar os dados deste aparelho"**, com o que acontece: "Sai da conta e baixa o catálogo de novo. Sua escolha de formatos fica." Ao lado, **"Recarregar o catálogo"**: "Baixa o catálogo de novo. Você continua na conta." Cada ação na sua linha, com a consequência embaixo (fatia 8e);
-- "Mídia" vira **"Formato"** (coluna, aba e permissão no painel, campo do livro); "Enriquecimento" e "Executar" viram **"Capas e sinopses"** e **"Buscar capas e dados"**;
-- "cadastrei" vira **"adicionei"**; os códigos da busca de capas (`manual_edit`, `not_found`, `isbn`…) aparecem como frase ("Alguém corrigiu à mão, então não mexemos"), nunca crus.
+- "Mídia" vira **"Formato"** (coluna, aba e permissão no painel, campo do livro); "Enriquecimento" vira **"Capa e dados"**, em todo lugar;
+- "cadastrei" vira **"adicionei"**.
 
 ## Acervo e catálogo
 
