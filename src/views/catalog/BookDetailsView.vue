@@ -129,6 +129,14 @@
         </div>
       </section>
 
+      <p v-if="coverPage" class="cover-credit">
+        <a :href="coverPage" target="_blank" rel="noopener noreferrer" class="cover-credit__link"
+          >A capa deste livro veio do Google Books<span class="visually-hidden">{{ ' (abre em outra aba)' }}</span
+          ><BaseIcon name="external" class="cover-credit__arrow" aria-hidden="true"
+        /></a>
+        <PoweredByGoogle />
+      </p>
+
       <BookFormDrawer
         :book="editingBook"
         :is-open="isEditing"
@@ -147,6 +155,7 @@ import { computed, ref, useId, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { authorNames } from '@/data/authors'
+import { googleBooksPage } from '@/data/googleBooks'
 import type { Book } from '@/types'
 
 import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
@@ -177,6 +186,7 @@ import AppNotice from '@/components/ui/AppNotice.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import PageStatus from '@/components/ui/PageStatus.vue'
+import PoweredByGoogle from '@/components/ui/PoweredByGoogle.vue'
 
 const RELATED_COUNT = 6
 const SYNOPSIS_COLLAPSE_CHARS = 420
@@ -226,6 +236,7 @@ const bookPath = computed(() =>
   book.value ? router.resolve({ name: 'catalog-book-details', params: { id: book.value.id } }).path : '',
 )
 const genre = computed(() => book.value?.categoria.replace(/-/g, ' ') ?? '')
+const coverPage = computed(() => googleBooksPage(book.value?.cover_url))
 
 const separator = (index: number) => {
   const left = (book.value?.authors.length ?? 0) - 1 - index
@@ -521,6 +532,31 @@ watch(book, () => (synopsisOpen.value = !synopsisIsLong.value), { immediate: tru
       grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: var(--space-8) var(--space-5);
     }
+  }
+}
+
+.cover-credit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-10);
+
+  font-size: var(--font-size-caption);
+  color: var(--color-text-subtle);
+
+  &__link {
+    @include text-link;
+
+    display: inline-flex;
+    min-height: var(--touch-min);
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  &__arrow {
+    width: var(--icon-xs);
+    height: var(--icon-xs);
   }
 }
 </style>
