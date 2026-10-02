@@ -95,7 +95,7 @@
             <EmptyState v-if="searchTerm" :title="`Nada com &quot;${searchTerm}&quot;`" :text="searchWhere">
               <AppButton @click="search = ''">Apagar a busca</AppButton>
               <AppButton v-if="hasFilters" @click="clearAll">Limpar os filtros</AppButton>
-              <AppButton v-if="canAddBooks && addTarget" :to="addTarget" :disabled="!canWrite">
+              <AppButton v-if="canAddBooks && addTarget" :disabled="!canWrite" @click="openAdd({ title: searchTerm })">
                 Adicionar esse livro
               </AppButton>
             </EmptyState>
@@ -141,6 +141,7 @@ import {
   describeSelection,
   rememberCatalog,
   useAddTarget,
+  useBookForm,
   useApi,
   useBreakpoints,
   useCanWrite,
@@ -210,6 +211,7 @@ const online = useOnline()
 const eco = useEcoOfTheWeek()
 
 const addTarget = useAddTarget()
+const { openAdd } = useBookForm()
 const canWrite = useCanWrite()
 const isPhone = useMediaQuery(useBreakpoints.isPhone)
 

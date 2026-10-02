@@ -115,7 +115,6 @@
 
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 
 import { authorLine } from '@/data/authors'
 import { personName } from '@/data/person'
@@ -137,9 +136,6 @@ import FilterChip from '@/components/ui/FilterChip.vue'
 import ListFooter from '@/components/ui/ListFooter.vue'
 import SearchBar from '@/components/ui/SearchBar.vue'
 import SectionHeader from '@/components/ui/SectionHeader.vue'
-
-const route = useRoute()
-const router = useRouter()
 
 // Segment and how many are open live in the URL (FilterChip.md), so going back keeps the list the admin was fixing.
 const permissions = usePermissionsStore()
@@ -296,17 +292,6 @@ watch(bookForm.lastChange, (change) => {
 watch(searchQuery, () => reset())
 
 onMounted(() => fetchBooks())
-
-// "Adicionar" from anywhere lands here with ?adicionar=1 and opens the form; the matrix may still be on its way.
-watch(
-  [() => route.query.adicionar, canCreate],
-  ([asked, may]) => {
-    if (asked !== '1' || !may) return
-    openCreate()
-    router.replace({ query: { ...route.query, adicionar: undefined } })
-  },
-  { immediate: true },
-)
 </script>
 
 <style lang="scss" scoped>

@@ -35,6 +35,8 @@ import { Head } from '@unhead/vue/components'
 import { onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import { useAuthStore, usePermissionsStore } from '@/stores'
+
 import { useApi, useAuth, useBookForm, useToast } from '@/composables'
 import { startAccountSync } from '@/composables/accountSync'
 import { startCatalogSync } from '@/composables/catalogSync'
@@ -68,6 +70,25 @@ const onBookRemoved = (id: string) => {
 watch(
   () => route.path,
   () => bookForm.close(),
+)
+
+// "Adicionar" anywhere is this screen with ?adicionar=1 (useAddTarget): the form opens over it, also back from login.
+const auth = useAuthStore()
+const permissions = usePermissionsStore()
+watch(
+  [() => route.query.adicionar, () => auth.isLoggedIn, () => permissions.mine],
+  ([asked, signedIn, matrix]) => {
+    // Signed out, the link went to the login; signed in, the matrix may still be on its way.
+    if (asked !== '1' || !signedIn || !matrix) return
+    if (!permissions.can('books', 'create')) {
+      // The page says why and how to ask for access, which a passing notice could not.
+      router.replace({ name: 'admin-forbidden', query: { motivo: 'adicionar' } })
+      return
+    }
+    router.replace({ query: { ...route.query, adicionar: undefined } })
+    bookForm.openAdd()
+  },
+  { immediate: true },
 )
 
 useHead({

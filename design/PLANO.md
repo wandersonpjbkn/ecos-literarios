@@ -66,7 +66,7 @@ O painel Adicionar, as prateleiras, a nova Meus livros e a Conta entram na fatia
 
 - **Meus livros e Conta:** fatia 7.
 - **Prateleiras:** fatia 4, ajustadas na 7; só na vista sem filtro, com a contagem da lista que abrem.
-- **Adicionar:** não virou painel sobre o catálogo. Por decisão do dono na triagem 2 da fatia 7, ele leva ao painel do clube (o Visitante não vê o botão; ver fatia 8a). O `IA.md` foi alinhado.
+- **Adicionar:** não virou painel sobre o catálogo. Por decisão do dono na triagem 2 da fatia 7, ele leva ao painel do clube (o Visitante não vê o botão; ver fatia 8a). O `IA.md` foi alinhado. **Substituído pela fatia 9c:** Adicionar abre a gaveta na tela atual.
 
 **Artboards atrás do código.** Eles ficam como estão até o dono refazê-los no Claude Design:
 
