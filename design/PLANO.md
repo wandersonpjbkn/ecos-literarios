@@ -213,7 +213,7 @@ Aceite: marcar no formulário do livro mostra a estrela na grade e a pílula na 
 
 ## 9 · Capa e dados
 
-Redesenho da busca de capa e dados, a partir do estudo de 02/10/2026. O problema: quem cadastra não descobre a busca, e quem a encontra depois esbarra em dois jeitos de salvar, na edição errada e numa recusa sem saída. Daqui em diante os livros entram um a um, pelo cadastro e pela edição, então esse caminho precisa ser simples e guiado. Especificação em `componentes/LinhaCapaEDados.md`, `componentes/VistaBusca.md`, `BACKEND.md` §11 e `COPY.md` ("Capa e dados"). Telas em `telas/capa-e-dados/`.
+Redesenho da busca de capa e dados, a partir do estudo de 02/10/2026. O problema: quem cadastra não descobre a busca, e quem a encontra depois esbarra em dois jeitos de salvar, na edição errada e numa recusa sem saída. Daqui em diante os livros entram um a um, pelo cadastro e pela edição, então esse caminho precisa ser simples e guiado. Especificação em `componentes/LinhaCapaEDados.md`, `componentes/VistaBusca.md`, `BACKEND.md` §11 e `COPY.md` ("Capa e dados"). Telas em `telas/`.
 
 Um PR por fatia, nesta ordem. A 9a e a 9b não dependem de nada e podem ir antes. Fora do escopo, de propósito: corrigir os dados já gravados no acervo pela busca antiga (corrige-se caso a caso) e qualquer envio ou hospedagem de capa (fica o campo de endereço).
 

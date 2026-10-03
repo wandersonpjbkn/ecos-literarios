@@ -32,7 +32,7 @@ Cole isto na raiz do projeto, com a pasta `design/` já commitada. Um prompt por
 
 Antes da primeira sub-fatia, numa sessão sem código:
 
-> Leia `design/componentes/LinhaCapaEDados.md`, `design/componentes/VistaBusca.md`, `design/BACKEND.md` §11, a seção "Capa e dados" de `design/COPY.md` e a fatia 9 de `design/PLANO.md`. As telas estão em `design/telas/capa-e-dados/`. Não escreva código. Me devolva: (a) o que muda em cada sub-fatia, 9a a 9h, arquivo por arquivo; (b) onde o código atual vai brigar com isso; (c) o que você precisa saber antes da 9e, que mexe num composable usado por todas as gavetas.
+> Leia `design/componentes/LinhaCapaEDados.md`, `design/componentes/VistaBusca.md`, `design/BACKEND.md` §11, a seção "Capa e dados" de `design/COPY.md` e a fatia 9 de `design/PLANO.md`. As telas estão em `design/telas/`. Não escreva código. Me devolva: (a) o que muda em cada sub-fatia, 9a a 9h, arquivo por arquivo; (b) onde o código atual vai brigar com isso; (c) o que você precisa saber antes da 9e, que mexe num composable usado por todas as gavetas.
 
 Para cada sub-fatia, o prompt de fatia de sempre, com "Implemente a **fatia 9x**", mais estas regras:
 

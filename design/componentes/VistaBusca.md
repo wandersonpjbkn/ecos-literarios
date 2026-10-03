@@ -49,4 +49,4 @@ Toda troca de vista tem transição que mostra a hierarquia (entrar desliza para
 
 A consulta inicial (título, autor), os campos que o livro já tem com seus valores, e o retorno com os campos marcados.
 
-Telas: `design/telas/capa-e-dados/V1` a `V5`, `V2-aberta`, `Desk-V2`, `Desk-V3`.
+Telas: `design/telas/V1` a `V5`, `V2-aberta`, `Desk-V2`, `Desk-V3`.

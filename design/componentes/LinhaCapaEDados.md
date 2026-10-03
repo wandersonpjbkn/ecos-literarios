@@ -36,4 +36,4 @@ Ao voltar da vista, o foco vai para o botão da linha (o mesmo que abriu a vista
 
 Título e autor atuais do formulário, se é cadastro ou edição, a capa atual (se houver), quais campos opcionais o livro já tem e o que foi escolhido na vista (para o L2).
 
-Telas: `design/telas/capa-e-dados/L0` a `L4` e `Desk-Form`.
+Telas: `design/telas/L0` a `L4` e `Desk-Form`.
