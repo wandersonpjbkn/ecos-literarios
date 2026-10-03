@@ -180,51 +180,9 @@ export interface AdminBook {
   published_year?: number
 }
 
-export type ResultStatus = 'applied' | 'skipped' | 'failed'
-
-export interface EnrichmentResult {
-  id: string
-  title: string
-  status: ResultStatus
-  detail?: string
-}
-
-export interface EnrichmentSummary {
-  total: number
-  applied: number
-  skipped: number
-  failed: number
-}
-
-export interface EnrichmentHistoryItem {
-  book_id: string
-  titulo: string
-  status: ResultStatus
-  source?: 'google_books' | 'open_library'
-  reason?: 'manual_edit' | 'not_found' | 'missing_author'
-  strategy?: string
-  error?: string
-  cover_url?: string
-}
-
-export interface EnrichmentRun {
-  id: string
-  started_at: string
-  finished_at: string
-  force: boolean
-  initiated_by_email: string
-  total: number
-  applied: number
-  skipped: number
-  failed: number
-  coverage_pct_after: number
-  results: EnrichmentHistoryItem[]
-}
-
 export type Role = 'admin' | 'editor' | 'viewer'
 
-export type Resource =
-  'books' | 'users' | 'autores' | 'midias' | 'categorias' | 'subgeneros' | 'permissions' | 'claim' | 'enrichment'
+export type Resource = 'books' | 'users' | 'autores' | 'midias' | 'categorias' | 'subgeneros' | 'permissions' | 'claim'
 
 export type Action = 'create' | 'read' | 'update' | 'delete'
 

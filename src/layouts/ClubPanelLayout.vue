@@ -18,8 +18,6 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { mayOpen } from '@/router/modules/admin'
-
 import { useAuthStore, usePermissionsStore } from '@/stores'
 
 import { retryAccountSync } from '@/composables/accountSync'
@@ -36,7 +34,6 @@ const GROUPS: AreaGroup[] = [
     links: [
       { name: 'admin-books', label: 'Livros' },
       { name: 'admin-entities', label: 'Autores e gêneros' },
-      { name: 'admin-enrichment', label: 'Capas e sinopses' },
     ],
   },
   {
@@ -60,10 +57,6 @@ const visibleGroups = computed(() =>
   ),
 )
 
-// The route says who may enter (adminRoute, permissionRoute), so the menu never offers what the guard refuses.
-const isOpenToMe = (name: string) => {
-  const { adminOnly, permission } = router.resolve({ name }).meta
-  if (permission) return mayOpen(permission)
-  return !adminOnly || authStore.isAdmin
-}
+// The route says who may enter (adminRoute), so the menu never offers what the guard refuses.
+const isOpenToMe = (name: string) => !router.resolve({ name }).meta.adminOnly || authStore.isAdmin
 </script>

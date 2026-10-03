@@ -346,35 +346,6 @@ export const getClaimHistory = (limit: number) =>
     'Não foi possível carregar o histórico. Tente de novo.',
   )
 
-export type EnrichmentStatus = {
-  total: number
-  with_cover: number
-  without_cover: number
-  coverage_pct: number
-  last_enriched_at: string | null
-}
-
-export const getEnrichmentStatus = () =>
-  authedRequest<EnrichmentStatus>(
-    '/admin/books/enrich/status',
-    { method: 'GET' },
-    'Não foi possível carregar o que já foi feito. Tente de novo.',
-  )
-
-export const getEnrichmentHistory = (limit: number) =>
-  authedRequest<{ history?: Array<Record<string, unknown>> }>(
-    `/admin/books/enrich/history?limit=${limit}`,
-    { method: 'GET' },
-    'Não foi possível carregar o que já foi feito. Tente de novo.',
-  )
-
-export const runEnrichment = (force: boolean) =>
-  authedRequest<Record<string, unknown>>(
-    '/admin/books/enrich',
-    { method: 'POST', body: JSON.stringify({ force }) },
-    'Não foi possível buscar os dados. Tente de novo.',
-  )
-
 // Saves nothing: the form takes what the person picks and saves it with the book.
 export const searchBookCandidates = (query: BookSearchQuery) =>
   authedRequest<{ source: BookSearchSource | null; candidates: BookCandidate[] }>(

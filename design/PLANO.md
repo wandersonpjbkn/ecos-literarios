@@ -265,7 +265,7 @@ Aceite: no cadastro, a linha aparece antes de salvar e o botão habilita ao pree
 
 ### 9h · Fim da busca em lote
 
-Sai a seção "Capas e sinopses" do Painel do clube (`AdminEnrichment`, a rota e o item da lateral), a linha de Permissões e, no servidor, a busca em lote, o recurso `enrichment` e a trava `manually_edited_at` (`BACKEND.md` §11, "O que sai"). Supera a fatia 8f. Quem cuida do acervo encontra livros sem capa pelo "Faltando algo" do painel e completa pela edição (L4).
+Sai a seção "Capas e sinopses" do Painel do clube (`AdminEnrichment`, a rota e o item da lateral), a linha de Permissões e, no servidor, a busca em lote, o recurso `enrichment` e a trava `manually_edited_at` (`BACKEND.md` §11, "O que sai"). Supera a fatia 8f. Quem cuida do acervo encontra livros sem capa pelo "Faltando algo" do painel e completa pela edição (L4). O endereço antigo (`/admin/capas`, `/admin/enriquecimento`) leva a "Faltando algo" (`/admin/livros?mostrar=faltando`), em vez de "Página não encontrada".
 
 Aceite: nenhuma tela, rota ou permissão de busca em lote; a matriz de Permissões não mostra mais a linha.
 

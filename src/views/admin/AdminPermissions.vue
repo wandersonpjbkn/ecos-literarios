@@ -119,7 +119,6 @@ const RESOURCES: Resource[] = [
   'categorias',
   'subgeneros',
   'claim',
-  'enrichment',
   'permissions',
 ]
 const ACTIONS: Action[] = ['create', 'read', 'update', 'delete']
@@ -137,7 +136,6 @@ const VERB: Record<Action, string> = { create: 'adicionar', read: 'ver', update:
 const PHRASE: Partial<Record<Resource, Partial<Record<Action, string>>>> = {
   users: { read: 'ver a lista de membros' },
   claim: { update: 'vincular a própria conta a um nome do grupo', create: 'incluir um nome novo de pessoa do clube' },
-  enrichment: { update: 'buscar capas e dados para o acervo inteiro' },
 }
 
 const auth = useAuthStore()
@@ -182,7 +180,6 @@ const resourceLabel = (r: string) =>
     categorias: 'Gêneros',
     subgeneros: 'Subgêneros',
     claim: 'Vínculo',
-    enrichment: 'Capas e sinopses',
     permissions: 'Permissões',
   })[r] ?? r
 
