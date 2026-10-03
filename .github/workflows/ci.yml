@@ -23,7 +23,7 @@ jobs:
       - run: yarn ts
       - run: yarn eslint .
       - run: yarn lint:style
-      - run: yarn prettier --check src/ eslint/
+      - run: yarn prettier --check src/ eslint/ scripts/
       - run: yarn build-only
       # Fails only on high and critical: yarn 1 exits non-zero for any severity.
       - run: yarn audit:check
