@@ -27,8 +27,13 @@
           >
             <div class="app-drawer__handle" aria-hidden="true" />
 
-            <div class="app-drawer__header">
-              <h2 :id="titleId" class="app-drawer__title">{{ title }}</h2>
+            <div class="app-drawer__header" :class="{ 'app-drawer__header--back': back }">
+              <!-- A view inside the panel goes up one level; "Fechar" keeps its place in every view. -->
+              <AppButton v-if="back" size="md" class="app-drawer__back" @click="emit('back')">
+                <BaseIcon name="arrow-left" aria-hidden="true" />
+                Voltar
+              </AppButton>
+              <h2 :id="titleId" ref="heading" class="app-drawer__title" tabindex="-1">{{ title }}</h2>
               <!-- The secondary weight, not a borderless grey: that is how a disabled button looks (8e). -->
               <AppButton ref="closeButton" size="md" class="app-drawer__close" @click="requestClose">
                 <BaseIcon name="times" aria-hidden="true" />
@@ -37,7 +42,7 @@
             </div>
           </div>
 
-          <div class="app-drawer__body">
+          <div ref="body" class="app-drawer__body">
             <slot />
           </div>
 
@@ -80,9 +85,11 @@ const props = defineProps<{
   returnFocus?: () => HTMLElement | null | undefined
   // Asked before any way out (Fechar, outside, drag, Esc, the system back); false keeps the panel open.
   mayClose?: () => boolean | Promise<boolean>
+  // A view inside the panel (the cover and data search): shows "Voltar", which emits back.
+  back?: boolean
 }>()
 
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits<{ close: []; back: [] }>()
 
 const generatedId = useId()
 
@@ -110,6 +117,8 @@ const panel = ref<HTMLElement | null>(null)
 const drag = useSheetDrag(panel, () => isPhone.value, requestClose)
 
 const closeButton = ref<{ $el: HTMLElement } | null>(null)
+const heading = ref<HTMLElement | null>(null)
+const body = ref<HTMLElement | null>(null)
 
 useDialogFocus({
   open: () => props.open,
@@ -131,7 +140,12 @@ watch(
 )
 
 // A link inside the panel navigates only after the panel's own history entry is gone (AreaLayout).
-defineExpose({ closeThen })
+defineExpose({
+  closeThen,
+  focusTitle: () => heading.value?.focus(),
+  // A new view inside the panel starts at its top, not where the last one was scrolled.
+  scrollToTop: () => body.value?.scrollTo({ top: 0 }),
+})
 
 watch(() => props.open, lockScroll, { immediate: true })
 onBeforeUnmount(() => lockScroll(false))
@@ -157,6 +171,13 @@ onBeforeUnmount(() => lockScroll(false))
     flex-direction: column;
     background: var(--color-surface-default);
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+
+    // The book form changes views inside it: a sheet of one height keeps "Fechar" in place from view to view.
+    @media (max-width: $bp-phone-max) {
+      .app-drawer--wide & {
+        height: calc(100dvh - var(--space-14));
+      }
+    }
 
     // A short drag that does not close slides the sheet back into place.
     @media (max-width: $bp-phone-max) and (prefers-reduced-motion: no-preference) {
@@ -207,10 +228,43 @@ onBeforeUnmount(() => lockScroll(false))
     border-bottom: 1px solid var(--color-border-default);
   }
 
+  // With "Voltar": on the phone, Voltar and Fechar share the first row and the title goes under them.
+  &__header--back {
+    display: grid;
+    grid-template-areas:
+      'back close'
+      'title title';
+    grid-template-columns: auto auto;
+    justify-content: space-between;
+    row-gap: var(--space-3);
+
+    @media (min-width: $bp-tablet-min) {
+      grid-template-areas: 'back title close';
+      grid-template-columns: auto 1fr auto;
+      column-gap: var(--space-4);
+    }
+
+    .app-drawer__back {
+      grid-area: back;
+    }
+
+    .app-drawer__title {
+      grid-area: title;
+    }
+
+    .app-drawer__close {
+      grid-area: close;
+    }
+  }
+
   &__title {
     margin: 0;
     font-size: var(--font-size-section);
     font-weight: var(--font-weight-bold);
+
+    &:focus {
+      outline: none;
+    }
   }
 
   &__close {

@@ -2,224 +2,259 @@
   <AppDrawer
     ref="drawer"
     :open="isOpen"
-    :title="isEditMode ? 'Editar o livro' : 'Adicionar um livro'"
+    :title="drawerTitle"
+    :back="view !== 'form'"
     wide
     :initial-focus="focus === 'porque' ? '#bf-porque' : '#bf-titulo'"
     class="book-form-drawer"
     :return-focus="returnFocus"
     :may-close="mayLeave"
     @close="close"
+    @back="goBack"
   >
-    <form class="book-form" @submit.prevent="handleSubmit">
-      <section class="form-section" aria-labelledby="bf-essential">
-        <h3 id="bf-essential" class="form-section__title">O essencial</h3>
-        <p class="form-section__text">Só isto é preciso para o livro entrar no catálogo.</p>
+    <Transition :name="motion">
+      <BookDataSearch
+        v-if="view === 'search'"
+        ref="searchView"
+        :status="dataSearch.status.value"
+        :candidates="dataSearch.candidates.value"
+        :source="dataSearch.source.value"
+        :query="dataSearch.query.value"
+        :error-message="dataSearch.errorMessage.value"
+        @pick="pick"
+        @search="dataSearch.search"
+      />
+      <BookDataCheck
+        v-else-if="view === 'check' && picked"
+        v-model="pickedFields"
+        :candidate="picked"
+        :current="baselineData"
+      />
+    </Transition>
+    <Transition :name="motion">
+      <form v-show="view === 'form'" class="book-form" @submit.prevent="handleSubmit">
+        <section class="form-section" aria-labelledby="bf-essential">
+          <h3 id="bf-essential" class="form-section__title">O essencial</h3>
+          <p class="form-section__text">Só isto é preciso para o livro entrar no catálogo.</p>
 
-        <!-- A free placeholder with this account's name: linking first makes those books this person's too. -->
-        <div v-if="claimOffer" class="claim-offer" role="status">
-          <p class="claim-offer__text">
-            O nome "{{ claimOffer }}" já está no catálogo. É você? Se for, vincule esse nome e esses livros passam a ser
-            seus.
-          </p>
-          <AppNotice v-if="claimError" :text="claimError" />
-          <div class="claim-offer__actions">
-            <AppButton size="md" :disabled="claiming" @click="claimOfferedName">
-              {{ claiming ? 'Vinculando…' : 'Vincular este nome' }}
-            </AppButton>
-            <AppButton variant="ghost" size="md" :disabled="claiming" @click="dismissClaimOffer">
-              Não sou eu, continuar
-            </AppButton>
-          </div>
-        </div>
-        <div class="form-grid">
-          <AppField
-            id="bf-titulo"
-            v-model="form.titulo"
-            trim
-            class="form-grid__full"
-            label="Título"
-            :disabled="isSaving"
-            autocomplete="off"
-          />
-          <AppField label="Autores">
-            <template #default="{ labelId }">
-              <MultiSelect
-                label="Escolher autores"
-                :labelledby="labelId"
-                :options="authorOptions"
-                :selected="form.authors"
-                :multiple="true"
-                :searchable="true"
-                :create-label="canCreate('autores') ? createLabel('autor') : undefined"
-                @toggle="toggleAuthor"
-                @create="pickNewAuthor"
-                @clear="form.authors = []"
-              />
-            </template>
-          </AppField>
-          <AppField label="Formato">
-            <template #default="{ labelId }">
-              <MultiSelect
-                label="Escolher o formato"
-                :labelledby="labelId"
-                :options="formatOptions"
-                :selected="form.midia"
-                :multiple="false"
-                :searchable="false"
-                @toggle="(v) => (form.midia = v)"
-              />
-            </template>
-          </AppField>
-          <AppField label="Gênero">
-            <template #default="{ labelId }">
-              <MultiSelect
-                label="Escolher o gênero"
-                :labelledby="labelId"
-                :options="genreOptions"
-                :selected="form.categoria"
-                :multiple="false"
-                :searchable="true"
-                :create-label="canCreate('categorias') ? createLabel('gênero') : undefined"
-                @toggle="(v) => (form.categoria = v)"
-                @create="pickNewGenre"
-              />
-            </template>
-          </AppField>
-          <AppField v-if="!isMemberScope" label="Mencionado por" hint="Quem falou do livro no grupo.">
-            <template #default="{ labelId, describedBy }">
-              <MultiSelect
-                label="Escolher quem mencionou"
-                :labelledby="labelId"
-                :aria-describedby="describedBy"
-                :options="personOptions"
-                :selected="form.person"
-                :multiple="false"
-                :searchable="true"
-                :create-label="canAddName ? newNameLabel : undefined"
-                @toggle="(v) => (form.person = v)"
-                @create="(typed) => (form.person = `${NEW_NAME}${typed}`)"
-              />
-            </template>
-          </AppField>
-          <AppNotice v-if="peopleError" class="form-grid__full" :text="peopleError" retry @retry="loadPeople" />
-          <AppField
-            id="bf-porque"
-            v-model="form.porque"
-            trim
-            class="form-grid__full"
-            label="Comentário"
-            hint="Os comentários aparecem no eco da semana, no catálogo."
-            multiline
-            :rows="3"
-            :disabled="isSaving"
-          />
-        </div>
-      </section>
-
-      <section class="form-section form-section--optional">
-        <button
-          type="button"
-          class="form-section__toggle"
-          :aria-expanded="showMore"
-          aria-controls="bf-more"
-          @click="showMore = !showMore"
-        >
-          <span>Mais sobre o livro <span class="form-section__optional">(opcional)</span></span>
-          <BaseIcon name="chevron" class="form-section__chevron" :class="{ 'is-open': showMore }" aria-hidden="true" />
-        </button>
-
-        <div v-show="showMore" id="bf-more" class="form-section__more">
-          <template v-if="canSearchData">
-            <p class="form-section__text">
-              A busca preenche capa, sinopse, páginas e ano pelo
-              <a href="https://books.google.com/" class="form-section__link" target="_blank" rel="noopener noreferrer"
-                >Google Books<span class="visually-hidden">{{ ' ' }}(abre em outra aba)</span></a
-              >
-              ou pela
-              <a href="https://openlibrary.org" class="form-section__link" target="_blank" rel="noopener noreferrer"
-                >Open Library<span class="visually-hidden">{{ ' ' }}(abre em outra aba)</span></a
-              >. Tudo continua editável à mão.
+          <!-- A free placeholder with this account's name: linking first makes those books this person's too. -->
+          <div v-if="claimOffer" class="claim-offer" role="status">
+            <p class="claim-offer__text">
+              O nome "{{ claimOffer }}" já está no catálogo. É você? Se for, vincule esse nome e esses livros passam a
+              ser seus.
             </p>
-            <BookEnrichmentPanel
-              class="form-section__enrichment"
-              :book-id="book?._id ?? null"
-              :disabled="isSaving"
-              @applied="handleEnrichmentApplied"
-            />
-          </template>
-
+            <AppNotice v-if="claimError" :text="claimError" />
+            <div class="claim-offer__actions">
+              <AppButton size="md" :disabled="claiming" @click="claimOfferedName">
+                {{ claiming ? 'Vinculando…' : 'Vincular este nome' }}
+              </AppButton>
+              <AppButton variant="ghost" size="md" :disabled="claiming" @click="dismissClaimOffer">
+                Não sou eu, continuar
+              </AppButton>
+            </div>
+          </div>
           <div class="form-grid">
-            <AppField label="Subgêneros" class="form-grid__full">
+            <AppField
+              id="bf-titulo"
+              v-model="form.titulo"
+              trim
+              class="form-grid__full"
+              label="Título"
+              :disabled="isSaving"
+              autocomplete="off"
+            />
+            <AppField label="Autores">
               <template #default="{ labelId }">
                 <MultiSelect
-                  label="Escolher subgêneros"
+                  label="Escolher autores"
                   :labelledby="labelId"
-                  :options="subgenreOptions"
-                  :selected="form.subgeneros"
+                  :options="authorOptions"
+                  :selected="form.authors"
                   :multiple="true"
                   :searchable="true"
-                  :create-label="canCreate('subgeneros') ? createLabel('subgênero') : undefined"
-                  @toggle="toggleSubgenre"
-                  @create="pickNewSubgenre"
-                  @clear="form.subgeneros = []"
+                  :create-label="canCreate('autores') ? createLabel('autor') : undefined"
+                  @toggle="toggleAuthor"
+                  @create="pickNewAuthor"
+                  @clear="form.authors = []"
                 />
               </template>
             </AppField>
+            <AppField label="Formato">
+              <template #default="{ labelId }">
+                <MultiSelect
+                  label="Escolher o formato"
+                  :labelledby="labelId"
+                  :options="formatOptions"
+                  :selected="form.midia"
+                  :multiple="false"
+                  :searchable="false"
+                  @toggle="(v) => (form.midia = v)"
+                />
+              </template>
+            </AppField>
+            <AppField label="Gênero">
+              <template #default="{ labelId }">
+                <MultiSelect
+                  label="Escolher o gênero"
+                  :labelledby="labelId"
+                  :options="genreOptions"
+                  :selected="form.categoria"
+                  :multiple="false"
+                  :searchable="true"
+                  :create-label="canCreate('categorias') ? createLabel('gênero') : undefined"
+                  @toggle="(v) => (form.categoria = v)"
+                  @create="pickNewGenre"
+                />
+              </template>
+            </AppField>
+            <AppField v-if="!isMemberScope" label="Mencionado por" hint="Quem falou do livro no grupo.">
+              <template #default="{ labelId, describedBy }">
+                <MultiSelect
+                  label="Escolher quem mencionou"
+                  :labelledby="labelId"
+                  :aria-describedby="describedBy"
+                  :options="personOptions"
+                  :selected="form.person"
+                  :multiple="false"
+                  :searchable="true"
+                  :create-label="canAddName ? newNameLabel : undefined"
+                  @toggle="(v) => (form.person = v)"
+                  @create="(typed) => (form.person = `${NEW_NAME}${typed}`)"
+                />
+              </template>
+            </AppField>
+            <AppNotice v-if="peopleError" class="form-grid__full" :text="peopleError" retry @retry="loadPeople" />
             <AppField
-              v-model="form.synopsis"
+              id="bf-porque"
+              v-model="form.porque"
               trim
               class="form-grid__full"
-              label="Sinopse"
+              label="Comentário"
+              hint="Os comentários aparecem no eco da semana, no catálogo."
               multiline
-              :rows="4"
+              :rows="3"
               :disabled="isSaving"
             />
-            <AppField
-              v-model="form.published_year"
-              trim
-              label="Ano de publicação"
-              type="number"
-              min="0"
-              step="1"
-              :disabled="isSaving"
-              autocomplete="off"
-            />
-            <AppField
-              v-model="form.page_count"
-              trim
-              label="Páginas"
-              type="number"
-              min="0"
-              step="1"
-              :disabled="isSaving"
-              autocomplete="off"
-            />
-            <AppField
-              v-model="form.isbn"
-              trim
-              label="ISBN"
-              placeholder="978-…"
-              :maxlength="17"
-              :disabled="isSaving"
-              autocomplete="off"
-            />
-            <AppField v-model="form.publisher" trim label="Editora" :disabled="isSaving" autocomplete="off" />
-            <AppField
-              v-model="form.cover_url"
-              trim
+            <BookDataLine
+              v-if="canSearchData"
+              ref="dataLine"
               class="form-grid__full"
-              label="Endereço da capa"
-              type="url"
-              placeholder="https://…"
-              :disabled="isSaving"
-              autocomplete="off"
+              :can-search="!!form.titulo.trim() && form.authors.length > 0"
+              :editing="isEditMode"
+              :has-cover="!!form.cover_url"
+              :has-synopsis="!!form.synopsis"
+              :cover-url="form.cover_url || undefined"
+              :chosen="chosenLabels"
+              @search="openSearch"
+              @undo="undoChoice"
             />
           </div>
-        </div>
-      </section>
-    </form>
+        </section>
 
-    <template #footer>
+        <section class="form-section form-section--optional">
+          <button
+            type="button"
+            class="form-section__toggle"
+            :aria-expanded="showMore"
+            aria-controls="bf-more"
+            @click="showMore = !showMore"
+          >
+            <span>Mais sobre o livro <span class="form-section__optional">(opcional)</span></span>
+            <BaseIcon
+              name="chevron"
+              class="form-section__chevron"
+              :class="{ 'is-open': showMore }"
+              aria-hidden="true"
+            />
+          </button>
+
+          <div v-show="showMore" id="bf-more" class="form-section__more">
+            <div class="form-grid">
+              <AppField label="Subgêneros" class="form-grid__full">
+                <template #default="{ labelId }">
+                  <MultiSelect
+                    label="Escolher subgêneros"
+                    :labelledby="labelId"
+                    :options="subgenreOptions"
+                    :selected="form.subgeneros"
+                    :multiple="true"
+                    :searchable="true"
+                    :create-label="canCreate('subgeneros') ? createLabel('subgênero') : undefined"
+                    @toggle="toggleSubgenre"
+                    @create="pickNewSubgenre"
+                    @clear="form.subgeneros = []"
+                  />
+                </template>
+              </AppField>
+              <AppField
+                v-model="form.synopsis"
+                trim
+                class="form-grid__full"
+                label="Sinopse"
+                multiline
+                :rows="4"
+                :disabled="isSaving"
+              />
+              <AppField
+                v-model="form.published_year"
+                trim
+                label="Ano de publicação"
+                type="number"
+                min="0"
+                step="1"
+                :disabled="isSaving"
+                autocomplete="off"
+              />
+              <AppField
+                v-model="form.page_count"
+                trim
+                label="Páginas"
+                type="number"
+                min="0"
+                step="1"
+                :disabled="isSaving"
+                autocomplete="off"
+              />
+              <AppField
+                v-model="form.isbn"
+                trim
+                label="ISBN"
+                placeholder="978-…"
+                :maxlength="17"
+                :disabled="isSaving"
+                autocomplete="off"
+              />
+              <AppField v-model="form.publisher" trim label="Editora" :disabled="isSaving" autocomplete="off" />
+              <AppField
+                v-model="form.cover_url"
+                trim
+                class="form-grid__full"
+                label="Endereço da capa"
+                type="url"
+                placeholder="https://…"
+                :disabled="isSaving"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+        </section>
+      </form>
+    </Transition>
+
+    <template v-if="view === 'check'" #footer>
+      <div class="drawer-footer">
+        <p v-if="!pickedFields.length" class="drawer-footer__missing" role="status">
+          Marque pelo menos um dado para usar.
+        </p>
+        <div class="drawer-footer__actions">
+          <AppButton size="md" @click="goBack">Escolher outro</AppButton>
+          <AppButton variant="primary" size="md" :disabled="!pickedFields.length" @click="useChoice">
+            Usar estes dados
+          </AppButton>
+        </div>
+      </div>
+    </template>
+    <template v-else-if="view === 'form'" #footer>
       <div class="drawer-footer">
         <AppNotice v-if="error" class="drawer-footer__notice" :text="error" />
         <p v-if="success" class="drawer-footer__success" role="status">{{ success }}</p>
@@ -275,7 +310,7 @@
 import { ref, reactive, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 
 import { joinWords } from '@/data/words'
-import type { BookPayload } from '@/types'
+import type { BookCandidate, BookPayload } from '@/types'
 
 import { useAuthStore, usePermissionsStore } from '@/stores'
 
@@ -283,8 +318,12 @@ import { useEntityCrud, useErrorReporter, useToast } from '@/composables'
 import { reloadAccount } from '@/composables/accountSync'
 import { errorText } from '@/composables/apiError'
 import { claimRegister, getPeople, removeBook, saveBook, useApi } from '@/composables/useApi'
+import { useBackCloses } from '@/composables/useBackCloses'
+import { useBookSearch } from '@/composables/useBookSearch'
 
-import BookEnrichmentPanel from '@/components/books/BookEnrichmentPanel.vue'
+import BookDataCheck, { type DataField } from '@/components/books/BookDataCheck.vue'
+import BookDataLine from '@/components/books/BookDataLine.vue'
+import BookDataSearch from '@/components/books/BookDataSearch.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppDrawer from '@/components/ui/AppDrawer.vue'
 import AppField from '@/components/ui/AppField.vue'
@@ -392,7 +431,8 @@ let closeTimer: ReturnType<typeof setTimeout> | undefined
 // Scope follows the permission, not the screen: whoever may edit any book (PATCH /books/:id) gets the panel's form.
 const isMemberScope = computed(() => !permissions.can('books', 'update'))
 // The automatic search asks for books:update in the API; everyone else fills the same fields by hand.
-const canSearchData = computed(() => permissions.can('books', 'update'))
+// The search answers whoever may add or edit books (the API asks the same); an owner fills the fields by hand.
+const canSearchData = computed(() => permissions.can('books', 'create') || permissions.can('books', 'update'))
 
 const isEditMode = computed(() => !!props.book)
 const canRemove = computed(() => isEditMode.value && !isMemberScope.value && permissions.can('books', 'delete'))
@@ -497,10 +537,10 @@ const loadPeople = async () => {
 }
 
 // The box leaves with the button that had focus: the next field takes it.
-const focusTitle = () => nextTick(() => document.querySelector<HTMLElement>('#bf-titulo')?.focus())
+const focusTitleField = () => nextTick(() => document.querySelector<HTMLElement>('#bf-titulo')?.focus())
 const dismissClaimOffer = () => {
   claimDismissed.value = true
-  focusTitle()
+  focusTitleField()
 }
 
 const claimOfferedName = async () => {
@@ -514,7 +554,7 @@ const claimOfferedName = async () => {
     await reloadAccount()
     useApi().fetchBooks()
     loadPeople()
-    focusTitle()
+    focusTitleField()
   } catch (e) {
     claimError.value = errorText(e, 'Não foi possível vincular o nome. Tente de novo.')
     useErrorReporter().captureException(e, { context: 'BookFormDrawer.claim' })
@@ -575,7 +615,162 @@ const populateForm = (book: BookPayload): void => {
 
 const close = (): void => {
   clearTimeout(closeTimer)
+  // A view left open would stay a history level of a closed form.
+  view.value = 'form'
   emit('close')
+}
+
+// ── Cover and data: a view inside the same drawer (VistaBusca.md), nothing saved until the form is ──
+const DATA_LABELS: Record<DataField, string> = {
+  cover_url: 'Capa',
+  synopsis: 'Sinopse',
+  publisher: 'Editora',
+  page_count: 'Páginas',
+  published_year: 'Ano',
+  isbn: 'ISBN',
+}
+const DATA_FIELDS = Object.keys(DATA_LABELS) as DataField[]
+
+const view = ref<'form' | 'search' | 'check'>('form')
+const DEPTH = { form: 0, search: 1, check: 2 }
+// Going deeper slides the view in from the right; going back, from the left (VistaBusca.md).
+const motion = ref('view-forward')
+watch(view, (now, before) => (motion.value = DEPTH[now] > DEPTH[before] ? 'view-forward' : 'view-back'), {
+  flush: 'sync',
+})
+const dataSearch = useBookSearch()
+const picked = ref<BookCandidate | null>(null)
+const pickedIndex = ref(0)
+const pickedFields = ref<DataField[]>([])
+// What the search put in the form, what was there before, and where it came from: undo, and the save's sources.
+const choice = ref<{
+  fields: DataField[]
+  values: Partial<Record<DataField, string>>
+  before: Partial<Record<DataField, string>>
+  source: 'google' | 'openlibrary'
+} | null>(null)
+const openedIsbn = ref('')
+const searchView = ref<InstanceType<typeof BookDataSearch> | null>(null)
+const dataLine = ref<InstanceType<typeof BookDataLine> | null>(null)
+
+const drawerTitle = computed(() => {
+  if (view.value === 'search') return 'Capa e dados'
+  if (view.value === 'check') return 'Conferir'
+  return isEditMode.value ? 'Editar o livro' : 'Adicionar um livro'
+})
+
+const currentData = computed(
+  () => Object.fromEntries(DATA_FIELDS.map((field) => [field, String(form[field] ?? '')])) as Record<DataField, string>,
+)
+// A field still holding what the search put there: "Trocar" and "Desfazer" treat it as not the person's.
+const fromSearch = (field: DataField) =>
+  !!choice.value?.fields.includes(field) && currentData.value[field] === choice.value.values[field]
+// The book as it is without the current choice: what "Trocar" compares the next book with.
+const baselineData = computed(
+  () =>
+    Object.fromEntries(
+      DATA_FIELDS.map((field) => [
+        field,
+        fromSearch(field) ? (choice.value!.before[field] ?? '') : currentData.value[field],
+      ]),
+    ) as Record<DataField, string>,
+)
+const chosenLabels = computed(() =>
+  choice.value ? DATA_FIELDS.filter((f) => choice.value!.fields.includes(f)).map((f) => DATA_LABELS[f]) : [],
+)
+const candidateValue = (candidate: BookCandidate, field: DataField) => {
+  const value = candidate[field]
+  return value === undefined || value === null ? '' : String(value)
+}
+
+// The system back climbs one level: Conferir → results → form, before it closes the drawer.
+useBackCloses(
+  () => props.isOpen && view.value !== 'form',
+  () => (view.value = 'form'),
+)
+useBackCloses(
+  () => props.isOpen && view.value === 'check',
+  () => (view.value = 'search'),
+)
+
+const firstAuthorName = () => {
+  const first = form.authors[0] ?? ''
+  if (first.startsWith(NEW_NAME)) return first.slice(NEW_NAME.length)
+  return authorOptions.value.find((one) => one.value === first)?.label ?? ''
+}
+
+// A state change can remove the button that had focus ("Tentar de novo"): focus goes to the view's title, not out.
+watch(dataSearch.status, async () => {
+  await nextTick()
+  if (view.value !== 'form' && (!document.activeElement || document.activeElement === document.body))
+    drawer.value?.focusTitle()
+})
+
+// Focus follows the view, whichever way it changed (a button or the system back): VistaBusca.md.
+watch(view, async (now, before) => {
+  await nextTick()
+  if (now === 'search' && before === 'check') searchView.value?.focusCard(pickedIndex.value)
+  else if (now === 'form' && before !== 'form' && props.isOpen) dataLine.value?.focus()
+  else if (now !== 'form') drawer.value?.focusTitle()
+  if (now !== 'form' && DEPTH[now] > DEPTH[before]) drawer.value?.scrollToTop()
+})
+
+const openSearch = () => {
+  // An ISBN is a search key only when the person typed it here: one from the book or a search may be another edition.
+  const typedIsbn = form.isbn && form.isbn !== openedIsbn.value && form.isbn !== choice.value?.values.isbn
+  view.value = 'search'
+  dataSearch.search({ title: form.titulo.trim(), author: firstAuthorName(), isbn: typedIsbn ? form.isbn : undefined })
+}
+
+const pick = (index: number) => {
+  const candidate = dataSearch.candidates.value[index]
+  if (!candidate) return
+  picked.value = candidate
+  pickedIndex.value = index
+  // An empty field takes what the search found; one someone already wrote is only replaced when the person marks it.
+  pickedFields.value = DATA_FIELDS.filter((field) => candidateValue(candidate, field) && !baselineData.value[field])
+  view.value = 'check'
+}
+
+const goBack = () => {
+  view.value = view.value === 'check' ? 'search' : 'form'
+}
+
+// Empties only what the search put in: a field the person changed by hand afterwards stays as they left it.
+const undoChoice = () => {
+  if (!choice.value) return
+  for (const field of choice.value.fields) if (fromSearch(field)) form[field] = choice.value.before[field] ?? ''
+  choice.value = null
+}
+
+const useChoice = () => {
+  const candidate = picked.value
+  if (!candidate || !pickedFields.value.length) return
+  // "Trocar": the new choice replaces the old one, measured against what the book had before either.
+  undoChoice()
+  const fields = [...pickedFields.value]
+  const before = Object.fromEntries(fields.map((field) => [field, currentData.value[field]]))
+  const values = Object.fromEntries(fields.map((field) => [field, candidateValue(candidate, field)]))
+  for (const field of fields) form[field] = values[field]!
+  choice.value = {
+    fields,
+    values,
+    before,
+    source: dataSearch.source.value === 'google_books' ? 'google' : 'openlibrary',
+  }
+  view.value = 'form'
+}
+
+/** Where the cover and the ISBN came from, when they are still what the search put there. */
+const dataSources = () => {
+  const chosen = choice.value
+  if (!chosen) return {}
+  return {
+    ...(chosen.fields.includes('cover_url') && form.cover_url === chosen.values.cover_url
+      ? { cover_source: chosen.source }
+      : {}),
+    ...(chosen.fields.includes('isbn') && form.isbn === chosen.values.isbn ? { isbn_source: 'search' } : {}),
+  }
 }
 
 // The API decides what changed and what counts as a hand edit; an emptied field goes as null so it is cleared.
@@ -640,6 +835,7 @@ const handleSubmit = async () => {
       subgeneros: form.subgeneros,
       porque: form.porque,
       ...optionalFields(),
+      ...dataSources(),
     }
     // Who mentioned goes only when it changed: the API keeps the book's history for real changes.
     const person = !isMemberScope.value && form.person !== initialPerson.value ? personPayload() : {}
@@ -647,6 +843,7 @@ const handleSubmit = async () => {
     await saveBook(payload, { id: props.book?._id, asOwner: isMemberScope.value })
 
     success.value = isEditMode.value ? 'Livro atualizado.' : 'Livro adicionado.'
+    choice.value = null
     takeSnapshot()
     emit('saved')
 
@@ -660,13 +857,6 @@ const handleSubmit = async () => {
   } finally {
     isSaving.value = false
   }
-}
-
-// The search already saved these fields; the form shows them so the next save does not undo them.
-const handleEnrichmentApplied = (book: BookPayload): void => {
-  adoptOptional(book)
-  success.value = 'Capa e dados salvos no livro.'
-  emit('saved')
 }
 
 watch(
@@ -684,6 +874,9 @@ watch(
       form.titulo = props.title?.trim() ?? ''
     }
     initialPerson.value = form.person
+    openedIsbn.value = form.isbn
+    choice.value = null
+    dataSearch.reset()
     claimDismissed.value = false
     claimError.value = ''
     if (!isMemberScope.value) loadPeople()
@@ -736,10 +929,6 @@ onMounted(() => {
     color: var(--color-text-secondary);
   }
 
-  &__link {
-    @include text-link;
-  }
-
   &__toggle {
     display: flex;
     width: 100%;
@@ -780,11 +969,6 @@ onMounted(() => {
 
   &__more {
     margin-top: var(--space-3);
-  }
-
-  // One grid row gap, so the button sits apart from the field below like any other field.
-  &__enrichment {
-    margin-bottom: var(--space-4);
   }
 }
 
@@ -866,10 +1050,6 @@ onMounted(() => {
 
   .form-section {
     padding: var(--space-3);
-
-    &__enrichment {
-      margin-bottom: var(--space-3);
-    }
   }
 
   .drawer-footer__actions {
@@ -883,5 +1063,25 @@ onMounted(() => {
   .drawer-footer__remove .app-button {
     width: 100%;
   }
+}
+
+// Only the entering view moves: the leaving one goes at once, so the two never stack.
+.view-forward-enter-active,
+.view-back-enter-active {
+  @media (prefers-reduced-motion: no-preference) {
+    transition:
+      transform var(--motion-view) ease-out,
+      opacity var(--motion-view) ease-out;
+  }
+}
+
+.view-forward-enter-from {
+  opacity: 0;
+  transform: translateX(var(--motion-view-shift));
+}
+
+.view-back-enter-from {
+  opacity: 0;
+  transform: translateX(calc(var(--motion-view-shift) * -1));
 }
 </style>

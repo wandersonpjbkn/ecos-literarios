@@ -2,7 +2,6 @@ import { useAddTarget } from '@/composables/useAddTarget'
 import { useApi } from '@/composables/useApi'
 import { askGroupLink } from '@/composables/useAskGroup'
 import { useAuth } from '@/composables/useAuth'
-import { useBookEnrichment } from '@/composables/useBookEnrichment'
 import { useBookForm } from '@/composables/useBookForm'
 import { useBookSort } from '@/composables/useBookSort'
 import { useBreakpoints } from '@/composables/useBreakpoints'
@@ -49,6 +48,5 @@ export {
   useAuth,
   useUtils,
   useBreakpoints,
-  useBookEnrichment,
   useErrorReporter,
 }

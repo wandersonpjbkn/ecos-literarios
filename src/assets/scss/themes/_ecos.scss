@@ -163,6 +163,13 @@ $config: (
     --cover-w-phone: 180px;
     --mini-cover-w: 44px;
     --mini-cover-h: 64px;
+    // Cover and data: a search result, and the form's line (VistaBusca.md, LinhaCapaEDados.md).
+    --search-cover-w: 56px;
+    --search-cover-h: 84px;
+    --check-cover-w: 88px;
+    --check-cover-h: 132px;
+    --line-cover-w: 48px;
+    --line-cover-h: 72px;
 
     --page-max: 1200px;
     --area-side: 264px;
@@ -229,4 +236,7 @@ $config: (
     --underline-offset: 3px;
     --underline-offset-dotted: 4px;
     --motion-spin: 0.7s;
+    // A view inside a panel sliding in (the book form's cover and data search).
+    --motion-view: 180ms;
+    --motion-view-shift: var(--space-6);
 }

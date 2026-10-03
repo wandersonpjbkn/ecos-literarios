@@ -1,9 +1,22 @@
 <template>
-  <div v-bind="$attrs" class="base-spinner" role="status" aria-label="Carregando…">
+  <div
+    v-bind="$attrs"
+    class="base-spinner"
+    :class="{ 'base-spinner--inline': inline }"
+    role="status"
+    :aria-label="label"
+  >
     <div class="base-spinner--icon" aria-hidden="true" />
-    <slot><p>Carregando…</p></slot>
+    <slot>
+      <p>{{ label }}</p>
+    </slot>
   </div>
 </template>
+
+<script lang="ts" setup>
+// inline: a line among other content (the cover and data search), not a page waiting on its own.
+withDefaults(defineProps<{ inline?: boolean; label?: string }>(), { inline: false, label: 'Carregando…' })
+</script>
 
 <style lang="scss" scoped>
 .base-spinner {
@@ -24,6 +37,23 @@
     border-top-color: var(--color-action-default);
     border-radius: 50%;
     animation: spin var(--motion-spin) linear infinite;
+  }
+
+  &--inline {
+    flex-direction: row;
+    padding: 0;
+    font-size: var(--font-size-ui);
+    color: var(--color-text-secondary);
+
+    p {
+      margin: 0;
+    }
+
+    .base-spinner--icon {
+      width: var(--icon-sm);
+      height: var(--icon-sm);
+      border-width: 2px;
+    }
   }
 }
 

@@ -9,10 +9,11 @@ import type {
   AdminClaimHistoryEntry,
   ApiUser,
   AuthUser,
+  BookCandidate,
+  BookSearchQuery,
+  BookSearchSource,
   BookForEdit,
   BookPayload,
-  EnrichmentApiResponse,
-  EnrichmentField,
   SupportEntity,
   Book,
   ApiBook,
@@ -374,18 +375,12 @@ export const runEnrichment = (force: boolean) =>
     'Não foi possível buscar os dados. Tente de novo.',
   )
 
-export const previewBookEnrichment = (id: string) =>
-  authedRequest<EnrichmentApiResponse>(
-    `/books/${id}/enrich`,
-    { method: 'POST' },
-    'Não foi possível buscar os dados do livro. Tente de novo.',
-  )
-
-export const applyBookEnrichment = (id: string, fields: EnrichmentField[]) =>
-  authedRequest<{ book: BookPayload }>(
-    `/books/${id}/enrich/apply`,
-    { method: 'POST', body: JSON.stringify({ fields }) },
-    'Não foi possível salvar os dados no livro. Tente de novo.',
+// Saves nothing: the form takes what the person picks and saves it with the book.
+export const searchBookCandidates = (query: BookSearchQuery) =>
+  authedRequest<{ source: BookSearchSource | null; candidates: BookCandidate[] }>(
+    '/books/enrich/search',
+    { method: 'POST', body: JSON.stringify(query) },
+    'Não foi possível buscar agora. Tente de novo.',
   )
 
 // ── Painel: autores, formatos, gêneros, subgêneros ──

@@ -158,34 +158,6 @@ export interface RegisterResponse {
   name_synced?: boolean
 }
 
-// Enrichment
-
-export type EnrichmentField = 'description' | 'coverUrl' | 'publisher' | 'isbn' | 'pageCount' | 'publishedYear'
-
-export interface EnrichmentItem {
-  field: EnrichmentField
-  label: string
-  preview: string
-  hasValue: boolean
-}
-
-export interface EnrichmentPreview {
-  sourceLabel: string
-  items: EnrichmentItem[]
-}
-
-export interface EnrichmentApiResponse {
-  source: 'google_books' | 'open_library'
-  preview: {
-    description?: string
-    coverUrl?: string
-    publisher?: string
-    isbn?: string
-    pageCount?: number
-    publishedYear?: number
-  }
-}
-
 // Admin
 
 export type SegmentFilter = 'all' | 'missing' | 'complete' | 'missing-isbn'
@@ -315,4 +287,27 @@ export interface BookForEdit {
   cover_url?: string
   page_count?: number
   published_year?: number
+}
+
+/** One book the cover and data search found; nothing is saved until the book form is. */
+export interface BookCandidate {
+  volume_id: string
+  title?: string
+  authors: string[]
+  cover_url?: string
+  synopsis?: string
+  publisher?: string
+  isbn?: string
+  page_count?: number
+  published_year?: number
+  // As the source gives it ("pt-BR", "en", "por"); the screen shows the name.
+  language?: string
+}
+
+export type BookSearchSource = 'google_books' | 'open_library'
+
+export interface BookSearchQuery {
+  title: string
+  author: string
+  isbn?: string
 }
