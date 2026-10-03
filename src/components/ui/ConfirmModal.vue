@@ -23,7 +23,7 @@
 
           <div class="modal-footer">
             <AppButton ref="cancelButton" class="modal-btn" :disabled="loading" @click="emit('cancel')">
-              Cancelar
+              {{ cancelLabel }}
             </AppButton>
             <AppButton
               ref="confirmButton"
@@ -55,6 +55,8 @@ const props = withDefaults(
     title: string
     description?: string
     confirmLabel?: string
+    // Asking whether to leave a form, "Cancelar" reads as cancelling the book: there the button says what it keeps.
+    cancelLabel?: string
     // Shown in the confirm button while the request travels ("Removendo…").
     busyLabel?: string
     // A failed confirmation stays in the dialog, where the person acted; confirming again retries it.
@@ -68,6 +70,7 @@ const props = withDefaults(
   {
     description: '',
     confirmLabel: 'Confirmar',
+    cancelLabel: 'Cancelar',
     busyLabel: 'Salvando…',
     error: '',
     loading: false,

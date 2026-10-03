@@ -85,8 +85,8 @@ watch(
       router.replace({ name: 'admin-forbidden', query: { motivo: 'adicionar' } })
       return
     }
-    router.replace({ query: { ...route.query, adicionar: undefined } })
-    bookForm.openAdd()
+    // Open only once ?adicionar=1 left the URL: else the form's history entry keeps it, and a later back reopens the form.
+    router.replace({ query: { ...route.query, adicionar: undefined } }).then(() => bookForm.openAdd())
   },
   { immediate: true },
 )

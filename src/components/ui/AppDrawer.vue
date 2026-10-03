@@ -7,7 +7,7 @@
         class="app-drawer"
         :class="{ 'app-drawer--wide': wide, 'app-drawer--no-rail': !hasRail }"
       >
-        <div class="app-drawer__veil" aria-hidden="true" @click="emit('close')" />
+        <div class="app-drawer__veil" aria-hidden="true" @click="requestClose" />
 
         <section
           ref="panel"
@@ -30,7 +30,7 @@
             <div class="app-drawer__header">
               <h2 :id="titleId" class="app-drawer__title">{{ title }}</h2>
               <!-- The secondary weight, not a borderless grey: that is how a disabled button looks (8e). -->
-              <AppButton ref="closeButton" size="md" class="app-drawer__close" @click="emit('close')">
+              <AppButton ref="closeButton" size="md" class="app-drawer__close" @click="requestClose">
                 <BaseIcon name="times" aria-hidden="true" />
                 Fechar
               </AppButton>
@@ -78,6 +78,8 @@ const props = defineProps<{
   initialFocus?: string
   // Where focus goes when the button that opened the panel is gone (the book removed from its row).
   returnFocus?: () => HTMLElement | null | undefined
+  // Asked before any way out (Fechar, outside, drag, Esc, the system back); false keeps the panel open.
+  mayClose?: () => boolean | Promise<boolean>
 }>()
 
 const emit = defineEmits<{ close: [] }>()
@@ -89,19 +91,23 @@ const hasRail = inject(FRAME_HAS_RAIL, false)
 
 const isPhone = useMediaQuery(useBreakpoints.isPhone)
 
+const mayClose = () => props.mayClose?.() ?? true
+const requestClose = async () => {
+  if (await mayClose()) emit('close')
+  // Staying: a sheet dragged down goes back up.
+  else drag.reset()
+}
+
 const { closeThen } = useBackCloses(
   () => props.open,
   () => emit('close'),
+  mayClose,
 )
 
 const panel = ref<HTMLElement | null>(null)
 
 // Only the phone's bottom sheet drags; the desktop side panel does not.
-const drag = useSheetDrag(
-  panel,
-  () => isPhone.value,
-  () => emit('close'),
-)
+const drag = useSheetDrag(panel, () => isPhone.value, requestClose)
 
 const closeButton = ref<{ $el: HTMLElement } | null>(null)
 
@@ -110,7 +116,7 @@ useDialogFocus({
   panel,
   initial: () =>
     (props.initialFocus ? panel.value?.querySelector<HTMLElement>(props.initialFocus) : null) ?? closeButton.value?.$el,
-  onClose: () => emit('close'),
+  onClose: requestClose,
   fallback: () => props.returnFocus?.(),
 })
 

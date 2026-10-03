@@ -1,11 +1,13 @@
 <template>
   <AppDrawer
+    ref="drawer"
     :open="isOpen"
     :title="isEditMode ? 'Editar o livro' : 'Adicionar um livro'"
     wide
     :initial-focus="focus === 'porque' ? '#bf-porque' : '#bf-titulo'"
     class="book-form-drawer"
     :return-focus="returnFocus"
+    :may-close="mayLeave"
     @close="close"
   >
     <form class="book-form" @submit.prevent="handleSubmit">
@@ -223,7 +225,7 @@
         <p v-if="success" class="drawer-footer__success" role="status">{{ success }}</p>
 
         <div class="drawer-footer__actions">
-          <AppButton size="md" :disabled="isSaving" @click="close">Cancelar</AppButton>
+          <AppButton size="md" :disabled="isSaving" @click="cancel">Cancelar</AppButton>
           <AppButton variant="primary" size="md" :disabled="isSaving || isAdded || !isValid" @click="handleSubmit">
             {{ isSaving ? 'Salvando…' : isEditMode ? 'Salvar alterações' : 'Adicionar o livro' }}
           </AppButton>
@@ -241,6 +243,20 @@
     </template>
   </AppDrawer>
 
+  <ConfirmModal
+    v-model="leaving.open"
+    destructive
+    :title="isEditMode ? 'Sair sem salvar as alterações?' : 'Sair sem adicionar o livro?'"
+    :description="
+      isEditMode
+        ? 'As mudanças que você fez neste livro serão perdidas.'
+        : 'O que você preencheu, inclusive a capa e os dados escolhidos, será perdido.'
+    "
+    :confirm-label="isEditMode ? 'Sair sem salvar' : 'Sair sem adicionar'"
+    :cancel-label="isEditMode ? 'Continuar editando' : 'Continuar preenchendo'"
+    @confirm="answerLeaving(true)"
+    @cancel="answerLeaving(false)"
+  />
   <ConfirmModal
     v-model="removal.open"
     destructive
@@ -334,6 +350,31 @@ const showMore = ref(false)
 
 // A refused removal stays in the dialog, where the decision was made; confirming again retries it.
 const removal = reactive({ open: false, loading: false, error: '' })
+const drawer = ref<InstanceType<typeof AppDrawer> | null>(null)
+
+// The form as it opened (or as it was last saved): any difference is something the person would lose by leaving.
+const openedAs = ref('')
+const takeSnapshot = () => (openedAs.value = JSON.stringify(form))
+const isDirty = computed(() => JSON.stringify(form) !== openedAs.value)
+// Every way out asks the same question; a second way out while it is on screen waits for the same answer.
+const leaving = reactive({ open: false })
+let leavingAnswer: Promise<boolean> | null = null
+let answerLeaving: (stay: boolean) => void = () => undefined
+const mayLeave = (): boolean | Promise<boolean> => {
+  if (!isDirty.value || isSaving.value) return !isDirty.value
+  leavingAnswer ??= new Promise<boolean>((resolve) => {
+    leaving.open = true
+    answerLeaving = (leave) => {
+      leaving.open = false
+      leavingAnswer = null
+      resolve(leave)
+    }
+  })
+  return leavingAnswer
+}
+const cancel = async () => {
+  if (await mayLeave()) close()
+}
 
 const people = ref<{ user_id: string | null; name: string }[]>([])
 const initialPerson = ref('')
@@ -426,8 +467,8 @@ const remove = async () => {
     // The dialog hands focus back first; then the form closes and sends it to the list, not to a leaving button.
     await nextTick()
     await nextTick()
-    emit('removed', book._id)
-    close()
+    // The page under the form may leave (a removed book's page): only after the form's history entry is gone.
+    drawer.value?.closeThen(() => emit('removed', book._id))
   } catch (e) {
     removal.error = errorText(e, 'Não foi possível remover o livro. Tente de novo.')
     useErrorReporter().captureException(e, { context: 'BookFormDrawer.remove' })
@@ -606,6 +647,7 @@ const handleSubmit = async () => {
     await saveBook(payload, { id: props.book?._id, asOwner: isMemberScope.value })
 
     success.value = isEditMode.value ? 'Livro atualizado.' : 'Livro adicionado.'
+    takeSnapshot()
     emit('saved')
 
     if (!isEditMode.value) {
@@ -651,6 +693,7 @@ watch(
           Boolean,
         )) ||
       (!!props.book && form.subgeneros.length > 0)
+    takeSnapshot()
   },
   // Opened on arrival (?adicionar=1): the form must be prepared on the first render too.
   { immediate: true },
