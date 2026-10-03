@@ -1,7 +1,6 @@
 <template>
   <div class="page catalog-page" data-page="catalog">
     <div class="catalog-body">
-      <!-- States take only the place of the list (Estados): the header search stays usable -->
       <CatalogSkeleton v-if="booksStore.loading && !booksStore.books.length" />
       <PageStatus
         v-else-if="booksStore.error && !booksStore.books.length"
@@ -39,7 +38,6 @@
             </AppButton>
           </header>
 
-          <!-- With nothing in the collection there is nothing to filter, sort or count: only the empty state speaks. -->
           <template v-if="booksStore.books.length">
             <AppButton
               class="catalog-bar__filter"
@@ -53,7 +51,6 @@
               Filtrar
             </AppButton>
 
-            <!-- Applied filters take the place of the quick chips, next to the result -->
             <div v-if="showApplied" class="catalog-bar__chips chip-strip">
               <FilterChip
                 v-for="chip in appliedChips"
@@ -166,7 +163,6 @@ import PageStatus from '@/components/ui/PageStatus.vue'
 
 const QUICK_GENRES = 5
 
-// "por" (who mentioned) and "de" (author) keep the two apart without repeating "mencionado por" per chip.
 const CHIP_LABEL: Partial<Record<FilterKey, (value: string) => string>> = {
   person: (value) => `por ${value}`,
   authors: (value) => `de ${value}`,
@@ -217,7 +213,6 @@ const isPhone = useMediaQuery(useBreakpoints.isPhone)
 
 const drawerOpen = ref(false)
 
-// Which list the reader is seeing when the server is down: from today, yesterday or the day it was saved here.
 const savedWhen = computed(() => {
   const saved = booksStore.savedAt
   if (!saved) return 'a última lista salva neste aparelho'
@@ -234,10 +229,8 @@ const banner = computed(() => {
   return ''
 })
 
-// The eco and the shelves belong to the whole catalog; next to a filtered list they would be out of context.
 const isDefaultView = computed(() => !hasFilters.value && !search.value.trim())
 
-// Empty states (COPY.md): say where the search looked; only people who can create books are offered to add one.
 const searchTerm = computed(() => search.value.trim())
 const searchWhere = computed(() =>
   hasFilters.value
@@ -245,16 +238,12 @@ const searchWhere = computed(() =>
     : 'Procuramos no título, no autor e no que as pessoas escreveram sobre cada livro.',
 )
 
-// The API's matrix decides who may add a book (front mirrors backend), not the role.
 const canAddBooks = computed(() => permissions.can('books', 'create'))
 
-// Catalog.mobile has no eco. Decided here rather than hidden by CSS, because the eco takes a book's slot.
 const showEco = computed(() => isDefaultView.value && !isPhone.value)
 
-// A format picked by the link overrides the preference, so its chip only shows when the preference is in force.
 const preferenceChips = computed(() => (selected.value.midia.length ? [] : preferences.hiddenFormats))
 
-// A chip counts what its click will show: with a search on, the search's result; a zero chip is left out (slice 8d).
 const quickCounts = computed<Record<string, number>>(() => {
   if (!searchTerm.value) return optionCounts.value.categoria
   const counts: Record<string, number> = {}
@@ -272,7 +261,6 @@ const quickGenres = computed(() =>
     .map(([genre]) => genre),
 )
 
-// Picking a quick genre keeps the strip where it was clicked; any other filter shows the applied ones instead.
 const onlyQuickGenres = computed(() => {
   const { categoria: genres, ...others } = selected.value
   return (
@@ -309,14 +297,12 @@ const summary = computed(() => {
   return { count, rest: ` · ${joinWords(parts)} ${onlyOne ? 'está' : 'estão'} fora por sua escolha` }
 })
 
-// What a screen reader hears after a search or a filter: the count, or the empty result by name.
 const announced = computed(() =>
   searchTerm.value && !filtered.value.length ? `Nada com "${searchTerm.value}"` : summary.value.count,
 )
 
 const retry = () => useApi().fetchBooks()
 
-// Every visit checks the catalog: unchanged, the API answers with a bodyless 304.
 onMounted(() => useApi().fetchBooks())
 
 const { refreshing, refresh } = useCatalogRefresh()
@@ -336,12 +322,10 @@ watch(() => route.fullPath, rememberCatalog, { immediate: true })
   padding: var(--space-5) var(--space-4) var(--space-10);
 }
 
-// The look comes from AppNotice; here only its place above the bar.
 .catalog-banner {
   margin: var(--space-4) 0 0;
 }
 
-// Phones give the bar no top margin of its own; without this the banner touches "Filtrar".
 .catalog-banner + .catalog-bar {
   margin-top: var(--space-4);
 
@@ -375,7 +359,6 @@ watch(() => route.fullPath, rememberCatalog, { immediate: true })
     gap: var(--space-1) var(--space-3);
   }
 
-  // The catalog heading stays for screen readers; on phones the count carries the row (Catalog.mobile).
   &__title {
     font-size: var(--font-size-title);
     font-weight: var(--font-weight-bold);
@@ -391,7 +374,6 @@ watch(() => route.fullPath, rememberCatalog, { immediate: true })
     color: var(--color-text-subtle);
   }
 
-  // Phone (Catalog.mobile): with no title on screen, the count leads the row.
   &__count {
     @media (max-width: $bp-phone-max) {
       font-weight: var(--font-weight-bold);
@@ -408,7 +390,6 @@ watch(() => route.fullPath, rememberCatalog, { immediate: true })
     grid-area: chips;
   }
 
-  // On phones the sort lives inside the filter sheet (Catalog.mobile shows only the quick chips).
   &__sort {
     grid-area: sort;
 

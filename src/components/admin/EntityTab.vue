@@ -96,7 +96,6 @@
               Salvar<span class="visually-hidden">{{ ' ' }}o novo nome de {{ item.nome }}</span>
             </AppButton>
             <AppButton size="md" :disabled="isUpdating" @click="cancelEdit">Cancelar</AppButton>
-            <!-- Apart from saving, decided with the item open (slice 8b). -->
             <span v-if="canDelete" class="entity-row__remove">
               <AppButton variant="danger" size="md" :disabled="isUpdating" @click="confirmDelete(item)">
                 <BaseIcon name="trash" aria-hidden="true" />
@@ -184,22 +183,18 @@ const editingId = ref<string | null>(null)
 const editingName = ref('')
 const newName = ref('')
 const searchQuery = ref('')
-// Stays until the next action: an error that vanishes on a timer can be missed.
 const actionError = ref('')
 
 const deleteModal = reactive({ open: false, title: '', error: '', targetId: '', usage: 0 })
 
 let clickOutsideTimer: ReturnType<typeof setTimeout> | null = null
 
-// The server decides; this only hides what it would refuse for this level (users/me).
 const canCreate = computed(() => permissions.can(props.resource, 'create'))
 const canEdit = computed(() => permissions.can(props.resource, 'update'))
 const canDelete = computed(() => permissions.can(props.resource, 'delete'))
 
-// The API refuses to remove an author, format or genre in use; a subgenre it removes without that check.
 const removeHint = computed(() => {
   if (props.resource !== 'subgeneros') return `Só é possível remover se nenhum livro usar este ${props.singular}.`
-  // A subgenre is only a tag: removing it is allowed, but the person hears how many books lose it (dono).
   if (!deleteModal.usage) return 'Nenhum livro usa este subgênero. Não é possível desfazer.'
   return `Está em ${counted(deleteModal.usage, 'livro', 'livros')}, que perdem este subgênero. Não é possível desfazer.`
 })
@@ -279,7 +274,6 @@ const handleUpdate = async () => {
 
 const confirmDelete = async (item: SupportEntity) => {
   actionError.value = ''
-  // Counted by the API: a catalog copy saved on this device could say "no book" for a subgenre in use.
   try {
     deleteModal.usage = props.resource === 'subgeneros' ? (await getSubgenreUsage(item._id)).books : 0
   } catch (e) {
@@ -292,7 +286,6 @@ const confirmDelete = async (item: SupportEntity) => {
   deleteModal.open = true
 }
 
-// A refused removal (in use) stays in the dialog, where the admin acted.
 const handleDelete = async () => {
   const removed = crud.items.value.find((item) => item._id === deleteModal.targetId)
   isDeleting.value = true
@@ -311,7 +304,6 @@ const handleDelete = async () => {
   }
 }
 
-// The search is not in the URL, so a new term starts the list from the top here.
 watch(searchQuery, () => reset())
 
 watch(isFormOpen, (open) => {
@@ -381,7 +373,6 @@ onMounted(() => crud.fetchAll())
   margin: var(--space-4);
 }
 
-// SearchBar is width: 100%; with side margins that overflows the card, so here the width is the block's own.
 .entity-tab .entity-search {
   width: auto;
   margin: var(--space-3) var(--space-4);
@@ -424,7 +415,6 @@ onMounted(() => crud.fetchAll())
     flex: 1;
   }
 
-  // On its own line under saving, as in the book form: never the next button the hand reaches for.
   &__remove {
     display: flex;
     flex: 1 1 100%;
@@ -432,7 +422,6 @@ onMounted(() => crud.fetchAll())
     border-top: 1px solid var(--color-border-default);
   }
 
-  // Phone: the name takes its line and the two worded actions sit under it, instead of squeezing it.
   @media (max-width: $bp-phone-max) {
     flex-wrap: wrap;
     padding-block: var(--space-2);

@@ -7,7 +7,6 @@ import { useLastList } from '@/composables/useLastCatalog'
 const CATALOG_ROUTE = 'catalog-books'
 const MY_BOOKS_ROUTE = 'profile-books'
 
-/** Filters the catalog or Meus livros in place; on a book page it searches the list the book came from. */
 export function useCatalogSearch() {
   const route = useRoute()
   const router = useRouter()
@@ -36,7 +35,6 @@ export function useCatalogSearch() {
     model,
     onCatalog,
     onMyBooks,
-    // The placeholder names where the next letter will search, on the book page too.
     searchesMyBooks: computed(() => onMyBooks.value || (!onCatalog.value && fromMyBooks.value)),
     suggestions: computed(() => (onCatalog.value ? searchSuggestions.value : [])),
   }

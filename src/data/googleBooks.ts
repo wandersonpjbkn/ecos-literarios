@@ -1,4 +1,3 @@
-/** The book's Google Books page when its cover came from there, read from the cover address; null otherwise. */
 export const googleBooksPage = (coverUrl?: string): string | null => {
   if (!coverUrl) return null
   try {

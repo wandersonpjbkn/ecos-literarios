@@ -8,7 +8,6 @@
       what="o livro"
     />
 
-    <!-- Shown with an empty collection too: a link to a book that is not there never lands on a blank page. -->
     <EmptyState
       v-if="!booksStore.loading && !book && !(booksStore.error && !booksStore.books.length)"
       title-tag="h1"
@@ -112,7 +111,6 @@
           </section>
         </div>
 
-        <!-- After the file and comment in the DOM too, so reading and Tab order match the phone. -->
         <WhereToFind class="book-page__where" :book="book" />
       </div>
 
@@ -192,7 +190,6 @@ const canWrite = useCanWrite()
 const { error: editError, openEdit, lastChange } = useBookForm()
 
 const lastCatalog = useLastCatalog()
-// Back goes to the list the book was opened from: the catalog, or Meus livros.
 const lastList = useLastList()
 const { catalogLink } = useFilters()
 
@@ -226,10 +223,8 @@ const separator = (index: number) => {
   return left === 1 ? ' e ' : ''
 }
 
-// The API only lets the person who mentioned the book (after linking the name) or an admin edit it.
 const isOwner = computed(() => !!book.value?.quem_user_id && book.value.quem_user_id === authStore.user?._id)
 
-// The API's matrix, not the role (front mirrors backend): the owner, or whoever may edit any book.
 const canEdit = computed(() => permissions.canEditBook(book.value?.quem_user_id))
 
 const askPerson = computed(() => ask(`${book.value?.person}, o que você acha de "${book.value?.titulo}"?`))
@@ -246,7 +241,6 @@ const openEditor = (id: string, focus?: 'porque') => {
 }
 
 const retry = () => useApi().fetchBooks()
-// The book no longer exists: back to the list it was opened from, which no longer shows it.
 watch(lastChange, (change) => {
   if (change?.kind === 'removed' && change.id === String(route.params.id)) router.push(lastList.value.path)
 })
@@ -290,7 +284,6 @@ watch(book, () => (synopsisOpen.value = !synopsisIsLong.value), { immediate: tru
     }
   }
 
-  // Phone first: head, cover and actions, then the file. Desktop (Detail.desktop): cover column on the left.
   &__layout {
     display: grid;
     margin-top: var(--space-4);
@@ -301,7 +294,6 @@ watch(book, () => (synopsisOpen.value = !synopsisIsLong.value), { immediate: tru
       'where';
     gap: var(--space-6);
 
-    // "Onde encontrar" stays under the cover on desktop and goes last on phones, after the file and comment.
     @media (min-width: $bp-wide-min) {
       grid-template-columns: var(--cover-column) minmax(0, 1fr);
       grid-template-areas:
@@ -324,7 +316,6 @@ watch(book, () => (synopsisOpen.value = !synopsisIsLong.value), { immediate: tru
     flex-wrap: wrap;
     gap: var(--space-2);
 
-    // Phone: the same links sit in the facts right below; up here they only push the book down (8e).
     @media (max-width: $bp-phone-max) {
       display: none;
     }
@@ -373,7 +364,6 @@ watch(book, () => (synopsisOpen.value = !synopsisIsLong.value), { immediate: tru
     color: var(--color-text-subtle);
   }
 
-  // A link, so it takes the action colour like the person below (one colour means "this clicks").
   &__author {
     font-size: var(--font-size-section);
     color: var(--color-action-default);

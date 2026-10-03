@@ -1,8 +1,6 @@
 import { ref } from 'vue'
 
-// sessionStorage so reloading the book keeps them. The catalog one backs every "Voltar ao catálogo".
 const CATALOG_KEY = 'last-catalog'
-// The list a book was opened from (catalog or Meus livros), for the book page's way back.
 const LIST_KEY = 'last-list'
 
 type LastList = { path: string; label: string }
@@ -20,9 +18,7 @@ const read = <T>(key: string, fallback: T): T => {
 const store = (key: string, value: string) => {
   try {
     sessionStorage.setItem(key, value)
-  } catch {
-    // Storage blocked: it still works for this visit.
-  }
+  } catch {}
 }
 
 const lastCatalog = ref(read(CATALOG_KEY, '/'))

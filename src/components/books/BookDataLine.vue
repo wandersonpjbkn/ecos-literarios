@@ -15,7 +15,6 @@
           <AppButton ref="action" size="md" :aria-describedby="textId" @click="emit('search')">Trocar</AppButton>
           <AppButton variant="ghost" size="md" @click="emit('undo')">Desfazer</AppButton>
         </template>
-        <!-- Disabled in place, said why by the text: nothing moves when it turns on. -->
         <AppButton
           v-else
           ref="action"
@@ -39,13 +38,11 @@ import { computed, ref, useId } from 'vue'
 import AppButton from '@/components/ui/AppButton.vue'
 
 const props = defineProps<{
-  // Title and author filled: the search needs both.
   canSearch: boolean
   editing: boolean
   hasCover: boolean
   hasSynopsis: boolean
   coverUrl?: string
-  // Labels of what came from the search and waits for the save ("Capa", "Sinopse"…).
   chosen: string[]
 }>()
 
@@ -73,7 +70,6 @@ const text = computed(() => {
   if (state.value === 'L1') return `${brings} Tudo continua editável à mão.`
   if (state.value === 'L3') return 'Este livro já tem capa e sinopse.'
   if (state.value === 'L4') return `${missing.value} ${brings}`
-  // "Capa, sinopse e ISBN": only the first label keeps its capital, and an acronym keeps it everywhere.
   const fields = list.format(
     props.chosen.map((label, index) => (index && label !== 'ISBN' ? label.toLowerCase() : label)),
   )
@@ -81,7 +77,6 @@ const text = computed(() => {
   return `${fields} ${verb} no livro quando você ${props.editing ? 'salvar' : 'o adicionar'}.`
 })
 
-/** Back from the search view: focus returns to the button that opened it. */
 const focus = () => action.value?.$el.focus()
 
 defineExpose({ focus })
@@ -148,7 +143,6 @@ defineExpose({ focus })
     margin-top: var(--space-2);
   }
 
-  // Phone: the search is the line's one action, full width like the screen (L1).
   &__search {
     @media (max-width: $bp-phone-max) {
       flex: 1;

@@ -64,7 +64,6 @@
           <AppButton size="md" @click="askAccess(user, user.status === 'suspended' ? 'reactivate' : 'suspend')">
             {{ user.status === 'suspended' ? 'Reativar a conta' : 'Suspender a conta' }}
           </AppButton>
-          <!-- Apart from suspending, like removing in Autores e gêneros. -->
           <span class="member-access__remove">
             <AppButton variant="danger" size="md" @click="askAccess(user, 'remove')">
               <BaseIcon name="trash" aria-hidden="true" />
@@ -135,7 +134,6 @@ import InfoTip from '@/components/ui/InfoTip.vue'
 import ListFooter from '@/components/ui/ListFooter.vue'
 import SectionHeader from '@/components/ui/SectionHeader.vue'
 
-// The select stays on the current level until the change is confirmed: it only shows what the server holds.
 const ROLE_OPTIONS: { label: string; value: ApiUser['role'] }[] = [
   { label: roleLabel('viewer'), value: 'viewer' },
   { label: roleLabel('editor'), value: 'editor' },
@@ -171,7 +169,6 @@ const confirm = reactive({
   newRole: '' as ApiUser['role'],
 })
 
-// Which row has its access actions open; one at a time, like editing in Autores e gêneros.
 const openId = ref<string | null>(null)
 
 const access = reactive({
@@ -247,7 +244,6 @@ const onRoleChange = (user: ApiUser, newRole: string) => {
   confirm.open = true
 }
 
-// A refused change stays in the dialog, where the admin acted; confirming again retries it.
 const applyRoleChange = async () => {
   confirm.loading = true
   confirm.error = ''
@@ -281,7 +277,6 @@ const closeAccess = (user: ApiUser) => {
   nextTick(() => document.getElementById(`acesso-botao-${user._id}`)?.focus())
 }
 
-// The dialog is teleported to the body, and its Cancelar closes it before the click gets here: not a click away.
 const onDocumentClick = (e: MouseEvent) => {
   if (!openId.value) return
   if ((e.target as HTMLElement).closest('.member-row--open, .modal-overlay')) return
@@ -292,7 +287,6 @@ const askAccess = (user: ApiUser, kind: AccessKind) => {
   Object.assign(access, { kind, userId: user._id, name: user.name, error: '', open: true })
 }
 
-// Like the level: a refused change stays in the dialog, and confirming again retries it.
 const applyAccess = async () => {
   access.loading = true
   access.error = ''
@@ -320,7 +314,6 @@ const applyAccess = async () => {
 
 let clickOutsideTimer: ReturnType<typeof setTimeout> | undefined
 
-// Closes on a click away, like editing in Autores e gêneros; the timer lets the opening click pass first.
 watch(openId, (id) => {
   document.removeEventListener('click', onDocumentClick)
   clearTimeout(clickOutsideTimer)

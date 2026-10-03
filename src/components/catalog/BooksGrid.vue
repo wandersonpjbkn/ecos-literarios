@@ -10,7 +10,6 @@
       />
     </TransitionGroup>
 
-    <!-- The page knows why the list is empty (search or filters) and says so (EmptyState.md). -->
     <slot v-else name="empty" />
 
     <ListFooter
@@ -40,7 +39,6 @@ const books = defineModel<Book[]>({ required: true })
 
 const props = withDefaults(
   defineProps<{
-    // Third card (Main): takes a book's slot but stays out of the counts.
     eco?: Book | null
   }>(),
   { eco: null },
@@ -77,7 +75,6 @@ const gridElement = () => grid.value?.$el
   opacity: 0;
   transform: scale(0.96);
 }
-// Leaving cards stay in flow: taking them out collapses the list for a frame and clamps the scroll to 0.
 .grid-leave-active {
   transition: opacity var(--motion-transition-default);
 }

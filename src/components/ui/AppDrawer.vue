@@ -17,7 +17,6 @@
           :aria-labelledby="titleId"
           :style="drag.style.value"
         >
-          <!-- Phone: the handle and the header drag the sheet down to close it, as on any bottom sheet. -->
           <div
             class="app-drawer__grip"
             @pointerdown="drag.handlers.onPointerdown"
@@ -28,13 +27,11 @@
             <div class="app-drawer__handle" aria-hidden="true" />
 
             <div class="app-drawer__header" :class="{ 'app-drawer__header--back': back }">
-              <!-- A view inside the panel goes up one level; "Fechar" keeps its place in every view. -->
               <AppButton v-if="back" size="md" class="app-drawer__back" @click="emit('back')">
                 <BaseIcon name="arrow-left" aria-hidden="true" />
                 Voltar
               </AppButton>
               <h2 :id="titleId" ref="heading" class="app-drawer__title" tabindex="-1">{{ title }}</h2>
-              <!-- The secondary weight, not a borderless grey: that is how a disabled button looks (8e). -->
               <AppButton ref="closeButton" size="md" class="app-drawer__close" @click="requestClose">
                 <BaseIcon name="times" aria-hidden="true" />
                 Fechar
@@ -68,24 +65,16 @@ import { FRAME_HAS_RAIL } from '@/layouts/frame'
 
 import AppButton from '@/components/ui/AppButton.vue'
 
-// A Teleport root takes no attrs: class and the rest go to the drawer itself.
 defineOptions({ inheritAttrs: false })
 
-// The FilterDrawer's frame for any side panel: beside the rail on desktop, a sheet from the bottom on phones.
 const props = defineProps<{
   open: boolean
   title: string
-  // Earlier checks and aria-labelledby elsewhere look for this id (#filter-drawer-title).
   titleId?: string
-  // The book form: two columns of fields instead of one list.
   wide?: boolean
-  // Selector of the first field to focus; without it focus starts on "Fechar".
   initialFocus?: string
-  // Where focus goes when the button that opened the panel is gone (the book removed from its row).
   returnFocus?: () => HTMLElement | null | undefined
-  // Asked before any way out (Fechar, outside, drag, Esc, the system back); false keeps the panel open.
   mayClose?: () => boolean | Promise<boolean>
-  // A view inside the panel (the cover and data search): shows "Voltar", which emits back.
   back?: boolean
 }>()
 
@@ -93,7 +82,6 @@ const emit = defineEmits<{ close: []; back: [] }>()
 
 const generatedId = useId()
 
-// The frame says whether a rail sits beside the drawer; outside any frame there is none.
 const hasRail = inject(FRAME_HAS_RAIL, false)
 
 const isPhone = useMediaQuery(useBreakpoints.isPhone)
@@ -101,7 +89,6 @@ const isPhone = useMediaQuery(useBreakpoints.isPhone)
 const mayClose = () => props.mayClose?.() ?? true
 const requestClose = async () => {
   if (await mayClose()) emit('close')
-  // Staying: a sheet dragged down goes back up.
   else drag.reset()
 }
 
@@ -113,7 +100,6 @@ const { closeThen } = useBackCloses(
 
 const panel = ref<HTMLElement | null>(null)
 
-// Only the phone's bottom sheet drags; the desktop side panel does not.
 const drag = useSheetDrag(panel, () => isPhone.value, requestClose)
 
 const closeButton = ref<{ $el: HTMLElement } | null>(null)
@@ -131,7 +117,6 @@ useDialogFocus({
 
 const titleId = computed(() => props.titleId ?? generatedId)
 
-// The page under an open panel does not scroll; the lock goes with the panel, even when it unmounts open.
 const lockScroll = (locked: boolean) => (document.body.style.overflow = locked ? 'hidden' : '')
 
 watch(
@@ -139,11 +124,9 @@ watch(
   (isOpen) => isOpen && drag.reset(),
 )
 
-// A link inside the panel navigates only after the panel's own history entry is gone (AreaLayout).
 defineExpose({
   closeThen,
   focusTitle: () => heading.value?.focus(),
-  // A new view inside the panel starts at its top, not where the last one was scrolled.
   scrollToTop: () => body.value?.scrollTo({ top: 0 }),
 })
 
@@ -172,14 +155,12 @@ onBeforeUnmount(() => lockScroll(false))
     background: var(--color-surface-default);
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
 
-    // The book form changes views inside it: a sheet of one height keeps "Fechar" in place from view to view.
     @media (max-width: $bp-phone-max) {
       .app-drawer--wide & {
         height: calc(100dvh - var(--space-14));
       }
     }
 
-    // A short drag that does not close slides the sheet back into place.
     @media (max-width: $bp-phone-max) and (prefers-reduced-motion: no-preference) {
       transition: transform var(--motion-transition-default);
     }
@@ -201,7 +182,6 @@ onBeforeUnmount(() => lockScroll(false))
     }
   }
 
-  // The browser must not take the gesture as a scroll or a pull-to-refresh.
   &__grip {
     @media (max-width: $bp-phone-max) {
       touch-action: none;
@@ -228,7 +208,6 @@ onBeforeUnmount(() => lockScroll(false))
     border-bottom: 1px solid var(--color-border-default);
   }
 
-  // With "Voltar": on the phone, Voltar and Fechar share the first row and the title goes under them.
   &__header--back {
     display: grid;
     grid-template-areas:

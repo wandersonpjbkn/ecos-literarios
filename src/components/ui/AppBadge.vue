@@ -7,7 +7,6 @@ withDefaults(defineProps<{ tone?: 'tag' | 'alert' }>(), { tone: 'tag' })
 </script>
 
 <style lang="scss" scoped>
-// A label, not a control: square corners and no border keep it from reading as a chip or a button.
 .app-badge {
   display: inline-flex;
   align-items: center;

@@ -1,5 +1,4 @@
 <template>
-  <!-- The sections (<nav>) and, outside it, who you are and the way out: leaving is not a place. -->
   <div class="area-sections">
     <nav class="panel-nav" :aria-label="navLabel">
       <div v-for="group in groups" :key="group.title" class="panel-nav__group">
@@ -33,7 +32,6 @@ import AreaWho from '@/layouts/AreaWho.vue'
 
 export type AreaGroup = { title: string; links: { name: string; label: string }[] }
 
-// The same list on the desktop side and inside the phone's sheet (estudo-nav-area-celular.md).
 defineProps<{
   navLabel: string
   groups: AreaGroup[]
@@ -106,7 +104,6 @@ const route = useRoute()
   }
 }
 
-// Who you are and the way to the other area, always after the sections.
 .panel-foot {
   display: flex;
   margin-top: auto;
@@ -115,7 +112,6 @@ const route = useRoute()
   padding-top: var(--space-4);
   border-top: 1px solid var(--color-border-default);
 
-  // Slot content (the switch to the other area, "Sair da conta") looks like the section links above it.
   :deep(.area-link) {
     display: flex;
     width: 100%;
@@ -144,7 +140,6 @@ const route = useRoute()
     }
   }
 
-  // Leaving the account is set apart from the area links, so it never reads as one more place to go.
   :deep(.area-link--leave + .area-link) {
     position: relative;
     margin-top: var(--space-2);

@@ -42,7 +42,6 @@ const id = useId()
 const panelId = `${id}-panel`
 const tabId = (key: string) => `${id}-tab-${key}`
 
-// The parent moves `active` (often through the URL); focus waits for it, or it lands on the tab being left.
 let focusWhenActive: string | null = null
 watch(
   () => props.active,
@@ -54,7 +53,6 @@ watch(
   },
 )
 
-// Tab pattern: arrows move between tabs, Home and End jump to the ends; Tab itself goes into the panel.
 const onKeydown = (event: KeyboardEvent) => {
   const index = props.tabs.findIndex((tab) => tab.key === props.active)
   const last = props.tabs.length - 1
@@ -72,7 +70,6 @@ const onKeydown = (event: KeyboardEvent) => {
   display: flex;
   gap: var(--space-2);
   margin-bottom: var(--space-6);
-  // Inset line, not a border: the active tab's underline covers it even when the strip scrolls (phone).
   box-shadow: inset 0 -1px 0 var(--color-border-default);
 
   @media (max-width: $bp-phone-max) {
@@ -86,7 +83,6 @@ const onKeydown = (event: KeyboardEvent) => {
   }
 }
 
-// Tabs switch the list, so they are not pills: the pill is a filter (FilterChip.md).
 .list-tabs__btn {
   min-height: var(--touch-cta);
   padding: 0 var(--space-4);

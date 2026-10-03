@@ -79,7 +79,6 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import ListFooter from '@/components/ui/ListFooter.vue'
 import SectionHeader from '@/components/ui/SectionHeader.vue'
 
-// The API's ceiling for this list; older records stay in the database, and the footer says the list is the recent part.
 const HISTORY_LIMIT = 500
 
 const loading = ref(false)
@@ -143,7 +142,6 @@ onMounted(loadHistory)
     }
   }
 
-  // Name over e-mail, the same pair as a row in Membros.
   &__who {
     display: flex;
     min-width: 0;

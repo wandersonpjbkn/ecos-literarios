@@ -88,7 +88,6 @@ const query = ref('')
 const isOpen = ref(false)
 const activeIndex = ref(-1)
 
-// Word-start match: "ro" finds "romântico", not "horror".
 const matches = computed(() => {
   const q = normalizeText(query.value)
   if (!q) return props.options
@@ -105,7 +104,6 @@ const toggle = (value: string) => {
   model.value = model.value.includes(value) ? model.value.filter((v) => v !== value) : [...model.value, value]
 }
 
-// The removed chip takes its focus with it; send it back to the field instead of the page.
 const removeChosen = (value: string) => {
   toggle(value)
   input.value?.focus()
@@ -134,7 +132,6 @@ const onKeydown = (event: KeyboardEvent) => {
     const value = matches.value[activeIndex.value]
     if (value) toggle(value)
   } else if (event.key === 'Escape' && isOpen.value) {
-    // Closes only the list; the drawer listening on the document must not close too.
     event.stopPropagation()
     isOpen.value = false
     activeIndex.value = -1
@@ -210,7 +207,6 @@ const onFocusOut = (event: FocusEvent) => {
     outline: none;
   }
 
-  // Bounded so the whole list can be browsed without pushing the drawer to thousands of pixels.
   &__list {
     max-height: calc(6 * var(--touch-min));
     margin-top: var(--space-1);

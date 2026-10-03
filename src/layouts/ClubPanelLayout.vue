@@ -57,6 +57,5 @@ const visibleGroups = computed(() =>
   ),
 )
 
-// The route says who may enter (adminRoute), so the menu never offers what the guard refuses.
 const isOpenToMe = (name: string) => !router.resolve({ name }).meta.adminOnly || authStore.isAdmin
 </script>

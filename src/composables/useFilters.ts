@@ -11,7 +11,6 @@ import { useUtils } from '@/composables/useUtils'
 
 const FILTER_KEYS: FilterKey[] = ['midia', 'categoria', 'subgenres', 'person', 'authors', 'size']
 
-// Query names are part of links already shared in the club group: renaming one breaks them.
 const QUERY_PARAM: Record<FilterKey, string> = {
   midia: 'midia',
   categoria: 'genero',
@@ -21,7 +20,6 @@ const QUERY_PARAM: Record<FilterKey, string> = {
   size: 'tamanho',
 }
 
-// `phrase` completes "Nenhum livro …" in the empty state (EmptyState.md: the combination said in Portuguese).
 const SIZES: { slug: string; label: string; phrase: string; match: (book: Book) => boolean }[] = [
   {
     slug: 'curto',
@@ -52,7 +50,6 @@ const SIZES: { slug: string; label: string; phrase: string; match: (book: Book) 
 const orList = (values: string[]) => values.join(' ou ')
 const inSentence = (value: string) => (value === value.toUpperCase() ? value : value.toLowerCase())
 
-/** The filters as one sentence; "mencionado" agrees with "livro", since the data holds no gender. */
 export const describeSelection = (selection: Options): string => {
   const kinds = [...selection.categoria, ...selection.subgenres].map(inSentence)
   const formats = selection.midia.map(inSentence)
@@ -77,7 +74,6 @@ const valuesOf = (book: Book, key: FilterKey): string[] => {
 
 const emptySelection = (): Options => Object.fromEntries(FILTER_KEYS.map((key) => [key, []])) as unknown as Options
 
-/** OR inside a group, AND across groups; the format preference only applies when the URL does not pick a format. */
 const applyFilters = (books: Book[], selection: Options, search: string, hiddenFormats: string[]) => {
   const q = search.trim().toLowerCase()
   return books.filter((book) => {
@@ -128,7 +124,6 @@ export function useFilters() {
     return counts as Record<FilterKey, Record<string, number>>
   })
 
-  // ── Selection lives in the URL; unknown slugs are ignored ───────
   const selected = computed(
     (): Options =>
       Object.fromEntries(
@@ -153,7 +148,6 @@ export function useFilters() {
 
   const filtered = computed(() => applyFilters(books.value, selected.value, search.value, hiddenFormats.value))
 
-  /** Books left out only because of the format preference, per hidden format. */
   const hiddenByPreference = computed(() => {
     if (selected.value.midia.length) return []
     const wouldShow = applyFilters(books.value, selected.value, search.value, [])
@@ -196,18 +190,15 @@ export function useFilters() {
     }
   }
 
-  /** The catalog filtered by one value, for links outside the catalog (the open book). */
   const catalogLink = (key: FilterKey, value: string): RouteLocationRaw => ({
     name: 'catalog-books',
     query: { [QUERY_PARAM[key]]: toSlug(key, value) },
   })
 
-  /** Location with one value toggled, for filters rendered as real links. */
   const hrefToggling = (key: FilterKey, value: string): RouteLocationRaw => ({
     query: queryFor(withToggled(key, value)),
   })
 
-  /** `ordem` comes along when the drawer also holds the sort (mobile); `replace` keeps one history entry per drawer visit. */
   const apply = (selection: Options, ordem?: BookSortOrder, replace = false) => {
     const query = { ...queryFor(selection), ...(ordem ? { ordem } : {}) }
     return replace ? router.replace({ query }) : router.push({ query })
@@ -219,11 +210,9 @@ export function useFilters() {
     return router.push({ query })
   }
 
-  /** The catalog as filtered, minus one group: what that group's options would count if nothing in it were picked. */
   const filteredIgnoring = (key: FilterKey) =>
     applyFilters(books.value, { ...selected.value, [key]: [] }, search.value, hiddenFormats.value)
 
-  /** Books a selection opens from a link (no search, format preference in force), so a shelf count matches its page. */
   const booksFor = (selection: Options) => applyFilters(books.value, selection, '', hiddenFormats.value)
 
   return {

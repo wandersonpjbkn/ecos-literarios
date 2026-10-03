@@ -21,7 +21,6 @@ const props = defineProps<{
   genre?: string
   format?: string
   coverUrl?: string
-  // "page": the open book, a real book's 2:3 proportion instead of the grid's fixed height.
   size?: 'grid' | 'page'
 }>()
 

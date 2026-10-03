@@ -33,7 +33,7 @@ img {
   display: block;
 }
 
-/* ── Tipografia ──────────────────────────────── */
+/* ── Typography ──────────────────────────────────── */
 h1,
 h2,
 h3,
@@ -43,7 +43,6 @@ h4 {
 }
 
 /* ── Utilities ───────────────────────────────── */
-// A title that took the focus on a new screen (useRouteFocus) is not a control: no ring around it.
 :is(h1, h2)[tabindex='-1']:focus {
   outline: none;
 }
@@ -52,7 +51,6 @@ h4 {
   @include visually-hidden;
 }
 
-// Area content widths (8e): fields at --form-max, rows with a count or an action at --text-column.
 .width-form {
   max-width: var(--form-max);
 }
@@ -61,7 +59,6 @@ h4 {
   max-width: var(--text-column);
 }
 
-// Every list, table and card of the panel: the same box, and rows the same distance from its edge.
 .panel-box {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
@@ -82,7 +79,6 @@ h4 {
   }
 }
 
-// The book cards' grid: catalog, Meus livros and the loading skeleton, so a card reads the same everywhere.
 .book-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--card-min), 1fr));
@@ -94,10 +90,8 @@ h4 {
   }
 }
 
-// A row of chips: one line that scrolls sideways on phones, wrapping from tablet up (catalog, Meus livros, panel).
 .chip-strip {
   display: flex;
-  // A chip reached with Tab scrolls fully into view, not cut at the edge of the strip.
   scroll-padding-inline: var(--space-4);
   min-width: 0;
   align-items: center;
@@ -132,7 +126,7 @@ h4 {
   border-radius: calc(var(--scrollbar) / 2);
 }
 
-/* ── Transitions de rota ─────────────────────── */
+/* ── Route transitions ─────────────────────── */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity var(--motion-transition-default);

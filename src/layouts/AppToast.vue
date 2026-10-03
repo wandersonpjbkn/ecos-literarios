@@ -1,5 +1,4 @@
 <template>
-  <!-- Always in the DOM so screen readers announce each new message (a live region added late is not read). -->
   <div class="app-toast" role="status" aria-live="polite">
     <Transition name="app-toast">
       <p v-if="message" class="app-toast__box">{{ message }}</p>

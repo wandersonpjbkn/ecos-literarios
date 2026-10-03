@@ -20,7 +20,6 @@
 </template>
 
 <style lang="scss" scoped>
-// A band of light crosses each shape; with reduced motion the shapes stay still, in the base grey.
 @mixin shimmer {
   background-color: var(--color-skeleton);
   background-image: var(--skeleton-gradient);
@@ -43,7 +42,6 @@
   }
 }
 
-// Same shapes and grid as the catalog, so nothing jumps when the books arrive (Estados: Carregando).
 .catalog-skeleton {
   &__bar {
     display: grid;

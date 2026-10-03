@@ -1,7 +1,6 @@
 <template>
   <AppDrawer :open="open" title="Filtrar" title-id="filter-drawer-title" class="filter-drawer" @close="close">
     <div ref="panel" class="filter-drawer__body">
-      <!-- Phone only: the page hides the sort (see BooksView) -->
       <fieldset v-if="isPhone" class="filter-drawer__group">
         <legend class="filter-drawer__legend">Ordenar</legend>
         <CheckRow
@@ -97,11 +96,9 @@ type Group = {
   title: string
   key?: Exclude<FilterKey, 'midia' | 'authors'>
   more?: [string, string, 'o' | 'a']
-  // Long lists (100+ subgenres) become a combobox: browsable, and typing narrows by word start.
   searchable?: boolean
 }
 
-// [plural, singular, article]: "Mostrar as outras 8 pessoas" / "Mostrar o outro gênero".
 const GROUPS: Group[] = [
   { title: 'Gênero', key: 'categoria', more: ['gêneros', 'gênero', 'o'] },
   { title: 'Subgênero', key: 'subgenres', searchable: true },
@@ -140,7 +137,6 @@ const keptWhere = computed(() =>
 
 const formats = computed(() => sortedOptions('midia'))
 
-// With nothing left the button cannot promise books: it closes, and the line above it says why.
 const resultLabel = computed(() => {
   const n = filtered.value.length
   if (n === 0) return 'Fechar'
@@ -158,7 +154,6 @@ const byCount = (key: FilterKey) => (a: string, b: string) =>
 const sortedOptions = (key: FilterKey) =>
   key === 'size' ? options.value[key] : [...options.value[key]].sort(byCount(key))
 
-// A checked option is never hidden behind "Mostrar os outros".
 const visibleOptions = (group: Group) => {
   const all = sortedOptions(group.key!)
   if (!group.more) return all
@@ -177,7 +172,6 @@ const moreLabel = (group: Group) => {
     : `Mostrar ${article}s outr${article}s ${n} ${plural}`
 }
 
-// Live (no "apply" step): every change replaces the entry opening added (useBackCloses), so one Back undoes the visit.
 const change = (selection: Options, ordem?: BookSortOrder) => apply(selection, ordem, true)
 
 const toggle = (key: FilterKey, value: string) => change(withToggled(key, value))
@@ -186,7 +180,6 @@ const changeOrder = (order: BookSortOrder) => change(selected.value, order)
 
 const close = () => emit('close')
 
-// The "show more" button disappears once clicked; focus goes to the first revealed option instead of the page.
 const showAll = async (key: FilterKey) => {
   expanded.value.push(key)
   await nextTick()
@@ -202,7 +195,6 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-// The frame (veil, side panel or bottom sheet, "Fechar", focus, Back) is AppDrawer's; this is only what is inside.
 .filter-drawer {
   &__body {
     margin: 0 calc(-1 * var(--space-6));
@@ -218,7 +210,6 @@ watch(
     }
   }
 
-  // Floated so the legend leaves the fieldset border instead of sitting on it.
   &__legend {
     float: left;
     width: 100%;
@@ -235,7 +226,6 @@ watch(
     color: var(--color-text-subtle);
   }
 
-  // The legend floats: a row must start below it.
   &__row {
     clear: both;
   }

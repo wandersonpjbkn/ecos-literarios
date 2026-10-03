@@ -20,7 +20,6 @@ const SORT_FIELD: Record<Exclude<BookSortOrder, 'recentes'>, (book: Book) => str
   genero: (book) => book.categoria,
 }
 
-// Cached catalogs may lack `added_at`; the API already sends newest first, so a tie keeps that order.
 const byNewest = (a: Book, b: Book) => (a.added_at && b.added_at ? b.added_at.localeCompare(a.added_at) : 0)
 
 export function useBookSort(source: Ref<Book[]>) {

@@ -27,7 +27,6 @@
       />
     </slot>
 
-    <!-- Under the control, like the error: fields side by side keep their boxes on one line whatever the hints. -->
     <p v-if="hint" :id="hintId" class="app-field__hint">{{ hint }}</p>
     <p v-if="error" :id="errorId" class="app-field__error">{{ error }}</p>
 
@@ -50,11 +49,8 @@ const props = withDefaults(
     rows?: number
     maxlength?: number
     counter?: boolean
-    // Not v-model.trim: Vue would trim every emit, eating the space being typed.
     trim?: boolean
-    // For a field whose row already shows what it edits (renaming in place); screen readers still hear the label.
     hideLabel?: boolean
-    // Shown under the field and read with it (aria-describedby), never only as a colour.
     error?: string
     id?: string
   }>(),
@@ -63,7 +59,6 @@ const props = withDefaults(
 
 const model = defineModel<string | number | null | undefined>()
 
-// Class goes on the wrapper (grid placement); every other attribute (type, placeholder, disabled…) on the field.
 const attrs = useAttrs()
 
 const uid = useId()
@@ -79,7 +74,6 @@ const describedBy = computed(
 )
 const length = computed(() => String(model.value ?? '').length)
 
-// Trimmed once the value is committed (change), and the field shows what was kept.
 const commit = (event: Event) => {
   const field = event.target as HTMLInputElement
   if (!props.trim) return

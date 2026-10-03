@@ -64,7 +64,6 @@
               </span>
             </template>
           </div>
-          <!-- Not in the matrix: said here so nobody reads the list as complete. -->
           <p class="resource-row resource-row--fixed panel-row">
             Mudar o nível de alguém: só Administrador (não muda aqui)
           </p>
@@ -124,7 +123,6 @@ const RESOURCES: Resource[] = [
 const ACTIONS: Action[] = ['create', 'read', 'update', 'delete']
 const WRITES: Action[] = ['create', 'update', 'delete']
 
-// Each row says, as a sentence, what the level may do there (slice 8d): "Ver a lista de membros".
 const NOUN: Partial<Record<Resource, string>> = {
   books: 'livros',
   autores: 'autores',
@@ -142,7 +140,6 @@ const auth = useAuthStore()
 const permissionsStore = usePermissionsStore()
 
 const permissions = ref<Permission[]>([])
-// What the API's routes really obey, per resource: a box outside it would change nothing, so it is not shown.
 const configurable = ref<Partial<Record<Resource, Action[]>>>({})
 
 const loading = ref(false)
@@ -192,7 +189,6 @@ const stored = (role: Role, resource: Resource) =>
     actionsOf(resource).includes(action),
   )
 
-// The level's saved rows, in the shape users/me returns, so your own screens follow the edit now.
 const matrixOf = (role: Role) =>
   Object.fromEntries(permissions.value.filter((p) => p.role === role).map((p) => [p.resource, [...p.actions]]))
 
@@ -203,11 +199,9 @@ const hasActionDraft = (role: Role, resource: Resource, action: Action) => {
   return draft.value.get(resource)?.has(action) ?? false
 }
 
-// Same rule as the API: creating, editing or removing brings "Ver" along, and it stays while any of them does.
 const readLocked = (resource: Resource) =>
   actionsOf(resource).includes('read') && WRITES.some((action) => draft.value.get(resource)?.has(action))
 
-// Entering and leaving edit swaps the buttons under the focus: it moves in to the first box and back to "Editar".
 const cardOf = (role: Role | null) => document.querySelector<HTMLElement>(`[data-role="${role}"]`)
 const editButtonOf = (role: Role | null) => cardOf(role)?.querySelector<HTMLElement>('[data-edit]')
 
@@ -241,20 +235,16 @@ const toggleDraft = (resource: Resource, action: Action) => {
     if (WRITES.includes(action) && actionsOf(resource).includes('read')) set.add('read')
   }
 
-  // Force reactivity (Set is not deeply reactive)
   draft.value = new Map(draft.value)
 }
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 
-// Read mode says it in words ("Criar, ver e editar"); the boxes appear only while that level is being edited.
 const allowedText = (role: Role, resource: Resource) => {
   const allowed = actionsOf(resource).filter((action) => hasAction(role, resource, action))
-  // A resource with no sentence of its own still names itself: "Adicionar e ver <recurso>".
   const noun = NOUN[resource] ?? (PHRASE[resource] ? undefined : resourceLabel(resource).toLowerCase())
   if (!allowed.length) return `Nada em ${noun ?? resourceLabel(resource).toLowerCase()}`
   if (noun) return `${capitalize(joinWords(allowed.map((action) => VERB[action])))} ${noun}`
-  // Phrases name their own object, so they join whole: "Vincular … e incluir …".
   const phrases = PHRASE[resource] ?? {}
   return capitalize(joinWords(allowed.map((action) => phrases[action] ?? VERB[action])))
 }
@@ -266,7 +256,6 @@ const openConfirm = () => {
   confirm.open = true
 }
 
-// A failed save stays in the dialog, where the admin acted; confirming again retries it.
 const applyChanges = async () => {
   if (!editingRole.value) return
   confirm.loading = true
@@ -275,7 +264,6 @@ const applyChanges = async () => {
   const role = editingRole.value
   savedRole.value = role
 
-  // Only what changed goes out: seven writes per save ran into the API's rate limit and saved half.
   const changed = shownResources.value.filter((resource) => {
     const before = stored(role, resource)
     const after = [...(draft.value.get(resource) ?? [])]
@@ -300,7 +288,6 @@ const applyChanges = async () => {
   } catch (e) {
     useErrorReporter().captureException(e, { context: 'AdminPermissions.applyChanges', role: editingRole.value })
     confirm.error = errorText(e, 'Não foi possível salvar as permissões. Tente de novo.')
-    // Part of it may have been saved: the screen shows what the server holds, not what was sent.
     await fetchPermissions(true)
   } finally {
     confirm.loading = false

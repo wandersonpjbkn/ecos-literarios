@@ -14,7 +14,6 @@
 </template>
 
 <script lang="ts" setup>
-// inline: a line among other content (the cover and data search), not a page waiting on its own.
 withDefaults(defineProps<{ inline?: boolean; label?: string }>(), { inline: false, label: 'Carregando…' })
 </script>
 

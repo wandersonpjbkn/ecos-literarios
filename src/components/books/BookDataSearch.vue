@@ -1,6 +1,5 @@
 <template>
   <div class="data-search">
-    <!-- V4 says what happened first, then the query to change. -->
     <div v-if="status === 'none'" class="data-search__box" role="status">
       <p class="data-search__box-title">Nenhum livro encontrado</p>
       <p>
@@ -9,7 +8,6 @@
       </p>
     </div>
 
-    <!-- V2 open, V4: the query can be changed and searched again; otherwise it is summed up. -->
     <form v-if="queryOpen" ref="queryForm" class="data-search__query" @submit.prevent="searchAgain">
       <AppField v-model="draft.title" trim label="Título" autocomplete="off" />
       <AppField v-model="draft.author" trim label="Autor" autocomplete="off" />
@@ -116,7 +114,6 @@ const asked = ref(false)
 const cards: HTMLElement[] = []
 const queryForm = ref<HTMLFormElement | null>(null)
 
-// Nothing found: the query is the next step, so it opens by itself.
 const queryOpen = computed(() => asked.value || props.status === 'none')
 
 const countText = computed(() =>
@@ -126,7 +123,6 @@ const countText = computed(() =>
 const openQuery = async () => {
   Object.assign(draft, { title: props.query.title, author: props.query.author, isbn: props.query.isbn ?? '' })
   asked.value = true
-  // "Mudar a busca" gives way to the fields: focus goes to the first one, not out of the drawer.
   await nextTick()
   queryForm.value?.querySelector('input')?.focus()
 }
@@ -144,7 +140,6 @@ watch(
   { immediate: true },
 )
 
-/** Back from checking a book: focus returns to the one that was picked. */
 const focusCard = (index: number) => cards[index]?.focus()
 
 defineExpose({ focusCard })

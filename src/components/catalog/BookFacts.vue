@@ -66,7 +66,6 @@ const genre = computed(() => props.book.categoria.replace(/-/g, ' '))
       color: var(--color-text-subtle);
     }
 
-    // Same height for text and link values, so the four stay on one line.
     dd {
       display: flex;
       min-height: var(--touch-min);

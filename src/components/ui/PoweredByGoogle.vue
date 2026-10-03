@@ -1,5 +1,4 @@
 <template>
-  <!-- The official file from the Google Books branding guidelines, unaltered: never redraw it. -->
   <img :src="logo" alt="" class="powered-by-google" width="62" height="30" />
 </template>
 

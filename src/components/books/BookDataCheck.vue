@@ -4,7 +4,6 @@
       <BookCandidateSummary :candidate="candidate" size="check" />
       <template v-if="candidate.synopsis">
         <h3 class="data-check__section">Sinopse</h3>
-        <!-- Whole: a synopsis from another book of the same series only shows when read. -->
         <p class="data-check__synopsis">{{ candidate.synopsis }}</p>
       </template>
     </section>
@@ -37,14 +36,12 @@ export type DataField = 'cover_url' | 'synopsis' | 'publisher' | 'published_year
 
 const props = defineProps<{
   candidate: BookCandidate
-  // What the book already has, as the form holds it ('' when empty).
   current: Record<DataField, string>
   modelValue: DataField[]
 }>()
 
 const emit = defineEmits<{ 'update:modelValue': [fields: DataField[]] }>()
 
-// The order of COPY.md; the noun completes "O livro ainda não tem …".
 const FIELDS: { field: DataField; label: string; noun: string }[] = [
   { field: 'cover_url', label: 'Capa', noun: 'capa' },
   { field: 'synopsis', label: 'Sinopse', noun: 'sinopse' },
@@ -54,7 +51,6 @@ const FIELDS: { field: DataField; label: string; noun: string }[] = [
   { field: 'isbn', label: 'ISBN', noun: 'ISBN' },
 ]
 
-/** What a field is worth on screen: a cover or a synopsis is too long to quote, so it is named. */
 const shown = (field: DataField, value: string, isNew: boolean) => {
   if (field === 'cover_url') return isNew ? 'outra capa' : 'uma capa'
   if (field === 'synopsis') return isNew ? 'outra sinopse' : 'uma sinopse'
@@ -67,7 +63,6 @@ const found = (field: DataField) => {
   return value === undefined || value === null ? '' : String(value)
 }
 
-// A field the search brings nothing new to (empty there, or the same value) has no row.
 const rows = computed(() =>
   FIELDS.filter(({ field }) => found(field) && found(field) !== props.current[field]).map(({ field, label, noun }) => {
     const now = props.current[field]

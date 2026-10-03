@@ -17,7 +17,6 @@ import { computed, ref, watch } from 'vue'
 import { languageName } from '@/data/languages'
 import type { BookCandidate } from '@/types'
 
-// A book the cover and data search found, as a result (list) and on top of the check (check, with the page count).
 const props = withDefaults(defineProps<{ candidate: BookCandidate; size?: 'list' | 'check' }>(), { size: 'list' })
 
 const imageFailed = ref(false)
@@ -76,7 +75,6 @@ const facts = computed(() =>
     min-width: 0;
   }
 
-  // Never cut: in a series the volume number in the title is what tells two results apart.
   &__title {
     font-weight: var(--font-weight-semibold);
     overflow-wrap: anywhere;

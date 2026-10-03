@@ -27,7 +27,6 @@ const props = defineProps<{
 
 const query = computed(() => encodeURIComponent(`${props.book.titulo} ${props.book.authors[0] ?? ''}`))
 
-// Search links, not affiliate ones.
 const links = computed(() => {
   const { isbn } = props.book
   return [

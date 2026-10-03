@@ -20,7 +20,6 @@ import CoverBlock from '@/components/books/CoverBlock.vue'
 
 const props = defineProps<{
   book: Book
-  // Meus livros: every card is the same person's, so the line would repeat one name (BookCard.md).
   hideMention?: boolean
 }>()
 
@@ -47,7 +46,6 @@ const label = computed(() =>
     outline-offset: var(--space-1);
   }
 
-  // Only the name is cut: "(+2)" stays whole, it is what says the book has more authors.
   &__author {
     display: flex;
     gap: var(--space-1);

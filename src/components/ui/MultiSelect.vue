@@ -114,7 +114,6 @@ import { useUtils } from '@/composables'
 
 import AppBadge from '@/components/ui/AppBadge.vue'
 
-// Never a real option value: the option list is built from ids and names.
 const CREATE = '\u0000create'
 
 const props = withDefaults(
@@ -124,9 +123,7 @@ const props = withDefaults(
     selected: string | string[]
     multiple?: boolean
     searchable?: boolean
-    // Id of the visible label outside the control (a form field's label), so the button is named by it.
     labelledby?: string
-    // Offers the typed text as a last option ("Outro nome: Joana"); choosing it emits `create` instead of `toggle`.
     createLabel?: (typed: string) => string
   }>(),
   {
@@ -165,7 +162,6 @@ const normalizedOptions = computed(() => {
 
   if (!searchable.value || !query.value.trim()) return base
 
-  // Same comparison as the API (slug), for finding and for "already exists": an accent or a dot more is the same name.
   const typed = query.value.trim()
   const key = slugify(typed)
   if (!key) return []
@@ -185,7 +181,6 @@ const selectedCount = computed(() => {
 
 const selectedOption = computed(() => {
   if (multiple.value || typeof props.selected !== 'string') return null
-  // From every option, not the filtered ones: typing in the search must not blank the chosen label.
   return (
     props.options
       .map((opt) => (typeof opt === 'string' ? { label: opt, value: opt } : opt))
@@ -193,7 +188,6 @@ const selectedOption = computed(() => {
   )
 })
 
-// Esc closes an open list here; with the list closed it reaches the drawer and closes that.
 const onEscape = (event: KeyboardEvent) => {
   if (!isOpen.value) return
   event.stopPropagation()
@@ -219,7 +213,6 @@ const handleSelect = (value: string) => {
   if (!multiple.value) closeToControl()
 }
 
-// With a search box, typing right after opening filters: the focus goes to the box.
 const openAt = (active: number) => {
   isOpen.value = true
   activeIdx.value = active
@@ -237,13 +230,11 @@ const close = () => {
   activeIdx.value = -1
 }
 
-// Closing removes the search box: without this the focus inside it would drop to the page.
 const closeToControl = () => {
   close()
   controlRef.value?.focus()
 }
 
-// Without a search box the button itself takes the arrows: first press opens, the next ones move.
 const openOrMove = (dir: number) => {
   if (!isOpen.value) {
     openAt(0)
@@ -266,7 +257,6 @@ watch(normalizedOptions, () => {
   activeIdx.value = -1
 })
 
-// Tab walks through the open list (search, clear, "Limpar") and closes it only when the focus leaves the select.
 const onFocusOut = (event: FocusEvent) => {
   if (isOpen.value && !wrapRef.value?.contains(event.relatedTarget as Node | null)) close()
 }
@@ -300,7 +290,6 @@ onClickOutside(wrapRef, close)
   gap: var(--space-2);
   align-items: center;
 
-  // The same field as AppField: white with or without a value, a paler border on hover and while open.
   &:hover,
   .is-open & {
     border-color: var(--color-action-border-subtle);
@@ -466,7 +455,6 @@ onClickOutside(wrapRef, close)
     background: var(--color-background-subtle);
   }
 
-  // Same as AppSelect and ComboSelect: a tick and the action ink, no fill.
   &.is-selected .ms-opt-label {
     font-weight: var(--font-weight-semibold);
     color: var(--color-action-default-hover);
@@ -499,7 +487,6 @@ onClickOutside(wrapRef, close)
   text-align: center;
 }
 
-/* ── Footer (somente multi) ──────────────────── */
 .ms-footer {
   display: flex;
   align-items: center;

@@ -4,7 +4,6 @@
       <BaseIcon name="link" aria-hidden="true" />
       Compartilhar
     </AppButton>
-    <!-- Stays until the next try: a toast would take the link away before anyone could select it. -->
     <AppNotice v-if="uncopied" :text="`Não foi possível copiar. O link é ${uncopied}`" />
   </div>
 </template>
@@ -27,7 +26,6 @@ const isPhone = useMediaQuery(useBreakpoints.isPhone)
 const toast = useToast()
 const uncopied = ref('')
 
-// Phone: the system share sheet (WhatsApp is right there). Desktop: just copy, the sheet adds nothing there.
 const share = async () => {
   const url = `${window.location.origin}${props.path}`
   uncopied.value = ''

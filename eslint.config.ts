@@ -6,13 +6,9 @@ import pluginVue from 'eslint-plugin-vue'
 import { globalIgnores } from 'eslint/config'
 
 import englishNames from './eslint/english-names'
+import noComments from './eslint/no-comments'
 
-// To allow more languages other than `ts` in `.vue` files, uncomment the following lines:
-// import { configureVueProject } from '@vue/eslint-config-typescript'
-// configureVueProject({ scriptLangs: ['ts', 'tsx'] })
-// More info at https://github.com/vuejs/eslint-config-typescript/#advanced-setup
-
-// import.meta.env.VITE_ENV === 'production'
+const local = { rules: { ...englishNames.rules, ...noComments.rules } }
 
 export default defineConfigWithVueTs(
   {
@@ -46,15 +42,6 @@ export default defineConfigWithVueTs(
       'no-console': 'off',
       'no-debugger': 'warn',
 
-      // Bitwise and syntax
-      // ...
-
-      // Naming conventions
-      // ...
-
-      // Function and parameter rules
-      // ...
-
       // Loop and flow control
       'no-await-in-loop': 'off',
       'no-continue': 'off',
@@ -84,7 +71,6 @@ export default defineConfigWithVueTs(
 
       // TypeScript specific overrides
       '@typescript-eslint/no-explicit-any': 'warn',
-      // Duplicates the rule below, which honors the `_` prefix used to drop props from a rest.
       'sonarjs/no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -127,7 +113,6 @@ export default defineConfigWithVueTs(
     },
   },
 
-  // The data layer (composables) reads API statuses; a screen only shows the message (errorText).
   {
     name: 'app/data-layer',
     files: ['src/components/**/*.vue', 'src/views/**/*.vue', 'src/layouts/**/*.vue'],
@@ -154,17 +139,15 @@ export default defineConfigWithVueTs(
     },
   },
 
-  // Code and new database fields are named in English; the frozen lists are what already existed outside the code.
   {
     name: 'app/english-names',
     files: ['src/**/*.{ts,vue}'],
-    plugins: { local: englishNames },
+    plugins: { local },
     rules: {
       'local/english-names': [
         'error',
         {
           legacyFields: [
-            // Database and API fields.
             'titulo',
             'autor',
             'autores',
@@ -179,7 +162,6 @@ export default defineConfigWithVueTs(
             'quem_user_id',
             'hidden_midias',
             'lido',
-            // URL names, already in links shared in the club group.
             'busca',
             'lista',
             'mostrar',
@@ -188,12 +170,18 @@ export default defineConfigWithVueTs(
             'lidos',
             'pessoa',
             'genero',
-            // A format name as the database has it.
             'Livro',
           ],
         },
       ],
     },
+  },
+
+  {
+    name: 'app/no-comments',
+    files: ['**/*.{ts,mts,mjs,vue}'],
+    plugins: { local },
+    rules: { 'local/no-comments': 'error' },
   },
 
   {
@@ -204,7 +192,6 @@ export default defineConfigWithVueTs(
     },
   },
 
-  // Debt that predates sonarjs: warn here, error everywhere else.
   {
     name: 'app/sonarjs-debt',
     files: [

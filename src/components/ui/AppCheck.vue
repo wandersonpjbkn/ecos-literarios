@@ -19,7 +19,6 @@ withDefaults(
 </script>
 
 <style lang="scss" scoped>
-// Drawn over a transparent native input: the browser keeps the semantics but no longer paints the box.
 .app-check {
   position: relative;
   display: inline-flex;
@@ -76,7 +75,6 @@ withDefaults(
     visibility: visible;
   }
 
-  // Radio: a white dot inside the filled circle.
   &--radio &__input:checked + &__mark::after {
     content: '';
     width: var(--mark);
@@ -85,7 +83,6 @@ withDefaults(
     background: var(--color-on-action);
   }
 
-  // The disabled family of the app (BasePill): sunken grey, subtle ink, no pointer.
   &__input:disabled {
     cursor: not-allowed;
   }

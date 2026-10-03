@@ -15,7 +15,6 @@
       </AreaSections>
     </div>
 
-    <!-- Phone: the current section opens the whole list in the bottom sheet, the same one Filtrar uses. -->
     <div class="panel-sections-bar">
       <AppButton
         variant="outline"
@@ -71,7 +70,6 @@ import { FRAME_HAS_RAIL } from '@/layouts/frame'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppDrawer from '@/components/ui/AppDrawer.vue'
 
-// The frame of the areas where someone looks after things (Minha conta, Painel do clube): estudo-moldura.md.
 const props = defineProps<{
   title: string
   navLabel: string
@@ -81,12 +79,10 @@ const props = defineProps<{
 const route = useRoute()
 const router = useRouter()
 
-// No rail here: a drawer opened in an area starts at the left edge.
 provide(FRAME_HAS_RAIL, false)
 const lastCatalog = useLastCatalog()
 const isPhone = useMediaQuery(useBreakpoints.isPhone)
 
-// Each section names the tab ("Membros · Painel do clube"), so a screen reader hears the change of screen.
 usePageMeta(() => ({ title: route.meta.title ?? props.title, description: props.title }))
 
 const sectionsOpen = ref(false)
@@ -96,7 +92,6 @@ const currentLabel = computed(
   () => props.groups.flatMap((group) => group.links).find((link) => link.name === route.name)?.label ?? props.title,
 )
 
-// The sheet added a history entry; it goes first, so Back from the new page returns to the section before.
 const leaveSheet = (event: MouseEvent) => {
   const link = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[href]')
   if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target) return
@@ -157,12 +152,10 @@ const leaveSheet = (event: MouseEvent) => {
   border-right: 1px solid var(--color-border-default);
 }
 
-// Phone only.
 .panel-sections-bar {
   display: none;
 }
 
-// The foot sits in the sheet's body, so it keeps the same clearance from the home bar as a sheet footer.
 .panel-sections-sheet__body {
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -202,7 +195,6 @@ const leaveSheet = (event: MouseEvent) => {
   }
 }
 
-// Phone: the bar keeps the title and the way back; the sections open in a sheet from the current one.
 @media (max-width: $bp-phone-max) {
   .panel {
     grid-template-rows: auto auto 1fr;
@@ -221,7 +213,6 @@ const leaveSheet = (event: MouseEvent) => {
       display: none;
     }
 
-    // Hidden from sight only: the button still says "Voltar ao catálogo" to a screen reader.
     &__back-long {
       @include visually-hidden;
     }

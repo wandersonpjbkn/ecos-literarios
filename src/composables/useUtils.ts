@@ -13,12 +13,12 @@ const slugify = (value: unknown): string => {
   if (typeof value !== 'string') return ''
   return String(value)
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // remove acentos
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '') // remove pontuação (pontos, apóstrofos…)
+    .replace(/[^a-z0-9\s-]/g, '')
     .trim()
-    .replace(/\s+/g, '-') // espaços → hífens
-    .replace(/-{2,}/g, '-') // colapsa hífens duplos
+    .replace(/\s+/g, '-')
+    .replace(/-{2,}/g, '-')
 }
 
 function sendGtmEvent(payload: Record<string, unknown>) {

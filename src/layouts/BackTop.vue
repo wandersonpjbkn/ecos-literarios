@@ -30,7 +30,6 @@ const backTop = () => {
 </script>
 
 <style lang="scss" scoped>
-// Secondary, not primary: the screen already has its one primary action.
 .back-top {
   position: fixed;
   right: var(--space-6);

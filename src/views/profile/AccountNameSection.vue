@@ -61,7 +61,6 @@ const name = ref(authStore.user?.name ?? '')
 const isSubmitting = ref(false)
 const error = ref('')
 
-// Same rule as PATCH /users/me: not empty (the 60 limit is the field's maxlength).
 const isValid = computed(() => name.value.trim().length > 0)
 const isChanged = computed(() => name.value.trim() !== authStore.user?.name)
 
@@ -95,7 +94,6 @@ const submit = async () => {
 
 <style lang="scss" scoped>
 .you {
-  // One field per line, each at a readable width: side by side they squeezed each other.
   display: flex;
   max-width: var(--form-max);
   flex-direction: column;

@@ -25,7 +25,6 @@ defineProps<{
 </script>
 
 <style lang="scss" scoped>
-// Fills the whole grid cell (cover + caption) so it never reads as a book tile; card language of the shelves.
 .eco-card {
   display: block;
   height: 100%;
@@ -77,7 +76,6 @@ defineProps<{
     -webkit-box-orient: vertical;
   }
 
-  // Title first: it is the link's destination; "mencionado por" says only what the data guarantees (COPY.md).
   &__foot {
     display: flex;
     margin: auto 0 0;

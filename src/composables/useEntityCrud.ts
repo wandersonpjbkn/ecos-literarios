@@ -6,7 +6,6 @@ import { useErrorReporter, useUtils } from '@/composables'
 import { errorText } from '@/composables/apiError'
 import { createEntity, listEntities, removeEntity, updateEntity } from '@/composables/useApi'
 
-/** Reusable CRUD state for flat support entities (nome + slug). */
 export function useEntityCrud({ resource }: EntityCrudOptions) {
   const items = ref<SupportEntity[]>([])
   const loading = ref(false)
@@ -34,7 +33,6 @@ export function useEntityCrud({ resource }: EntityCrudOptions) {
     return created
   }
 
-  // The list may be stale (someone else created the name since it loaded): read it again, compare like the API (slug).
   const findOrCreate = async (name: string): Promise<SupportEntity> => {
     await fetchAll()
     return items.value.find((item) => slugify(item.nome) === slugify(name)) ?? create(name)

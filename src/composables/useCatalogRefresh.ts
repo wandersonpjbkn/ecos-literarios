@@ -7,7 +7,6 @@ import { useApi } from '@/composables/useApi'
 import { useToast } from '@/composables/useToast'
 import { useUtils } from '@/composables/useUtils'
 
-/** "Atualizar" the catalog, the same from every screen that offers it. */
 export function useCatalogRefresh() {
   const route = useRoute()
 
@@ -16,7 +15,6 @@ export function useCatalogRefresh() {
 
   const refresh = async () => {
     if (refreshing.value) return
-    // Offline the saved copy stays on screen with no error, so the refresh would pass for a success.
     if (!navigator.onLine) {
       useToast().show('Você está sem internet. Tente de novo quando a conexão voltar.')
       return
@@ -28,7 +26,6 @@ export function useCatalogRefresh() {
     try {
       await useApi().fetchBooks()
       failed.value = !!useBooksStore().error
-      // The browser hands a 304 over as a fresh answer, so the message cannot claim that nothing changed.
       if (!failed.value) useToast().show('Catálogo atualizado.')
     } finally {
       refreshing.value = false

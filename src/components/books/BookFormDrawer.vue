@@ -37,7 +37,6 @@
           <h3 id="bf-essential" class="form-section__title">O essencial</h3>
           <p class="form-section__text">Só isto é preciso para o livro entrar no catálogo.</p>
 
-          <!-- A free placeholder with this account's name: linking first makes those books this person's too. -->
           <div v-if="claimOffer" class="claim-offer" role="status">
             <p class="claim-offer__text">
               O nome "{{ claimOffer }}" já está no catálogo. É você? Se for, vincule esse nome e esses livros passam a
@@ -267,7 +266,6 @@
         </div>
         <p v-if="missingText" class="drawer-footer__missing" aria-live="polite">{{ missingText }}</p>
 
-        <!-- Apart from saving, with the book open in front of whoever decides (slice 8b). -->
         <div v-if="canRemove" class="drawer-footer__remove">
           <AppButton variant="danger" size="md" :disabled="isSaving" @click="openRemove">
             <BaseIcon name="trash" aria-hidden="true" />
@@ -338,11 +336,8 @@ const NEW_NAME = 'new:'
 const props = defineProps<{
   book: BookPayload | null
   isOpen: boolean
-  // A new book can start with a title, e.g. the search that found nothing.
   title?: string
-  // Opened to write the comment ("Escrever o que achei"): focus starts on it.
   focus?: 'porque'
-  // Where focus goes when the button that opened the form is gone (after removing the book).
   returnFocus?: () => HTMLElement | null | undefined
 }>()
 
@@ -362,7 +357,6 @@ const genres = useEntityCrud({ resource: 'categorias' })
 const subgenres = useEntityCrud({ resource: 'subgeneros' })
 
 const isSaving = ref(false)
-// A new book is in: the form stays on screen until it closes, but it cannot add the same book again.
 const isAdded = ref(false)
 const error = ref('')
 const success = ref('')
@@ -373,7 +367,6 @@ const form = reactive({
   midia: '',
   categoria: '',
   subgeneros: [] as string[],
-  // 'user:<id>' for an account, 'name:<placeholder>' for a free placeholder, 'new:<typed>' for a new name.
   person: '',
   porque: '',
   isbn: '',
@@ -384,18 +377,14 @@ const form = reactive({
   published_year: '',
 })
 
-// Open when editing a book that already has any of the optional data; closed when adding (cadastro-de-livro-essencial).
 const showMore = ref(false)
 
-// A refused removal stays in the dialog, where the decision was made; confirming again retries it.
 const removal = reactive({ open: false, loading: false, error: '' })
 const drawer = ref<InstanceType<typeof AppDrawer> | null>(null)
 
-// The form as it opened (or as it was last saved): any difference is something the person would lose by leaving.
 const openedAs = ref('')
 const takeSnapshot = () => (openedAs.value = JSON.stringify(form))
 const isDirty = computed(() => JSON.stringify(form) !== openedAs.value)
-// Every way out asks the same question; a second way out while it is on screen waits for the same answer.
 const leaving = reactive({ open: false })
 let leavingAnswer: Promise<boolean> | null = null
 let answerLeaving: (stay: boolean) => void = () => undefined
@@ -417,7 +406,6 @@ const cancel = async () => {
 
 const people = ref<{ user_id: string | null; name: string }[]>([])
 const initialPerson = ref('')
-// The book's own account, which the list leaves out until it links a name (the adder, by default).
 const currentAccount = ref<{ value: string; label: string } | null>(null)
 
 const peopleError = ref('')
@@ -428,16 +416,12 @@ const claimError = ref('')
 
 let closeTimer: ReturnType<typeof setTimeout> | undefined
 
-// Scope follows the permission, not the screen: whoever may edit any book (PATCH /books/:id) gets the panel's form.
 const isMemberScope = computed(() => !permissions.can('books', 'update'))
-// The automatic search asks for books:update in the API; everyone else fills the same fields by hand.
-// The search answers whoever may add or edit books (the API asks the same); an owner fills the fields by hand.
 const canSearchData = computed(() => permissions.can('books', 'create') || permissions.can('books', 'update'))
 
 const isEditMode = computed(() => !!props.book)
 const canRemove = computed(() => isEditMode.value && !isMemberScope.value && permissions.can('books', 'delete'))
 
-// Says what is missing instead of a silent grey button.
 const missingText = computed(() => {
   const missing = [
     !form.titulo.trim() && 'o título',
@@ -453,7 +437,6 @@ const isValid = computed(
   () => form.titulo.trim().length > 0 && form.authors.length > 0 && form.midia.length > 0 && form.categoria.length > 0,
 )
 
-// "Outro nome" follows the matrix (claim: create), by default only the Administrador.
 const canAddName = computed(() => permissions.can('claim', 'create'))
 
 const personOptions = computed(() => {
@@ -472,7 +455,6 @@ const claimOffer = computed(() =>
   !isEditMode.value && !isMemberScope.value && !claimDismissed.value ? permissions.claimMatch : null,
 )
 
-// A list item typed in the form is created on save, like "Outro nome": nothing is left behind if the form is dropped.
 const canCreate = (resource: 'autores' | 'categorias' | 'subgeneros') => permissions.can(resource, 'create')
 const createLabel = (word: string) => (typed: string) => `Outro ${word}: ${typed}`
 const withPending = (options: { label: string; value: string }[], picked: string[], word: string) => [
@@ -504,10 +486,8 @@ const remove = async () => {
     await removeBook(book._id)
     removal.open = false
     useToast().show(`"${book.titulo}" removido.`)
-    // The dialog hands focus back first; then the form closes and sends it to the list, not to a leaving button.
     await nextTick()
     await nextTick()
-    // The page under the form may leave (a removed book's page): only after the form's history entry is gone.
     drawer.value?.closeThen(() => emit('removed', book._id))
   } catch (e) {
     removal.error = errorText(e, 'Não foi possível remover o livro. Tente de novo.')
@@ -536,7 +516,6 @@ const loadPeople = async () => {
   }
 }
 
-// The box leaves with the button that had focus: the next field takes it.
 const focusTitleField = () => nextTick(() => document.querySelector<HTMLElement>('#bf-titulo')?.focus())
 const dismissClaimOffer = () => {
   claimDismissed.value = true
@@ -615,12 +594,10 @@ const populateForm = (book: BookPayload): void => {
 
 const close = (): void => {
   clearTimeout(closeTimer)
-  // A view left open would stay a history level of a closed form.
   view.value = 'form'
   emit('close')
 }
 
-// ── Cover and data: a view inside the same drawer (VistaBusca.md), nothing saved until the form is ──
 const DATA_LABELS: Record<DataField, string> = {
   cover_url: 'Capa',
   synopsis: 'Sinopse',
@@ -633,7 +610,6 @@ const DATA_FIELDS = Object.keys(DATA_LABELS) as DataField[]
 
 const view = ref<'form' | 'search' | 'check'>('form')
 const DEPTH = { form: 0, search: 1, check: 2 }
-// Going deeper slides the view in from the right; going back, from the left (VistaBusca.md).
 const motion = ref('view-forward')
 watch(view, (now, before) => (motion.value = DEPTH[now] > DEPTH[before] ? 'view-forward' : 'view-back'), {
   flush: 'sync',
@@ -642,7 +618,6 @@ const dataSearch = useBookSearch()
 const picked = ref<BookCandidate | null>(null)
 const pickedIndex = ref(0)
 const pickedFields = ref<DataField[]>([])
-// What the search put in the form, what was there before, and where it came from: undo, and the save's sources.
 const choice = ref<{
   fields: DataField[]
   values: Partial<Record<DataField, string>>
@@ -662,10 +637,8 @@ const drawerTitle = computed(() => {
 const currentData = computed(
   () => Object.fromEntries(DATA_FIELDS.map((field) => [field, String(form[field] ?? '')])) as Record<DataField, string>,
 )
-// A field still holding what the search put there: "Trocar" and "Desfazer" treat it as not the person's.
 const fromSearch = (field: DataField) =>
   !!choice.value?.fields.includes(field) && currentData.value[field] === choice.value.values[field]
-// The book as it is without the current choice: what "Trocar" compares the next book with.
 const baselineData = computed(
   () =>
     Object.fromEntries(
@@ -683,7 +656,6 @@ const candidateValue = (candidate: BookCandidate, field: DataField) => {
   return value === undefined || value === null ? '' : String(value)
 }
 
-// The system back climbs one level: Conferir → results → form, before it closes the drawer.
 useBackCloses(
   () => props.isOpen && view.value !== 'form',
   () => (view.value = 'form'),
@@ -699,14 +671,12 @@ const firstAuthorName = () => {
   return authorOptions.value.find((one) => one.value === first)?.label ?? ''
 }
 
-// A state change can remove the button that had focus ("Tentar de novo"): focus goes to the view's title, not out.
 watch(dataSearch.status, async () => {
   await nextTick()
   if (view.value !== 'form' && (!document.activeElement || document.activeElement === document.body))
     drawer.value?.focusTitle()
 })
 
-// Focus follows the view, whichever way it changed (a button or the system back): VistaBusca.md.
 watch(view, async (now, before) => {
   await nextTick()
   if (now === 'search' && before === 'check') searchView.value?.focusCard(pickedIndex.value)
@@ -716,7 +686,6 @@ watch(view, async (now, before) => {
 })
 
 const openSearch = () => {
-  // An ISBN is a search key only when the person typed it here: one from the book or a search may be another edition.
   const typedIsbn = form.isbn && form.isbn !== openedIsbn.value && form.isbn !== choice.value?.values.isbn
   view.value = 'search'
   dataSearch.search({ title: form.titulo.trim(), author: firstAuthorName(), isbn: typedIsbn ? form.isbn : undefined })
@@ -727,7 +696,6 @@ const pick = (index: number) => {
   if (!candidate) return
   picked.value = candidate
   pickedIndex.value = index
-  // An empty field takes what the search found; one someone already wrote is only replaced when the person marks it.
   pickedFields.value = DATA_FIELDS.filter((field) => candidateValue(candidate, field) && !baselineData.value[field])
   view.value = 'check'
 }
@@ -736,7 +704,6 @@ const goBack = () => {
   view.value = view.value === 'check' ? 'search' : 'form'
 }
 
-// Empties only what the search put in: a field the person changed by hand afterwards stays as they left it.
 const undoChoice = () => {
   if (!choice.value) return
   for (const field of choice.value.fields) if (fromSearch(field)) form[field] = choice.value.before[field] ?? ''
@@ -746,7 +713,6 @@ const undoChoice = () => {
 const useChoice = () => {
   const candidate = picked.value
   if (!candidate || !pickedFields.value.length) return
-  // "Trocar": the new choice replaces the old one, measured against what the book had before either.
   undoChoice()
   const fields = [...pickedFields.value]
   const before = Object.fromEntries(fields.map((field) => [field, currentData.value[field]]))
@@ -761,7 +727,6 @@ const useChoice = () => {
   view.value = 'form'
 }
 
-/** Where the cover and the ISBN came from, when they are still what the search put there. */
 const dataSources = () => {
   const chosen = choice.value
   if (!chosen) return {}
@@ -773,7 +738,6 @@ const dataSources = () => {
   }
 }
 
-// The API decides what changed and what counts as a hand edit; an emptied field goes as null so it is cleared.
 const optionalFields = () => {
   const fields: Record<string, string | number | null> = {
     isbn: form.isbn || null,
@@ -783,7 +747,6 @@ const optionalFields = () => {
     page_count: positiveInt(form.page_count),
     published_year: positiveInt(form.published_year),
   }
-  // A new book leaves out what was not filled; an edit sends everything, empty included.
   return isEditMode.value ? fields : Object.fromEntries(Object.entries(fields).filter(([, value]) => value !== null))
 }
 
@@ -810,7 +773,6 @@ type EntityList = ReturnType<typeof useEntityCrud>
 const resolvePicked = async (list: EntityList, value: string) =>
   value.startsWith(NEW_NAME) ? (await list.findOrCreate(value.slice(NEW_NAME.length)))._id : value
 
-// Written back into the form: a retry after a failed save reuses what was created instead of creating it twice.
 const resolvePickedItems = async () => {
   for (const [index, value] of form.authors.entries()) form.authors[index] = await resolvePicked(authors, value)
   form.categoria = await resolvePicked(genres, form.categoria)
@@ -837,7 +799,6 @@ const handleSubmit = async () => {
       ...optionalFields(),
       ...dataSources(),
     }
-    // Who mentioned goes only when it changed: the API keeps the book's history for real changes.
     const person = !isMemberScope.value && form.person !== initialPerson.value ? personPayload() : {}
     const payload = { ...shared, ...person }
     await saveBook(payload, { id: props.book?._id, asOwner: isMemberScope.value })
@@ -888,7 +849,6 @@ watch(
       (!!props.book && form.subgeneros.length > 0)
     takeSnapshot()
   },
-  // Opened on arrival (?adicionar=1): the form must be prepared on the first render too.
   { immediate: true },
 )
 
@@ -903,7 +863,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-// The frame (veil, panel, "Fechar", focus, Back) is AppDrawer's; this is the form inside it.
 .book-form {
   display: flex;
   flex-direction: column;
@@ -982,7 +941,6 @@ onMounted(() => {
   }
 }
 
-// A question, not a warning: the neutral box, with both ways on.
 .claim-offer {
   display: flex;
   flex-direction: column;
@@ -1034,7 +992,6 @@ onMounted(() => {
     gap: var(--space-2);
   }
 
-  // Set apart from saving by a line, so it is never the next button the hand reaches for.
   &__remove {
     display: flex;
     padding-top: var(--space-3);
@@ -1065,7 +1022,6 @@ onMounted(() => {
   }
 }
 
-// Only the entering view moves: the leaving one goes at once, so the two never stack.
 .view-forward-enter-active,
 .view-back-enter-active {
   @media (prefers-reduced-motion: no-preference) {

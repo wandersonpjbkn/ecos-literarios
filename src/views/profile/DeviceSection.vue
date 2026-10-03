@@ -2,7 +2,6 @@
   <div class="area-section">
     <SectionHeader title="Dados salvos" />
     <AppNotice v-if="refreshFailed" text="Não foi possível atualizar o catálogo." retry @retry="refreshCatalog" />
-    <!-- Each action with what it does; clearing signs out, so it takes the weight of what has no way back (8e). -->
     <ul class="device panel-box width-column">
       <li class="device__row panel-row">
         <AppButton size="md" :aria-busy="refreshing" @click="refreshCatalog">
@@ -56,7 +55,6 @@ const fetchFresh = () => {
   return useApi().fetchBooks()
 }
 
-// Leaving the account is what the dialog promises: the session goes first, or pinia would write it back.
 const clearDevice = async () => {
   clearing.value = true
   await logout()

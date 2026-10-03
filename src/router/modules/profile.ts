@@ -2,13 +2,11 @@ import type { RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
 
 import { useAuthStore } from '@/stores'
 
-// Signed out goes to the login and comes back to the page it asked for (?voltar).
 const authGuard = (to: RouteLocationNormalized) => {
   const auth = useAuthStore()
   if (!auth.isLoggedIn) return { name: 'auth-login', query: { voltar: to.fullPath } }
 }
 
-// Meus livros lives in the catalog frame; Minha conta is an area like the club panel (estudo-moldura.md).
 export const routes: RouteRecordRaw[] = [
   { path: '/perfil', redirect: { name: 'profile-books' } },
   {
@@ -24,7 +22,6 @@ export const routes: RouteRecordRaw[] = [
     beforeEnter: authGuard,
     component: () => import('@/layouts/AccountLayout.vue'),
     redirect: { name: 'account-you' },
-    // An area with its own frame, like the club panel (estudo-moldura.md).
     meta: { frame: 'area', signedIn: true },
     children: [
       {

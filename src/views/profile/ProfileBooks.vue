@@ -53,7 +53,6 @@
         <AppButton :to="{ query: { ...route.query, busca: undefined } }">Apagar a busca</AppButton>
       </EmptyState>
 
-      <!-- Linking follows the matrix (claim: update): without it, no way in that leads to a refusal. -->
       <EmptyState
         v-else-if="shelf === 'estante' && !myBooks.length"
         title="Nenhum livro com o seu nome ainda"
@@ -81,7 +80,6 @@
         <li v-for="book in visibleBooks" :key="book.id" class="my-book">
           <BookCard :book="book" :hide-mention="shelf === 'estante'" data-list-item />
           <div class="my-book__foot">
-            <!-- Not disabled while loading: open() already refuses a second click, and a disabled button drops the focus. -->
             <AppButton v-if="permissions.canEditBook(book.quem_user_id)" size="md" @click="editor.openEdit(book.id)">
               <BaseIcon name="pencil" aria-hidden="true" />
               {{ editor.loadingId.value === book.id ? 'Abrindo…' : 'Editar' }}
@@ -136,7 +134,6 @@ import LiveStatus from '@/components/ui/LiveStatus.vue'
 type Segment = 'all' | 'no-cover' | 'no-synopsis'
 type Shelf = 'estante' | 'quero-ler' | 'lidos'
 
-// Same words as the buttons on the book page. The shelf lives in the URL (?lista=), like the tabs of the panel.
 const SHELVES: { value: Shelf; label: string }[] = [
   { value: 'estante', label: 'Estante' },
   { value: 'quero-ler', label: 'Quero ler' },
@@ -151,7 +148,6 @@ const SHELF_EMPTY: Record<Exclude<Shelf, 'estante'>, { title: string; text: stri
   lidos: { title: 'Nenhum livro marcado como lido', text: 'Na página de um livro, use “Marcar como lido”.' },
 }
 
-// The segment lives in the URL (FilterChip.md).
 const SEGMENTS: SegmentOption<Segment, Book>[] = [
   { value: 'all', label: 'Todos', test: () => true, empty: { title: 'Nenhum livro com o seu nome ainda' } },
   {
@@ -188,7 +184,6 @@ const editor = useBookForm()
 
 const grid = ref<HTMLElement | null>(null)
 
-// Only someone who has not linked a name can be missing books; after linking there is none left to claim.
 const hasClaim = ref<boolean | null>(null)
 
 const permissions = usePermissionsStore()
@@ -202,7 +197,6 @@ const emptyText = computed(() => {
   return 'Aqui aparecem os livros mencionados por você.'
 })
 
-// The header search writes ?busca= here on Meus livros.
 const searchQuery = computed(() => String(route.query.busca ?? ''))
 
 const loading = computed(() => booksStore.loading)
@@ -222,7 +216,6 @@ const shelfTabs = computed(() =>
   SHELVES.map((option) => ({ key: option.value, label: option.label, count: shelfItems.value[option.value].length })),
 )
 
-// Always the same first shelf without ?lista=, like the panel tabs: a default that followed the data would move alone.
 const shelf = computed<Shelf>(() => SHELVES.find((option) => option.value === route.query.lista)?.value ?? 'estante')
 
 const selectShelf = (key: string) => router.replace({ query: { ...route.query, lista: key, mostrar: undefined } })
@@ -248,14 +241,12 @@ const searched = computed(() => {
 
 const { sortOrder, sortOptions, sortedBooks: filteredBooks } = useBookSort(searched)
 
-// The Estante holds only the reader's own books, so "Por quem mencionou" would sort nothing there.
 const shelfSortOptions = computed(() =>
   shelf.value === 'estante' ? sortOptions.filter((option) => option.value !== 'pessoa') : sortOptions,
 )
 
 const { visible: visibleBooks, nextBatch, more } = useLoadMore(filteredBooks, { name: 'meus-livros' })
 
-// What a screen reader hears after a search or a chip: how many of the reader's books are on screen.
 const announced = computed(() => {
   if (searchQuery.value && !filteredBooks.value.length) return `Nada com "${searchQuery.value}"`
   const n = filteredBooks.value.length
@@ -264,7 +255,6 @@ const announced = computed(() => {
   return `${name}: ${n} de ${total} ${total === 1 ? 'livro' : 'livros'}`
 })
 
-// A book opened from here comes back here, with the same chip and search.
 watch(
   () => route.fullPath,
   (path) => {

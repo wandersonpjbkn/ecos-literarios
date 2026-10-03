@@ -10,7 +10,6 @@ export function usePageMeta(options: MaybeRefOrGetter<PageMetaOptions>) {
 
   const route = useRoute()
 
-  // A layout stays mounted across its sections, so the address has to follow the route too.
   const canonical = () => `${siteUrl}${route.path}`
 
   useHead({
@@ -18,7 +17,6 @@ export function usePageMeta(options: MaybeRefOrGetter<PageMetaOptions>) {
     link: [{ rel: 'canonical', href: canonical }],
   })
 
-  // Getters, so a layout can hand in a title that follows the route (the panel's sections).
   const fullTitle = () => `${toValue(options).title} | ${siteName}`
 
   useSeoMeta({

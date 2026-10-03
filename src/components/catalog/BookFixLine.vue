@@ -23,7 +23,6 @@ import AppButton from '@/components/ui/AppButton.vue'
 
 const props = defineProps<{
   book: Book
-  // Who may edit the book (API): its owner, or whoever may edit any book. The same "Editar" as Meus livros.
   canEdit: boolean
   canWrite: boolean
   askLink: (message: string) => string
@@ -31,16 +30,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{ edit: [] }>()
 
-// A missing field stays in the file saying what is missing: that is how someone notices and completes it.
 const missing = computed(() =>
   [!props.book.published_year && 'o ano', !props.book.page_count && 'o número de páginas'].filter(Boolean),
 )
 
-// "Falta o ano" / "Faltam o ano e o número de páginas": the screen and the message say it the same way.
 const lack = computed(() => `${missing.value.length > 1 ? 'Faltam' : 'Falta'} ${missing.value.join(' e ')}`)
 const gap = computed(() => `${lack.value}.`)
 
-// Readers who cannot edit report it on WhatsApp; the label does not promise an edit.
 const askLabel = computed(() =>
   missing.value.length ? `Pedir para completar ${missing.value.join(' e ')}` : 'Avisar sobre um erro',
 )
@@ -59,7 +55,6 @@ const question = computed(() =>
   align-items: center;
   column-gap: var(--space-3);
 
-  // A question, not a label: it may wrap on phones instead of running off the screen.
   .app-button--ask {
     margin-left: calc(-1 * var(--space-2));
     max-width: 100%;

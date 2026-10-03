@@ -1,6 +1,5 @@
 <template>
   <div class="auth-frame">
-    <!-- Entering has one task: the brand to go back home, and the form. No search, rail or "Adicionar" here. -->
     <header class="auth-frame__bar">
       <BrandLogo />
     </header>

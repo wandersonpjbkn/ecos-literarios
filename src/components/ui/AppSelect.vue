@@ -86,11 +86,9 @@ const open = async () => {
   alignsLeft.value = false
   isOpen.value = true
   await nextTick()
-  // Near an edge of the window the list opens upward, or from the left, instead of going past the screen.
   const box = list.value?.getBoundingClientRect()
   const anchor = root.value?.getBoundingClientRect()
   if (box && anchor && box.bottom > window.innerHeight && anchor.top - box.height > 0) opensUp.value = true
-  // The list's width settles only after it is shown, so the side comes from where the trigger sits.
   if (anchor && anchor.left + anchor.width / 2 < window.innerWidth / 2) alignsLeft.value = true
   list.value?.focus()
 }
@@ -126,15 +124,12 @@ const onListKeydown = (event: KeyboardEvent) => {
   else if (event.key === 'End') move(props.options.length - 1)
   else if ((event.key === 'Enter' || event.key === ' ') && option) choose(option.value)
   else if (event.key === 'Escape') {
-    // Only the list closes; a drawer or page listening on the document must not react.
     event.stopPropagation()
     close(true)
   } else if (event.key === 'Tab') {
-    // Focus goes back to the trigger first, so Tab moves on from there instead of dropping to the page.
     close(true)
     return
   } else if (event.key.length === 1) {
-    // Type-ahead: jump to the next option starting with the typed letter.
     const letter = event.key.toLowerCase()
     const next = props.options.findIndex((o, i) => i > activeIndex.value && o.label.toLowerCase().startsWith(letter))
     const first = props.options.findIndex((o) => o.label.toLowerCase().startsWith(letter))

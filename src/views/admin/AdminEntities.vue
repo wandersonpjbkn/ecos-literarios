@@ -60,7 +60,6 @@ const tabs: TabConfig[] = [
   },
 ]
 
-// The tab lives in the URL (?lista=): reload and Back keep it, and changing tab starts its list from the top.
 const route = useRoute()
 const router = useRouter()
 const activeTab = computed({

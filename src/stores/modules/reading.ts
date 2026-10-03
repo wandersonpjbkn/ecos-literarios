@@ -3,7 +3,6 @@ import { ref } from 'vue'
 
 import type { ReadingEntry, ReadingStatus } from '@/types'
 
-// Not persisted: the list belongs to the account and is reloaded from the API for whoever is signed in.
 export const useReadingStore = defineStore('reading', () => {
   const statuses = ref<Record<string, ReadingStatus>>({})
   const loadedFor = ref<string | null>(null)

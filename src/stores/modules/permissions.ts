@@ -5,17 +5,13 @@ import type { Action, Resource } from '@/types'
 
 import { useAuthStore } from '@/stores/modules/auth'
 
-// Not persisted: the matrix can change on the server, so each session reads it again (users/me).
 export const usePermissionsStore = defineStore('permissions', () => {
   const mine = ref<Partial<Record<Resource, Action[]>> | null>(null)
   const failed = ref(false)
-  // A free placeholder with this account's name (users/me): the add form asks "is this you?" first.
   const claimMatch = ref<string | null>(null)
 
-  // Only hides what the server would refuse; the server still decides every request.
   const can = (resource: Resource, action: Action) => mine.value?.[resource]?.includes(action) ?? false
 
-  // Mirrors the API: whoever may update books edits any book; the owner edits theirs through their own route.
   const canEditBook = (ownerUserId?: string) =>
     can('books', 'update') || (!!ownerUserId && ownerUserId === useAuthStore().user?._id)
 

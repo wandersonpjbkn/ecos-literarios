@@ -2,7 +2,6 @@ import type { RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
 
 import { useAuthStore } from '@/stores'
 
-// Signed out goes to the login and back here; signed in without the level sees why (AdminForbidden).
 const editorGuard = (to: RouteLocationNormalized) => {
   const auth = useAuthStore()
   if (!auth.isLoggedIn) return { name: 'auth-login', query: { voltar: to.fullPath } }
@@ -15,7 +14,6 @@ const adminGuard = (to: RouteLocationNormalized) => {
   if (!auth.isAdmin) return { name: 'admin-forbidden' }
 }
 
-// The one place that says a section is admin only: the guard and the panel menu both read it.
 const adminRoute = (route: RouteRecordRaw): RouteRecordRaw => ({
   ...route,
   beforeEnter: adminGuard,
@@ -34,7 +32,6 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/layouts/ClubPanelLayout.vue'),
     beforeEnter: editorGuard,
     redirect: { name: 'admin-books' },
-    // The panel is a tool, not part of the catalog: it brings its own bar and leaves the app's header and rail out.
     meta: { frame: 'area', signedIn: true },
     children: [
       {
@@ -61,7 +58,6 @@ export const routes: RouteRecordRaw[] = [
         component: () => import('@/views/admin/AdminEntities.vue'),
         meta: { title: 'Autores e gêneros · Painel do clube', pageClass: 'page-admin' },
       },
-      // The bulk cover search is gone: books without a cover are found under "Faltando algo" and completed one by one.
       { path: 'capas', alias: 'enriquecimento', redirect: { name: 'admin-books', query: { mostrar: 'faltando' } } },
       adminRoute({
         path: 'vinculos',

@@ -48,7 +48,6 @@ const { emptySelection, booksFor, hrefToggling } = useFilters()
 
 const { coverTint } = useCategoryColors()
 
-// A format the reader chose to hide gets no shelf, and an empty shelf is not shown.
 const shelves = computed(() =>
   SHELVES.filter((shelf) => !(shelf.key === 'midia' && hiddenFormats.value.includes(shelf.value)))
     .map((shelf) => {

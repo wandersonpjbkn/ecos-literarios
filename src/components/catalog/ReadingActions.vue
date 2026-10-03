@@ -52,10 +52,8 @@ const { status, counts, pending, error, canWrite, change } = useReading(toRef(pr
 
 const root = ref<HTMLElement | null>(null)
 
-// The status names the shelf of Meus livros where the book now is: the way to find the list again.
 const shelfLink = (shelf: 'quero-ler' | 'lidos') => ({ name: 'profile-books', query: { lista: shelf } })
 
-// Totals only, never names: who wants or read a book is private (contract of slice 5).
 const countsLabel = computed(() => {
   if (!counts.value) return ''
   const { quero_ler: want, lido: read } = counts.value
@@ -68,7 +66,6 @@ const countsLabel = computed(() => {
     .join(' · ')
 })
 
-// The pressed button is replaced by the next state's buttons; focus moves to the first of them, not to the page.
 const act = async (next: ReadingStatus | null) => {
   await change(next)
   await nextTick()
@@ -94,7 +91,6 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? `1 ${one}` :
     @include text-link;
   }
 
-  // Selected state: soft action background with its line, never a filled blue (rule of every slice).
   &__state {
     display: flex;
     min-height: var(--touch-cta);

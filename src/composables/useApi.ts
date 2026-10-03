@@ -41,7 +41,7 @@ const extractName = (field: ApiPopulated | string | undefined): string => {
   return typeof field === 'string' ? field : field.nome
 }
 
-// ── Normalização ApiBook → Book ──
+// ── ApiBook → Book ──
 const normalizeBook = (raw: ApiBook): Book => ({
   id: raw._id,
   titulo: raw.titulo,
@@ -63,7 +63,6 @@ const normalizeBook = (raw: ApiBook): Book => ({
 })
 
 // ── Auth helper ──
-// getSession renews a token about to expire, so a tab back from sleep does not send a stale one.
 const currentToken = async (): Promise<string | null> =>
   (await supabase.auth.getSession()).data.session?.access_token ?? null
 
@@ -72,12 +71,10 @@ const headersWith = (token: string | null): HeadersInit => ({
   ...(token ? { Authorization: `Bearer ${token}` } : {}),
 })
 
-// A token the API refused: another request may have renewed it already, otherwise it is renewed once here.
 const renewedToken = async (refused: string): Promise<string | null> => {
   const current = await currentToken()
   if (current && current !== refused) return current
   const { data, error } = await supabase.auth.refreshSession()
-  // Offline or Supabase down: the session stays; the call fails like any other and is tried again later.
   if (isAuthRetryableFetchError(error)) return null
   return data.session?.access_token ?? null
 }
@@ -91,7 +88,6 @@ const isSuspended = async (res: Response): Promise<boolean> =>
       .catch(() => ({}))) as { code?: string }
   ).code === 'account_suspended'
 
-/** Every call to the API: a 401 renews the token and resends once; refused twice, or suspended, the session ends. */
 const apiFetch = async (path: string, init: RequestInit = {}): Promise<Response> => {
   const send = (token: string | null) => fetch(`${API_BASE}${path}`, { ...init, headers: headersWith(token) })
   const token = await currentToken()
@@ -108,7 +104,6 @@ const apiFetch = async (path: string, init: RequestInit = {}): Promise<Response>
 }
 
 // ── Composable ──
-// One request at a time: screens and the sync asking together share it.
 let inFlight: Promise<void> | null = null
 
 const loadBooks = async () => {
@@ -121,7 +116,6 @@ const loadBooks = async () => {
   store.loading = true
   store.error = null
   try {
-    // no-cache: the browser asks with the ETag every time; an unchanged catalog is a 304 and its own copy comes back.
     const res = await apiFetch('/books', { cache: 'no-cache' })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
@@ -129,7 +123,6 @@ const loadBooks = async () => {
     store.books = raw.map(normalizeBook)
     store.savedAt = Date.now()
   } catch (e: unknown) {
-    // Offline the saved copy is the catalog, not an error; the banner already says there is no internet.
     if (!navigator.onLine && store.books.length > 0) return
     const raw = e instanceof Error ? e.message : String(e)
     store.error = raw || 'Não foi possível carregar os livros.'
@@ -141,7 +134,6 @@ const loadBooks = async () => {
 }
 
 export function useApi() {
-  /** The catalog from the API; the saved copy stays on screen meanwhile and when the platform is down. */
   const fetchBooks = (): Promise<void> => {
     inFlight ??= loadBooks().finally(() => {
       inFlight = null
@@ -152,7 +144,7 @@ export function useApi() {
   return { fetchBooks }
 }
 
-// ── Ações autenticadas ──
+// ── Signed-in calls ──
 export const verifyAuth = async (token: string) => {
   const res = await fetch(`${API_BASE}/auth/verify`, {
     method: 'POST',
@@ -163,8 +155,6 @@ export const verifyAuth = async (token: string) => {
   })
 
   if (!res.ok) {
-    // Surface the backend error so callers (and DevTools) get the real cause.
-    // Its status lets the callback tell a rejected link (4xx) from a platform that is down (5xx).
     throw await toApiError(res, 'Falha na verificação do token.', 'POST')
   }
 
@@ -241,7 +231,7 @@ export const getReadingCounts = (bookId: string) =>
     'Não foi possível carregar essa contagem.',
   )
 
-// ── Conta: formatos escondidos e permissões do próprio nível ──
+// ── Account ──
 export const getMe = () =>
   authedRequest<{
     user: AuthUser & { hidden_midias?: string[] }
@@ -263,7 +253,7 @@ export const saveMyFormats = (hiddenFormats: string[]) =>
     'Não foi possível salvar seus formatos.',
   )
 
-// ── Painel: permissões ──
+// ── Panel permissions ──
 export const getPermissions = () =>
   authedRequest<{ permissions: Permission[]; configurable: Partial<Record<Resource, Action[]>> }>(
     '/permissions',
@@ -278,11 +268,10 @@ export const savePermission = (role: Role, resource: Resource, actions: Action[]
     'Não foi possível salvar as permissões. Tente de novo.',
   )
 
-// ── Painel: livros, membros, histórico, capas ──
+// ── Panel books and members ──
 export const getPanelBooks = () =>
   authedRequest<AdminBook[]>('/books', { method: 'GET' }, 'Não foi possível carregar os livros. Tente de novo.')
 
-// Who a book can be credited to: accounts that linked a name and the placeholders nobody linked (user_id null).
 export const getPeople = () =>
   authedRequest<{ user_id: string | null; name: string }[]>(
     '/books/people',
@@ -297,7 +286,6 @@ export const getBookForEdit = (id: string) =>
     'Não foi possível abrir este livro para editar. Tente de novo.',
   )
 
-// The owner's own route for someone who cannot update every book; the panel route otherwise (the API decides).
 export const saveBook = (payload: Record<string, unknown>, target: { id?: string; asOwner?: boolean }) =>
   authedRequest<BookPayload>(
     target.asOwner ? `/users/me/books/${target.id}` : target.id ? `/books/${target.id}` : '/books',
@@ -346,7 +334,6 @@ export const getClaimHistory = (limit: number) =>
     'Não foi possível carregar o histórico. Tente de novo.',
   )
 
-// Saves nothing: the form takes what the person picks and saves it with the book.
 export const searchBookCandidates = (query: BookSearchQuery) =>
   authedRequest<{ source: BookSearchSource | null; candidates: BookCandidate[] }>(
     '/books/enrich/search',
@@ -354,7 +341,7 @@ export const searchBookCandidates = (query: BookSearchQuery) =>
     'Não foi possível buscar agora. Tente de novo.',
   )
 
-// ── Painel: autores, formatos, gêneros, subgêneros ──
+// ── Panel lists ──
 export const listEntities = (resource: string) =>
   authedRequest<SupportEntity[]>(`/${resource}`, { method: 'GET' }, 'Não foi possível carregar a lista. Tente de novo.')
 

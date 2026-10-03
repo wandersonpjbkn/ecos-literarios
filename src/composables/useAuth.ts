@@ -11,21 +11,9 @@ import { verifyAuth } from '@/composables/useApi'
 
 // ── Session resolution from URL ───────────────────────────────────
 
-/**
- * Resolves a Supabase session from URL parameters set by an email
- * confirmation or magic link. Handles the three formats produced by
- * Supabase Auth, in priority order:
- *   1. PKCE flow        — `?code=...`
- *   2. Token hash flow  — `?token_hash=...&type=...`
- *   3. Implicit flow    — `#access_token=...` (auto-parsed at client init)
- *
- * Returns the access token of the established session, or throws if no
- * valid credentials are present.
- */
 const resolveSessionFromUrl = async (): Promise<string> => {
   const url = new URL(window.location.href)
 
-  // 1. PKCE: exchange the auth code for a session.
   const code = url.searchParams.get('code')
   if (code) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
@@ -33,7 +21,6 @@ const resolveSessionFromUrl = async (): Promise<string> => {
     if (error?.code === 'user_banned') throw error
   }
 
-  // 2. Token hash: verify the OTP token hash explicitly.
   const tokenHash = url.searchParams.get('token_hash')
   const type = url.searchParams.get('type') as EmailOtpType | null
   if (tokenHash && type) {
@@ -42,17 +29,13 @@ const resolveSessionFromUrl = async (): Promise<string> => {
     if (error?.code === 'user_banned') throw error
   }
 
-  // 3. Implicit / pre-existing: client already parsed the hash, or a
-  //    persisted session is still active (e.g. user reloaded the page).
   const { data } = await supabase.auth.getSession()
   if (data.session) return data.session.access_token
 
   throw new Error('Link de acesso inválido ou expirado.')
 }
 
-// On /auth/callback both App (restoreSession) and the callback sync the same fresh session: one request serves both.
 let inFlightSync: { token: string; promise: Promise<void> } | null = null
-// "Sair" also fires SIGNED_OUT; this keeps it from reading as a session that ended on its own.
 let leaving = false
 
 export class CallbackError extends Error {
@@ -77,17 +60,14 @@ export function useAuth() {
       },
     })
 
-    // Supabase's text is English and technical; the screen only needs to know the link was asked for too soon (429).
     if (error) throw Object.assign(new Error(error.message), { tooSoon: error.status === 429 })
   }
 
-  // "platform" = valid session but the API did not answer (network or 5xx): a new link would not help.
   const handleCallback = async (): Promise<void> => {
     let accessToken: string
     try {
       accessToken = await resolveSessionFromUrl()
     } catch (err) {
-      // Supabase sends the link to a suspended account too; it refuses it here, when the link is used.
       throw new CallbackError((err as { code?: string }).code === 'user_banned' ? 'suspended' : 'link', err)
     }
     try {
@@ -159,7 +139,6 @@ export function useAuth() {
     }
   }
 
-  /** onEnded: the session ended without "Sair" (renewal refused, account suspended, another tab left). */
   const watchSession = (onEnded: (reason: SessionEndReason) => void): (() => void) => {
     const {
       data: { subscription },

@@ -6,7 +6,6 @@ import { useAuthStore, usePreferencesStore } from '@/stores'
 import { saveMyFormats } from '@/composables/useApi'
 import { useErrorReporter } from '@/composables/useErrorReporter'
 
-// A few toggles in a row become one save instead of one write per click.
 const SAVE_DELAY_MS = 800
 
 const sameList = (a: string[], b: string[]) => a.length === b.length && a.every((item) => b.includes(item))
@@ -16,7 +15,6 @@ export type FormatsSync = {
   stop: () => void
 }
 
-/** Hidden formats kept in the account (rules in BACKEND.md §2); started once in App.vue, fed by accountSync. */
 export function startFormatsSync(): FormatsSync {
   const auth = useAuthStore()
   const preferences = usePreferencesStore()
@@ -39,7 +37,6 @@ export function startFormatsSync(): FormatsSync {
     adopting = false
   }
 
-  // One save at a time: a change made while one is travelling goes right after it, never out of order.
   const save = async () => {
     const pending = preferences.pending
     if (!pending || pending.userId !== auth.user?._id) return
@@ -50,9 +47,7 @@ export function startFormatsSync(): FormatsSync {
     saving = true
     try {
       const kept = (await saveMyFormats(pending.list)).hidden_midias ?? []
-      // Someone else signed in while this travelled: the answer is the previous account's, not theirs.
       if (auth.user?._id !== pending.userId) return
-      // What the account holds now; a change made while this save travelled stays pending and goes next.
       accountList = [...kept]
       if (preferences.pending && sameList(preferences.pending.list, pending.list)) {
         preferences.pending = null
@@ -73,7 +68,6 @@ export function startFormatsSync(): FormatsSync {
     if (auth.user?._id !== userId) return
     if (preferences.pending?.userId === userId) return save()
     if (server === undefined) {
-      // Another account's list, or one chosen signed out, would leak into this one: it starts empty instead.
       if (preferences.owner !== userId) return adopt([])
       if (!preferences.hiddenFormats.length) return
       preferences.pending = { userId, list: [...preferences.hiddenFormats] }
@@ -82,7 +76,6 @@ export function startFormatsSync(): FormatsSync {
     adopt(server)
   }
 
-  // Sync flush: the change is marked pending the moment it happens, so closing the tab inside the delay loses nothing.
   const stopList = watch(
     () => preferences.hiddenFormats,
     (list) => {
@@ -101,7 +94,6 @@ export function startFormatsSync(): FormatsSync {
     { flush: 'sync' },
   )
 
-  // Another account's pending change stays stored for it and is never pushed into this one.
   const stopSession = watch(
     () => auth.user?._id,
     () => {
@@ -110,7 +102,6 @@ export function startFormatsSync(): FormatsSync {
     },
   )
 
-  // A save that failed offline stays pending; it goes as soon as the connection is back.
   const stopOnline = useEventListener(window, 'online', () => save())
 
   return {

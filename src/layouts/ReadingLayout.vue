@@ -1,9 +1,7 @@
 <template>
   <div class="app-wrapper">
-    <!-- Tab order follows the screen: top bar, then navigation, then the content; this link jumps straight there. -->
     <a href="#conteudo" class="skip-link">Ir para o conteúdo</a>
     <AppHeader />
-    <!-- On the phone the navigation is the bar at the bottom, so it comes after the content in the tab order too. -->
     <AppSidebar v-if="!isPhone" />
 
     <main id="conteudo" ref="content" class="app-main" tabindex="-1">
@@ -20,7 +18,6 @@
 </template>
 
 <script lang="ts">
-// Module scope: the scroll places survive a visit to an area frame (panel, Minha conta), which unmounts this one.
 const scrollPositions = new Map<string, number>()
 </script>
 
@@ -37,10 +34,8 @@ import { FRAME_HAS_RAIL } from '@/layouts/frame'
 const AppSidebar = defineAsyncComponent(() => import('@/layouts/AppSidebar.vue'))
 const BackTop = defineAsyncComponent(() => import('@/layouts/BackTop.vue'))
 
-// The frame of the reading screens (catalog, book, Meus livros, login): rail, top bar and the scrolling <main>.
 const route = useRoute()
 const router = useRouter()
-// The rail sits at the left edge: a drawer opens beside it.
 provide(FRAME_HAS_RAIL, true)
 const isPhone = useMediaQuery(useBreakpoints.isPhone)
 
@@ -51,7 +46,6 @@ const stopRemember = router.beforeEach((_, from) => {
 })
 onUnmounted(stopRemember)
 
-// Path only: filters live in the query, and toggling one must not scroll the catalog back to the top.
 watch(
   () => route.path,
   async () => {
@@ -63,7 +57,6 @@ watch(
       else content.value.scrollTo({ top: 0, behavior: 'smooth' })
     }, 350)
   },
-  // Also on mount: coming back from an area frame remounts this layout on a path it already knows.
   { immediate: true },
 )
 </script>

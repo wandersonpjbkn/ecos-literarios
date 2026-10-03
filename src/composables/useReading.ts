@@ -10,7 +10,6 @@ import { getMyReading, getReadingCounts, removeReading, saveReading } from '@/co
 import { useCanWrite } from '@/composables/useCanWrite'
 import { useErrorReporter } from '@/composables/useErrorReporter'
 
-/** The reader's list, loaded once per account: the book page and the shelves of Meus livros read the same copy. */
 export const loadMyReading = async (userId: string | undefined) => {
   const store = useReadingStore()
   if (!userId) return store.clear()
@@ -22,7 +21,6 @@ export const loadMyReading = async (userId: string | undefined) => {
   }
 }
 
-/** "Quero ler" / "Lido" for one book: the reader's own status, the totals, and the actions. */
 export function useReading(bookId: Ref<string | undefined>) {
   const router = useRouter()
 
@@ -47,7 +45,6 @@ export function useReading(bookId: Ref<string | undefined>) {
     }
   }
 
-  // Signed out: the button leads to the login and back to this book (BACKEND.md, contract of slice 5).
   const change = async (next: ReadingStatus | null) => {
     if (!bookId.value || !canWrite.value || pending.value) return
     if (!auth.isLoggedIn) {

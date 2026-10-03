@@ -137,7 +137,6 @@ import ListFooter from '@/components/ui/ListFooter.vue'
 import SearchBar from '@/components/ui/SearchBar.vue'
 import SectionHeader from '@/components/ui/SectionHeader.vue'
 
-// Segment and how many are open live in the URL (FilterChip.md), so going back keeps the list the admin was fixing.
 const permissions = usePermissionsStore()
 const bookForm = useBookForm()
 
@@ -147,7 +146,6 @@ const loading = ref(false)
 const loadError = ref('')
 const searchQuery = ref('')
 
-// The server decides; this only hides what it would refuse for this level (users/me).
 const canCreate = computed(() => permissions.can('books', 'create'))
 
 const summary = computed(() => {
@@ -195,7 +193,6 @@ const authorsOf = (book: AdminBook) => book.authors.map(resolveName)
 
 const isMissingField = (value?: string | null) => !value || !value.trim()
 
-// The fields a complete book has; the "Faltando" column and the "Completos" empty state both read this list.
 const FIELDS: { label: string; missing: (book: AdminBook) => boolean }[] = [
   { label: 'capa', missing: (b) => isMissingField(b.cover_url) },
   { label: 'ISBN', missing: (b) => isMissingField(b.isbn) },
@@ -249,7 +246,6 @@ const {
   inCurrent: segmentBooks,
 } = useSegments(SEGMENTS, books)
 
-// Two names are readable in a table cell; the rest becomes a count ("capa, ISBN e mais 3").
 const missingLabel = (book: AdminBook) => {
   const fields = missingFields(book)
   if (fields.length === 0) return 'nada'
@@ -257,7 +253,6 @@ const missingLabel = (book: AdminBook) => {
   return `${fields.slice(0, 2).join(', ')} e mais ${fields.length - 2}`
 }
 
-// A refresh after saving keeps the table on screen instead of swapping it for the spinner.
 const fetchBooks = async (quiet = false) => {
   if (!quiet) loading.value = true
   loadError.value = ''
@@ -277,18 +272,15 @@ const onSelectSuggestion = (suggestion: Suggestion) => {
   searchQuery.value = suggestion.main
 }
 
-// A removed row takes its "Editar" with it: focus goes to the list instead.
 const firstRow = () => table.value?.querySelector<HTMLElement>('[data-list-item]')
 const openCreate = (title = '') => bookForm.openAdd({ title, fallback: firstRow })
 const openEdit = (book: AdminBook) => bookForm.openEdit(book._id, { fallback: firstRow })
 
-// The panel keeps its own list (App.vue refreshes the catalog): a saved book reloads it, a removed one leaves it.
 watch(bookForm.lastChange, (change) => {
   if (change?.kind === 'removed') books.value = books.value.filter((b) => b._id !== change.id)
   else if (change) fetchBooks(true)
 })
 
-// The search is not in the URL, so a new term starts the list from the top here.
 watch(searchQuery, () => reset())
 
 onMounted(() => fetchBooks())
@@ -346,7 +338,6 @@ onMounted(() => fetchBooks())
     color: var(--color-text-secondary);
   }
 
-  // Wraps instead of cutting: "capa, sinopse e mais 3" is the reason to open the row.
   &__missing {
     min-width: 0;
     padding: var(--space-2) 0;
@@ -360,7 +351,6 @@ onMounted(() => fetchBooks())
   }
 }
 
-// Phone: each book becomes a card; the column name goes in front of the value.
 @media (max-width: $bp-phone-max) {
   .books-search {
     flex: 1 1 100%;
@@ -380,7 +370,6 @@ onMounted(() => fetchBooks())
     grid-column: 1;
   }
 
-  // The worded actions close the card, under the fields, instead of squeezing the title beside them.
   .books-table__actions {
     grid-row: auto;
     grid-column: 1 / -1;

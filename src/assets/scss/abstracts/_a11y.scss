@@ -1,4 +1,3 @@
-// Out of sight, still read by screen readers.
 @mixin visually-hidden {
   position: absolute;
   width: 1px;
@@ -11,7 +10,6 @@
   border: 0;
 }
 
-// A link inside text: color alone does not tell it apart, so it keeps the underline.
 @mixin text-link {
   color: var(--color-action-default);
   text-decoration: underline;

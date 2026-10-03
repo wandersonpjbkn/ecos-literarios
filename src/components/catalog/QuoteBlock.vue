@@ -47,7 +47,6 @@ const COLLAPSE_CHARS = 240
 
 const props = defineProps<{
   text: string
-  // Who mentioned the book; "Comentário" does not claim they wrote the text (QuoteBlock.md, slice 5).
   person: string
   isAuthor: boolean
   canWrite: boolean
@@ -82,7 +81,6 @@ const isLong = computed(() => props.text.length > COLLAPSE_CHARS)
     color: var(--color-text-subtle);
   }
 
-  // body-l: the one large body size of the system (QuoteBlock.md).
   &__text {
     margin: var(--space-3) 0 0;
     font-size: var(--font-size-body-l);

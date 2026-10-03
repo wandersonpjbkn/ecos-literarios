@@ -5,7 +5,6 @@ export type OptionMultiSelect =
   | {
       label: string
       value: string
-      // The bare name when the label carries more (a pending "Ana (autor novo)"): what typing is compared against.
       match?: string
     }
 
@@ -25,7 +24,6 @@ import CategoriesColors from '@/data/categoryColors.json'
 export interface Book {
   id: string
   titulo: string
-  // In the order the book lists them; a list shows the first.
   authors: string[]
   categoria: keyof typeof CategoriesColors
   midia: string
@@ -33,7 +31,6 @@ export interface Book {
   porque: string
   subgenreNames: string[]
   quem_user_id?: string
-  // The placeholder from the first load, when the book has one; `person` is the name shown.
   quem_nome?: string
 
   cover_url?: string
@@ -43,7 +40,6 @@ export interface Book {
   page_count?: number
   published_year?: number
   added_at?: string
-  // Where the book came from: the WhatsApp conversation (CSV import) or the site. Decided by the API.
 }
 
 export type ReadingStatus = 'quero_ler' | 'lido'
@@ -99,7 +95,6 @@ export interface SupportEntity {
 }
 
 export interface EntityCrudOptions {
-  /** URL path segment: 'autores', 'midias', 'categorias', 'subgeneros' */
   resource: string
 }
 
@@ -114,7 +109,7 @@ export interface AuthUser {
   role: UserRole
 }
 
-// Tipos da resposta da API
+// API responses
 
 export interface ApiPopulated {
   _id: string
@@ -145,7 +140,6 @@ export interface MyClaimStatus {
   claim_name: string | null
   claimed_books: number
   has_claim: boolean
-  // Only without a claim: the placeholders nobody has claimed, counted by the API.
   available_names?: string[]
   warning?: string
 }
@@ -203,7 +197,6 @@ export interface TabConfig {
   label: string
   resource: Extract<Resource, 'autores' | 'midias' | 'categorias' | 'subgeneros'>
   description: string
-  // For the sentences of this list: "Nenhum autor ainda", "Nome do autor".
   singular: string
 }
 
@@ -214,7 +207,6 @@ export interface ApiUser {
   name: string
   email: string
   role: Role
-  // Absent on accounts from before suspension existed: they are active.
   status?: AccountStatus
   created_at: string
   last_seen_at: string
@@ -228,7 +220,6 @@ export interface Permission {
 
 // Profile
 
-// Mirrors BookPayload from BookFormDrawer — needed to type the edit state.
 export interface BookForEdit {
   _id: string
   titulo: string
@@ -247,7 +238,6 @@ export interface BookForEdit {
   published_year?: number
 }
 
-/** One book the cover and data search found; nothing is saved until the book form is. */
 export interface BookCandidate {
   volume_id: string
   title?: string
@@ -258,7 +248,6 @@ export interface BookCandidate {
   isbn?: string
   page_count?: number
   published_year?: number
-  // As the source gives it ("pt-BR", "en", "por"); the screen shows the name.
   language?: string
 }
 

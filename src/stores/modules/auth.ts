@@ -18,7 +18,6 @@ export const useAuthStore = defineStore(
       token.value = accessToken
     }
 
-    // What login saved goes stale (a new level, an account recreated with another id): users/me brings the current one.
     const refreshUser = (current: AuthUser) => {
       if (user.value) user.value = current
     }
