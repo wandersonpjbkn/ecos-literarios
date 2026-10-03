@@ -146,16 +146,19 @@ A busca deixa de depender de um livro salvo e deixa de gravar sozinha. Quem grav
 
 ```http
 POST /books/enrich/search   ← { title, author, isbn? }
-                            → { source: "google_books" | "open_library", candidates: [...] }
+                            → { source: "google_books" | "open_library" | null, candidates: [...] }
+                            → 503 quando nenhuma das duas fontes respondeu (a vista mostra o V5)
 ```
 
 - Exige `books: create` **ou** `books: update` (quem cadastra e quem edita). Mantém o `enrichmentRateLimit`.
 - Até 5 candidatos (`maxResults=5` no Google, `limit=5` na Open Library). Cada um: `volume_id`, `title`, `authors`, `publisher`, `published_year`, `page_count`, `language`, `synopsis`, `cover_url`, `isbn`.
-- `language`: o Google devolve `volumeInfo.language` (código de duas letras); a Open Library, uma lista de códigos de três letras. O servidor devolve o código; o front mostra o nome ("Português").
-- Ordem das estratégias como hoje: ISBN (só se veio na consulta), título e autor em português, título e autor sem idioma, e a Open Library como reserva. Devolve os candidatos da primeira estratégia que achar algo.
+- `language`: o Google devolve `volumeInfo.language` por edição (`pt-BR`, `en`). A Open Library devolve a **obra**, com as línguas e os ISBNs de todas as edições; o servidor só devolve `language` e `isbn` dela quando há um só (um de vários seria de uma edição qualquer). O front mostra o nome ("Português").
+- Ordem das estratégias: ISBN (só se veio na consulta), título e autor em português, título e autor sem idioma, e a Open Library como reserva. Devolve os candidatos da primeira estratégia que achar algo, na ordem da fonte. Título e autor vão ao Google em texto simples: em 2026-10-03, com a chave, ele devolvia zero para qualquer consulta com `intitle:`, `inauthor:` ou `isbn:` (estudo `rca/2026-10-03-ecos-api-busca-de-capa-e-dados/`). A Open Library é pedida com `fields=`: sem isso não vêm ISBN, editora, primeira frase nem páginas.
 - `isbn` na consulta vem só do que a pessoa digitou. O ISBN que veio de uma busca anterior não é usado como chave (ver `isbn_source`).
 
 ### O que sai
+
+Cada item sai junto com quem ainda o usa, para nenhum commit deixar uma tela ou uma salvaguarda sem par: as duas rotas na 9g (com o `BookEnrichmentPanel`), a busca em lote e a trava manual na 9h (a trava protege a busca em lote até ela sair).
 
 - `POST /books/:id/enrich` e `POST /books/:id/enrich/apply`. Só o `useBookEnrichment` usava as duas.
 - A busca em lote: `POST /admin/books/enrich`, `GET /admin/books/enrich/status`, `GET /admin/books/enrich/history`, o modelo `EnrichmentRun` e o recurso `enrichment` (em `RESOURCES`, `CONFIGURABLE` e na semente). A seção 8 deixa de valer no item "Capas e sinopses vira permissão". A semente do boot apaga as linhas `enrichment` da coleção `Permission`.

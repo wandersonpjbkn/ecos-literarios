@@ -239,7 +239,7 @@ Aceite: do catálogo, da página de um livro e de Meus livros, adicionar não mu
 
 ### 9d · Servidor
 
-`BACKEND.md` §11: a busca nova por título e autor, com até 5 candidatos e o idioma; o fim de `/books/:id/enrich` e `/apply`; o fim de `manually_edited_at`; `isbn_source`; `cover_source` vindo do formulário. A busca em lote **não** sai aqui (é a 9h): os dois caminhos convivem até a vista nova existir.
+`BACKEND.md` §11: a busca nova por título e autor, com até 5 candidatos e o idioma; `isbn_source`; `cover_source` vindo do formulário; as buscas antigas passam a usar como chave só o ISBN confirmado. As rotas antigas saem na 9g e a trava `manually_edited_at` na 9h, junto com quem as usa.
 
 Aceite: a busca responde sem livro salvo; um livro com páginas editadas à mão aceita capa da busca no salvar seguinte; ISBN com origem `search` não é usado como chave.
 
@@ -259,13 +259,13 @@ Aceite: o resultado em inglês mostra "Inglês"; a sinopse aparece inteira no V3
 
 ### 9g · A linha no formulário
 
-`componentes/LinhaCapaEDados.md`: L0 a L4, no fim do essencial, largura inteira no computador. Sai o `BookEnrichmentPanel` e o aviso "Depois de salvar o livro…". Os valores que voltam da vista entram nos campos do formulário e vão no mesmo salvar, com `isbn_source` e `cover_source` quando for o caso.
+`componentes/LinhaCapaEDados.md`: L0 a L4, no fim do essencial, largura inteira no computador. Sai o `BookEnrichmentPanel` e o aviso "Depois de salvar o livro…", e, no servidor, `POST /books/:id/enrich` e `/apply`. Os valores que voltam da vista entram nos campos do formulário e vão no mesmo salvar, com `isbn_source` e `cover_source` quando for o caso.
 
 Aceite: no cadastro, a linha aparece antes de salvar e o botão habilita ao preencher título e autor; escolher e salvar grava capa e dados num salvar só; "Desfazer" esvazia só o que veio da busca; na edição de um livro sem capa, a linha diz o que falta.
 
 ### 9h · Fim da busca em lote
 
-Sai a seção "Capas e sinopses" do Painel do clube (`AdminEnrichment`, a rota e o item da lateral), a linha de Permissões e, no servidor, o que `BACKEND.md` §11 lista em "O que sai". Supera a fatia 8f. Quem cuida do acervo encontra livros sem capa pelo "Faltando algo" do painel e completa pela edição (L4).
+Sai a seção "Capas e sinopses" do Painel do clube (`AdminEnrichment`, a rota e o item da lateral), a linha de Permissões e, no servidor, a busca em lote, o recurso `enrichment` e a trava `manually_edited_at` (`BACKEND.md` §11, "O que sai"). Supera a fatia 8f. Quem cuida do acervo encontra livros sem capa pelo "Faltando algo" do painel e completa pela edição (L4).
 
 Aceite: nenhuma tela, rota ou permissão de busca em lote; a matriz de Permissões não mostra mais a linha.
 
