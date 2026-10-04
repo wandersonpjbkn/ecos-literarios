@@ -56,15 +56,12 @@ const placeholder = computed(() =>
   searchesMyBooks.value
     ? 'Buscar nos meus livros'
     : isPhone.value
-      ? 'Título, autor ou quem mencionou'
-      : 'Buscar por título, autor ou quem mencionou',
+      ? 'Título, autor ou comentário'
+      : 'Buscar por título, autor ou comentário',
 )
 
-// One primary per fold: on the open book that is "Guardar em Quero ler" (Detail.desktop).
-// Primary only where adding is the page's own action; elsewhere the page's primary would get a rival (Button.md).
 const addVariant = computed(() => (route.name === 'catalog-books' ? 'primary' : 'secondary'))
 
-// Navegacao: desktop opens with the search focused; only on app open, so returning from a book keeps focus.
 onMounted(async () => {
   await router.isReady()
   if (route.name === 'catalog-books' && !isPhone.value) search.value?.focus()
@@ -79,7 +76,6 @@ onMounted(async () => {
   background-color: var(--color-surface-default);
   border-bottom: 1px solid var(--color-border-default);
 
-  // Phone (Catalog.mobile): brand and account on top, search below.
   &__inner {
     display: grid;
     max-width: var(--page-max);
@@ -93,7 +89,6 @@ onMounted(async () => {
     align-items: center;
     gap: var(--space-3);
 
-    // Desktop (Main): search on the left, primary action on the right; brand and account live in the rail.
     @media (min-width: $bp-tablet-min) {
       grid-template-columns: minmax(0, var(--header-search-max)) 1fr auto;
       grid-template-areas: 'search . add';
@@ -113,7 +108,6 @@ onMounted(async () => {
     grid-area: search;
   }
 
-  // On desktop the account sits at the rail foot, away from "Adicionar um livro".
   &__user {
     grid-area: user;
 

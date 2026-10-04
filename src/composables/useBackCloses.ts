@@ -1,13 +1,26 @@
 import { onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
-/** Back closes an open side panel; closing drops the entry opening added, unless the URL changed meanwhile. */
-export function useBackCloses(open: () => boolean, onClose: () => void) {
+type Level = { onPop: () => void }
+
+const levels: Level[] = []
+const ownPops: Array<() => void> = []
+
+const onPopState = () => {
+  const own = ownPops.shift()
+  if (own) return own()
+  levels.at(-1)?.onPop()
+}
+
+export function useBackCloses(
+  open: () => boolean,
+  onClose: () => void,
+  mayClose: () => boolean | Promise<boolean> = () => true,
+) {
   const router = useRouter()
 
-  let armed = false
+  let level: Level | null = null
   let openedAt = ''
-  // One step to take once the panel's entry is gone (a link inside it); a newer one replaces it.
   let afterClose: (() => void) | null = null
 
   const runAfterClose = () => {
@@ -16,18 +29,22 @@ export function useBackCloses(open: () => boolean, onClose: () => void) {
     step?.()
   }
 
-  const onPop = () => {
-    if (!armed) return
-    armed = false
-    onClose()
+  const leave = () => {
+    if (!level) return
+    levels.splice(levels.indexOf(level), 1)
+    level = null
+    if (!levels.length) window.removeEventListener('popstate', onPopState)
   }
 
-  const disarm = () => {
-    armed = false
-    window.removeEventListener('popstate', onPop)
+  const onPop = async () => {
+    if (await mayClose()) {
+      leave()
+      onClose()
+      return
+    }
+    history.pushState(history.state, '')
   }
 
-  /** Closes the panel, then runs `step` once its history entry is gone (right away when there is none). */
   const closeThen = (step: () => void) => {
     afterClose = step
     if (open()) onClose()
@@ -38,31 +55,34 @@ export function useBackCloses(open: () => boolean, onClose: () => void) {
     if (isOpen) {
       openedAt = router.currentRoute.value.fullPath
       history.pushState(history.state, '')
-      armed = true
-      window.addEventListener('popstate', onPop)
+      if (!levels.length) window.addEventListener('popstate', onPopState)
+      level = { onPop }
+      levels.push(level)
       return
     }
     const unchanged = router.currentRoute.value.fullPath === openedAt
-    const wasArmed = armed
-    disarm()
-    if (!(wasArmed && unchanged)) return runAfterClose()
-    window.addEventListener('popstate', runAfterClose, { once: true })
+    const wasOpen = level !== null
+    leave()
+    if (!(wasOpen && unchanged)) return runAfterClose()
+    if (!levels.length) window.addEventListener('popstate', onPopState)
+    ownPops.push(() => {
+      if (!levels.length) window.removeEventListener('popstate', onPopState)
+      runAfterClose()
+    })
     history.back()
   })
 
-  // A link inside the panel went to another page: the panel just closes, the history is the router's again.
   watch(
     () => router.currentRoute.value.path,
     (path, before) => {
-      if (!armed || path === before) return
-      disarm()
+      if (!level || path === before) return
+      leave()
       onClose()
     },
   )
 
   onBeforeUnmount(() => {
-    disarm()
-    window.removeEventListener('popstate', runAfterClose)
+    leave()
   })
 
   return { closeThen }

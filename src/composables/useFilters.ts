@@ -2,25 +2,24 @@ import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import { useRoute, useRouter, type LocationQueryRaw, type RouteLocationRaw } from 'vue-router'
 
+import { matchesSearch, titleSuggestions } from '@/data/bookSearch'
 import type { Book, BookSortOrder, FilterKey, Options } from '@/types'
 
 import { useBooksStore, usePreferencesStore } from '@/stores'
 
 import { useUtils } from '@/composables/useUtils'
 
-const FILTER_KEYS: FilterKey[] = ['midia', 'categoria', 'subgeneros', 'quem', 'autor', 'tamanho']
+const FILTER_KEYS: FilterKey[] = ['midia', 'categoria', 'subgenres', 'person', 'authors', 'size']
 
-// Query names are part of links already shared in the club group: renaming one breaks them.
 const QUERY_PARAM: Record<FilterKey, string> = {
   midia: 'midia',
   categoria: 'genero',
-  subgeneros: 'subgenero',
-  quem: 'quem',
-  autor: 'autor',
-  tamanho: 'tamanho',
+  subgenres: 'subgenero',
+  person: 'quem',
+  authors: 'autor',
+  size: 'tamanho',
 }
 
-// `phrase` completes "Nenhum livro …" in the empty state (EmptyState.md: the combination said in Portuguese).
 const SIZES: { slug: string; label: string; phrase: string; match: (book: Book) => boolean }[] = [
   {
     slug: 'curto',
@@ -51,37 +50,34 @@ const SIZES: { slug: string; label: string; phrase: string; match: (book: Book) 
 const orList = (values: string[]) => values.join(' ou ')
 const inSentence = (value: string) => (value === value.toUpperCase() ? value : value.toLowerCase())
 
-/** The filters as one sentence; "mencionado" agrees with "livro", since the data holds no gender. */
 export const describeSelection = (selection: Options): string => {
-  const kinds = [...selection.categoria, ...selection.subgeneros].map(inSentence)
+  const kinds = [...selection.categoria, ...selection.subgenres].map(inSentence)
   const formats = selection.midia.map(inSentence)
   const parts = [
     'Nenhum livro',
     kinds.length && `de ${orList(kinds)}`,
     formats.length && `em ${orList(formats)}`,
-    selection.tamanho.length && orList(selection.tamanho.map((label) => SIZES.find((s) => s.label === label)!.phrase)),
-    selection.autor.length && `de ${orList(selection.autor)}`,
-    selection.quem.length && `mencionado por ${orList(selection.quem)}`,
+    selection.size.length && orList(selection.size.map((label) => SIZES.find((s) => s.label === label)!.phrase)),
+    selection.authors.length && `de ${orList(selection.authors)}`,
+    selection.person.length && `mencionado por ${orList(selection.person)}`,
   ]
   return `${parts.filter(Boolean).join(' ')}.`
 }
 
 const valuesOf = (book: Book, key: FilterKey): string[] => {
-  if (key === 'tamanho') return SIZES.filter((size) => size.match(book)).map((size) => size.label)
-  if (key === 'subgeneros') return book.subgenerosArr ?? []
+  if (key === 'size') return SIZES.filter((size) => size.match(book)).map((size) => size.label)
+  if (key === 'subgenres') return book.subgenreNames ?? []
+  if (key === 'authors') return book.authors ?? []
   const value = book[key]
   return value ? [value] : []
 }
 
 const emptySelection = (): Options => Object.fromEntries(FILTER_KEYS.map((key) => [key, []])) as unknown as Options
 
-/** OR inside a group, AND across groups; the format preference only applies when the URL does not pick a format. */
-const applyFilters = (books: Book[], selection: Options, search: string, hiddenMidias: string[]) => {
-  const q = search.trim().toLowerCase()
+const applyFilters = (books: Book[], selection: Options, search: string, hiddenFormats: string[]) => {
   return books.filter((book) => {
-    if (q && ![book.titulo, book.autor, book.quem, book.porque].some((field) => field?.toLowerCase().includes(q)))
-      return false
-    if (!selection.midia.length && hiddenMidias.includes(book.midia)) return false
+    if (!matchesSearch(book, search)) return false
+    if (!selection.midia.length && hiddenFormats.includes(book.midia)) return false
     return FILTER_KEYS.every(
       (key) => !selection[key].length || valuesOf(book, key).some((value) => selection[key].includes(value)),
     )
@@ -92,7 +88,7 @@ export function useFilters() {
   const route = useRoute()
   const router = useRouter()
 
-  const { hiddenMidias } = storeToRefs(usePreferencesStore())
+  const { hiddenFormats } = storeToRefs(usePreferencesStore())
 
   const { slugify } = useUtils()
 
@@ -104,7 +100,7 @@ export function useFilters() {
       Object.fromEntries(
         FILTER_KEYS.map((key) => [
           key,
-          key === 'tamanho'
+          key === 'size'
             ? SIZES.map((size) => size.label)
             : [...new Set(books.value.flatMap((book) => valuesOf(book, key)))].sort((a, b) =>
                 a.localeCompare(b, 'pt-BR'),
@@ -123,7 +119,6 @@ export function useFilters() {
     return counts as Record<FilterKey, Record<string, number>>
   })
 
-  // ── Selection lives in the URL; unknown slugs are ignored ───────
   const selected = computed(
     (): Options =>
       Object.fromEntries(
@@ -146,32 +141,22 @@ export function useFilters() {
     },
   })
 
-  const filtered = computed(() => applyFilters(books.value, selected.value, search.value, hiddenMidias.value))
+  const filtered = computed(() => applyFilters(books.value, selected.value, search.value, hiddenFormats.value))
 
-  /** Books left out only because of the format preference, per hidden format. */
   const hiddenByPreference = computed(() => {
     if (selected.value.midia.length) return []
     const wouldShow = applyFilters(books.value, selected.value, search.value, [])
-    return hiddenMidias.value
-      .map((midia) => ({ midia, count: wouldShow.filter((book) => book.midia === midia).length }))
+    return hiddenFormats.value
+      .map((format) => ({ format, count: wouldShow.filter((book) => book.midia === format).length }))
       .filter((entry) => entry.count > 0)
   })
 
   const hasFilters = computed(() => FILTER_KEYS.some((key) => selected.value[key].length > 0))
 
-  const searchSuggestions = computed(() => {
-    if (!search.value.trim() || search.value.length < 2) return []
-
-    const q = search.value.toLowerCase()
-
-    return books.value
-      .filter((book) => book.titulo?.toLowerCase().includes(q))
-      .map((book) => ({ id: book.id, main: book.titulo, sub: book.autor }))
-      .slice(0, 8)
-  })
+  const searchSuggestions = computed(() => titleSuggestions(books.value, search.value))
 
   const toSlug = (key: FilterKey, value: string) =>
-    key === 'tamanho' ? (SIZES.find((size) => size.label === value)?.slug ?? '') : slugify(value)
+    key === 'size' ? (SIZES.find((size) => size.label === value)?.slug ?? '') : slugify(value)
 
   const queryFor = (selection: Options): LocationQueryRaw => {
     const query: LocationQueryRaw = { ...route.query }
@@ -191,18 +176,15 @@ export function useFilters() {
     }
   }
 
-  /** The catalog filtered by one value, for links outside the catalog (the open book). */
   const catalogLink = (key: FilterKey, value: string): RouteLocationRaw => ({
     name: 'catalog-books',
     query: { [QUERY_PARAM[key]]: toSlug(key, value) },
   })
 
-  /** Location with one value toggled, for filters rendered as real links. */
   const hrefToggling = (key: FilterKey, value: string): RouteLocationRaw => ({
     query: queryFor(withToggled(key, value)),
   })
 
-  /** `ordem` comes along when the drawer also holds the sort (mobile); `replace` keeps one history entry per drawer visit. */
   const apply = (selection: Options, ordem?: BookSortOrder, replace = false) => {
     const query = { ...queryFor(selection), ...(ordem ? { ordem } : {}) }
     return replace ? router.replace({ query }) : router.push({ query })
@@ -214,8 +196,10 @@ export function useFilters() {
     return router.push({ query })
   }
 
-  /** Books a selection opens from a link (no search, format preference in force), so a shelf count matches its page. */
-  const booksFor = (selection: Options) => applyFilters(books.value, selection, '', hiddenMidias.value)
+  const filteredIgnoring = (key: FilterKey) =>
+    applyFilters(books.value, { ...selected.value, [key]: [] }, search.value, hiddenFormats.value)
+
+  const booksFor = (selection: Options) => applyFilters(books.value, selection, '', hiddenFormats.value)
 
   return {
     emptySelection,
@@ -230,6 +214,7 @@ export function useFilters() {
     apply,
     clearAll,
     filtered,
+    filteredIgnoring,
     booksFor,
     hiddenByPreference,
     searchSuggestions,

@@ -19,13 +19,11 @@ import UserAvatar from '@/components/ui/UserAvatar.vue'
 
 withDefaults(
   defineProps<{
-    // "rail": at the foot of the desktop rail, dressed like the other rail items; "header": the phone header.
     placement?: 'header' | 'rail'
   }>(),
   { placement: 'header' },
 )
 
-// The word shows next to the icon everywhere, the phone header included: no label depends on reading an icon.
 const store = useAuthStore()
 </script>
 
@@ -65,12 +63,10 @@ const store = useAuthStore()
   }
 }
 
-// Same shape and hover as Catálogo, Meus livros and Adicionar right above it (AppSidebar).
 .user-menu--rail .user-btn {
   width: 100%;
   min-height: var(--rail-item);
   flex-direction: column;
-  // Thinner padding keeps the taller avatar in the rail row; none on the sides keeps "Minha conta" on one line.
   padding: var(--space-1) 0;
   white-space: nowrap;
 

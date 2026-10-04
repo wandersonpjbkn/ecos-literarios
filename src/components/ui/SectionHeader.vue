@@ -17,7 +17,6 @@ defineProps<{
 </script>
 
 <style lang="scss" scoped>
-// Page titles share one size across the app (catalog, Meus livros, panel, Minha conta): 1.375rem, 700.
 .section {
   &__header {
     display: flex;

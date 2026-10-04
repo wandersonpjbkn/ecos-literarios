@@ -1,13 +1,9 @@
 import { computed, ref, type Ref } from 'vue'
 
-// Below this a touch is still a tap; past it the grip captures the pointer, so "Fechar" gets no click.
 const START_PX = 8
-// Share of the sheet's height that closes it on release.
 const CLOSE_SHARE = 0.25
-// A flick this fast closes it even when short.
 const FLICK_PX_PER_MS = 0.5
 
-/** Drag a bottom sheet down by its handle or header; past a quarter of its height, or flicked, it closes. */
 export function useSheetDrag(panel: Ref<HTMLElement | null>, enabled: () => boolean, onClose: () => void) {
   const offset = ref(0)
   const dragging = ref(false)
@@ -18,9 +14,10 @@ export function useSheetDrag(panel: Ref<HTMLElement | null>, enabled: () => bool
   let lastT = 0
   let speed = 0
 
-  // While the finger moves the sheet follows it at once; on release the stylesheet's transition takes it back.
   const style = computed(() =>
-    offset.value ? { transform: `translateY(${offset.value}px)`, transition: dragging.value ? 'none' : undefined } : undefined,
+    offset.value
+      ? { transform: `translateY(${offset.value}px)`, transition: dragging.value ? 'none' : undefined }
+      : undefined,
   )
 
   const onPointerdown = (event: PointerEvent) => {

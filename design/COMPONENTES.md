@@ -1,6 +1,6 @@
 # Componentes
 
-Dez componentes, um arquivo cada em `componentes/`. Cada um traz as regras, os estados
+Onze componentes, um arquivo cada em `componentes/`. Cada um traz as regras, os estados
 (inclusive o vazio) e o que o consumidor precisa fornecer. Os previews ao vivo estão no
 design system; aqui está o texto, que é o que decide implementação.
 
@@ -16,6 +16,7 @@ design system; aqui está o texto, que é o que decide implementação.
 | [EmptyState](componentes/EmptyState.md) | Sem resultado, sem conteúdo, fora do ar | 6 |
 | [NavRail](componentes/NavRail.md) | Os três destinos, no desktop | 3 |
 | [TabBar](componentes/TabBar.md) | Os mesmos três, no celular | 3 |
+| [Avatar](componentes/Avatar.md) | A inicial de quem é do clube, e a da sua conta | 8g |
 
 ## Controles de formulário
 
@@ -43,6 +44,7 @@ Todo campo de formulário (`AppField`, `MultiSelect`, o campo do `ComboSelect`) 
 - `ConfirmModal`: diálogo de confirmação. O foco começa em "Cancelar", Tab fica dentro, Esc fecha e o foco volta ao botão que abriu; o erro aparece dentro do diálogo.
 - `AppDrawer`: a moldura do FilterDrawer para qualquer painel lateral: ao lado do trilho no desktop, folha de baixo no celular. Trava a rolagem da página enquanto está aberta. Fecha por "Fechar", pelo fundo, por Esc, pelo Voltar e, no celular, arrastando a alça ou o cabeçalho para baixo (`useSheetDrag`). Hoje é usada pela gaveta de filtro, pelo formulário do livro e pelas seções das áreas no celular.
 - `SectionHeader` e `BookFormDrawer`: servem o painel, o perfil e a página do livro.
+- `ListTabs`: abas que trocam de lista, com a lista na URL (`?lista=`), setas, Home e End, e contagem opcional. Aba troca de lista; pílula (`FilterChip`) filtra dentro dela. Hoje: Autores e gêneros no painel e as prateleiras de Meus livros.
 - `useDialogFocus` e `useLoadMore`: foco de diálogo e "Ver mais" com a quantidade na URL, os mesmos em todas as telas.
 
 `PanelPagination` saiu na fatia 7, e o "Ver mais" passou a valer no app inteiro ([ListFooter](componentes/ListFooter.md)).
@@ -101,6 +103,16 @@ Nenhum componente aceita cor por prop. A cor vem do token, e o gênero do livro 
 escolhe a tinta da capa. Um `color="blue"` em qualquer assinatura é o começo do fim da
 regra de que azul quer dizer clicável.
 
+## Link dentro de texto
+
+Azul sozinho não basta quando o link está no meio de uma frase: quem não distingue a cor, ou
+lê numa tela ruim, vê só texto. Link dentro de texto corrido usa o mixin `text-link`
+(`abstracts/_a11y.scss`): azul de ação, sublinhado e foco visível. Hoje: os links de fonte
+do formulário de livro, "Vincular meu nome" em Meus livros e gênero e formato na ficha do livro.
+
+Link de ação com ícone (voltar, ver todos, onde encontrar) não leva sublinhado: o ícone e a
+posição já dizem que é clicável.
+
 ## Nenhum valor solto
 
 Todo valor visual vem de token (`src/assets/scss/themes/_ecos.scss`): cor, raio, tamanho e
@@ -152,3 +164,14 @@ outro arquivo. A tela chama a função e mostra o erro com `errorText`.
 **Caixa de marcar: exceção documentada.** Marcada, a caixa (e o rádio) é preenchida com `action` e tique branco. É a única exceção à regra "azul cheio só em botão", e é de propósito: é a convenção de todo celular e navegador, e para quem não é nativo digital reconhecer vale mais que a pureza da regra. A regra continua valendo para áreas: chip, linha e item selecionados usam `action-soft` com borda.
 
 **Largura nas áreas.** Em Minha conta e nas seções de formulário do painel, o conteúdo tem largura máxima: `--form-max` para campos, `--text-column` para linhas de escolha com contagem ou ação à direita. Tabela de várias colunas usa a largura toda.
+
+**Acento da voz (8g).** Uma segunda cor, que nunca clica. Tokens novos no tema, ao lado dos `--alert-*`:
+
+```
+--voice-soft: #FBEFF4;  /* fundo do monograma */
+--voice-line: #EFCADB;  /* borda do monograma */
+--voice-mark: #C25E88;  /* estrela e ícone: 4,0:1, só objeto gráfico */
+--voice-ink:  #8A3A5C;  /* texto: 7,4:1 sobre branco, 6,6:1 sobre voice-soft */
+```
+
+Três lugares, e mais nenhum: a estrela do Destaque do clube (`CoverBlock`), o monograma de pessoa do clube (`UserAvatar kind="pessoa"`) e o rótulo do eco da semana (`EcoCard`). Sempre do tamanho do objeto: nenhum fundo, faixa ou borda de bloco em rosa, e nunca em botão, link, chip ou item selecionado. Medido nas telas do estudo: 0,1% da área, contra 1,1–1,7% de azul. Passou de 1% em uma tela, virou tema. O vermelho destrutivo fica a 28° de matiz do rosa: os dois não dividem tela.

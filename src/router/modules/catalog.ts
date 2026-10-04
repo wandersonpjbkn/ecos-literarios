@@ -1,6 +1,5 @@
 import type { RouteLocation, RouteRecordRaw } from 'vue-router'
 
-// Old per-filter pages were shared in the club group; they keep their names and land on the catalog query.
 const toCatalogQuery = (param: string) => (to: RouteLocation) => ({
   path: '/',
   query: { [param]: String(to.params.slug) },

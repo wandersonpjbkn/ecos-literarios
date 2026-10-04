@@ -1,7 +1,6 @@
 <template>
   <AppDrawer :open="open" title="Filtrar" title-id="filter-drawer-title" class="filter-drawer" @close="close">
     <div ref="panel" class="filter-drawer__body">
-      <!-- Phone only: the page hides the sort (see BooksView) -->
       <fieldset v-if="isPhone" class="filter-drawer__group">
         <legend class="filter-drawer__legend">Ordenar</legend>
         <CheckRow
@@ -53,13 +52,13 @@
           <p class="filter-drawer__hint">Desmarque o que você não lê. {{ keptWhere }}</p>
 
           <CheckRow
-            v-for="midia in midias"
-            :key="midia"
+            v-for="format in formats"
+            :key="format"
             class="filter-drawer__row"
-            :label="midia"
-            :count="optionCounts.midia[midia]"
-            :checked="!hiddenMidias.includes(midia)"
-            @change="preferences.toggleMidia(midia)"
+            :label="format"
+            :count="optionCounts.midia[format]"
+            :checked="!hiddenFormats.includes(format)"
+            @change="preferences.toggleFormat(format)"
           />
         </fieldset>
       </template>
@@ -95,19 +94,17 @@ import LiveStatus from '@/components/ui/LiveStatus.vue'
 
 type Group = {
   title: string
-  key?: Exclude<FilterKey, 'midia' | 'autor'>
+  key?: Exclude<FilterKey, 'midia' | 'authors'>
   more?: [string, string, 'o' | 'a']
-  // Long lists (100+ subgenres) become a combobox: browsable, and typing narrows by word start.
   searchable?: boolean
 }
 
-// [plural, singular, article]: "Mostrar as outras 8 pessoas" / "Mostrar o outro gênero".
 const GROUPS: Group[] = [
   { title: 'Gênero', key: 'categoria', more: ['gêneros', 'gênero', 'o'] },
-  { title: 'Subgênero', key: 'subgeneros', searchable: true },
-  { title: 'Tamanho', key: 'tamanho' },
+  { title: 'Subgênero', key: 'subgenres', searchable: true },
+  { title: 'Tamanho', key: 'size' },
   { title: 'O que você quer ver' },
-  { title: 'Quem mencionou', key: 'quem', more: ['pessoas', 'pessoa', 'a'] },
+  { title: 'Quem mencionou', key: 'person', more: ['pessoas', 'pessoa', 'a'] },
 ]
 
 const COLLAPSED_OPTIONS = 6
@@ -123,7 +120,7 @@ const emit = defineEmits<{
 }>()
 
 const preferences = usePreferencesStore()
-const { hiddenMidias } = storeToRefs(preferences)
+const { hiddenFormats } = storeToRefs(preferences)
 const auth = useAuthStore()
 
 const { emptySelection, options, optionCounts, selected, withToggled, apply, filtered } = useFilters()
@@ -138,9 +135,8 @@ const keptWhere = computed(() =>
   auth.isLoggedIn ? 'A escolha fica guardada na sua conta.' : 'A escolha fica guardada neste aparelho.',
 )
 
-const midias = computed(() => sortedOptions('midia'))
+const formats = computed(() => sortedOptions('midia'))
 
-// With nothing left the button cannot promise books: it closes, and the line above it says why.
 const resultLabel = computed(() => {
   const n = filtered.value.length
   if (n === 0) return 'Fechar'
@@ -156,9 +152,8 @@ const byCount = (key: FilterKey) => (a: string, b: string) =>
   (optionCounts.value[key][b] ?? 0) - (optionCounts.value[key][a] ?? 0) || a.localeCompare(b, 'pt-BR')
 
 const sortedOptions = (key: FilterKey) =>
-  key === 'tamanho' ? options.value[key] : [...options.value[key]].sort(byCount(key))
+  key === 'size' ? options.value[key] : [...options.value[key]].sort(byCount(key))
 
-// A checked option is never hidden behind "Mostrar os outros".
 const visibleOptions = (group: Group) => {
   const all = sortedOptions(group.key!)
   if (!group.more) return all
@@ -177,7 +172,6 @@ const moreLabel = (group: Group) => {
     : `Mostrar ${article}s outr${article}s ${n} ${plural}`
 }
 
-// Live (no "apply" step): every change replaces the entry opening added (useBackCloses), so one Back undoes the visit.
 const change = (selection: Options, ordem?: BookSortOrder) => apply(selection, ordem, true)
 
 const toggle = (key: FilterKey, value: string) => change(withToggled(key, value))
@@ -186,7 +180,6 @@ const changeOrder = (order: BookSortOrder) => change(selected.value, order)
 
 const close = () => emit('close')
 
-// The "show more" button disappears once clicked; focus goes to the first revealed option instead of the page.
 const showAll = async (key: FilterKey) => {
   expanded.value.push(key)
   await nextTick()
@@ -202,7 +195,6 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-// The frame (veil, side panel or bottom sheet, "Fechar", focus, Back) is AppDrawer's; this is only what is inside.
 .filter-drawer {
   &__body {
     margin: 0 calc(-1 * var(--space-6));
@@ -218,7 +210,6 @@ watch(
     }
   }
 
-  // Floated so the legend leaves the fieldset border instead of sitting on it.
   &__legend {
     float: left;
     width: 100%;
@@ -235,7 +226,6 @@ watch(
     color: var(--color-text-subtle);
   }
 
-  // The legend floats: a row must start below it.
   &__row {
     clear: both;
   }

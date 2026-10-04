@@ -4,13 +4,11 @@ import { useRoute, type RouteLocationRaw } from 'vue-router'
 export type SegmentOption<V extends string, T> = {
   value: V
   label: string
-  // Absent only on the default segment, which leaves ?mostrar= out of the URL.
   query?: string
   test: (item: T) => boolean
   empty: { title: string; text?: string }
 }
 
-/** The chips over a list (?mostrar=): the current one, a count per chip, the link to each and its items. */
 export function useSegments<V extends string, T>(options: SegmentOption<V, T>[], items: Ref<T[]>) {
   const fallback = options.find((option) => !option.query)!
 

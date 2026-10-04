@@ -19,7 +19,7 @@
       --badge-#{$key}-text-color: #{map.get($val, 'ink')};
     }
 
-    // Superfícies e Texto
+    // Surfaces and text
     --color-background-default: #{map.get($semantics, 'bg')};
     --color-background-subtle: #{map.get($semantics, 'bg-subtle')};
     --color-surface-default: #{map.get($semantics, 'surface')};
@@ -32,42 +32,37 @@
     --color-text-disabled: #{map.get($semantics, 'muted-light')};
     --color-text-default-rgb: #{get-rgb(map.get($semantics, 'ink'))};
 
-    // Ações Primárias
+    // Primary actions
     --color-action-default: #{map.get($actions, 'primary')};
     --color-action-default-hover: #{map.get($actions, 'primary-hover')};
     --color-action-background-subtle: #{map.get($actions, 'primary-light')};
     --color-action-border-subtle: #{map.get($actions, 'primary-muted')};
     --color-action-default-rgb: #{get-rgb(map.get($actions, 'primary'))};
-    // Text and icons over an action fill, and over the dark toast.
     --color-on-action: #{map.get($semantics, 'surface')};
     --color-on-inverse: #{map.get($semantics, 'surface')};
 
-    // Ações Secundárias
+    // Secondary actions
     --color-secondary-default: #{map.get($actions, 'secondary')};
     --color-secondary-default-hover: #{map.get($actions, 'secondary-hover')};
     --color-secondary-background-subtle: #{map.get($actions, 'secondary-light')};
     --color-secondary-text-default: #{map.get($actions, 'secondary-text')};
 
-    // Bordas
+    // Borders
     --color-border-default: #{map.get($borders, 'default')};
     --color-border-strong: #{map.get($borders, 'strong')};
     --color-border-focus: #{map.get($borders, 'focus')};
 
-    // Header e Globais
+    // Header and globals
     --color-header-bg: #{map.get($config, 'header-bg')};
 
-    // ── context: — (global)  ──────────────────────────────────────
-    // object: shadow  ·  modifier: sm | default | lg | xl (scale)
     --shadow-sm: #{$shadow-sm};
     --shadow-default: #{$shadow};
     --shadow-lg: #{$shadow-lg};
     --shadow-xl: #{$shadow-xl};
 
-    // object: font  ·  type: family  ·  scale: display | body
     --font-family-display: #{$font-display};
     --font-family-body: #{$font-body};
 
-    // object: motion  ·  type: transition  ·  scale: default
     --motion-transition-default: #{$transition};
   }
 }

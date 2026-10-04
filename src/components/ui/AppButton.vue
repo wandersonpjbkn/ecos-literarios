@@ -22,7 +22,6 @@ import BasePill, { type PillTone } from '@/components/ui/BasePill.vue'
 
 type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
 
-// Button.md weights on the shared pill; "outline" is a second action on a screen that spent its primary (Filtrar).
 const TONE: Record<Variant, PillTone> = {
   primary: 'primary',
   secondary: 'neutral',
@@ -31,7 +30,6 @@ const TONE: Record<Variant, PillTone> = {
   danger: 'danger',
 }
 
-// Leading space: without it a screen reader hears the label and the note as one word.
 const EXTERNAL_NOTE = ' (abre em outra aba)'
 
 const props = withDefaults(
@@ -39,7 +37,6 @@ const props = withDefaults(
     variant?: Variant
     size?: 'md' | 'lg'
     to?: RouteLocationRaw
-    // Outside the app (WhatsApp, stores): opens in a new tab.
     href?: string
     type?: 'button' | 'submit'
     disabled?: boolean
@@ -47,17 +44,14 @@ const props = withDefaults(
   { variant: 'secondary', size: 'lg', to: undefined, href: undefined, type: 'button', disabled: false },
 )
 
-// A disabled destination renders as a disabled button: a link cannot be disabled.
 const isLink = computed(() => !!props.to && !props.disabled)
 const isExternal = computed(() => !!props.href && !props.disabled)
-// Only for external links: an explicit href="undefined" would override the one RouterLink builds (no href, no Tab).
 const externalAttrs = computed(() =>
   isExternal.value ? { href: props.href, target: '_blank', rel: 'noopener noreferrer' } : {},
 )
 </script>
 
 <style lang="scss" scoped>
-// Button.md: on a phone every button is at least touch-cta; chips keep touch-min (FilterChip.md).
 @media (max-width: $bp-phone-max) {
   .app-button.pill--md {
     min-height: var(--touch-cta);

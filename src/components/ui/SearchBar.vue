@@ -1,6 +1,5 @@
 <template>
   <div ref="wrapRef" class="search-wrap" role="search">
-    <!-- A real label, not only the placeholder: it stays when the person types and names the field on every width. -->
     <label :for="inputId" class="visually-hidden">{{ label ?? placeholder }}</label>
     <div class="search-box">
       <button v-if="model" type="button" class="clear-search" aria-label="Apagar a busca" @click="cleanAll">
@@ -120,7 +119,6 @@ const close = () => {
   activeIdx.value = -1
 }
 
-// Titles come from people: the match is marked by the template, never by building HTML from them.
 const highlightParts = (text: string) => {
   if (!model.value) return [{ text, match: false }]
   const q = model.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -161,7 +159,6 @@ onClickOutside(wrapRef, () => close())
     gap: var(--space-3);
     transition: all var(--motion-transition-default);
 
-    // The same ring as AppField: a pale halo on white did not reach the 3:1 a focus indicator needs.
     &:has(.search-input:focus-visible) {
       outline: 2px solid var(--color-border-focus);
       outline-offset: var(--focus-offset-tight);
@@ -195,7 +192,6 @@ onClickOutside(wrapRef, () => close())
     color: var(--color-text-subtle);
     flex-shrink: 0;
 
-    // Not the action colour: the count is read, never clicked.
     strong {
       color: var(--color-text-default);
     }

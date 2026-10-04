@@ -137,3 +137,46 @@ O aparelho guarda **uma** cópia do catálogo (`books`, com a hora em que veio d
 - **O que decide uma ação vem da API, nunca da cópia:** os nomes livres para vincular (`available_names` em `GET /users/me/claim`) e quantos livros perdem um subgênero antes de removê-lo (`GET /subgeneros/:id/usage`).
 - **Por que não um prazo:** o antigo cache de 7 dias (com uma segunda cópia sem prazo nenhum) escondia livro novo, edição, remoção e vínculo feitos em outro aparelho. A revalidação custa uma requisição de cabeçalhos por visita; no plano grátis do Render (5 GB/mês de saída) isso não chega perto do limite.
 - **Se o clube crescer muito:** o `304` ainda consulta o banco para calcular a `ETag`. Uma versão do catálogo, incrementada a cada escrita, responderia `304` sem ler os livros.
+
+## 11. Capa e dados (fatia 9)
+
+A busca deixa de depender de um livro salvo e deixa de gravar sozinha. Quem grava é o formulário, com os valores que a pessoa conferiu. Com isso, "o que é gravado é o que foi visto" vale por construção.
+
+### Busca nova
+
+```http
+POST /books/enrich/search   ← { title, author, isbn? }
+                            → { source: "google_books" | "open_library" | null, candidates: [...] }
+                            → 503 quando nenhuma das duas fontes respondeu (a vista mostra o V5)
+```
+
+- Exige `books: create` **ou** `books: update` (quem cadastra e quem edita). Mantém o `enrichmentRateLimit`.
+- Até 5 candidatos (`maxResults=5` no Google, `limit=5` na Open Library). Cada um: `volume_id`, `title`, `authors`, `publisher`, `published_year`, `page_count`, `language`, `synopsis`, `cover_url`, `isbn`.
+- `language`: o Google devolve `volumeInfo.language` por edição (`pt-BR`, `en`). A Open Library devolve a **obra**, com as línguas e os ISBNs de todas as edições; o servidor só devolve `language` e `isbn` dela quando há um só (um de vários seria de uma edição qualquer). O front mostra o nome ("Português").
+- Ordem das estratégias: ISBN (só se veio na consulta), título e autor em português, título e autor sem idioma, e a Open Library como reserva. Devolve os candidatos da primeira estratégia que achar algo, na ordem da fonte. Título e autor vão ao Google em texto simples: em 2026-10-03, com a chave, ele devolvia zero para qualquer consulta com `intitle:`, `inauthor:` ou `isbn:` (estudo `rca/2026-10-03-ecos-api-busca-de-capa-e-dados/`). A Open Library é pedida com `fields=`: sem isso não vêm ISBN, editora, primeira frase nem páginas.
+- `isbn` na consulta vem só do que a pessoa digitou. O ISBN que veio de uma busca anterior não é usado como chave (ver `isbn_source`).
+
+### O que sai
+
+Cada item sai junto com quem ainda o usa, para nenhum commit deixar uma tela ou uma salvaguarda sem par: as duas rotas na 9g (com o `BookEnrichmentPanel`), a busca em lote e a trava manual na 9h (a trava protege a busca em lote até ela sair).
+
+- `POST /books/:id/enrich` e `POST /books/:id/enrich/apply`. Só o `useBookEnrichment` usava as duas.
+- A busca em lote: `POST /admin/books/enrich`, `GET /admin/books/enrich/status`, `GET /admin/books/enrich/history`, o modelo `EnrichmentRun` e o recurso `enrichment` (em `RESOURCES`, `CONFIGURABLE` e na semente). A seção 8 deixa de valer no item "Capas e sinopses vira permissão". A semente do boot apaga as linhas `enrichment` da coleção `Permission`.
+- A trava manual: o campo `manually_edited_at` sai do modelo, e `hasEnrichmentEdit` e a parte `enrichmentEdited` de `markBookEdit` saem de `utils/bookEdit.ts`. O histórico de edição (`edit_history`) continua.
+
+### O que entra
+
+- **`isbn_source`** no livro: `"person"`, `"search"` ou ausente. O formulário manda `"search"` quando o ISBN veio da busca e não foi mexido; qualquer ISBN digitado ou alterado à mão vira `"person"`. Se o `PATCH` trouxer um ISBN diferente do salvo sem `isbn_source`, o servidor grava `"person"`. Ausente quer dizer origem desconhecida e conta como não confirmado. Sem migração: os ISBNs já gravados ficam sem origem.
+- **`cover_source` vindo do formulário.** Hoje, trocar a capa num `PATCH` grava `"manual"`. Passa a aceitar `"google"` ou `"openlibrary"` no payload quando a capa veio da busca; sem isso, continua `"manual"`.
+
+### O que sai do livro
+
+- **`google_books_id`** sai do modelo, da validação e das respostas, e a subida da API apaga o campo dos livros já gravados (`migrations/book-google-id.ts`). O dono (2026-10-02): "o catálogo é um acervo do clube do livro, não é um acervo do google ou extensão dele" e "nunca foi a intenção criar essa relação". O `volume_id` da busca serve para escolher um resultado na vista; não é gravado.
+
+### Atribuição
+
+Só onde o sistema mostra algo do Google: os resultados da busca e a capa. O dono (2026-10-02): "se o google exige atribuição, que fique onde de fato usa coisa deles: resultados de busca; capa". A sinopse não leva atribuição; o dono: "sinopse, não pode se valer disso... entra na questão da cópia de texto".
+
+A página do livro mostra a atribuição quando o endereço da capa é do Google Books (`books.google.com`). O endereço é o que guarda a origem da capa; `cover_source` não serve para isso (em 2026-10-02, 63 das 75 capas do acervo estavam sem `cover_source`). Trocar a capa por outra tira a atribuição sozinho. Não precisa de campo novo.
+
+**Diretrizes de marca (conferidas em 2026-10-02, developers.google.com/books/branding):** o logo "powered by Google" junto dos resultados ("must appear adjacent to these results"), e cada livro mostrado com um link para a página dele no Google Books. Na página do livro, o link usa o `id` que o próprio endereço da capa traz. "You must not alter results": vale para os resultados como a API devolve (a vista não reordena nem reescreve); o que a pessoa escolhe e edita passa a ser dado do livro (leitura do dono e do estudo, 2026-10-02).

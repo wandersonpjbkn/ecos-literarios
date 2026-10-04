@@ -1,29 +1,33 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-// Also the localStorage key: "Limpar os dados deste aparelho" keeps it, the choice is the reader's, not cache.
 export const PREFERENCES_STORE_ID = 'preferences'
 
 export const usePreferencesStore = defineStore(
   PREFERENCES_STORE_ID,
   () => {
-    const hiddenMidias = ref<string[]>([])
-    // Whose list this is: null when chosen signed out. Only the owner's own account ever receives it.
+    const hiddenFormats = ref<string[]>([])
     const owner = ref<string | null>(null)
-    // A change made here that has not reached that account yet (offline, server down), with the list itself.
     const pending = ref<{ userId: string; list: string[] } | null>(null)
 
-    const toggleMidia = (midia: string) => {
-      hiddenMidias.value = hiddenMidias.value.includes(midia)
-        ? hiddenMidias.value.filter((m) => m !== midia)
-        : [...hiddenMidias.value, midia]
+    const toggleFormat = (format: string) => {
+      hiddenFormats.value = hiddenFormats.value.includes(format)
+        ? hiddenFormats.value.filter((hidden) => hidden !== format)
+        : [...hiddenFormats.value, format]
     }
 
-    return { hiddenMidias, owner, pending, toggleMidia }
+    return { hiddenFormats, owner, pending, toggleFormat }
   },
   {
     persist: {
       storage: localStorage,
+      serializer: {
+        serialize: JSON.stringify,
+        deserialize: (raw) => {
+          const { hiddenMidias: legacyHidden, ...state } = JSON.parse(raw)
+          return legacyHidden && !state.hiddenFormats ? { ...state, hiddenFormats: legacyHidden } : state
+        },
+      },
     },
   },
 )

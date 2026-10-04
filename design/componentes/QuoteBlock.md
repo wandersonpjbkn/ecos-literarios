@@ -8,7 +8,7 @@ O rótulo é **"Comentário"** (fatia 5). Nunca "Por que Fulana indicou": o text
 
 ## Regras
 
-Fundo `bg-sunken` com uma régua de 3px à esquerda — `action-line` quando há texto, `border-strong` quando está vazio. Sem cor de destaque própria: o sistema tem um acento só, e ele é de ação.
+Fundo `bg-sunken` com uma régua de 3px à esquerda — `action-line` quando há texto, `border-strong` quando está vazio. Sem cor de destaque própria. A régua azul é um vazamento pequeno conhecido (azul em um bloco que não clica); trocar por `voice-line` foi sugerido na rodada de cor e **não** foi adotado: fica como está até o dono decidir.
 
 O texto usa `body-l` (19px), o único corpo grande do sistema. Ele é a coisa mais humana da tela e merece o tamanho.
 

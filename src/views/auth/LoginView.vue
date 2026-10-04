@@ -1,7 +1,6 @@
 <template>
   <div class="login-page">
     <div class="login-card">
-      <!-- After sending, the introduction leaves: only the message and its ways out stay (slice 8d). -->
       <header v-if="step === 'form'" class="login-head">
         <h1 class="login-head__title">Entrar</h1>
         <p class="login-head__text">Coloque seu e-mail e nós enviamos um link para você entrar. Não é preciso senha.</p>
@@ -20,13 +19,12 @@
           @keydown.enter="submit"
         />
 
-        <!-- Enabled with the field empty: a click says what is missing, a disabled button would say nothing. -->
         <AppButton class="submit-btn" variant="primary" :disabled="loading" @click="submit">
           {{ loading ? 'Enviando…' : 'Enviar o link' }}
         </AppButton>
       </div>
 
-      <!-- Confirmação -->
+      <!-- Sent -->
       <div v-else class="login-sent">
         <AppNotice v-if="errorMsg" :text="errorMsg" />
         <EmptyState ref="sentMessage" title="Enviamos o link" title-tag="h1">
@@ -34,7 +32,6 @@
             >Foi para <strong>{{ email }}</strong
             >. Abra seu e-mail e toque no link para entrar.</template
           >
-          <!-- Waiting is text, not a grey button: a disabled button looks broken, the text says when. -->
           <p v-if="resendCooldown > 0" class="resend-wait" aria-live="polite">
             Você pode pedir outro link em {{ resendCooldown === 1 ? '1 segundo' : `${resendCooldown} segundos` }}
           </p>
@@ -44,7 +41,7 @@
         </EmptyState>
       </div>
 
-      <!-- Voltar -->
+      <!-- Back -->
       <AppButton :to="lastCatalog" variant="ghost" size="md" class="back-link">
         <BaseIcon name="arrow-left" aria-hidden="true" />
         Voltar ao catálogo
@@ -92,7 +89,6 @@ const resendCooldown = ref(0)
 
 let cooldown: ReturnType<typeof setInterval> | undefined
 
-// Back to the field, still filled, for whoever typed the address wrong.
 const retypeEmail = async () => {
   errorMsg.value = ''
   step.value = 'form'
@@ -121,11 +117,10 @@ const submit = async () => {
     await sendMagicLink(email.value.trim())
     rememberEmail(email.value.trim())
     step.value = 'sent'
-    // The form that had the focus is gone: the news takes it, so a screen reader hears it.
     nextTick(() => sentMessage.value?.focus())
     startCooldown()
   } catch (err) {
-    const tooSoon = (err as { status?: number }).status === 429
+    const tooSoon = (err as { tooSoon?: boolean }).tooSoon === true
     errorMsg.value = tooSoon
       ? 'Você já pediu um link agora há pouco. Espere um minuto e peça de novo.'
       : 'Não foi possível enviar o link. Tente de novo.'
@@ -163,7 +158,6 @@ onBeforeUnmount(() => clearInterval(cooldown))
   display: flex;
   align-items: center;
   justify-content: center;
-  // The auth frame gives the whole height under its bar: the form sits in the middle of it.
   min-height: 100%;
   padding: var(--space-8) var(--space-4);
   background: var(--color-background-default);

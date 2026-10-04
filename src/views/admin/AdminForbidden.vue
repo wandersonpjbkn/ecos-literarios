@@ -1,8 +1,6 @@
 <template>
-  <!-- The same message as "página não encontrada": an EmptyState with the page's h1 and the way out. -->
   <EmptyState title-tag="h1" title="Sem permissão" :text="reason">
     <AppButton :to="lastCatalog" variant="primary">Voltar ao catálogo</AppButton>
-    <!-- An Editor who opened an admin-only section by link keeps a way back to the panel they can use. -->
     <AppButton v-if="auth.isEditor" :to="{ name: 'admin-books' }">Voltar ao painel</AppButton>
     <AppButton v-else-if="accessRequest" :href="accessRequest">
       <BaseIcon name="whatsapp" aria-hidden="true" />
@@ -37,7 +35,6 @@ const accessRequest = computed(() =>
     : null,
 )
 
-// Why this person is here: "Adicionar" as a Membro, an admin-only section as an Editor, or the panel itself.
 const reason = computed(() => {
   if (route.query.motivo === 'adicionar') return 'Adicionar livros é para Administrador e Editor.'
   return auth.isEditor

@@ -1,31 +1,28 @@
-// Values mirror design/tokens/tokens.json; never regenerate them with generate-palette (breaks measured contrast).
 
 @use '@/assets/scss/abstracts/mixins' as *;
 
 $config: (
   'badges': (
       'tag':   ('bg': #F4F6F8, 'ink': #47525C),
-      // A state that asks for attention and can be undone (a suspended account); red stays for no way back.
       'alert': ('bg': var(--alert-bg), 'ink': var(--alert-ink)),
     ),
 
   'semantics': (
-      'bg':             #FBFCFD,  // bg-page
-      'bg-subtle':      #F4F6F8,  // bg-sunken
-      'surface':        #FFFFFF,  // bg-surface
+      'bg':             #FBFCFD,
+      'bg-subtle':      #F4F6F8,
+      'surface':        #FFFFFF,
       'surface-raised': #FFFFFF,
-      'ink':            #141A1F,  // 16.4:1 on white
-      'ink-secondary':  #47525C,  //  8.1:1
-      'muted':          #5F6B77,  //  5.4:1, lightest grey allowed for text
-      'muted-light':    #5F6B77   // same on purpose: there is no lighter text grey
+      'ink':            #141A1F,
+      'ink-secondary':  #47525C,
+      'muted':          #5F6B77,
+      'muted-light':    #5F6B77
     ),
 
   'actions': (
-      'primary':         #3A63B8,  // 5.8:1, logo blue
-      'primary-hover':   #2B5192,  // 7.6:1, logo navy
-      'primary-light':   #EAF0FB,  // selected background, never a button background
-      'primary-muted':   #C6D6F2,  // selected border; never text
-      // One accent only: secondary keys exist for the mixin and point to the same blue.
+      'primary':         #3A63B8,
+      'primary-hover':   #2B5192,
+      'primary-light':   #EAF0FB,
+      'primary-muted':   #C6D6F2,
       'secondary':       #3A63B8,
       'secondary-hover': #2B5192,
       'secondary-light': #EAF0FB,
@@ -33,8 +30,8 @@ $config: (
     ),
 
   'borders': (
-      'default': #E7EBEF,  // border-hair
-      'strong':  #D3DAE0,  // border-strong, 3:1
+      'default': #E7EBEF,
+      'strong':  #D3DAE0,
       'focus':   #3A63B8
     ),
 
@@ -43,7 +40,6 @@ $config: (
 
 @include create-theme('ecos', $config);
 
-// Not covered by the mixin: genre tints, alert tints, spacing, radius and target sizes.
 :root[data-theme='ecos'] {
     --tint-ficcao-bg: #EEF1F5;
     --tint-ficcao-line: #DFE5EC;
@@ -75,12 +71,11 @@ $config: (
 
     --alert-bg: #FBF3E2;
     --alert-line: #EDDAB0;
-    --alert-ink: #5A4210; // 8.56:1 on alert-bg
+    --alert-ink: #5A4210;
 
-    // Only for an action with no way back (design/tokens/tokens.css): never a full fill.
-    --danger-ink: #A3322B; // 6.9:1 on white, 6.0:1 on danger-soft
+    --danger-ink: #A3322B;
     --danger-soft: #FBEDEC;
-    --danger-line: #C98078; // 3.1:1 on white, the floor for a control's outline
+    --danger-line: #C98078;
 
     --space-1: 4px;
     --space-2: 8px;
@@ -93,7 +88,6 @@ $config: (
     --space-14: 56px;
     --space-24: 96px;
 
-    // Type scale from design/tokens/tokens.css; micro is for an isolated word only, sentences start at caption.
     --font-size-micro: 0.6875rem;
     --font-size-caption: 0.8125rem;
     --font-size-meta: 0.875rem;
@@ -122,7 +116,6 @@ $config: (
     --drawer-width: 388px;
     --text-column: 760px;
 
-    // Line height by role, not by size: a 15px sentence reads at 1.5, a 15px label at 1.2 (estudo-tokens.md).
     --line-height-display: 1.1;
     --line-height-title: 1.25;
     --line-height-ui: 1.2;
@@ -153,7 +146,6 @@ $config: (
     --row-tall: 64px;
     --rail-item: 66px;
     --tab-item: 58px;
-    // What floats over the phone's bottom bar (toast, version notice, back to top) sits this far up.
     --tab-bar-h: var(--tab-item);
     --above-tab-bar: calc(var(--tab-bar-h) + var(--space-4) + env(safe-area-inset-bottom));
 
@@ -163,6 +155,12 @@ $config: (
     --cover-w-phone: 180px;
     --mini-cover-w: 44px;
     --mini-cover-h: 64px;
+    --search-cover-w: 56px;
+    --search-cover-h: 84px;
+    --check-cover-w: 88px;
+    --check-cover-h: 132px;
+    --line-cover-w: 48px;
+    --line-cover-h: 72px;
 
     --page-max: 1200px;
     --area-side: 264px;
@@ -180,7 +178,6 @@ $config: (
     --popover-max-h: 260px;
     --toast-min: 280px;
     --header-search-max: 540px;
-    // Height of the app frame around a centred screen: top bar on desktop, top and bottom bars on phones.
     --chrome-h: 4rem;
     --chrome-h-phone: 6rem;
 
@@ -194,10 +191,8 @@ $config: (
     --col-lg: 120px;
     --col-xl: 180px;
     --col-date: 130px;
-    // Two worded row actions (Editar + Remover) side by side; every row of a table shares it, so columns line up.
     --col-actions: 232px;
 
-    // Loading shapes: the 3:1 field grey, so they read on any screen brightness; the shine is the sunken grey.
     --color-skeleton: var(--color-border-strong);
     --color-skeleton-shine: var(--color-background-subtle);
     --skeleton-shimmer: 1.4s;
@@ -211,7 +206,6 @@ $config: (
     --skeleton-short: 96px;
     --skeleton-long: 120px;
 
-    // Stacking order, lowest first: page floats, the frame, the drawer, then what must sit over it.
     --layer-float: 30;
     --layer-back-top: 40;
     --layer-header: 50;
@@ -229,4 +223,6 @@ $config: (
     --underline-offset: 3px;
     --underline-offset-dotted: 4px;
     --motion-spin: 0.7s;
+    --motion-view: 180ms;
+    --motion-view-shift: var(--space-6);
 }

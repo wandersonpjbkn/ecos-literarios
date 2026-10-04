@@ -4,7 +4,7 @@ A célula da grade. Três informações, uma vez cada: **título** (dentro da ca
 
 Essa é a correção mais importante do sistema. A versão anterior punha título e autor dentro do bloco de capa *e* embaixo dele — quatro linhas por cartão, 24 cartões por tela, e a grade ficava ilegível.
 
-Não há avatar de quem mencionou. O campo `avatar_url` existe no tipo do projeto mas nunca teve valor; a interface mostra o nome, que é verdade.
+Não há avatar de quem mencionou. O campo `avatar_url` existe no tipo do projeto mas nunca teve valor; a interface mostra o nome, que é verdade. E 24 monogramas rosa por tela fariam do acento da voz um tema (ver [Avatar](Avatar.md)). A estrela do Destaque do clube, quando há, mora na capa.
 
 ## Regras
 
@@ -12,7 +12,7 @@ Largura da coluna pela grade (`.book-grid`: seis colunas no desktop, duas no cel
 
 O cartão inteiro é um `<a>` único, com `aria-label` trazendo o título completo. Dois links dentro do mesmo cartão (um no título, outro na pessoa) dobram o número de paradas do Tab sem dobrar a utilidade.
 
-Autor em `ink-2`, uma linha, com reticências. Quem mencionou em `ink-muted`, `caption`. O selo de formato, quando há, mora na capa e não se repete embaixo.
+Autor em `ink-2`, uma linha, com reticências. Com mais de um autor, o primeiro e quantos faltam: **"Neil Gaiman (+1)"**; o `aria-label` diz **"Neil Gaiman e mais 1 autor"**, porque "(+1)" lido em voz alta não diz nada. A página do livro mostra todos juntos ("Neil Gaiman e Terry Pratchett"), cada nome levando ao catálogo filtrado. Quem mencionou em `ink-muted`, `caption`. O selo de formato, quando há, mora na capa e não se repete embaixo.
 
 ## O que o consumidor fornece
 

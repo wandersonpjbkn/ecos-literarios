@@ -28,7 +28,6 @@
       </div>
     </template>
 
-    <!-- Linking follows the matrix (claim: update); a Visitante sees why instead of a form. -->
     <div v-else-if="!canClaim" class="claim-locked">
       <p class="claim-locked__text">
         Vincular um nome do grupo não está liberado para a sua conta.
@@ -112,11 +111,9 @@ const isSubmitting = ref(false)
 const chosenName = ref('')
 const undo = reactive({ open: false, loading: false, error: '' })
 
-// From the API, never from the catalog saved on this device: another account may have linked or let go since.
 const availableNames = computed(() => status.value?.available_names ?? [])
 const canClaim = computed(() => permissions.can('claim', 'update'))
 const accessRequest = useAccessRequest()
-// Known to lack the permission: the invitation to link would contradict the refusal below.
 const lockedOut = computed(() => !!permissions.mine && !canClaim.value && !status.value?.has_claim)
 
 const claimedText = computed(() => {
@@ -149,7 +146,6 @@ const submitClaim = async () => {
       authStore.user = { ...authStore.user, name: result.claim_name }
     }
     const linked = result.updated_books
-    // The API's own message says "claim"; the screen keeps its words (COPY.md).
     toast.show(
       typeof linked === 'number'
         ? `Pronto: ${linked === 1 ? '1 livro vinculado' : `${linked} livros vinculados`} ao seu nome.`
@@ -160,7 +156,7 @@ const submitClaim = async () => {
     useApi().fetchBooks()
   } catch (err) {
     actionError.value = errorText(err, 'Não foi possível vincular o nome. Tente de novo.')
-    useErrorReporter().captureException(err, { context: 'ClaimNameSection.submit', quemNome: chosenName.value })
+    useErrorReporter().captureException(err, { context: 'ClaimNameSection.submit', claimedName: chosenName.value })
   } finally {
     isSubmitting.value = false
   }
@@ -171,7 +167,6 @@ const openUndo = () => {
   undo.open = true
 }
 
-// A refused undo stays in the dialog, where the person acted; confirming again retries it.
 const unclaim = async () => {
   undo.loading = true
   undo.error = ''

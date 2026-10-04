@@ -25,14 +25,10 @@ const props = defineProps<{
   book: Book
 }>()
 
-const query = computed(() => encodeURIComponent(`${props.book.titulo} ${props.book.autor}`))
+const query = computed(() => encodeURIComponent(`${props.book.titulo} ${props.book.authors[0] ?? ''}`))
 
-// Search links, not affiliate ones; Google Books needs an ISBN or its own id, otherwise the row goes away.
 const links = computed(() => {
-  const { isbn, google_books_id: googleId } = props.book
-  const googleBooks = isbn
-    ? `https://books.google.com/books?vid=ISBN${encodeURIComponent(isbn)}`
-    : googleId && `https://books.google.com/books?id=${encodeURIComponent(googleId)}`
+  const { isbn } = props.book
   return [
     {
       name: 'Amazon',
@@ -40,9 +36,6 @@ const links = computed(() => {
       icon: 'amazon' as const,
       href: `https://www.amazon.com.br/s?k=${isbn ? encodeURIComponent(isbn) : query.value}`,
     },
-    ...(googleBooks
-      ? [{ name: 'Google Books', origin: 'google-books', icon: 'book' as const, href: googleBooks }]
-      : []),
     {
       name: 'Google',
       origin: 'google',
@@ -63,7 +56,7 @@ const track = (origin: string) =>
     event: 'external_link',
     external_link_origin: origin,
     external_link_name: props.book.titulo,
-    external_link_author: props.book.autor,
+    external_link_author: props.book.authors[0] ?? '',
   })
 </script>
 

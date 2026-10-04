@@ -11,10 +11,8 @@ export type PillTone = 'primary' | 'neutral' | 'quiet' | 'soft' | 'outline' | 'g
 
 withDefaults(
   defineProps<{
-    // Tag or component to render (button, a, RouterLink, span); the pill only owns the shape and states.
     as?: string | Component
     tone?: PillTone
-    // md = controls and chips (touch-min), lg = actions (touch-cta).
     size?: 'md' | 'lg'
   }>(),
   { as: 'span', tone: 'neutral', size: 'md' },
@@ -22,7 +20,6 @@ withDefaults(
 </script>
 
 <style lang="scss" scoped>
-// One pill for buttons, chips and select triggers, so no browser gives a control a look of its own.
 .pill {
   display: inline-flex;
   flex-shrink: 0;
@@ -114,7 +111,6 @@ withDefaults(
     }
   }
 
-  // "De ação, contornado" (Button.md): action-soft is a selected chip's fill, never a button's.
   &--outline:not(:disabled) {
     color: var(--color-action-default);
     background: var(--color-surface-default);
@@ -126,7 +122,6 @@ withDefaults(
     }
   }
 
-  // An action with no way back: outlined in red, never filled, so neither the eye nor Enter lands on it first.
   &--danger:not(:disabled) {
     color: var(--danger-ink);
     background: var(--color-surface-default);

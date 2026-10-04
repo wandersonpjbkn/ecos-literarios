@@ -18,7 +18,6 @@ defineProps<{
   shown: number
   total: number
   nextBatch: number
-  // The server sent only the most recent part of the list, so "todos" would not be true.
   capped?: boolean
 }>()
 

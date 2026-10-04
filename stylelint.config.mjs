@@ -1,4 +1,7 @@
-// A raw visual value fails `yarn lint`; only the theme and the SCSS abstracts, which define the tokens, may hold one.
+import stylelint from 'stylelint'
+
+import { judgeComment } from './eslint/no-comments.ts'
+
 const KEYWORDS = [
   '0',
   'auto',
@@ -13,17 +16,13 @@ const KEYWORDS = [
   'max-content',
   'min-content',
   '/^-?var\\(--/',
-  // Math over tokens is fine; a raw length inside it is not (calc(10px + 2px) fails), save the whole box or viewport.
   '/^-?(calc|min|max|minmax|repeat)\\((?!.*\\b(?!100(%|vw|vh|dvh|svh)(?!\\w))\\d+(\\.\\d+)?(px|rem|em|ch|ex|pt|vw|vh|dvh|svh)).*\\)$/',
-  // Transparency over a token colour (the drawer veil): rgba(var(--color-…-rgb), 0.4).
   '/^rgba\\(var\\(--/',
-  // The device's own inset (iPhone home bar), not a design value.
   '/^env\\(safe-area-inset-/',
   '100vh',
   '100dvh',
 ]
 
-// Relative to the container, not a step of any scale: only where a share of the box makes sense.
 const SHARE = [...KEYWORDS, '/^\\d+(\\.\\d+)?%$/']
 
 const TOKENIZED = [
@@ -55,49 +54,87 @@ const TOKENIZED = [
   '/^(top|right|bottom|left|inset)$/',
 ]
 
+const NO_COMMENTS = 'local/no-comments'
+const noCommentsMessages = stylelint.utils.ruleMessages(NO_COMMENTS, {
+  comment:
+    'Comentário no código é proibido: só título de seção ou de bloco, curto, em uma linha só. O porquê vai no commit ou na doc.',
+  portuguese: 'Título de seção em português: escreva em inglês.',
+})
+
+const noComments = stylelint.createPlugin(NO_COMMENTS, (enabled) => (root, result) => {
+  if (!enabled) return
+  root.walkComments((comment) => {
+    const first = comment.parent.type === 'root' && comment.parent.first === comment
+    const next = comment.next()
+    const startsLine = first || comment.raws.before.includes('\n')
+    const endsLine = comment.raws.inline || (next ? next.raws.before.includes('\n') : true)
+    const text = comment.raws.inline ? comment.text : `${comment.raws.left}${comment.text}${comment.raws.right}`
+    const verdict = judgeComment(text, startsLine && endsLine)
+    if (verdict !== 'allowed')
+      stylelint.utils.report({ ruleName: NO_COMMENTS, result, node: comment, message: noCommentsMessages[verdict] })
+  })
+  root.walkDecls((decl) => {
+    const raw = decl.raws.value?.raw ?? ''
+    for (const match of raw.matchAll(/(?<!:)\/\/[^\n]*|\/\*[\s\S]*?\*\//g)) {
+      const lineStart = raw.lastIndexOf('\n', match.index) + 1
+      let lineEnd = raw.indexOf('\n', match.index + match[0].length)
+      if (lineEnd === -1) lineEnd = raw.length
+      const alone =
+        !raw.slice(lineStart, match.index).trim() && !raw.slice(match.index + match[0].length, lineEnd).trim()
+      const text = match[0].startsWith('//') ? match[0].slice(2) : match[0].slice(2, -2)
+      const verdict = judgeComment(text, alone)
+      if (verdict !== 'allowed')
+        stylelint.utils.report({ ruleName: NO_COMMENTS, result, node: decl, message: noCommentsMessages[verdict] })
+    }
+  })
+})
+
+const TOKEN_SOURCES = ['src/assets/scss/themes/**', 'src/assets/scss/abstracts/**', 'src/assets/scss/base/**']
+
 export default {
   customSyntax: 'postcss-scss',
-  overrides: [{ files: ['**/*.vue'], customSyntax: 'postcss-html' }],
-  ignoreFiles: ['src/assets/scss/themes/**', 'src/assets/scss/abstracts/**', 'src/assets/scss/base/**', 'src/graphify-out/**', 'dist/**'],
-  plugins: ['stylelint-declaration-strict-value', 'stylelint-scss'],
+  overrides: [
+    { files: ['**/*.vue'], customSyntax: 'postcss-html' },
+    {
+      files: TOKEN_SOURCES,
+      rules: {
+        'scale-unlimited/declaration-strict-value': null,
+        'scss/dollar-variable-pattern': null,
+        'media-feature-name-value-allowed-list': null,
+      },
+    },
+  ],
+  ignoreFiles: ['src/graphify-out/**', 'dist/**'],
+  plugins: ['stylelint-declaration-strict-value', 'stylelint-scss', noComments],
   rules: {
+    [NO_COMMENTS]: true,
     'scale-unlimited/declaration-strict-value': [
       TOKENIZED,
       {
-        // Grow and shrink factors and fr fractions are ratios, not lengths.
         ignoreValues: {
           '': KEYWORDS,
           flex: [...SHARE, '/^\\d+$/'],
           'flex-basis': SHARE,
-          // Shadows come from the theme; a ring over a token colour is drawn like a border, a hairline width is fine.
           'box-shadow': [...KEYWORDS, 'inset', '/^-?[1-3]px$/'],
           '/^(min-|max-)?(width|height)$/': SHARE,
           '/^(top|right|bottom|left|inset)$/': SHARE,
-          // A circle: 50% of the box, not a radius step.
           'border-radius': [...KEYWORDS, '50%'],
           '/^border-.*-radius$/': [...KEYWORDS, '50%'],
-          // The shimmer slides a gradient twice the box wide.
           '/^background/': SHARE,
-          // The property names in a transition or animation are words; only its durations must be tokens.
           '/^(transition|animation)(-duration|-delay)?$/': [...KEYWORDS, '/^[a-z-]+$/'],
           'grid-template-columns': [...KEYWORDS, '/^\\d+(\\.\\d+)?fr$/'],
           'grid-template-rows': [...KEYWORDS, '/^\\d+(\\.\\d+)?fr$/'],
         },
-        // Border and outline shorthands: only their colour is checked; widths (1px, 2px) are hairlines, not scale.
         expandShorthand: true,
-        // Functions are checked too: rgb(0, 0, 0) is as raw as #000.
         ignoreFunctions: false,
-        // A local $size would hide a raw value from this rule; the SCSS abstracts own every variable.
         ignoreVariables: false,
         disableFix: true,
         message: '"${property}: ${value}" is a raw value: use a token (var(--…)) from _ecos.scss.',
       },
     ],
-    // `font: { size: … }` and the font shorthand would carry a raw value past the longhand checks above.
     'scss/declaration-nested-properties': 'never',
     'property-disallowed-list': ['font'],
     'scss/dollar-variable-pattern': ['^bp-', { message: 'Variables live in the SCSS abstracts; use a token here.' }],
-    // Breakpoints come from abstracts/_breakpoints.scss: CSS variables do not work inside @media.
     'media-feature-name-value-allowed-list': {
       'min-width': ['/^\\$bp-/'],
       'max-width': ['/^\\$bp-/'],

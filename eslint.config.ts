@@ -5,12 +5,10 @@ import sonarjs, { configs as sonarjsConfigs } from 'eslint-plugin-sonarjs'
 import pluginVue from 'eslint-plugin-vue'
 import { globalIgnores } from 'eslint/config'
 
-// To allow more languages other than `ts` in `.vue` files, uncomment the following lines:
-// import { configureVueProject } from '@vue/eslint-config-typescript'
-// configureVueProject({ scriptLangs: ['ts', 'tsx'] })
-// More info at https://github.com/vuejs/eslint-config-typescript/#advanced-setup
+import englishNames from './eslint/english-names'
+import noComments from './eslint/no-comments'
 
-// import.meta.env.VITE_ENV === 'production'
+const local = { rules: { ...englishNames.rules, ...noComments.rules } }
 
 export default defineConfigWithVueTs(
   {
@@ -44,15 +42,6 @@ export default defineConfigWithVueTs(
       'no-console': 'off',
       'no-debugger': 'warn',
 
-      // Bitwise and syntax
-      // ...
-
-      // Naming conventions
-      // ...
-
-      // Function and parameter rules
-      // ...
-
       // Loop and flow control
       'no-await-in-loop': 'off',
       'no-continue': 'off',
@@ -82,7 +71,6 @@ export default defineConfigWithVueTs(
 
       // TypeScript specific overrides
       '@typescript-eslint/no-explicit-any': 'warn',
-      // Duplicates the rule below, which honors the `_` prefix used to drop props from a rest.
       'sonarjs/no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -126,6 +114,77 @@ export default defineConfigWithVueTs(
   },
 
   {
+    name: 'app/data-layer',
+    files: ['src/components/**/*.vue', 'src/views/**/*.vue', 'src/layouts/**/*.vue'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@/composables/apiError',
+              importNames: ['ApiError'],
+              message: 'Status da API se trata no composable; na tela, use errorText.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "BinaryExpression[left.property.name='status'][right.raw=/^[1-5][0-9][0-9]$/]",
+          message: 'Status da API se trata no composable; na tela, use errorText.',
+        },
+      ],
+    },
+  },
+
+  {
+    name: 'app/english-names',
+    files: ['src/**/*.{ts,vue}'],
+    plugins: { local },
+    rules: {
+      'local/english-names': [
+        'error',
+        {
+          legacyFields: [
+            'titulo',
+            'autor',
+            'autores',
+            'categoria',
+            'categorias',
+            'midia',
+            'midias',
+            'subgeneros',
+            'nome',
+            'porque',
+            'quem_nome',
+            'quem_user_id',
+            'hidden_midias',
+            'lido',
+            'busca',
+            'lista',
+            'mostrar',
+            'adicionar',
+            'estante',
+            'lidos',
+            'pessoa',
+            'genero',
+            'Livro',
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    name: 'app/no-comments',
+    files: ['**/*.{ts,mts,mjs,vue}'],
+    plugins: { local },
+    rules: { 'local/no-comments': 'error' },
+  },
+
+  {
     name: 'app/api-gateway',
     files: ['src/composables/useApi.ts'],
     rules: {
@@ -133,7 +192,6 @@ export default defineConfigWithVueTs(
     },
   },
 
-  // Debt that predates sonarjs: warn here, error everywhere else.
   {
     name: 'app/sonarjs-debt',
     files: [

@@ -16,7 +16,6 @@ import AppCheck from '@/components/ui/AppCheck.vue'
 
 defineOptions({ inheritAttrs: false })
 
-// class and style dress the row; the rest (change, name) belongs to the input.
 const attrs = useAttrs()
 
 withDefaults(
@@ -38,7 +37,6 @@ const inputAttrs = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-// One row for every checkbox and radio of the app: filters, formats, permissions, cover search.
 .check-row {
   display: flex;
   min-height: var(--touch-min);

@@ -4,7 +4,6 @@ import type { Book } from '@/types'
 
 import { useBooksStore } from '@/stores'
 
-/** ISO-8601 week, e.g. "2026-W39": the eco changes on Mondays and is the same for everyone that week. */
 export const isoWeekKey = (date: Date) => {
   const day = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
   const weekday = day.getUTCDay() || 7
@@ -16,7 +15,6 @@ export const isoWeekKey = (date: Date) => {
 
 const hashOf = (text: string) => [...text].reduce((h, char) => (h * 31 + char.charCodeAt(0)) >>> 0, 7)
 
-/** One `porque` per ISO week, the same for everyone, so the few comments last; new books join the pool. */
 export function useEcoOfTheWeek(now: () => Date = () => new Date()) {
   return computed((): Book | null => {
     const pool = useBooksStore()

@@ -21,9 +21,7 @@ import AppButton from '@/components/ui/AppButton.vue'
 
 const props = withDefaults(
   defineProps<{
-    // The address the message carries; left out, the signed-in account's.
     email?: string | null
-    // A ghost button among other actions; otherwise a bare link the caller dresses.
     pill?: boolean
   }>(),
   { email: undefined, pill: false },

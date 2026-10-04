@@ -7,15 +7,17 @@
       'has-value': hasValue,
       'is-single': !multiple,
     }"
+    @focusout="onFocusOut"
   >
     <button
+      ref="controlRef"
       type="button"
       class="ms-control"
       aria-haspopup="listbox"
       role="combobox"
       :aria-expanded="isOpen"
-      :aria-controls="isOpen ? `${id}-list` : undefined"
-      :aria-activedescendant="isOpen && activeIdx >= 0 ? `${id}-opt-${activeIdx}` : undefined"
+      :aria-controls="isOpen && !searchable ? `${id}-list` : undefined"
+      :aria-activedescendant="isOpen && !searchable && activeIdx >= 0 ? `${id}-opt-${activeIdx}` : undefined"
       :aria-labelledby="labelledby"
       @click="toggleOpen"
       @keydown.down.prevent="openOrMove(1)"
@@ -38,7 +40,7 @@
     </button>
 
     <Transition name="ms-dropdown">
-      <div v-if="isOpen" class="ms-dropdown">
+      <div v-if="isOpen" class="ms-dropdown" @keydown.escape.stop="closeToControl">
         <div v-if="searchable" class="ms-search-wrap">
           <BaseIcon name="search" class="ms-search-icon" />
           <input
@@ -54,13 +56,18 @@
             :aria-label="`Buscar em ${label.toLowerCase()}`"
             :aria-controls="`${id}-list`"
             :aria-activedescendant="activeIdx >= 0 ? `${id}-opt-${activeIdx}` : undefined"
-            @keydown.escape.stop="close"
-            @keydown.tab="close"
             @keydown.down.prevent="moveActive(1)"
             @keydown.up.prevent="moveActive(-1)"
             @keydown.enter.prevent="selectActive"
           />
-          <button v-if="query" type="button" class="ms-clear-query" aria-label="Apagar a busca" @click.stop="query = ''">
+          <button
+            v-if="query"
+            type="button"
+            class="ms-clear-query"
+            aria-label="Apagar a busca"
+            @mousedown.prevent
+            @click.stop="query = ''"
+          >
             <BaseIcon name="times" aria-hidden="true" />
           </button>
         </div>
@@ -89,7 +96,7 @@
         </ul>
 
         <div v-if="multiple && selected.length > 0" class="ms-footer">
-          <button type="button" class="ms-clear-all" @click.stop="emit('clear')">Limpar</button>
+          <button type="button" class="ms-clear-all" @mousedown.prevent @click.stop="emit('clear')">Limpar</button>
           <span class="ms-footer-count">{{ selected.length }} selecionado{{ selected.length > 1 ? 's' : '' }}</span>
         </div>
       </div>
@@ -99,13 +106,14 @@
 
 <script lang="ts" setup>
 import { onClickOutside } from '@vueuse/core'
-import { computed, ref, useId, watch } from 'vue'
+import { computed, nextTick, ref, useId, watch } from 'vue'
 
 import type { OptionMultiSelect } from '@/types'
 
+import { useUtils } from '@/composables'
+
 import AppBadge from '@/components/ui/AppBadge.vue'
 
-// Never a real option value: the option list is built from ids and names.
 const CREATE = '\u0000create'
 
 const props = withDefaults(
@@ -115,9 +123,7 @@ const props = withDefaults(
     selected: string | string[]
     multiple?: boolean
     searchable?: boolean
-    // Id of the visible label outside the control (a form field's label), so the button is named by it.
     labelledby?: string
-    // Offers the typed text as a last option ("Outro nome: Joana"); choosing it emits `create` instead of `toggle`.
     createLabel?: (typed: string) => string
   }>(),
   {
@@ -137,6 +143,7 @@ const emit = defineEmits<{
 const id = useId()
 
 const wrapRef = ref<HTMLDivElement | null>(null)
+const controlRef = ref<HTMLButtonElement | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
 const isOpen = ref(false)
 
@@ -146,17 +153,20 @@ const activeIdx = ref(-1)
 const multiple = computed(() => props.multiple !== false)
 const searchable = computed(() => props.searchable !== false)
 
+const { slugify } = useUtils()
+
 const normalizedOptions = computed(() => {
   const base = props.options.map((opt) =>
-    typeof opt === 'string' ? { label: opt, value: opt } : { label: opt.label, value: opt.value },
+    typeof opt === 'string' ? { label: opt, value: opt } : { label: opt.label, value: opt.value, match: opt.match },
   )
 
   if (!searchable.value || !query.value.trim()) return base
 
-  const q = query.value.toLowerCase()
-  const found = base.filter((opt) => opt.label.toLowerCase().includes(q))
   const typed = query.value.trim()
-  if (!props.createLabel || base.some((opt) => opt.label.toLowerCase() === typed.toLowerCase())) return found
+  const key = slugify(typed)
+  if (!key) return []
+  const found = base.filter((opt) => slugify(opt.label).includes(key))
+  if (!props.createLabel || base.some((opt) => slugify(opt.match ?? opt.label) === key)) return found
   return [...found, { label: props.createLabel(typed), value: CREATE }]
 })
 
@@ -171,7 +181,6 @@ const selectedCount = computed(() => {
 
 const selectedOption = computed(() => {
   if (multiple.value || typeof props.selected !== 'string') return null
-  // From every option, not the filtered ones: typing in the search must not blank the chosen label.
   return (
     props.options
       .map((opt) => (typeof opt === 'string' ? { label: opt, value: opt } : opt))
@@ -179,11 +188,10 @@ const selectedOption = computed(() => {
   )
 })
 
-// Esc closes an open list here; with the list closed it reaches the drawer and closes that.
 const onEscape = (event: KeyboardEvent) => {
   if (!isOpen.value) return
   event.stopPropagation()
-  close()
+  closeToControl()
 }
 
 const isSelected = (value: string): boolean => {
@@ -197,21 +205,23 @@ const isSelected = (value: string): boolean => {
 const handleSelect = (value: string) => {
   if (value === CREATE) {
     emit('create', query.value.trim())
-    close()
+    closeToControl()
     return
   }
   emit('toggle', value)
 
-  if (!multiple.value) close()
+  if (!multiple.value) closeToControl()
+}
+
+const openAt = (active: number) => {
+  isOpen.value = true
+  activeIdx.value = active
+  if (searchable.value) nextTick(() => inputRef.value?.focus())
 }
 
 const toggleOpen = () => {
-  if (isOpen.value) {
-    close()
-  } else {
-    isOpen.value = true
-    activeIdx.value = -1
-  }
+  if (isOpen.value) close()
+  else openAt(-1)
 }
 
 const close = () => {
@@ -220,11 +230,14 @@ const close = () => {
   activeIdx.value = -1
 }
 
-// Without a search box the button itself takes the arrows: first press opens, the next ones move.
+const closeToControl = () => {
+  close()
+  controlRef.value?.focus()
+}
+
 const openOrMove = (dir: number) => {
   if (!isOpen.value) {
-    isOpen.value = true
-    activeIdx.value = 0
+    openAt(0)
     return
   }
   moveActive(dir)
@@ -243,6 +256,10 @@ const selectActive = () => {
 watch(normalizedOptions, () => {
   activeIdx.value = -1
 })
+
+const onFocusOut = (event: FocusEvent) => {
+  if (isOpen.value && !wrapRef.value?.contains(event.relatedTarget as Node | null)) close()
+}
 
 onClickOutside(wrapRef, close)
 </script>
@@ -273,7 +290,6 @@ onClickOutside(wrapRef, close)
   gap: var(--space-2);
   align-items: center;
 
-  // The same field as AppField: white with or without a value, a paler border on hover and while open.
   &:hover,
   .is-open & {
     border-color: var(--color-action-border-subtle);
@@ -439,7 +455,6 @@ onClickOutside(wrapRef, close)
     background: var(--color-background-subtle);
   }
 
-  // Same as AppSelect and ComboSelect: a tick and the action ink, no fill.
   &.is-selected .ms-opt-label {
     font-weight: var(--font-weight-semibold);
     color: var(--color-action-default-hover);
@@ -472,7 +487,6 @@ onClickOutside(wrapRef, close)
   text-align: center;
 }
 
-/* ── Footer (somente multi) ──────────────────── */
 .ms-footer {
   display: flex;
   align-items: center;

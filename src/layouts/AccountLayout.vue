@@ -2,7 +2,6 @@
   <AreaLayout title="Minha conta" nav-label="Seções da conta" :groups="GROUPS">
     <template #foot>
       <SupportLink class="area-link" />
-      <!-- The way to the other area sits last, where the panel keeps "Minha conta": the same spot never signs out. -->
       <button type="button" class="area-link area-link--leave" @click="handleLogout">
         <BaseIcon name="sign-out" aria-hidden="true" />
         Sair da conta
@@ -24,7 +23,6 @@ import type { AreaGroup } from '@/layouts/AreaSections.vue'
 
 import SupportLink from '@/components/ui/SupportLink.vue'
 
-// Same frame as the club panel (estudo-moldura.md): each part has its own address.
 const GROUPS: AreaGroup[] = [
   {
     title: 'Conta',

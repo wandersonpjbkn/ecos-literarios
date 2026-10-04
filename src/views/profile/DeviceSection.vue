@@ -1,12 +1,11 @@
 <template>
   <div class="area-section">
     <SectionHeader title="Dados salvos" />
-    <AppNotice v-if="refreshFailed" text="Não foi possível recarregar o catálogo." retry @retry="refreshCatalog" />
-    <!-- Each action with what it does; clearing signs out, so it takes the weight of what has no way back (8e). -->
+    <AppNotice v-if="refreshFailed" text="Não foi possível atualizar o catálogo." retry @retry="refreshCatalog" />
     <ul class="device panel-box width-column">
       <li class="device__row panel-row">
-        <AppButton size="md" :disabled="refreshing" @click="refreshCatalog">
-          {{ refreshing ? 'Recarregando…' : 'Recarregar o catálogo' }}
+        <AppButton size="md" :aria-busy="refreshing" @click="refreshCatalog">
+          {{ refreshing ? 'Atualizando…' : 'Atualizar o catálogo' }}
         </AppButton>
         <p class="device__what">Baixa o catálogo de novo. Você continua na conta.</p>
       </li>
@@ -34,9 +33,9 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { PREFERENCES_STORE_ID, useBooksStore } from '@/stores'
+import { PREFERENCES_STORE_ID } from '@/stores'
 
-import { useApi, useAuth, useToast, useUtils } from '@/composables'
+import { useApi, useAuth, useCatalogRefresh, useUtils } from '@/composables'
 
 import AppButton from '@/components/ui/AppButton.vue'
 import AppNotice from '@/components/ui/AppNotice.vue'
@@ -46,10 +45,8 @@ import SectionHeader from '@/components/ui/SectionHeader.vue'
 const route = useRoute()
 const router = useRouter()
 const { logout } = useAuth()
-const toast = useToast()
+const { refreshing, failed: refreshFailed, refresh: refreshCatalog } = useCatalogRefresh()
 
-const refreshing = ref(false)
-const refreshFailed = ref(false)
 const confirmOpen = ref(false)
 const clearing = ref(false)
 
@@ -58,16 +55,6 @@ const fetchFresh = () => {
   return useApi().fetchBooks()
 }
 
-const refreshCatalog = async () => {
-  refreshing.value = true
-  refreshFailed.value = false
-  await fetchFresh()
-  refreshing.value = false
-  refreshFailed.value = !!useBooksStore().error
-  if (!refreshFailed.value) toast.show('Catálogo atualizado.')
-}
-
-// Leaving the account is what the dialog promises: the session goes first, or pinia would write it back.
 const clearDevice = async () => {
   clearing.value = true
   await logout()

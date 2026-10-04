@@ -1,4 +1,3 @@
-/** Failed API call: the message is for the screen; status and endpoint go to the error reporter as tags. */
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -10,22 +9,17 @@ export class ApiError extends Error {
   }
 }
 
-// "PATCH /users/:id/role": ids folded so every call to the same route groups together.
 const endpointOf = (url: string, method: string) => {
   let path = url
   try {
     path = new URL(url).pathname
-  } catch {
-    // Relative or empty URL: kept as it came.
-  }
+  } catch {}
   return `${method} ${path.replace(/[a-f\d]{24}/gi, ':id')}`
 }
 
-/** The API's own message when it sends one, otherwise the screen's fallback; never a bare "HTTP 500". */
 export const toApiError = async (res: Response, fallback: string, method = 'GET'): Promise<ApiError> => {
   const body = (await res.json().catch(() => ({}))) as { error?: string }
   return new ApiError(body.error ?? fallback, res.status, endpointOf(res.url, method))
 }
 
-/** What a failed call shows: the API's message, or the screen's own sentence (never the browser's "Failed to fetch"). */
 export const errorText = (e: unknown, fallback: string): string => (e instanceof ApiError ? e.message : fallback)

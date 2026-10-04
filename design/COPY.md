@@ -19,8 +19,8 @@ Vale na interface, nos títulos de página, nos textos de estado vazio, nos e-ma
 | Onde | Texto |
 | --- | --- |
 | Ação primária do catálogo | Adicionar um livro |
-| Guardar para ler | Guardar em "Quero ler" → depois do clique: **Guardado em Quero ler · Tirar da lista** |
-| Marcar lido | Marcar como lido → depois: **Lido · Desmarcar** |
+| Guardar para ler | Guardar em "Quero ler" → depois do clique: **Guardado em Quero ler · Tirar da lista**, com "Quero ler" como link para a prateleira em Meus livros |
+| Marcar lido | Marcar como lido → depois: **Lido · Desmarcar**, com "Lido" como link para a prateleira em Meus livros |
 | Abrir o filtro | Filtrar |
 | Fechar filtro aplicando | Ver 25 livros *(o número real)* · sem nenhum: **Fechar**, com **Nenhum livro com esses filtros.** acima |
 | Limpar | **Limpar os filtros** — nunca "Limpar tudo", que soa como apagar a conta |
@@ -115,6 +115,8 @@ Depois de enviar, a introdução some e fica só:
 
 Espera não é botão desabilitado: botão cinza parece quebrado, e o texto diz quando vai dar.
 
+Pedido cedo demais (o serviço de login recusa por excesso de pedidos), no Entrar e no "Enviar outro link" da volta do link: **"Você já pediu um link agora há pouco. Espere um minuto e peça de novo."** As duas entradas dizem o mesmo; o resto dos erros de envio segue o texto de cada tela.
+
 ## Vincular meu nome
 
 A seção tem o mesmo nome do botão de Meus livros que leva a ela e aparece para toda conta. Vincular segue a matriz (Vínculo · Editar; por padrão Editor e Administrador); sem essa permissão, no lugar do formulário:
@@ -134,7 +136,11 @@ Ninguém precisa vincular antes de adicionar: o livro sai com quem cadastra como
 
 "Mencionado por" é escolha em uma lista (as contas e os nomes da carga sem dono), com quem cadastra já escolhido. Nome digitado só pela última opção, **"Outro nome: {o que foi digitado}"**, que segue a matriz (Vínculo · Criar; por padrão só Administrador). O nome novo não pode repetir um que já existe, nem com outro acento ou outra caixa: "Natalia" não entra se há "Natália"; "Natalia C." entra.
 
-As linhas novas da matriz de Permissões, em frase: **"Vincular a própria conta a um nome do grupo"** (Vínculo · Editar), **"Incluir um nome novo de pessoa do clube"** (Vínculo · Criar) e **"Buscar capas e dados para o acervo inteiro"**.
+Autor, Gênero e Subgênero, no formulário do livro, seguem o mesmo padrão: **"Outro autor: {o que foi digitado}"**, **"Outro gênero: …"** e **"Outro subgênero: …"**, só para quem pode criar a lista na matriz (por padrão Administrador e Editor). Escolhido, o item aparece como "{nome} (autor novo)" e só é criado quando o livro é salvo; desistir do formulário não deixa nada para trás. A busca ignora acento e caixa, e o nome que já existe com outra grafia aparece no lugar de "Outro …".
+
+Um livro pode ter vários autores: o campo é **"Autores"**, com "Escolher autores" e a contagem, como Subgêneros. O primeiro escolhido é o que aparece nas listas. O filtro de autor acha o livro por qualquer um deles.
+
+As linhas novas da matriz de Permissões, em frase: **"Vincular a própria conta a um nome do grupo"** (Vínculo · Editar) e **"Incluir um nome novo de pessoa do clube"** (Vínculo · Criar).
 
 ## Suporte
 
@@ -155,9 +161,58 @@ Título com o item entre aspas, uma frase do que acontece e do que vai junto, e 
 > O livro sai do catálogo e das listas de quem guardou. Não é possível desfazer.
 > `[Cancelar]` `[Remover o livro]` ← peso destrutivo, nunca o azul
 
+Exceção: ao sair de um formulário com dados preenchidos ("Sair sem adicionar o livro?", "Sair sem salvar as alterações?", em Capa e dados), o botão de ficar não se chama "Cancelar". Em um diálogo que pergunta se a pessoa quer sair, "Cancelar" pode ser lido como cancelar o livro. O foco inicial continua no botão de ficar.
+
 ## Permissões
 
 Cada linha é uma frase sobre o que ela controla ("Ver a lista de membros"), nunca o nome do recurso seguido de um verbo ("Membros: Ver"). O que o painel não configura aparece como linha fixa: **"Mudar o nível de alguém: só Administrador (não muda aqui)"**.
+
+## Destaque do clube
+
+**"Destaque do clube"**, nunca "Favorito" nem "Recomendado". O dono (2026-10-01): "favorito dá a impressão de ser o wishlist ou favoritos que vemos em websites [...] e não é isso!"; o recurso "é para quem cadastrou o livro poder dizer para o resto do clube - ou para quem acessar o catalog - 'olha, esse livro foi uma sensação de leitura!'". "Recomendado" sai pela regra de cima (afirma intenção). Na grade a estrela vai sozinha, com o nome no `aria-label`; na página do livro, estrela e texto juntos. Não confundir com o "Favorito da Brenda" que aparece em comentários: aquele é de uma pessoa e é texto dela.
+
+## Capa e dados
+
+Um nome só: **"Capa e dados"**, na linha do formulário, no botão e no título da vista. A sinopse vai na frase de apoio, nunca no nome. As fontes (Google Books, Open Library) não aparecem em frase: a tela não narra o mecanismo. A atribuição exigida pelo Google é o logo, ao lado dos resultados, e uma frase na página do livro.
+
+**A linha no formulário**
+
+| Estado | Texto |
+| --- | --- |
+| Título | Capa e dados (opcional) |
+| L0 | Preencha o título e o autor para buscar a capa e os dados do livro. `[Buscar capa e dados]` desabilitado |
+| L1 | A busca traz capa, sinopse, editora, páginas e ano. Tudo continua editável à mão. `[Buscar capa e dados]` |
+| L2 | **Capa e dados escolhidos.** {Os campos} entram no livro quando você o adicionar. (Edição: "quando você salvar".) `[Trocar]` `[Desfazer]` |
+| L3 | Este livro já tem capa e sinopse. `[Buscar de novo]` |
+| L4 | Faltam a capa e a sinopse deste livro. (Ou: "Falta a capa deste livro.", "Falta a sinopse deste livro.") A busca traz capa, sinopse, editora, páginas e ano. `[Buscar capa e dados]` |
+
+**A vista**
+
+| Estado | Texto |
+| --- | --- |
+| V1 | Buscando por **{título}**, de {autor} · Buscando… |
+| V2 | {n} livros encontrados (1 livro encontrado) · Toque no livro certo para conferir. (Computador: "Escolha o livro certo para conferir.") · `[Mudar a busca]` |
+| V2, consulta aberta | Título · Autor · ISBN (opcional), com o apoio "Fica no verso do livro, perto do código de barras." · `[Buscar de novo]` |
+| V3 | Título da vista: **Conferir** · Sinopse · **O que entra no livro** · Campo vazio: "O livro ainda não tem {capa/sinopse…}." · Campo preenchido: "O livro já tem {atual}. A busca traz {novo}." · Nada marcado: "Marque pelo menos um dado para usar." · `[Escolher outro]` `[Usar estes dados]` |
+| V4 | **Nenhum livro encontrado** · Confira a grafia, tente só o título ou informe o ISBN, se tiver o livro em mãos. O livro também pode ser adicionado sem capa e completado depois. · `[Buscar de novo]` |
+| V5 | **A busca de capa e dados não respondeu** · Tente de novo em alguns minutos. O que você já preencheu no livro continua guardado, e ele pode ser salvo sem a capa. · `[Tentar de novo]` |
+
+Sem internet, vale o aviso geral que já existe ("Você está sem internet…"); o V5 é só para a busca fora do ar.
+
+**Sair com dados preenchidos**
+
+| Caso | Título | Frase | Botões |
+| --- | --- | --- | --- |
+| Cadastro | Sair sem adicionar o livro? | O que você preencheu, inclusive a capa e os dados escolhidos, será perdido. | `[Sair sem adicionar]` (peso destrutivo) `[Continuar preenchendo]` |
+| Edição | Sair sem salvar as alterações? | As mudanças que você fez neste livro serão perdidas. | `[Sair sem salvar]` (peso destrutivo) `[Continuar editando]` |
+
+O botão de ficar não se chama "Cancelar": é a exceção registrada em "Confirmar o que não tem volta".
+
+**Atribuição na página do livro**
+
+> Parte dos dados deste livro veio do Google Books.
+
+No rodapé da página, em `caption`, com o logo "powered by Google" ao lado; a frase leva à página do livro no Google Books. Aparece quando o endereço da capa é do Google Books.
 
 ## Palavras de sistema que não aparecem
 
@@ -168,8 +223,8 @@ Na tela, inclusive no painel do clube e nas mensagens que vêm do servidor:
 - "Painel admin" vira **"Painel do clube"**; "Segmentações" vira **"Autores e gêneros"**;
 - os níveis de permissão aparecem como **Administrador, Editor, Visitante**, nunca `admin`, `editor`, `viewer`. "Membro" não é nível: os membros do clube são Editores, e o nível mais baixo é de quem entrou por um link sem ser do clube (fatia 8a);
 - "Resetar cache" vira **"Limpar os dados deste aparelho"**, com o que acontece: "Sai da conta e baixa o catálogo de novo. Sua escolha de formatos fica." Ao lado, **"Recarregar o catálogo"**: "Baixa o catálogo de novo. Você continua na conta." Cada ação na sua linha, com a consequência embaixo (fatia 8e);
-- "Mídia" vira **"Formato"** (coluna, aba e permissão no painel, campo do livro); "Enriquecimento" e "Executar" viram **"Capas e sinopses"** e **"Buscar capas e dados"**;
-- "cadastrei" vira **"adicionei"**; os códigos da busca de capas (`manual_edit`, `not_found`, `isbn`…) aparecem como frase ("Alguém corrigiu à mão, então não mexemos"), nunca crus.
+- "Mídia" vira **"Formato"** (coluna, aba e permissão no painel, campo do livro); "Enriquecimento" vira **"Capa e dados"**, em todo lugar;
+- "cadastrei" vira **"adicionei"**.
 
 ## Acervo e catálogo
 
@@ -179,4 +234,4 @@ Na tela, inclusive no painel do clube e nas mensagens que vêm do servidor:
 
 Texto de tela é placa: orienta quem chega, onde está. O texto dos artboards é ponto de partida; o que não orienta foi reescrito ("Recortes que saem do próprio acervo" saiu: são quatro palavras de leitura de máquina juntas). Frases curtas. Nada de "explore", "descubra", "gerencie", "otimize". Sem emoji. O leitor é um amigo do grupo, não um usuário de SaaS — e não é nativo digital, então nenhum rótulo depende de reconhecer um ícone.
 
-"Importação" e "cadastrado" são palavras de sistema. O app não diz de onde o livro veio (conversa do grupo ou cadastro aqui): a informação não muda nada para quem lê (dono, 2026-09-27).
+"Importação" e "cadastrado" são palavras de sistema. O app não diz de onde o livro veio (conversa do grupo ou cadastro aqui). O dono, sobre os textos de origem (2026-09-27): "é completamente irrelevante ao sistema; pode remover toda a esteira disso".

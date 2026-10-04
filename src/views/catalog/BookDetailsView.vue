@@ -8,7 +8,6 @@
       what="o livro"
     />
 
-    <!-- Shown with an empty collection too: a link to a book that is not there never lands on a blank page. -->
     <EmptyState
       v-if="!booksStore.loading && !book && !(booksStore.error && !booksStore.books.length)"
       title-tag="h1"
@@ -31,12 +30,17 @@
             <FilterChip v-if="book.categoria" :label="genre" :to="catalogLink('categoria', book.categoria)" />
           </div>
           <h1 class="book-page__title">{{ book.titulo }}</h1>
-          <RouterLink v-if="book.autor" :to="catalogLink('autor', book.autor)" class="book-page__author">
-            {{ book.autor }}
-          </RouterLink>
-          <p v-if="book.quem" class="book-page__mention">
+          <p v-if="book.authors.length" class="book-page__authors">
+            <template v-for="(author, index) in book.authors" :key="author">
+              <RouterLink :to="catalogLink('authors', author)" class="book-page__author">{{ author }}</RouterLink
+              >{{ separator(index) }}
+            </template>
+          </p>
+          <p v-if="book.person" class="book-page__mention">
             mencionado por
-            <RouterLink :to="catalogLink('quem', book.quem)" class="book-page__person">{{ book.quem }}</RouterLink>
+            <RouterLink :to="catalogLink('person', book.person)" class="book-page__person">{{
+              book.person
+            }}</RouterLink>
           </p>
         </header>
 
@@ -58,7 +62,7 @@
 
           <QuoteBlock
             :text="book.porque"
-            :person="book.quem"
+            :person="book.person"
             :is-author="isOwner"
             :can-write="canWrite"
             :ask-link="askPerson"
@@ -94,20 +98,19 @@
             </AppButton>
           </section>
 
-          <section v-if="book.subgenerosArr.length" class="book-page__tags" aria-labelledby="tags-title">
+          <section v-if="book.subgenreNames.length" class="book-page__tags" aria-labelledby="tags-title">
             <h2 id="tags-title" class="book-page__section-title">Subgêneros</h2>
             <div class="book-page__chips">
               <FilterChip
-                v-for="tag in book.subgenerosArr"
+                v-for="tag in book.subgenreNames"
                 :key="tag"
                 :label="tag"
-                :to="catalogLink('subgeneros', tag)"
+                :to="catalogLink('subgenres', tag)"
               />
             </div>
           </section>
         </div>
 
-        <!-- After the file and comment in the DOM too, so reading and Tab order match the phone. -->
         <WhereToFind class="book-page__where" :book="book" />
       </div>
 
@@ -124,15 +127,13 @@
         </div>
       </section>
 
-      <BookFormDrawer
-        :book="editingBook"
-        :is-open="isEditing"
-        :focus="editFocus"
-        scope="member"
-        @close="closeEditor"
-        @saved="onSaved"
-        @removed="onRemoved"
-      />
+      <p v-if="coverPage" class="cover-credit">
+        <a :href="coverPage" target="_blank" rel="noopener noreferrer" class="cover-credit__link"
+          >A capa deste livro veio do Google Books<span class="visually-hidden">{{ ' (abre em outra aba)' }}</span
+          ><BaseIcon name="external" class="cover-credit__arrow" aria-hidden="true"
+        /></a>
+        <PoweredByGoogle />
+      </p>
     </template>
   </div>
 </template>
@@ -141,6 +142,8 @@
 import { computed, ref, useId, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import { authorNames } from '@/data/authors'
+import { googleBooksPage } from '@/data/googleBooks'
 import type { Book } from '@/types'
 
 import { useAuthStore, useBooksStore, usePermissionsStore } from '@/stores'
@@ -149,7 +152,7 @@ import {
   askGroupLink,
   reportLink,
   useApi,
-  useBookEditor,
+  useBookForm,
   useCanWrite,
   useFilters,
   useLastCatalog,
@@ -158,7 +161,6 @@ import {
 } from '@/composables'
 
 import BookCard from '@/components/books/BookCard.vue'
-import BookFormDrawer from '@/components/books/BookFormDrawer.vue'
 import CoverBlock from '@/components/books/CoverBlock.vue'
 import BookFacts from '@/components/catalog/BookFacts.vue'
 import BookFixLine from '@/components/catalog/BookFixLine.vue'
@@ -171,6 +173,7 @@ import AppNotice from '@/components/ui/AppNotice.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import PageStatus from '@/components/ui/PageStatus.vue'
+import PoweredByGoogle from '@/components/ui/PoweredByGoogle.vue'
 
 const RELATED_COUNT = 6
 const SYNOPSIS_COLLAPSE_CHARS = 420
@@ -184,17 +187,9 @@ const authStore = useAuthStore()
 const permissions = usePermissionsStore()
 
 const canWrite = useCanWrite()
-const {
-  editingBook,
-  isOpen: isEditing,
-  error: editError,
-  open: openBookEditor,
-  close: closeEditor,
-  onSaved,
-} = useBookEditor()
+const { error: editError, openEdit, lastChange } = useBookForm()
 
 const lastCatalog = useLastCatalog()
-// Back goes to the list the book was opened from: the catalog, or Meus livros.
 const lastList = useLastList()
 const { catalogLink } = useFilters()
 
@@ -210,7 +205,7 @@ usePageMeta(
   computed(() => ({
     title: book.value?.titulo ?? 'Livro',
     description: book.value
-      ? `${book.value.titulo} · ${book.value.autor}${book.value.quem ? ` · mencionado por ${book.value.quem}` : ''}`
+      ? `${book.value.titulo} · ${authorNames(book.value.authors)}${book.value.person ? ` · mencionado por ${book.value.person}` : ''}`
       : '',
     type: 'article' as const,
   })),
@@ -220,14 +215,19 @@ const bookPath = computed(() =>
   book.value ? router.resolve({ name: 'catalog-book-details', params: { id: book.value.id } }).path : '',
 )
 const genre = computed(() => book.value?.categoria.replace(/-/g, ' ') ?? '')
+const coverPage = computed(() => googleBooksPage(book.value?.cover_url))
 
-// The API only lets the person who mentioned the book (after linking the name) or an admin edit it.
+const separator = (index: number) => {
+  const left = (book.value?.authors.length ?? 0) - 1 - index
+  if (left > 1) return ', '
+  return left === 1 ? ' e ' : ''
+}
+
 const isOwner = computed(() => !!book.value?.quem_user_id && book.value.quem_user_id === authStore.user?._id)
 
-// The API's matrix, not the role (front mirrors backend): the owner, or whoever may edit any book.
 const canEdit = computed(() => permissions.canEditBook(book.value?.quem_user_id))
 
-const askPerson = computed(() => ask(`${book.value?.quem}, o que você acha de "${book.value?.titulo}"?`))
+const askPerson = computed(() => ask(`${book.value?.person}, o que você acha de "${book.value?.titulo}"?`))
 
 const synopsisIsLong = computed(() => (book.value?.synopsis?.length ?? 0) > SYNOPSIS_COLLAPSE_CHARS)
 
@@ -237,15 +237,13 @@ const related = computed(() => sameGenre.value.filter((b) => b.id !== book.value
 
 const openEditor = (id: string, focus?: 'porque') => {
   editFocus.value = focus
-  return openBookEditor(id)
+  return openEdit(id, { field: focus })
 }
 
 const retry = () => useApi().fetchBooks()
-// The book no longer exists: back to the list it was opened from, which no longer shows it.
-const onRemoved = () => {
-  useApi().fetchBooks()
-  router.push(lastList.value.path)
-}
+watch(lastChange, (change) => {
+  if (change?.kind === 'removed' && change.id === String(route.params.id)) router.push(lastList.value.path)
+})
 
 const ask = (message: string) => askGroupLink(message, bookPath.value)
 const report = (message: string) => reportLink(message, bookPath.value)
@@ -286,7 +284,6 @@ watch(book, () => (synopsisOpen.value = !synopsisIsLong.value), { immediate: tru
     }
   }
 
-  // Phone first: head, cover and actions, then the file. Desktop (Detail.desktop): cover column on the left.
   &__layout {
     display: grid;
     margin-top: var(--space-4);
@@ -297,7 +294,6 @@ watch(book, () => (synopsisOpen.value = !synopsisIsLong.value), { immediate: tru
       'where';
     gap: var(--space-6);
 
-    // "Onde encontrar" stays under the cover on desktop and goes last on phones, after the file and comment.
     @media (min-width: $bp-wide-min) {
       grid-template-columns: var(--cover-column) minmax(0, 1fr);
       grid-template-areas:
@@ -320,7 +316,6 @@ watch(book, () => (synopsisOpen.value = !synopsisIsLong.value), { immediate: tru
     flex-wrap: wrap;
     gap: var(--space-2);
 
-    // Phone: the same links sit in the facts right below; up here they only push the book down (8e).
     @media (max-width: $bp-phone-max) {
       display: none;
     }
@@ -364,7 +359,11 @@ watch(book, () => (synopsisOpen.value = !synopsisIsLong.value), { immediate: tru
     }
   }
 
-  // A link, so it takes the action colour like the person below (one colour means "this clicks").
+  &__authors {
+    font-size: var(--font-size-section);
+    color: var(--color-text-subtle);
+  }
+
   &__author {
     font-size: var(--font-size-section);
     color: var(--color-action-default);
@@ -504,6 +503,31 @@ watch(book, () => (synopsisOpen.value = !synopsisIsLong.value), { immediate: tru
       grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: var(--space-8) var(--space-5);
     }
+  }
+}
+
+.cover-credit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-10);
+
+  font-size: var(--font-size-caption);
+  color: var(--color-text-subtle);
+
+  &__link {
+    @include text-link;
+
+    display: inline-flex;
+    min-height: var(--touch-min);
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  &__arrow {
+    width: var(--icon-xs);
+    height: var(--icon-xs);
   }
 }
 </style>

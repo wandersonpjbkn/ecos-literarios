@@ -30,12 +30,10 @@
       </ul>
     </nav>
 
-    <!-- Its own landmark, apart from "Principal": help, the panel and the account are not reading destinations. -->
     <nav class="app-sidebar__foot" aria-label="Conta">
       <SupportLink class="app-sidebar__item">
         <span class="app-sidebar__label">Ajuda</span>
       </SupportLink>
-      <!-- The panel's way in for who may enter it, between the destinations and the account (dono, 2026-09-27). -->
       <RouterLink v-if="auth.isEditor" :to="{ name: 'admin-books' }" class="app-sidebar__item">
         <BaseIcon name="panel" class="app-sidebar__icon" aria-hidden="true" />
         <span class="app-sidebar__label">Painel do clube</span>
@@ -63,7 +61,6 @@ const addTarget = useAddTarget()
 const canWrite = useCanWrite()
 const lastList = useLastList()
 
-// On a book page the list it was opened from stays marked, so the reader still knows where they are.
 const onBook = computed(() => route.name === 'catalog-book-details')
 const fromMine = computed(() => lastList.value.path.startsWith('/perfil/livros'))
 
@@ -80,7 +77,6 @@ const items = computed(() => [
     to: { name: 'profile-books' },
     active: route.name === 'profile-books' || (onBook.value && fromMine.value),
   },
-  // No "Adicionar" for a Visitante (useAddTarget answers null).
   ...(addTarget.value
     ? [{ label: 'Adicionar', icon: 'plus', to: addTarget.value, disabled: !canWrite.value, active: false }]
     : []),
@@ -96,7 +92,6 @@ const items = computed(() => [
   border-top: 1px solid var(--color-border-default);
   padding-bottom: env(safe-area-inset-bottom);
 
-  // Desktop only: on phones the brand sits in the header (Catalog.mobile).
   &__logo {
     display: none;
 
@@ -113,7 +108,6 @@ const items = computed(() => [
     }
   }
 
-  // Desktop only: on phones the account stays in the header and the panel is reached from it (TabBar.md).
   &__foot {
     display: none;
   }
@@ -153,7 +147,6 @@ const items = computed(() => [
       outline-offset: calc(-1 * var(--space-1));
     }
 
-    // The app's selected state; the border is inset so the bottom bar does not grow by the line.
     &.is-active {
       box-shadow: inset 0 0 0 1px var(--color-action-border-subtle);
       background: var(--color-action-background-subtle);
@@ -164,7 +157,6 @@ const items = computed(() => [
       }
     }
 
-    // Same look as a disabled pill: "Adicionar um livro" in the header turns off with it.
     &.is-disabled {
       box-shadow: inset 0 0 0 1px var(--color-border-default);
       color: var(--color-text-subtle);
@@ -173,7 +165,6 @@ const items = computed(() => [
     }
   }
 
-  // :deep reaches the icon a piece renders inside a rail item (the help link).
   &__icon,
   &__item :deep(.base-icon) {
     width: var(--icon-lg);

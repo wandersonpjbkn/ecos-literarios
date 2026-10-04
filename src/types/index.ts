@@ -5,6 +5,7 @@ export type OptionMultiSelect =
   | {
       label: string
       value: string
+      match?: string
     }
 
 // Meta
@@ -23,26 +24,23 @@ import CategoriesColors from '@/data/categoryColors.json'
 export interface Book {
   id: string
   titulo: string
-  autor: string
+  authors: string[]
   categoria: keyof typeof CategoriesColors
   midia: string
-  quem: string
+  person: string
   porque: string
-  subgenerosArr: string[]
+  subgenreNames: string[]
   quem_user_id?: string
-  // The placeholder from the first load, when the book has one; `quem` is the name shown.
   quem_nome?: string
 
   cover_url?: string
   synopsis?: string
-  google_books_id?: string
   isbn?: string
+  publisher?: string
   page_count?: number
   published_year?: number
   added_at?: string
-  // Where the book came from: the WhatsApp conversation (CSV import) or the site. Decided by the API.
 }
-
 
 export type ReadingStatus = 'quero_ler' | 'lido'
 
@@ -57,7 +55,7 @@ export interface ReadingCounts {
   lido: number
 }
 
-export type FilterKey = 'midia' | 'categoria' | 'subgeneros' | 'quem' | 'autor' | 'tamanho'
+export type FilterKey = 'midia' | 'categoria' | 'subgenres' | 'person' | 'authors' | 'size'
 
 export type Options = Record<FilterKey, string[]>
 
@@ -74,7 +72,7 @@ export type BookSortOrder = 'recentes' | 'titulo' | 'pessoa' | 'genero'
 export interface BookPayload {
   _id: string
   titulo: string
-  autor: string | { _id: string; nome: string }
+  authors: Array<string | { _id: string; nome: string }>
   midia: string | { _id: string; nome: string }
   categoria: string | { _id: string; nome: string }
   subgeneros: Array<string | { _id: string; nome: string }>
@@ -82,9 +80,9 @@ export interface BookPayload {
   quem_user_id?: { _id: string; name: string } | null
   porque: string
   isbn?: string
+  publisher?: string
   cover_url?: string
   synopsis?: string
-  google_books_id?: string | number
   page_count?: number
   published_year?: number
 }
@@ -97,7 +95,6 @@ export interface SupportEntity {
 }
 
 export interface EntityCrudOptions {
-  /** URL path segment: 'autores', 'midias', 'categorias', 'subgeneros' */
   resource: string
 }
 
@@ -112,7 +109,7 @@ export interface AuthUser {
   role: UserRole
 }
 
-// Tipos da resposta da API
+// API responses
 
 export interface ApiPopulated {
   _id: string
@@ -123,7 +120,7 @@ export interface ApiPopulated {
 export interface ApiBook {
   _id: string
   titulo: string
-  autor: ApiPopulated | string
+  authors: Array<ApiPopulated | string>
   midia: ApiPopulated | string
   categoria: ApiPopulated | string
   quem_nome?: string | null
@@ -135,7 +132,7 @@ export interface ApiBook {
   page_count?: number
   added_at?: string
   isbn?: string
-  google_books_id?: string
+  publisher?: string
   subgeneros: (ApiPopulated | string)[]
 }
 
@@ -143,7 +140,6 @@ export interface MyClaimStatus {
   claim_name: string | null
   claimed_books: number
   has_claim: boolean
-  // Only without a claim: the placeholders nobody has claimed, counted by the API.
   available_names?: string[]
   warning?: string
 }
@@ -156,108 +152,13 @@ export interface RegisterResponse {
   name_synced?: boolean
 }
 
-// Enrichment
-
-export type EnrichmentField = 'description' | 'coverUrl' | 'publisher' | 'isbn' | 'pageCount' | 'publishedYear'
-
-export interface EnrichmentItem {
-  field: EnrichmentField
-  label: string
-  preview: string
-  hasValue: boolean
-}
-
-export interface EnrichmentPreview {
-  sourceLabel: string
-  items: EnrichmentItem[]
-}
-
-export interface EnrichmentApiResponse {
-  source: 'google_books' | 'open_library'
-  preview: {
-    description?: string
-    coverUrl?: string
-    publisher?: string
-    isbn?: string
-    pageCount?: number
-    publishedYear?: number
-  }
-}
-
 // Admin
 
 export type SegmentFilter = 'all' | 'missing' | 'complete' | 'missing-isbn'
 
-export interface AdminBook {
-  _id: string
-  titulo: string
-  autor: string | { _id: string; nome: string }
-  midia: string | { _id: string; nome: string }
-  categoria: string | { _id: string; nome: string }
-  subgeneros: Array<string | { _id: string; nome: string }>
-  quem_nome?: string | null
-  quem_user_id?: { _id: string; name: string } | null
-  porque: string
-  isbn?: string
-  cover_url?: string
-  synopsis?: string
-  page_count?: number
-  published_year?: number
-}
-
-export type ResultStatus = 'applied' | 'skipped' | 'failed'
-
-export interface EnrichmentResult {
-  id: string
-  title: string
-  status: ResultStatus
-  detail?: string
-}
-
-export interface EnrichmentSummary {
-  total: number
-  applied: number
-  skipped: number
-  failed: number
-}
-
-export interface EnrichmentHistoryItem {
-  book_id: string
-  titulo: string
-  status: ResultStatus
-  source?: 'google_books' | 'open_library'
-  reason?: 'manual_edit' | 'not_found' | 'missing_author'
-  strategy?: string
-  error?: string
-  cover_url?: string
-}
-
-export interface EnrichmentRun {
-  id: string
-  started_at: string
-  finished_at: string
-  force: boolean
-  initiated_by_email: string
-  total: number
-  applied: number
-  skipped: number
-  failed: number
-  coverage_pct_after: number
-  results: EnrichmentHistoryItem[]
-}
-
 export type Role = 'admin' | 'editor' | 'viewer'
 
-export type Resource =
-  | 'books'
-  | 'users'
-  | 'autores'
-  | 'midias'
-  | 'categorias'
-  | 'subgeneros'
-  | 'permissions'
-  | 'claim'
-  | 'enrichment'
+export type Resource = 'books' | 'users' | 'autores' | 'midias' | 'categorias' | 'subgeneros' | 'permissions' | 'claim'
 
 export type Action = 'create' | 'read' | 'update' | 'delete'
 
@@ -278,7 +179,6 @@ export interface TabConfig {
   label: string
   resource: Extract<Resource, 'autores' | 'midias' | 'categorias' | 'subgeneros'>
   description: string
-  // For the sentences of this list: "Nenhum autor ainda", "Nome do autor".
   singular: string
 }
 
@@ -289,7 +189,6 @@ export interface ApiUser {
   name: string
   email: string
   role: Role
-  // Absent on accounts from before suspension existed: they are active.
   status?: AccountStatus
   created_at: string
   last_seen_at: string
@@ -303,11 +202,10 @@ export interface Permission {
 
 // Profile
 
-// Mirrors BookPayload from BookFormDrawer — needed to type the edit state.
 export interface BookForEdit {
   _id: string
   titulo: string
-  autor: string | { _id: string; nome: string }
+  authors: Array<string | { _id: string; nome: string }>
   midia: string | { _id: string; nome: string }
   categoria: string | { _id: string; nome: string }
   subgeneros: Array<string | { _id: string; nome: string }>
@@ -316,8 +214,29 @@ export interface BookForEdit {
   porque: string
   synopsis?: string
   isbn?: string
+  publisher?: string
   cover_url?: string
-  google_books_id?: string | number
   page_count?: number
   published_year?: number
+}
+
+export interface BookCandidate {
+  volume_id: string
+  title?: string
+  authors: string[]
+  cover_url?: string
+  synopsis?: string
+  publisher?: string
+  isbn?: string
+  page_count?: number
+  published_year?: number
+  language?: string
+}
+
+export type BookSearchSource = 'google_books' | 'open_library'
+
+export interface BookSearchQuery {
+  title: string
+  author: string
+  isbn?: string
 }

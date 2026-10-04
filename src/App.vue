@@ -4,7 +4,6 @@
     <bodyAttrs :class="[useRoute().meta.pageClass, `page-${useRoute().name as string}`]" />
   </Head>
   <div class="app-root">
-    <!-- Areas (panel, Minha conta) are route components with their own frame; entering has its own; the rest reads. -->
     <RouterView v-if="route.meta.frame === 'area'" v-slot="{ Component }">
       <Transition name="fade" mode="out-in">
         <component :is="Component" />
@@ -12,6 +11,17 @@
     </RouterView>
     <AuthLayout v-else-if="route.meta.frame === 'auth'" />
     <ReadingLayout v-else />
+
+    <BookFormDrawer
+      :book="bookForm.book.value"
+      :title="bookForm.title.value"
+      :focus="bookForm.focus.value"
+      :return-focus="bookForm.returnFocus.value"
+      :is-open="bookForm.isOpen.value"
+      @close="bookForm.close"
+      @saved="onBookSaved"
+      @removed="onBookRemoved"
+    />
 
     <UpdateNotification />
     <AppToast />
@@ -21,10 +31,12 @@
 <script lang="ts" setup>
 import { useHead } from '@unhead/vue'
 import { Head } from '@unhead/vue/components'
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { useAuth, useToast } from '@/composables'
+import { useAuthStore, usePermissionsStore } from '@/stores'
+
+import { useApi, useAuth, useBookForm, useToast } from '@/composables'
 import { startAccountSync } from '@/composables/accountSync'
 import { startCatalogSync } from '@/composables/catalogSync'
 import { startFormatsSync } from '@/composables/formatsSync'
@@ -35,11 +47,42 @@ import AuthLayout from '@/layouts/AuthLayout.vue'
 import ReadingLayout from '@/layouts/ReadingLayout.vue'
 import UpdateNotification from '@/layouts/UpdateNotification.vue'
 
+import BookFormDrawer from '@/components/books/BookFormDrawer.vue'
+
 const route = useRoute()
 const router = useRouter()
 useRouteFocus()
 const { restoreSession, watchSession } = useAuth()
 const toast = useToast()
+const bookForm = useBookForm()
+
+const onBookSaved = () => {
+  useApi().fetchBooks()
+  bookForm.notify({ kind: 'saved' })
+}
+const onBookRemoved = (id: string) => {
+  useApi().fetchBooks()
+  bookForm.notify({ kind: 'removed', id })
+}
+watch(
+  () => route.path,
+  () => bookForm.close(),
+)
+
+const auth = useAuthStore()
+const permissions = usePermissionsStore()
+watch(
+  [() => route.query.adicionar, () => auth.isLoggedIn, () => permissions.mine],
+  ([asked, signedIn, matrix]) => {
+    if (asked !== '1' || !signedIn || !matrix) return
+    if (!permissions.can('books', 'create')) {
+      router.replace({ name: 'admin-forbidden', query: { motivo: 'adicionar' } })
+      return
+    }
+    router.replace({ query: { ...route.query, adicionar: undefined } }).then(() => bookForm.openAdd())
+  },
+  { immediate: true },
+)
 
 useHead({
   htmlAttrs: { lang: 'pt-BR' },
@@ -53,17 +96,13 @@ let stopCatalog: (() => void) | null = null
 onMounted(async () => {
   stopWatchSession = watchSession(async (reason) => {
     toast.show(reason === 'suspended' ? 'Esta conta está suspensa.' : 'Sua sessão venceu. Entre de novo.')
-    // The first navigation may still be resolving: the page it lands on decides, not the blank start.
     await router.isReady()
     const current = router.currentRoute.value
     if (!current.meta.signedIn) return
-    // A suspended account has no login to go back to; the catalog stays open to anyone.
     if (reason === 'suspended') router.replace('/')
     else router.replace({ name: 'auth-login', query: { voltar: current.fullPath } })
   })
-  // Public: the catalog does not wait for the session.
   stopCatalog = startCatalogSync()
-  // A returning visit may carry an expired token: the account is read only after Supabase has refreshed it.
   await restoreSession()
   const formats = startFormatsSync()
   const stopAccountSync = startAccountSync(formats)

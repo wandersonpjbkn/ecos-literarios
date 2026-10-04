@@ -13,7 +13,6 @@ const initial = computed(() => props.alt?.trim().charAt(0).toUpperCase() || '?')
 </script>
 
 <style lang="scss" scoped>
-// Neutral circle with one initial (Main): the name, not a color, identifies the person.
 .avatar {
   display: inline-flex;
   width: var(--avatar-lg);

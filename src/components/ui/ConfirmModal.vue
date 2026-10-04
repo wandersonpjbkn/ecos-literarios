@@ -23,7 +23,7 @@
 
           <div class="modal-footer">
             <AppButton ref="cancelButton" class="modal-btn" :disabled="loading" @click="emit('cancel')">
-              Cancelar
+              {{ cancelLabel }}
             </AppButton>
             <AppButton
               ref="confirmButton"
@@ -55,19 +55,17 @@ const props = withDefaults(
     title: string
     description?: string
     confirmLabel?: string
-    // Shown in the confirm button while the request travels ("Removendo…").
+    cancelLabel?: string
     busyLabel?: string
-    // A failed confirmation stays in the dialog, where the person acted; confirming again retries it.
     error?: string
     loading?: boolean
-    // Where focus goes when the button that opened the dialog is gone (the removed row).
     returnFocus?: () => HTMLElement | null | undefined
-    // No way back: the action takes the danger weight and the dialog has no blue button at all.
     destructive?: boolean
   }>(),
   {
     description: '',
     confirmLabel: 'Confirmar',
+    cancelLabel: 'Cancelar',
     busyLabel: 'Salvando…',
     error: '',
     loading: false,
@@ -87,7 +85,6 @@ const card = ref<HTMLElement | null>(null)
 const cancelButton = ref<{ $el: HTMLElement } | null>(null)
 const confirmButton = ref<{ $el: HTMLElement } | null>(null)
 
-// Focus starts on "Cancelar": most of these dialogs remove or change something for good.
 useDialogFocus({
   open: () => props.modelValue,
   panel: card,
@@ -98,7 +95,6 @@ useDialogFocus({
   fallback: () => props.returnFocus?.(),
 })
 
-// A disabled button drops focus: the card holds it while loading, and a failure hands it to the confirm button.
 watch(
   () => props.loading,
   async (loading) => {
@@ -131,7 +127,6 @@ watch(
   box-shadow: var(--shadow-xl);
   overflow: hidden;
 
-  // Holds focus only while the buttons are disabled; it is a container, not a control.
   &:focus {
     outline: none;
   }

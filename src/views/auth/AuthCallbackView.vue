@@ -31,7 +31,6 @@
       </EmptyState>
 
       <EmptyState v-else ref="message" title-tag="h1" title="Não foi possível entrar com esse link.">
-        <!-- The address wraps in the text; a long one inside a pill would run off a phone screen. -->
         <template #text>
           Ele pode ter vencido.<template v-if="lastEmail">
             O link foi pedido para <strong>{{ lastEmail }}</strong
@@ -47,7 +46,6 @@
       </EmptyState>
       <AppNotice v-if="status === 'link' && resendError" :text="resendError" />
 
-      <!-- The same way back as the login page; "platform" already offers "Continuar sem entrar". -->
       <AppButton
         v-if="status === 'link' || status === 'resent' || status === 'suspended'"
         :to="lastCatalog"
@@ -78,7 +76,6 @@ import AppNotice from '@/components/ui/AppNotice.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import SupportLink from '@/components/ui/SupportLink.vue'
 
-// The tab names the state the person is in, not only the route's "Entrando".
 const TITLES = {
   loading: 'Entrando',
   link: 'Não foi possível entrar',
@@ -94,10 +91,8 @@ const { handleCallback, sendMagicLink } = useAuth()
 
 const status = ref<'loading' | 'link' | 'platform' | 'resent' | 'suspended'>('loading')
 
-// Expired link: resend to the e-mail that asked for it (same browser, within the hour) instead of retyping it.
 const lastEmail = ref(recallEmail())
 const resentTo = ref('')
-// Whichever message is showing; the button pressed is gone, so the focus goes there.
 const message = ref<InstanceType<typeof EmptyState> | null>(null)
 const sending = ref(false)
 const resendError = ref('')
@@ -116,14 +111,16 @@ const resend = async () => {
     await nextTick()
     message.value?.focus()
   } catch (err) {
-    resendError.value = 'Não foi possível enviar agora. Tente de novo daqui a pouco.'
-    useErrorReporter().captureException(err, { context: 'AuthCallback.resend' })
+    const tooSoon = (err as { tooSoon?: boolean }).tooSoon === true
+    resendError.value = tooSoon
+      ? 'Você já pediu um link agora há pouco. Espere um minuto e peça de novo.'
+      : 'Não foi possível enviar agora. Tente de novo daqui a pouco.'
+    if (!tooSoon) useErrorReporter().captureException(err, { context: 'AuthCallback.resend' })
   } finally {
     sending.value = false
   }
 }
 
-// The browser's or the API's own error ("Failed to fetch") goes to the reporter, never to the screen.
 const enter = async () => {
   status.value = 'loading'
   try {
@@ -140,7 +137,6 @@ const enter = async () => {
   }
 }
 
-// The saved list is shown with the "fora do ar" banner; the session stays and the app retries it on the next visit.
 const continueWithoutAccount = () => router.replace(takeReturn())
 
 onMounted(enter)
@@ -151,7 +147,6 @@ onMounted(enter)
   display: flex;
   align-items: center;
   justify-content: center;
-  // The auth frame gives the whole height under its bar: the message sits in the middle of it.
   min-height: 100%;
   background: var(--color-background-default);
 }
