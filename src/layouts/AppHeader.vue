@@ -56,8 +56,8 @@ const placeholder = computed(() =>
   searchesMyBooks.value
     ? 'Buscar nos meus livros'
     : isPhone.value
-      ? 'Título, autor ou quem mencionou'
-      : 'Buscar por título, autor ou quem mencionou',
+      ? 'Título, autor ou comentário'
+      : 'Buscar por título, autor ou comentário',
 )
 
 const addVariant = computed(() => (route.name === 'catalog-books' ? 'primary' : 'secondary'))

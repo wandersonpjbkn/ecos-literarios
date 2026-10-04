@@ -2,7 +2,7 @@ import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import { useRoute, useRouter, type LocationQueryRaw, type RouteLocationRaw } from 'vue-router'
 
-import { authorLine } from '@/data/authors'
+import { matchesSearch, titleSuggestions } from '@/data/bookSearch'
 import type { Book, BookSortOrder, FilterKey, Options } from '@/types'
 
 import { useBooksStore, usePreferencesStore } from '@/stores'
@@ -75,13 +75,8 @@ const valuesOf = (book: Book, key: FilterKey): string[] => {
 const emptySelection = (): Options => Object.fromEntries(FILTER_KEYS.map((key) => [key, []])) as unknown as Options
 
 const applyFilters = (books: Book[], selection: Options, search: string, hiddenFormats: string[]) => {
-  const q = search.trim().toLowerCase()
   return books.filter((book) => {
-    if (
-      q &&
-      ![book.titulo, ...book.authors, book.person, book.porque].some((field) => field?.toLowerCase().includes(q))
-    )
-      return false
+    if (!matchesSearch(book, search)) return false
     if (!selection.midia.length && hiddenFormats.includes(book.midia)) return false
     return FILTER_KEYS.every(
       (key) => !selection[key].length || valuesOf(book, key).some((value) => selection[key].includes(value)),
@@ -158,16 +153,7 @@ export function useFilters() {
 
   const hasFilters = computed(() => FILTER_KEYS.some((key) => selected.value[key].length > 0))
 
-  const searchSuggestions = computed(() => {
-    if (!search.value.trim() || search.value.length < 2) return []
-
-    const q = search.value.toLowerCase()
-
-    return books.value
-      .filter((book) => book.titulo?.toLowerCase().includes(q))
-      .map((book) => ({ id: book.id, main: book.titulo, sub: authorLine(book.authors) }))
-      .slice(0, 8)
-  })
+  const searchSuggestions = computed(() => titleSuggestions(books.value, search.value))
 
   const toSlug = (key: FilterKey, value: string) =>
     key === 'size' ? (SIZES.find((size) => size.label === value)?.slug ?? '') : slugify(value)

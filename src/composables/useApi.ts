@@ -5,7 +5,6 @@ import { personName } from '@/data/person'
 import type {
   AccountStatus,
   Action,
-  AdminBook,
   AdminClaimHistoryEntry,
   ApiUser,
   AuthUser,
@@ -269,9 +268,6 @@ export const savePermission = (role: Role, resource: Resource, actions: Action[]
   )
 
 // ── Panel books and members ──
-export const getPanelBooks = () =>
-  authedRequest<AdminBook[]>('/books', { method: 'GET' }, 'Não foi possível carregar os livros. Tente de novo.')
-
 export const getPeople = () =>
   authedRequest<{ user_id: string | null; name: string }[]>(
     '/books/people',

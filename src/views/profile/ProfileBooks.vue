@@ -23,80 +23,95 @@
       @retry="useApi().fetchBooks()"
     />
 
-    <ListTabs v-else :tabs="shelfTabs" :active="shelf" label="Prateleiras" @select="selectShelf">
-      <p v-if="shelf === 'estante' && hasClaim === false && canClaim" class="my-books__hint">
-        Faltou algum livro seu? Os livros da conversa do grupo aparecem aqui quando você vincula o seu nome.
-        <RouterLink :to="claimLink" class="my-books__hint-link">Vincular meu nome</RouterLink>
-      </p>
-
-      <div class="my-books__toolbar">
-        <div v-if="shelf === 'estante'" class="my-books__segments chip-strip" role="group" aria-label="Mostrar">
-          <FilterChip
-            v-for="option in SEGMENTS"
-            :key="option.value"
-            :label="option.label"
-            :count="segmentCounts[option.value]"
-            :selected="segment.value === option.value"
-            :to="segmentLink(option.value)"
-          />
-        </div>
-        <div class="my-books__controls">
-          <AppSelect v-model="sortOrder" label="Ordenar" :options="shelfSortOptions" />
-        </div>
-      </div>
-
-      <EmptyState
-        v-if="!filteredBooks.length && searchQuery"
-        :title="`Nada com &quot;${searchQuery}&quot;`"
-        text="Procuramos no título e no autor dos seus livros."
-      >
-        <AppButton :to="{ query: { ...route.query, busca: undefined } }">Apagar a busca</AppButton>
-      </EmptyState>
-
-      <EmptyState
-        v-else-if="shelf === 'estante' && !myBooks.length"
-        title="Nenhum livro com o seu nome ainda"
-        :text="emptyText"
-      >
-        <AppButton v-if="canClaim" variant="primary" :to="claimLink">Vincular meu nome</AppButton>
-        <AppButton v-else-if="accessRequest" variant="primary" :href="accessRequest"
-          ><BaseIcon name="whatsapp" aria-hidden="true" />Pedir a liberação</AppButton
-        >
-      </EmptyState>
-
-      <EmptyState
-        v-else-if="shelf !== 'estante' && !filteredBooks.length"
-        :title="shelfEmpty.title"
-        :text="shelfEmpty.text"
-      >
-        <AppButton :to="{ name: 'catalog-books' }">Ver o catálogo</AppButton>
-      </EmptyState>
-
-      <EmptyState v-else-if="!filteredBooks.length" :title="segment.empty.title" :text="segment.empty.text">
-        <AppButton :to="segmentLink('all')">Ver todos os seus livros</AppButton>
-      </EmptyState>
-
-      <ul v-else ref="grid" class="my-books__grid book-grid">
-        <li v-for="book in visibleBooks" :key="book.id" class="my-book">
-          <BookCard :book="book" :hide-mention="shelf === 'estante'" data-list-item />
-          <div class="my-book__foot">
-            <AppButton v-if="permissions.canEditBook(book.quem_user_id)" size="md" @click="editor.openEdit(book.id)">
-              <BaseIcon name="pencil" aria-hidden="true" />
-              {{ editor.loadingId.value === book.id ? 'Abrindo…' : 'Editar' }}
-              <span class="visually-hidden">{{ book.titulo }}</span>
-            </AppButton>
-          </div>
-        </li>
-      </ul>
-
-      <ListFooter
-        v-if="filteredBooks.length"
-        :shown="visibleBooks.length"
-        :total="filteredBooks.length"
-        :next-batch="nextBatch"
-        @more="more(grid)"
+    <template v-else>
+      <AppNotice
+        v-if="banner"
+        live="status"
+        :text="banner"
+        :retry="!!booksStore.error"
+        @retry="useApi().fetchBooks()"
       />
-    </ListTabs>
+
+      <ListTabs :tabs="shelfTabs" :active="shelf" label="Prateleiras" @select="selectShelf">
+        <p v-if="shelf === 'estante' && hasClaim === false && canClaim" class="my-books__hint">
+          Faltou algum livro seu? Os livros da conversa do grupo aparecem aqui quando você vincula o seu nome.
+          <RouterLink :to="claimLink" class="my-books__hint-link">Vincular meu nome</RouterLink>
+        </p>
+
+        <div class="my-books__toolbar">
+          <div v-if="shelf === 'estante'" class="my-books__segments chip-strip" role="group" aria-label="Mostrar">
+            <FilterChip
+              v-for="option in SEGMENTS"
+              :key="option.value"
+              :label="option.label"
+              :count="segmentCounts[option.value]"
+              :selected="segment.value === option.value"
+              :to="segmentLink(option.value)"
+            />
+          </div>
+          <div class="my-books__controls">
+            <AppSelect v-model="sortOrder" label="Ordenar" :options="shelfSortOptions" />
+          </div>
+        </div>
+
+        <EmptyState
+          v-if="!filteredBooks.length && searchQuery"
+          :title="`Nada com &quot;${searchQuery}&quot;`"
+          text="Procuramos no título, no autor e no comentário dos seus livros."
+        >
+          <AppButton :to="{ query: { ...route.query, busca: undefined } }">Apagar a busca</AppButton>
+        </EmptyState>
+
+        <EmptyState
+          v-else-if="shelf === 'estante' && !myBooks.length"
+          title="Nenhum livro com o seu nome ainda"
+          :text="emptyText"
+        >
+          <AppButton v-if="canClaim" variant="primary" :to="claimLink">Vincular meu nome</AppButton>
+          <AppButton v-else-if="accessRequest" variant="primary" :href="accessRequest"
+            ><BaseIcon name="whatsapp" aria-hidden="true" />Pedir a liberação</AppButton
+          >
+        </EmptyState>
+
+        <EmptyState
+          v-else-if="shelf !== 'estante' && !filteredBooks.length"
+          :title="shelfEmpty.title"
+          :text="shelfEmpty.text"
+        >
+          <AppButton :to="{ name: 'catalog-books' }">Ver o catálogo</AppButton>
+        </EmptyState>
+
+        <EmptyState v-else-if="!filteredBooks.length" :title="segment.empty.title" :text="segment.empty.text">
+          <AppButton :to="segmentLink('all')">Ver todos os seus livros</AppButton>
+        </EmptyState>
+
+        <ul v-else ref="grid" class="my-books__grid book-grid">
+          <li v-for="book in visibleBooks" :key="book.id" class="my-book">
+            <BookCard :book="book" :hide-mention="shelf === 'estante'" data-list-item />
+            <div class="my-book__foot">
+              <AppButton
+                v-if="permissions.canEditBook(book.quem_user_id)"
+                size="md"
+                :disabled="!canWrite"
+                @click="editor.openEdit(book.id)"
+              >
+                <BaseIcon name="pencil" aria-hidden="true" />
+                {{ editor.loadingId.value === book.id ? 'Abrindo…' : 'Editar' }}
+                <span class="visually-hidden">{{ book.titulo }}</span>
+              </AppButton>
+            </div>
+          </li>
+        </ul>
+
+        <ListFooter
+          v-if="filteredBooks.length"
+          :shown="visibleBooks.length"
+          :total="filteredBooks.length"
+          :next-batch="nextBatch"
+          @more="more(grid)"
+        />
+      </ListTabs>
+    </template>
   </div>
 </template>
 
@@ -104,6 +119,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 
+import { matchesSearch } from '@/data/bookSearch'
 import type { Book } from '@/types'
 
 import { useAuthStore, useBooksStore, usePermissionsStore, useReadingStore } from '@/stores'
@@ -115,6 +131,8 @@ import {
   useApi,
   useBookForm,
   useBookSort,
+  useCanWrite,
+  useCatalogNotice,
   usePageMeta,
 } from '@/composables'
 import { getMyClaimStatus } from '@/composables/useApi'
@@ -173,6 +191,8 @@ const router = useRouter()
 
 const authStore = useAuthStore()
 const booksStore = useBooksStore()
+const banner = useCatalogNotice()
+const canWrite = useCanWrite()
 const readingStore = useReadingStore()
 
 usePageMeta({
@@ -231,13 +251,7 @@ const {
 
 const shelfBooks = computed(() => (shelf.value === 'estante' ? segmentBooks.value : shelfItems.value[shelf.value]))
 
-const searched = computed(() => {
-  const q = searchQuery.value.trim().toLowerCase()
-  if (!q) return shelfBooks.value
-  return shelfBooks.value.filter(
-    (b) => b.titulo.toLowerCase().includes(q) || b.authors.some((name) => name.toLowerCase().includes(q)),
-  )
-})
+const searched = computed(() => shelfBooks.value.filter((book) => matchesSearch(book, searchQuery.value)))
 
 const { sortOrder, sortOptions, sortedBooks: filteredBooks } = useBookSort(searched)
 

@@ -6,6 +6,7 @@ import { useBookForm } from '@/composables/useBookForm'
 import { useBookSort } from '@/composables/useBookSort'
 import { useBreakpoints } from '@/composables/useBreakpoints'
 import { useCanWrite } from '@/composables/useCanWrite'
+import { useCatalogNotice } from '@/composables/useCatalogNotice'
 import { useCatalogRefresh } from '@/composables/useCatalogRefresh'
 import { useCatalogSearch } from '@/composables/useCatalogSearch'
 import { useCategoryColors } from '@/composables/useCategoryColors'
@@ -27,6 +28,7 @@ export {
   describeSelection,
   useFilters,
   useCatalogSearch,
+  useCatalogNotice,
   useCatalogRefresh,
   useAddTarget,
   useCanWrite,

@@ -156,24 +156,6 @@ export interface RegisterResponse {
 
 export type SegmentFilter = 'all' | 'missing' | 'complete' | 'missing-isbn'
 
-export interface AdminBook {
-  _id: string
-  titulo: string
-  authors: Array<string | { _id: string; nome: string }>
-  midia: string | { _id: string; nome: string }
-  categoria: string | { _id: string; nome: string }
-  subgeneros: Array<string | { _id: string; nome: string }>
-  quem_nome?: string | null
-  quem_user_id?: { _id: string; name: string } | null
-  porque: string
-  isbn?: string
-  publisher?: string
-  cover_url?: string
-  synopsis?: string
-  page_count?: number
-  published_year?: number
-}
-
 export type Role = 'admin' | 'editor' | 'viewer'
 
 export type Resource = 'books' | 'users' | 'autores' | 'midias' | 'categorias' | 'subgeneros' | 'permissions' | 'claim'

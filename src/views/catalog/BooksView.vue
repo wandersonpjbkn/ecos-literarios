@@ -125,7 +125,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useMediaQuery, useOnline } from '@vueuse/core'
+import { useMediaQuery } from '@vueuse/core'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -142,6 +142,7 @@ import {
   useApi,
   useBreakpoints,
   useCanWrite,
+  useCatalogNotice,
   useCatalogRefresh,
   useEcoOfTheWeek,
   useFilters,
@@ -202,8 +203,6 @@ const {
 } = useFilters()
 const { sortOrder, sortedBooks, sortOptions } = useBookSort(filtered)
 
-const online = useOnline()
-
 const eco = useEcoOfTheWeek()
 
 const addTarget = useAddTarget()
@@ -213,29 +212,15 @@ const isPhone = useMediaQuery(useBreakpoints.isPhone)
 
 const drawerOpen = ref(false)
 
-const savedWhen = computed(() => {
-  const saved = booksStore.savedAt
-  if (!saved) return 'a última lista salva neste aparelho'
-  const days = Math.floor((Date.now() - saved) / 86_400_000)
-  if (days === 0) return 'a lista de hoje'
-  if (days === 1) return 'a lista de ontem'
-  return `a lista de ${new Date(saved).toLocaleDateString('pt-BR', { day: 'numeric', month: 'numeric' })}`
-})
-
-const banner = computed(() => {
-  if (!online.value) return 'Você está sem internet. Os livros continuam visíveis, mas não é possível adicionar.'
-  if (booksStore.error)
-    return `A plataforma está fora do ar agora. Você está vendo ${savedWhen.value}: os livros continuam visíveis, mas não é possível adicionar.`
-  return ''
-})
+const banner = useCatalogNotice()
 
 const isDefaultView = computed(() => !hasFilters.value && !search.value.trim())
 
 const searchTerm = computed(() => search.value.trim())
 const searchWhere = computed(() =>
   hasFilters.value
-    ? 'Procuramos no título, no autor e no que as pessoas escreveram, dentro dos filtros escolhidos.'
-    : 'Procuramos no título, no autor e no que as pessoas escreveram sobre cada livro.',
+    ? 'Procuramos no título, no autor e no comentário, dentro dos filtros escolhidos.'
+    : 'Procuramos no título, no autor e no comentário de cada livro.',
 )
 
 const canAddBooks = computed(() => permissions.can('books', 'create'))
